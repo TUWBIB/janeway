@@ -22,6 +22,12 @@ class IdentifierForm(forms.ModelForm):
 
         if id_type == 'doi':
             pattern = models.DOI_RE
+        elif id_type == 'urn':
+            pattern = models.URN_RE
+        elif id_type == 'ac':
+            pattern = models.AC_RE
+        elif id_type == 'vlid':
+            pattern = models.VLID_RE
         else:
             pattern = models.PUB_ID_RE
 

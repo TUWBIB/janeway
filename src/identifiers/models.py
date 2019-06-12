@@ -19,6 +19,9 @@ identifier_choices = (
     ('doi', 'DOI'),
     ('uri', 'URI Path'),
     ('pubid', 'Publisher ID'),
+    ('urn', 'URN'),
+    ('ac', 'AC'),
+    ('vlid', 'VL ID')
 )
 
 IDENTIFIER_TYPES = {
@@ -34,6 +37,15 @@ DOI_REGEX_PATTERN = '10.\d{4,9}/[-._;()/:A-Za-z0-9]+'
 PUB_ID_REGEX_PATTERN = '[\w-]+'
 PUB_ID_RE = re.compile("^{}$".format(PUB_ID_REGEX_PATTERN))
 DOI_RE = re.compile(DOI_REGEX_PATTERN)
+
+AC_REGEX_PATTERN = 'AC\d{8}'
+AC_RE = re.compile(AC_REGEX_PATTERN)
+
+URN_REGEX_PATTERN = 'urn:nbn:at:at-ubtuw:\d-\d{4,6}'
+URN_RE = re.compile(URN_REGEX_PATTERN)
+
+VLID_REGEX_PATTERN = '\d{5,8}'
+VLID_RE = re.compile(VLID_REGEX_PATTERN)
 
 
 class Identifier(models.Model):
