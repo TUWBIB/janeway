@@ -535,6 +535,16 @@ class Article(models.Model):
             new_id = identifier_models.Identifier(id_type="id", identifier=self.id, article=self)
             return new_id
 
+    def get_identifiers(self):
+        from identifiers import models as identifier_models
+        ids = None
+        try:
+            ids = identifier_models.Identifier.objects.filter(article=self)
+        except:
+            ids = []
+        
+        return ids
+
     def get_identifier(self, identifier_type, object=False):
         from identifiers import models as identifier_models
         try:

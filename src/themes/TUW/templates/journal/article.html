@@ -70,7 +70,7 @@
 
 {% block body %}
 
-    <div class="row">
+<div class="row">
     {% if not journal.disable_article_images %}
         <div class="col-md-12">
             <div class="card">
@@ -204,7 +204,18 @@
                     {% endif %}
                     <li>{% trans "Peer Reviewed" %} {% if article.peer_reviewed %}
                         <i class="fa fa-check-circle"></i>{% else %}<i class="fa fa-times-circle"></i>{% endif %}</li>
-                    <li>{% trans "License" %} <a href="{{ article.license.url }}" data-toggle="tooltip"
+
+                    {% for x in article.get_identifiers %}
+                    {% if x.id_type == "urn" %}
+                    <li>  <a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></li>
+                    {% endif %}
+                    {% if x.id_type == "ac" %}
+                    <li>  <a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></li>
+                    {% endif %}
+
+                    {% endfor %}
+    
+                        <li>{% trans "License" %} <a href="{{ article.license.url }}" data-toggle="tooltip"
                                                  title="{{ article.license.text }}">{{ article.license.name }}</a></li>
                     {% if journal_settings.general.submission_summary and article.non_specialist_summary %}
                         <li>
@@ -262,7 +273,7 @@
         {% include "elements/journal/summary_modal.html" %}
     {% endif %}
 
-{% endblock body %}
+{% endblock body %} 
 
 {% block js %}
     <script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
