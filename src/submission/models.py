@@ -938,7 +938,15 @@ class Article(models.Model):
         return self.fieldanswer_set.filter(
             field__display=True,
             answer__isnull=False,
-        )
+        ).values_list('answer', flat=False)
+
+    @property
+    def publisher(self):
+        """ Returns publisher by filtering FieldAnswers"""
+        return self.fieldanswer_set.filter(
+            field__display=True,
+            answer__isnull=False,
+        ).values_list('answer', flat=True)[0]
 
     def get_meta_image_path(self):
         if self.meta_image and self.meta_image.url:

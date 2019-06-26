@@ -119,6 +119,52 @@
         </div>
     {% endif %}
     </div>
+    
+    <div class="row">
+        <div class="col-3">
+            <a class="imgLink" href="https://repositum.tuwien.ac.at/ifm-journal/periodical/pageview/3423752">
+                <img alt="Go to page" border="0"  src="https://repositum.tuwien.ac.at/ifm-journal/image/largethumb/3423752">
+            </a>
+        </div>
+        <div class="col">
+            <h1>Journal Article</h1>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>{% trans "Title" %}</th>
+                        <td>{{ article.section.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Author</th>
+                        <td>
+                            {% for author in article.frozen_authors.all %}
+                            {% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %}& {% endif %}
+                            {{ author.citation_name }}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% if article.is_published %}
+                    <tr>
+                            <th>{% trans "Published on" %}</th>
+                            <td>{{ article.date_published|date:"d M Y" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                            <th>{% trans "Accepted on" %}</th>
+                            <td>{{ article.date_accepted|date:"d M Y" }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>{% trans "Published by" %}</th>
+                        <td>
+                            {{ article.publisher}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
     <div class="row">
 
         <div class="col-md-7">
