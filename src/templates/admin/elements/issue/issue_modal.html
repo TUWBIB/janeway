@@ -33,6 +33,15 @@
                         {{ form.issue_type|foundation }}
                     </div>
                     <div class="large-12 columns">
+                        {{ form.tuw_year|foundation }}
+                    </div>
+                    <div class="large-12 columns">
+                        {{ form.tuw_issue_str|foundation }}
+                    </div>
+                    <div class="large-12 columns">
+                        {{ form.tuw_vlid|foundation }}
+                    </div>
+                    <div class="large-12 columns">
                         <button name="new_issue" type="submit" class="button success">{% if issue %}Edit{% else %}Add{% endif %} Issue</button>
                     </div>
                 </div>
