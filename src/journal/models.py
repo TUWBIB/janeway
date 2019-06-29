@@ -3,6 +3,7 @@ __author__ = "Martin Paul Eve & Andy Byers"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
+# TUW modified
 
 from operator import itemgetter
 import collections
@@ -398,6 +399,11 @@ class PinnedArticle(models.Model):
         return '{0}, {1}: {2}'.format(self.sequence, self.journal.code, self.article.title)
 
 
+# *TUW mod*
+# added tuw_year in case the 'issue year' differs from the publication date
+# added tuw_issue_str for double issues like '1/2'
+# added tuw_vlid since we need to be able to resolve bookmarks pointing to vl
+
 class Issue(models.Model):
     journal = models.ForeignKey(Journal)
 
@@ -424,6 +430,11 @@ class Issue(models.Model):
         related_name='guest_editors',
         through='IssueEditor',
     )
+
+    tuw_year = models.IntegerField(null=True)
+    tuw_issue_str = models.CharField(blank=True, null=True, max_length=10)
+    tuw_vlid = models.IntegerField(null=True)
+
 
     class Meta:
         ordering = ('order', 'year', 'volume', 'issue', 'title')
