@@ -60,13 +60,17 @@ class ArticleInfo(KeywordModelForm):
 
     class Meta:
         model = models.Article
-        fields = ('title', 'subtitle', 'abstract', 'non_specialist_summary', 'language', 'section', 'license',
+        fields = ('title', 'title_de', 'subtitle', 'subtitle_de', 'abstract', 'abstract_de', 'non_specialist_summary', 'language', 'section', 'license',
                   'primary_issue', 'page_numbers', 'is_remote', 'remote_url', 'peer_reviewed')
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
+            'title_de': forms.TextInput(attrs={'placeholder': _('Title (de)')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
+            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
             'abstract': forms.Textarea(
                 attrs={'placeholder': _('Enter your article\'s abstract here')}),
+            'abstract_de': forms.Textarea(
+                attrs={'placeholder': _('Enter your article\'s abstract here (de)')}),
         }
 
     def __init__(self, *args, **kwargs):
