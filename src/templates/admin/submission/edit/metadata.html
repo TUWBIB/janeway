@@ -30,8 +30,17 @@
                         <div class="large-6 columns">
                             {{ info_form.subtitle|foundation }}
                         </div>
+                        <div class="large-6 columns">
+                            {{ info_form.title_de|foundation }}
+                        </div>
+                        <div class="large-6 columns">
+                            {{ info_form.subtitle_de|foundation }}
+                        </div>
                         <div class="large-10 columns end">
                             {{ info_form.abstract|foundation }}
+                        </div>
+                        <div class="large-10 columns end">
+                            {{ info_form.abstract_de|foundation }}
                         </div>
                         {% if journal_settings.general.submission_summary %}
                         <div class="large-10 columns end">

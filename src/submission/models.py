@@ -315,6 +315,14 @@ class Article(models.Model):
     license = models.ForeignKey('Licence', blank=True, null=True, on_delete=models.SET_NULL)
     publisher_notes = models.ManyToManyField('PublisherNote', blank=True, null=True, related_name='publisher_notes')
 
+
+    # TUW extensions
+    title_de = models.CharField(max_length=300, blank=True, null=True, help_text=_('Your article title (de)'))
+    subtitle_de = models.CharField(max_length=300, blank=True, null=True,
+                                help_text=_('Subtitle of the article display format; Title: Subtitle (de)'))
+    abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (de)'))
+
+
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
     # this is useful for overlay journals. The ToC display of an issue uses this flag to link to a DOI rather
     # than an internal URL
