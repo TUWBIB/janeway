@@ -36,6 +36,7 @@ from security.decorators import article_stage_accepted_or_later_required, \
     file_history_user_required, file_edit_user_required, production_user_or_editor_required, \
     editor_user_required
 from submission import models as submission_models
+from identifiers import models as identifiers_models
 from utils import models as utils_models, shared
 from utils.logger import get_logger
 from events import logic as event_logic
@@ -1525,11 +1526,13 @@ def search(request):
         # checks titles, keywords and subtitles first,
         # then matches author based on below regex split search term.
         search_regex = "^({})$".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
+        identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
                         Q(keywords__word__iregex=search_regex) |
-                        Q(subtitle__icontains=search_term)
+                        Q(subtitle__icontains=search_term) |
+                        Q(id__in=identifier_ids)
                     )
                     |
                     (
