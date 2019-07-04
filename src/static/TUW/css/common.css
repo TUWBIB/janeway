@@ -1,0 +1,42 @@
+* {
+    font-family: Verdana, "Helvetica Neue", Arial;
+    font-size: 13.3px;
+}
+
+.navbar {
+    padding: 0;
+    background-color: transparent;
+    flex-direction: column;
+}
+
+.navbar form {
+    height: 100%;
+}
+
+.mainheader {
+    font-size: 120%;
+    max-width: 55em;
+    color: #274E90;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+
+.subheader {
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+    color: #666;
+    padding: .3em .4em .2em 2px;
+    font-size: 13.3px;
+}
+
+.infotable {
+    margin-bottom: 1em;
+}
+
+.infotable th {
+    color: #666;
+    width: 9em;
+    padding: 0em 4px 0;
+    font-weight: normal;
+    vertical-align: top;
+}
