@@ -109,6 +109,9 @@ class ArticleInfo(KeywordModelForm):
                 if not journal.submissionconfiguration.keywords:
                     self.fields.pop('keywords')
 
+                if not journal.submissionconfiguration.keywords:
+                    self.fields.pop('keywords_de')
+
                 if not journal.submissionconfiguration.section:
                     self.fields.pop('section')
 
@@ -156,6 +159,20 @@ class ArticleInfo(KeywordModelForm):
         article = super(ArticleInfo, self).save(commit=False)
 
         if request:
+            import submission.models as submission_models
+            posted_keywords_de = request.POST.get('keywords_de',None).split(',')
+            for keyword_de in posted_keywords_de:
+                if keyword_de != '':
+                    obj, _ = submission_models.KeywordDe.objects.get_or_create(
+                            word=keyword_de)
+                    article.keywords_de.add(obj)
+
+            for keyword_de in article.keywords_de.all():
+                if keyword_de.word not in posted_keywords_de:
+                    article.keywords_de.remove(keyword_de)
+
+
+
             additional_fields = models.Field.objects.filter(journal=request.journal)
 
             for field in additional_fields:
