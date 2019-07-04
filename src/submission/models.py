@@ -280,6 +280,12 @@ class Keyword(models.Model):
     def __str__(self):
         return self.word
 
+class KeywordDe(models.Model):
+    word = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.word
+
 
 class AllArticleManager(models.Manager):
     use_for_related_fields = True
@@ -321,6 +327,7 @@ class Article(models.Model):
     subtitle_de = models.CharField(max_length=300, blank=True, null=True,
                                 help_text=_('Subtitle of the article display format; Title: Subtitle (de)'))
     abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (de)'))
+    keywords_de = models.ManyToManyField(KeywordDe, blank=True, null=True)
 
 
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance

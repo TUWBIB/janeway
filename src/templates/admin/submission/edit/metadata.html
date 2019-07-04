@@ -88,6 +88,12 @@
                                 {% if form.cleaned_data.keywords %}{{ form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
                         Hit Enter to add a new keyword.
                     </div>
+                    <div class="large-12 columns">
+                        <label for="id_keywords_de">Keywords (De)</label>
+                        <input type="text" id="id_keywords_de" name="keywords_de" value="
+                                {% if form.cleaned_data.keywords_de %}{{ form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                        Hit Enter to add a new keyword.
+                    </div>
                 </div>
                 <div class="title-area">
                     <h2>Authors</h2>
@@ -148,6 +154,12 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $("#id_keywords").tagit(
+                {allowSpaces: true});
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#id_keywords_de").tagit(
                 {allowSpaces: true});
         });
     </script>

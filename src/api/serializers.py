@@ -18,6 +18,11 @@ class KeywordsSerializer(serializers.HyperlinkedModelSerializer):
         model = submission_models.Keyword
         fields = ('word',)
 
+class KeywordsDeSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = submission_models.KeywordDe
+        fields = ('word',)
 
 class FrozenAuthorSerializer(serializers.HyperlinkedModelSerializer):
 

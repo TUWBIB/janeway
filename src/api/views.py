@@ -85,6 +85,10 @@ class KeywordsViewSet(viewsets.ModelViewSet):
     queryset = submission_models.Keyword.objects.all()
     http_method_names = ['get']
 
+class KeywordsDeViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.KeywordsDeSerializer
+    queryset = submission_models.KeywordDe.objects.all()
+    http_method_names = ['get']
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """
