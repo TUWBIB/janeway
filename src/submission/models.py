@@ -948,6 +948,14 @@ class Article(models.Model):
             answer__isnull=False,
         ).values_list('answer', flat=True)[0]
 
+    @property
+    def edition(self):
+        """ Returns edition by filtering FieldAnswers"""
+        return self.fieldanswer_set.filter(
+            field__display=True,
+            answer__isnull=False,
+        ).values_list('answer', flat=True)[3]
+
     def get_meta_image_path(self):
         if self.meta_image and self.meta_image.url:
             return self.meta_image.url
