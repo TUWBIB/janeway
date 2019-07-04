@@ -10,24 +10,26 @@
             aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="row">
-        <a class="navbar-brand column-10" href="{% if request.journal %}{{ request.journal.site_url }}{% else %}{{ request.press_base_url }}{% endif %}">
-            {% if request.journal %}
-                {% if request.journal.header_image %}
-                    <a href="{% url 'website_index' %}"><img src="{{ request.journal.header_image.url }}" class="img-fluid"></a>
+    <div class="container-fluid">
+        <div class="row">
+            <a class="navbar-brand column-10" href="{% url 'website_index' %}>">
+                {% if request.journal %}
+                    {% if request.journal.header_image %}
+                        <a href="{% url 'website_index' %}"><img src="{{ request.journal.header_image.url }}" class="img-fluid"></a>
+                    {% else %}
+                    <img src="{% static "TUW/img/header.png" %}">
+                    {% endif %}
                 {% else %}
-                <a href="{% url 'website_index' %}"><img src="{% static "TUW/img/header.png" %}"></a>
+                    <a href="/">{% svg request.press_cover %}</a>
                 {% endif %}
-            {% else %}
-                <a href="/">{% svg request.press_cover %}</a>
-            {% endif %}
-        </a>
-        <div class="column-2">
-            <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
-                {% csrf_token %}
-                <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
-                <button class="btn my-2 my-sm-0" type="submit">Search</button>
-            </form>
+            </a>
+            <div class="column-2">
+                <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
+                    {% csrf_token %}
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
+                    <button class="btn my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="collapse navbar-collapse" id="navbarCollapse">

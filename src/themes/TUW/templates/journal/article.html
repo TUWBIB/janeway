@@ -72,7 +72,9 @@
 {% block body %}
     
     <div class="row">
-        <div class="col-4">
+        <div class="col-4"> 
+            {% for galley in galleys %}
+            <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">
             {% if article.large_image_file.id %}
                 <img class="card-img img-fluid article-img"
                         src="{% url 'article_file_download' 'id' article.id article.large_image_file.id %}"
@@ -86,6 +88,8 @@
                         src=""
                         alt="{{ article.title | striptags }}">
             {% endif %}
+            </a>
+            {% endfor %}
         </div>
         <div class="col">
             <h1 class="mainheader">Journal Article</h1>
@@ -151,9 +155,6 @@
                         <th>{% if forloop.first %} {% trans "Download" %} {% endif %}</th>
                         <td>
                             <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title }} [{% file_size galley.file article %}]</a>
-                                            {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
-                            <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">{% trans "View" %} {{ galley.label }}</a>
-                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
