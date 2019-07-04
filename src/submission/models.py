@@ -1158,6 +1158,8 @@ class Section(TranslatableModel):
         plural=models.CharField(max_length=200, null=True, blank=True)
     )
 
+    visible = models.BooleanField(default=True)
+
     class Meta:
         ordering = ('sequence',)
 
