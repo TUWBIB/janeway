@@ -354,7 +354,7 @@ class SectionForm(TranslatableModelForm):
     class Meta:
         model = submission_models.Section
         fields = ['name', 'plural', 'number_of_reviewers', 'is_filterable', 'sequence', 'section_editors', 'editors',
-                  'public_submissions', 'indexing']
+                  'public_submissions', 'indexing','visible']
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
