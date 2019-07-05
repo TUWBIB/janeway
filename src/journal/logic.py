@@ -346,6 +346,7 @@ def handle_search_controls(request, search_term=None, keyword=None, redir=False,
     :param sort: 'title' or incoming sort
     :return: strings: search_term, keyword, sort, and redirect() or None.
     """
+
     if request.POST:
 
         form = SearchForm(request.POST)
@@ -362,6 +363,10 @@ def handle_search_controls(request, search_term=None, keyword=None, redir=False,
             return search_term, keyword, sort, form, set_search_GET_variables(search_term, keyword, sort)
         # if form not valid no redir to send form w/errors
         else:
+            # TUW mod
+            # TODO: default search box reaches this for some reason
+            # at least extract the search term to actually start a search
+            search_term = form.cleaned_data['article_search']
             return search_term, keyword, sort, form, redir
     else:
         search_term = request.GET.get('article_search', '')

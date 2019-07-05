@@ -2,6 +2,7 @@
 {% load static from staticfiles %}
 {% load hooks %}
 {% load i18n %}
+{% load files %} `
 
 {% block title %}{{ article.authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
@@ -69,70 +70,34 @@
 {% endblock %}
 
 {% block body %}
-
-<div class="row">
-    {% if not journal.disable_article_images %}
-        <div class="col-md-12">
-            <div class="card">
-                {% if article.large_image_file.id %}
-                    <img class="card-img img-fluid article-img"
-                         src="{% url 'article_file_download' 'id' article.id article.large_image_file.id %}"
-                         alt="{{ article.title | striptags }}">
-                {% elif journal.default_large_image %}
-                    <img class="card-img img-fluid article-img"
-                         src="{{ journal.default_large_image.url }}"
-                         alt="{{ article.title | striptags }}">
-                {% else %}
-                    <img class="card-img"
-                         src=""
-                         alt="{{ article.title | striptags }}">
-                {% endif %}
-                <div class="card-img-overlay white-text">
-                    <div class="card-text">
-                        <p class="text-uppercase">{{ article.section.name }}</p>
-                        <h4 class="card-title align-text-bottom">{{ article.title|safe }}</h4>
-                        {% if article.is_published %}
-                            <p><strong>{% if article.frozen_authors.all|length > 1 %}{% trans "Authors" %}{% else %}
-                            {% trans "Author" %}{% endif %}:</strong>
-                            {% for author in article.frozen_authors.all %}
-                                <span>{% if forloop.first == False %}, {% endif %}<span itemscope
-                                                                                        itemtype="http://schema.org/Person"
-                                                                                        itemprop="author"
-                                                                                        href="#"
-                                                                                        {% if author.author.biography %}data-toggle="author{{ forloop.counter }}{% endif %}">
-                                                                                        {% if author.author.enable_public_profile %}
-                                                                                            <a class="profilelink"
-                                                                                               href="{% url 'core_public_profile' author.author.uuid %}">{{ author.full_name }}</a>{% else %}
-                                                                                            {{ author.full_name }}{% endif %}
-                                    {% if author.institution %}
-                                        <span itemprop="worksFor" itemscope
-                                              itemtype="http://schema.org/CollegeOrUniversity"><span
-                                                itemprop="name">({{ author.institution }})</span></span>{% endif %}
-                                    {% if author.is_correspondence_author %}
-                                        <a itemprop="email" href="mailto:{{ author.author.email }}"
-                                           class="fa fa-envelope email-link"></a>{% endif %}</span></span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    </div>
     
     <div class="row">
-        <div class="col-3">
-            <a class="imgLink" href="https://repositum.tuwien.ac.at/ifm-journal/periodical/pageview/3423752">
-                <img alt="Go to page" border="0"  src="https://repositum.tuwien.ac.at/ifm-journal/image/largethumb/3423752">
+        <div class="col-4"> 
+            {% for galley in galleys %}
+            <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">
+            {% if article.large_image_file.id %}
+                <img class="card-img img-fluid article-img"
+                        src="{% url 'article_file_download' 'id' article.id article.large_image_file.id %}"
+                        alt="{{ article.title | striptags }}">
+            {% elif journal.default_large_image %}
+                <img class="card-img img-fluid article-img"
+                        src="{{ journal.default_large_image.url }}"
+                        alt="{{ article.title | striptags }}">
+            {% else %}
+                <img class="card-img"
+                        src=""
+                        alt="{{ article.title | striptags }}">
+            {% endif %}
             </a>
+            {% endfor %}
         </div>
         <div class="col">
-            <h1>Journal Article</h1>
-            <table>
+            <h1 class="mainheader">Journal Article</h1>
+            <table class="infotable">
                 <tbody>
                     <tr>
                         <th>{% trans "Title" %}</th>
-                        <td>{{ article.section.name }}</td>
+                        <td>{{ article.title }}</td>
                     </tr>
                     <tr>
                         <th>Author</th>
@@ -156,169 +121,60 @@
                     {% endif %}
                     <tr>
                         <th>{% trans "Published by" %}</th>
-                        <td>
-                            {{ article.publisher}}
-                        </td>
+                        <td>{{ article.publisher}}</td>
                     </tr>
+                    <tr>
+                        <th>Edition</th>
+                        <td>{{ article.edition }}</td>
+                    </tr>
+                    <tr>
+                        <th>Keywords</th>
+                        <td>{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    </tr>
+                    {% for x in article.get_identifiers %}
+                        {% if x.id_type == "urn" %}
+                    <tr>
+                        <th>URN</th>
+                        <td><a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                    </tr>
+                    {% endif %}
+                    {% if x.id_type == "ac" %}
+                    <tr>
+                        <th>AC</th>
+                        <td><a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                    </tr>
+                        {% endif %}
+                    {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
-    
-    <div class="row">
-
-        <div class="col-md-7">
+            <h2 class="subheader">Links</h2>
+            <table class="infotable">
+                <tbody>
+                    {% for galley in galleys %}
+                    <tr>
+                        <th>{% if forloop.first %} {% trans "Download" %} {% endif %}</th>
+                        <td>
+                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title }} [{% file_size galley.file article %}]</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             <div id="article">
                 {% if journal.disable_article_images %}
                     <small>{{ article.section.name }}</small>
                     <h3>{{ article.title|safe }}</h3>
                 {% endif %}
                 {% if article.abstract != '' %}
-                    <h2>{% trans "Abstract" %}</h2>
+                    <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
                     <p>{{ article.abstract | safe }}</p>
                 {% endif %}
                 {% if article.keywords and article.keywords|length > 0 %}<p><strong>{% trans "Keywords" %}:</strong>
                     {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},
                     {% endif %}{% endfor %}</p>{% endif %}
-                {% if article.is_published %}
-                    <p><strong>{% trans "How to Cite" %}:</strong>
-                    {% include "elements/journal/how_to_cite.html" with article=article %}
-                {% endif %}
-                {% if article.publisher_notes.all %}
-                    <div class="callout primary">
-                        <h2>{% trans "Publisher Notes" %}</h2>
-                        <ul>
-                            {% for note in article.publisher_notes.all %}
-                                <li>{{ note.text }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                {% if article_content %}
-                    <h2>{% trans "Article" %}</h2>
-                    <div itemprop="articleBody" id="main_article">
-                        {{ article_content|safe }}
-                        {% hook 'article_footer_block' %}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="col-md-4 offset-md-1 left-bar">
-            <div class="article-menu">
-                {% if journal.disable_article_images %}
-                    <h4>{% trans "Authors" %}</h4>
-                    <ul>
-                    {% for author in article.frozen_authors.all %}
-                        <li>
-                            {{ author.full_name }}
-                        </li>
-                    {% endfor %}
-                     </ul>
-                {% endif %}
-
-                {% if article.is_published %}
-                    <h4>{% trans "Download" %}</h4>
-                    <ul>
-                        {% for galley in galleys %}
-                            <li>
-                                <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
-                                {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">{% trans "View" %} {{ galley.label }}</a>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                {% if article.supplementary_files.all %}
-                    <h4>{% trans "Supplementary Files" %}</h4>
-                    <ul>
-                        {% for file in article.supplementary_files.all %}
-                            <li><a href="{% url 'article_download_supp_file' article.pk file.pk %}">{{ file.label }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                <h4>{% trans "Information" %}</h4>
-                <ul>
-                    {% if article.is_published %}
-                    <li>{% trans "Published on" %} {{ article.date_published|date:"d M Y" }}</li>
-                    {% else %}
-                    <li>{% trans "Accepted on" %} {{ article.date_accepted|date:"d M Y" }}</li>
-                    {% endif %}
-                    <li>{% trans "Peer Reviewed" %} {% if article.peer_reviewed %}
-                        <i class="fa fa-check-circle"></i>{% else %}<i class="fa fa-times-circle"></i>{% endif %}</li>
-
-                    {% for x in article.get_identifiers %}
-                    {% if x.id_type == "urn" %}
-                    <li>  <a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></li>
-                    {% endif %}
-                    {% if x.id_type == "ac" %}
-                    <li>  <a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></li>
-                    {% endif %}
-
-                    {% endfor %}
-    
-                        <li>{% trans "License" %} <a href="{{ article.license.url }}" data-toggle="tooltip"
-                                                 title="{{ article.license.text }}">{{ article.license.name }}</a></li>
-                    {% if journal_settings.general.submission_summary and article.non_specialist_summary %}
-                        <li>
-                            <a href="#" data-toggle="modal"
-                               data-target="#summary">{% trans 'Non Specialist Summary' %}</a>
-                        </li>
-                    {% endif %}
-                </ul>
-                {% for field in article.custom_fields %}
-                <h4>{% trans field.field.name %}</h4>
-                <p>{{ field.answer }}</p>
-                {% endfor %}
-                {% if article.is_published %}
-                    {% if not request.journal.disable_metrics_display %}
-                    <h4>{% trans "Metrics" %}</h4>
-                    <ul>
-                        <li>{% trans "Views" %}: {{ article.metrics.views }}</li>
-                        <li>{% trans "Downloads" %}: {{ article.metrics.downloads }}</li>
-                        {% if article.metrics.alm.twitter %}
-                            <li>{% trans "Twitter" %}: {{ article.metrics.alm.twitter }}</li>{% endif %}
-                        {% if article.metrics.alm.wikipedia %}
-                            <li>{% trans "Wikipedia" %}: {{ article.metrics.alm.wikipedia }}</li>{% endif %}
-                        {% if article.metrics.alm.reddit %}
-                            <li>{% trans "Reddit" %}: {{ article.metrics.alm.reddit }}</li>{% endif %}
-                    </ul>
-                    {% endif %}
-                    <h4>{% trans "Citation" %}</h4>
-                    <div class="btn-group-vertical">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#HarvardModal">
-                            Harvard-Style Citation
-                        </button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#VancouverModal">
-                            Vancouver-Style Citation
-                        </button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#APAModal">
-                            APA-Style Citation
-                        </button>
-                        <br/>
-                    </div>
-                    <h4>File Checksums (MD5)</h4>
-                    <ul>
-                        {% for galley in galleys %}
-                            <li>
-                                <small>{{ galley.label }}: {{ galley.file.checksum }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </div>
         </div>
     </div>
-
-    {% include "elements/journal/citation_modals.html" %}
-    {% if journal_settings.general.submission_summary %}
-        {% include "elements/journal/summary_modal.html" %}
-    {% endif %}
-
 {% endblock body %} 
 
 {% block js %}

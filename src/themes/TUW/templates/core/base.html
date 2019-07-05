@@ -15,6 +15,7 @@
     {% block head %}{% endblock head %}
     <link href="{% static "default/css/bootstrap.css" %}" rel="stylesheet">
     <link href="{% static "common/css/common.css" %}" rel="stylesheet">
+    <link href="{% static "TUW/css/common.css" %}" rel="stylesheet">
     {% if request.journal %}
         <link href="{% static "default/css/journal" %}{{ request.journal.id }}_override.css" rel="stylesheet">
     {% endif %}

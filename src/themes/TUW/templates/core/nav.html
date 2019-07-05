@@ -10,17 +10,28 @@
             aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="{% if request.journal %}{{ request.journal.site_url }}{% else %}{{ request.press_base_url }}{% endif %}">
-        {% if request.journal %}
-            {% if request.journal.header_image %}
-                <a href="{% url 'website_index' %}"><img src="{{ request.journal.header_image.url }}" class="img-fluid"></a>
-            {% else %}
-            <a href="{% url 'website_index' %}"><img src="{% static "common/img/sample/janeway.png" %}"></a>
-            {% endif %}
-        {% else %}
-            <a href="/">{% svg request.press_cover %}</a>
-        {% endif %}
-    </a>
+    <div class="container-fluid">
+        <div class="row">
+            <a class="navbar-brand column-10" href="{% url 'website_index' %}>">
+                {% if request.journal %}
+                    {% if request.journal.header_image %}
+                        <a href="{% url 'website_index' %}"><img src="{{ request.journal.header_image.url }}" class="img-fluid"></a>
+                    {% else %}
+                    <img src="{% static "TUW/img/header.png" %}">
+                    {% endif %}
+                {% else %}
+                    <a href="/">{% svg request.press_cover %}</a>
+                {% endif %}
+            </a>
+            <div class="column-2">
+                <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
+                    {% csrf_token %}
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
+                    <button class="btn my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto font-weight-bold">
             {% if request.journal.nav_home %}
@@ -120,11 +131,6 @@
                     &nbsp;</i>Register</a></li>
             {% endif %}
         </ul>
-        <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
-            {% csrf_token %}
-            <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
 
     </div>
 </nav>
