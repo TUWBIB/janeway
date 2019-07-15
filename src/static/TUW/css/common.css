@@ -3,6 +3,21 @@
     font-size: 13.3px;
 }
 
+h1, h2, h3 {
+    color: #274E90;
+}
+
+h1 {
+    font-size: 120%;
+    max-width: 55em;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+
+h2 {
+    
+}
+
 .navbar {
     padding: 0;
     background-color: transparent;
@@ -13,12 +28,28 @@
     height: 100%;
 }
 
-.mainheader {
-    font-size: 120%;
-    max-width: 55em;
-    color: #274E90;
-    font-weight: bold;
-    margin-bottom: 1em;
+.navigation {
+    background-color: #103a59;
+    padding: 2px;
+    padding-top: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.navigation > ul > li {
+    border-right: 1px solid #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: -2px;
+    padding-top: 2px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #fff;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #ddd;
 }
 
 .subheader {
@@ -39,4 +70,8 @@
     padding: 0em 4px 0;
     font-weight: normal;
     vertical-align: top;
+}
+
+.fa-file-pdf-o {
+    color: #0275d8;
 }

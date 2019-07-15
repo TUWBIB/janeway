@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load static from staticfiles %}
 
-<div class="card">
+<div class="card" style="{% if indent %} margin-left: 20px; {% endif %}">
     <div class="card-block">
         <div class="row">
             {% if not journal.disable_article_images %}
@@ -39,10 +39,14 @@
                     {% if article.issue %}
                     <i class="fa fa-book"></i> 
                     <a href="{% url 'journal_issue' article.issue.pk %}">
-                        {{ article.issue.display_title }}
+                        {{ article.issue.tuw_display_title }}
                     </a>
                     {% endif %}
-                    
+                    {% for pdf in article.pdfs %}
+                    <a target="_blank" href="{% url 'article_view_galley' article.id pdf.id %}">
+                        <i class="fa fa-file-pdf-o">&nbsp;</i>
+                    </a>
+                    {% endfor %}
                 </p>
                 </a>
             </div>
