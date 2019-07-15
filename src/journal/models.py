@@ -439,6 +439,27 @@ class Issue(models.Model):
     class Meta:
         ordering = ('order', 'year', 'volume', 'issue', 'title')
 
+
+    @property
+    def tuw_display_title(self):
+        if self.issue_type == 'Collection':
+            return self.issue_title
+
+        journal = self.journal
+
+        volume = "Volume {}".format(
+            self.volume) if journal.display_issue_volume else ""
+        issue = "Issue {}".format(
+            self.tuw_issue_str) if journal.display_issue_number else ""
+        year = "{}".format(
+            self.tuw_year) if journal.display_issue_year else ""
+        title = "{}".format(
+            self.issue_title) if journal.display_issue_title else ""
+
+        title_list = [volume, issue, year, title]
+
+        return mark_safe(" &bull; ".join((filter(None, title_list))))
+
     @property
     def display_title(self):
         if self.issue_type == 'Collection':
@@ -554,6 +575,8 @@ class Issue(models.Model):
             stage=submission_models.STAGE_PUBLISHED,
             date_published__lte=timezone.now(),
         )
+        galley = models.OneToOneField('journal.IssueGalley', related_name='issue')
+
 
         for section in sections:
             article_with_order = ArticleOrdering.objects.filter(

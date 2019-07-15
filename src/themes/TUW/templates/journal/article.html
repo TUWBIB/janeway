@@ -99,6 +99,7 @@
                         <th>{% trans "Title" %}</th>
                         <td>{{ article.title }}</td>
                     </tr>
+                    {% if article.frozen_authors.all %}
                     <tr>
                         <th>Author</th>
                         <td>
@@ -108,6 +109,7 @@
                             {% endfor %}
                         </td>
                     </tr>
+                    {% endif %}
                     {% if article.is_published %}
                     <tr>
                             <th>{% trans "Published on" %}</th>
@@ -119,18 +121,24 @@
                             <td>{{ article.date_accepted|date:"d M Y" }}</td>
                     </tr>
                     {% endif %}
+                    {% if article.publisher %}
                     <tr>
                         <th>{% trans "Published by" %}</th>
                         <td>{{ article.publisher}}</td>
                     </tr>
+                    {% endif %}
+                    {% if article.edition %}
                     <tr>
                         <th>Edition</th>
                         <td>{{ article.edition }}</td>
                     </tr>
+                    {% endif %}
+                    {% if article.keywords.all %}
                     <tr>
                         <th>Keywords</th>
                         <td>{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                     </tr>
+                    {% endif %}
                     {% for x in article.get_identifiers %}
                         {% if x.id_type == "urn" %}
                     <tr>
@@ -160,19 +168,27 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% if article.abstract %}
             <div id="article">
-                {% if journal.disable_article_images %}
-                    <small>{{ article.section.name }}</small>
-                    <h3>{{ article.title|safe }}</h3>
-                {% endif %}
                 {% if article.abstract != '' %}
                     <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
                     <p>{{ article.abstract | safe }}</p>
                 {% endif %}
-                {% if article.keywords and article.keywords|length > 0 %}<p><strong>{% trans "Keywords" %}:</strong>
-                    {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},
-                    {% endif %}{% endfor %}</p>{% endif %}
             </div>
+            {% endif %}
+            {% if article.license %}
+            <h2 class="subheader">License</h2>
+            <table class="infotable">
+                <tbody>
+                    <tr>
+                        <td>{{ article.license.text }}</th>
+                        <td>
+                            <a href="{{article.license.url}}">{{ article.license.short_name }}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
         </div>
     </div>
 {% endblock body %} 
