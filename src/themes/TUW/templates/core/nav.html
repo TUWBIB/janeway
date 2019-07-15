@@ -4,36 +4,24 @@
 {% load i18n %}
 {% load hooks %}
 
-<nav class="navbar navbar-toggleable-md bg-faded navbar-light">
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-            data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
-            aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+<nav class="navbar navbar-toggleable-sm navbar-light bg-light align-items-start">
+    <a class="navbar-brand" href="{% url 'website_index' %}>">
+        {% if request.journal %}
+            {% if request.journal.header_image %}
+                <img src="{{ request.journal.header_image.url }}" class="img-fluid">
+            {% else %}
+            <img src="{% static "TUW/img/header.png" %}">
+            {% endif %}
+        {% else %}
+            <a href="/">{% svg request.press_cover %}</a>
+        {% endif %}
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="container-fluid">
-        <div class="row">
-            <a class="navbar-brand column-10" href="{% url 'website_index' %}>">
-                {% if request.journal %}
-                    {% if request.journal.header_image %}
-                        <a href="{% url 'website_index' %}"><img src="{{ request.journal.header_image.url }}" class="img-fluid"></a>
-                    {% else %}
-                    <img src="{% static "TUW/img/header.png" %}">
-                    {% endif %}
-                {% else %}
-                    <a href="/">{% svg request.press_cover %}</a>
-                {% endif %}
-            </a>
-            <div class="column-2">
-                <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
-                    {% csrf_token %}
-                    <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
-                    <button class="btn my-2 my-sm-0" type="submit">Search</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto font-weight-bold">
+
+    <div class="navigation collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
             {% if request.journal.nav_home %}
             <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">Home</a></li>{% endif %}
             {% if request.journal.nav_news %}
@@ -53,7 +41,7 @@
                 {% if journal_settings.general.multi_page_editorial %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="" id="editorial_team"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Editorial Team
                     </a>
                     <div class="dropdown-menu" aria-labelledby="editorial_team">
@@ -75,7 +63,7 @@
                 {% if item.has_sub_nav %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="" id="{{ item.link_name|slugify }}"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ item.link_name }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="{{ item.link_name|slugify }}">
@@ -102,7 +90,7 @@
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="" id="user"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Account
                     </a>
                     <div class="dropdown-menu" aria-labelledby="user">
@@ -131,6 +119,10 @@
                     &nbsp;</i>Register</a></li>
             {% endif %}
         </ul>
-
+        <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
+            {% csrf_token %}
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
+            <button class="btn my-2 my-sm-0" type="submit">Search</button>
+        </form>
     </div>
 </nav>
