@@ -1808,6 +1808,30 @@ def download_issue_galley(request, issue_id, galley_id):
 
     return issue_galley.serve(request)
 
+def view_issue_galley(request, issue_id, galley_id):
+    """
+    Serves a PDF journal to the browser.
+
+    :param request: HttpRequest object
+    :param galley: the galley to show
+    :return: an HttpResponse with a PDF attachment
+    """
+    issue_object = get_object_or_404(models.Issue,
+                                     pk=issue_id,
+                                     journal=request.journal,
+    )
+    
+    issue_galley = get_object_or_404(
+        models.IssueGalley,
+        pk=galley_id,
+        issue__pk=issue_id,
+    )
+
+    return files.serve_pdf_galley_to_browser(
+        request,
+        issue_galley.file,
+        issue_object
+    )
 
 def doi_redirect(request, identifier_type, identifier):
     """
