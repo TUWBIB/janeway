@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0035_auto_20190627_1117'),
+        ('submission', '0035_auto_20190712_2015'),
     ]
 
     operations = [
@@ -27,9 +27,16 @@ class Migration(migrations.Migration):
             name='title_de',
             field=models.CharField(blank=True, help_text='Your article title (de)', max_length=300, null=True),
         ),
-        migrations.AlterField(
+        migrations.CreateModel(
+            name='KeywordDe',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('word', models.CharField(max_length=200)),
+            ],
+        ),
+        migrations.AddField(
             model_name='article',
-            name='stage',
-            field=models.CharField(choices=[('Unsubmitted', 'Unsubmitted'), ('Unassigned', 'Unassigned'), ('Assigned', 'Assigned to Editor'), ('Under Review', 'Peer Review'), ('Under Revision', 'Revision'), ('Rejected', 'Rejected'), ('Accepted', 'Accepted'), ('Editor Copyediting', 'Editor Copyediting'), ('Author Copyediting', 'Author Copyediting'), ('Final Copyediting', 'Final Copyediting'), ('Typesetting', 'Typesetting'), ('Proofing', 'Proofing'), ('pre_publication', 'Pre Publication'), ('Published', 'Published'), ('preprint_review', 'Preprint Review'), ('preprint_published', 'Preprint Published'), ('Back Content', 'Back Content Plugin')], default='Unsubmitted', max_length=200),
+            name='keywords_de',
+            field=models.ManyToManyField(blank=True, null=True, to='submission.KeywordDe'),
         ),
     ]
