@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0035_auto_20190627_1117'),
+        ('submission', '0035_auto_20190712_2015'),
     ]
 
     operations = [
@@ -16,10 +16,5 @@ class Migration(migrations.Migration):
             model_name='section',
             name='visible',
             field=models.BooleanField(default=True),
-        ),
-        migrations.AlterField(
-            model_name='article',
-            name='stage',
-            field=models.CharField(choices=[('Unsubmitted', 'Unsubmitted'), ('Unassigned', 'Unassigned'), ('Assigned', 'Assigned to Editor'), ('Under Review', 'Peer Review'), ('Under Revision', 'Revision'), ('Rejected', 'Rejected'), ('Accepted', 'Accepted'), ('Editor Copyediting', 'Editor Copyediting'), ('Author Copyediting', 'Author Copyediting'), ('Final Copyediting', 'Final Copyediting'), ('Typesetting', 'Typesetting'), ('Proofing', 'Proofing'), ('pre_publication', 'Pre Publication'), ('Published', 'Published'), ('preprint_review', 'Preprint Review'), ('preprint_published', 'Preprint Published'), ('Back Content', 'Back Content Plugin')], default='Unsubmitted', max_length=200),
         ),
     ]
