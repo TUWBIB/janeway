@@ -5,7 +5,7 @@
 {% load hooks %}
 
 <nav class="navbar navbar-toggleable-sm navbar-light bg-light align-items-start">
-    <a class="navbar-brand" href="{% url 'website_index' %}>">
+    <a class="navbar-brand" href="{% url 'website_index' %}">
         {% if request.journal %}
             {% if request.journal.header_image %}
                 <img src="{{ request.journal.header_image.url }}" class="img-fluid">
