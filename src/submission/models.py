@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import uuid
 import os
+import re
 from dateutil import parser as dateparser
 
 from django.urls import reverse
@@ -1236,6 +1237,21 @@ class Licence(models.Model):
             return self.press
 
         return self.journal
+    
+    @property 
+    def tuw_cc_img_url(self):
+        str=None
+
+        if self.url is not None:
+            match=re.match(r'https://creativecommons.org/licenses/([a-zA-Z-]+)/([\d\.]+)(/:?([a-z]{2}))?',self.url)
+            if match:
+                lic_term=match.group(1)						
+                lic_ver=match.group(2)
+
+                str='https://licensebuttons.net/l/'+lic_term+'/'+lic_ver+'/80x15.png'
+
+        return str
+
 
 
 class Note(models.Model):
