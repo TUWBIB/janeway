@@ -106,6 +106,9 @@
                             {% for author in article.frozen_authors.all %}
                             {% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %}& {% endif %}
                             {{ author.citation_name }}
+                            {% if author.author.orcid %}
+                            <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUW/img/orcid_16x16.png" %}"></a>
+                            {% endif %}
                             {% endfor %}
                         </td>
                     </tr>
@@ -127,12 +130,14 @@
                         <td>{{ article.publisher}}</td>
                     </tr>
                     {% endif %}
+<!--                    
                     {% if article.edition %}
                     <tr>
                         <th>Edition</th>
                         <td>{{ article.edition }}</td>
                     </tr>
                     {% endif %}
+-->
                     {% if article.keywords.all %}
                     <tr>
                         <th>Keywords</th>
