@@ -3,6 +3,17 @@
 {% load pages %}
 
 <div class="row">
+        <div class="col-md-12 text-center">
+            <h3 style="line-height: :">{{ issue.tuw_display_title }}</h3>
+            {% if issue.issue_title %}
+            <br>{{ issue.issue_title }}
+            {% endif %}
+            <br>{{ issue.date|date:"d.M.Y" }}
+            <br>
+        </div>
+</div>
+
+<div class="row" style="margin-top: 15px;">
         {% if show_sidebar %}
             <aside class="col-md-3" data-sticky-container>
                 <div class="sticky" data-sticky data-margin-top="0" data-sticky data-anchor="issue_top">
@@ -34,7 +45,7 @@
             {% if not forloop.first %}<hr/>{% endif %}
             {% endif %}
             {% for article in section_articles %}
-                {% include "elements/article_listing.html" with article=article indent=section.visible %}
+                {% include "elements/article_listing.html" with article=article indent=section.visible suppress_issue_data=True %}
             {% endfor %}
         {% endfor %}
     </div>
