@@ -66,20 +66,40 @@
             <div class="col-md-2">
                 {% if request.journal.press_image_override %}
                     {% svg request.journal_cover %}
+                {% elif 'svg' in request.press_cover %}
+                    <a href="{% url 'website_index' %}">{% svg request.press_cover %}</a>
                 {% else %}
-                    {% svg request.press_cover %}
+                    <a href="https://janeway.systems">{% svg "static/common/img/sample/janeway.svg" %}</a>
                 {% endif %}
             </div>
-            <div class="col-md-5">
-                <small><p>
-                    {% if request.journal %}
-                        {% include "elements/journal_footer.html" %}
+            <div class="col-md-6">
+                <small>
+                    {% if request.journal.code == "JFM" %}
+                        <div class=wrapper>
+                        <img class="journal_logo" src="{% static "TUW/img/ifm-logo-footer-schrift.png"%}" style="height:65px; margin-right: 20px;">
+                        <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Journal for Facility Management">
+                        <span class="journal_phone_text">+43-1-58801-42701</span>
+                        <img class="journal_email_img" src="{% static "TUW/img/pic_mail.png"%}" alt="mail" title="E-Mail Redaktion Journal for Facility Management">
+                        <span class="journal_email_text"><a href="mailto:office@ifm.tuwien.ac.at">office@ifm.tuwien.ac.at</a> </span>
+                        <img class="journal_imprint_img" src="{% static "TUW/img/info_18px.png"%}" alt="Impressum" title="Impressum">
+                        <span class="journal_imprint_text">Impressum</span>
+                        </div>
+                    {% elif request.journal.code == "OES" %}
+                        <div class=wrapper>
+                        <img class="journal_logo" src="{% static "TUW/img/ifip_h54px.png"%}" style="height:65px; margin-right: 20px;">
+                        <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Der Öffentliche Sektor">
+                        <span class="journal_phone_text">+43-1-58801-280321</span>
+                        <img class="journal_email_img" src="{% static "TUW/img/pic_mail.png"%}" alt="mail" title="E-Mail Redaktion Der Öffentliche Sektor">
+                        <span class="journal_email_text"><a href="mailto:oes@ifip.tuwien.ac.at">oes@ifip.tuwien.ac.at</a> </span>
+                        <img class="journal_imprint_img" src="{% static "TUW/img/info_18px.png"%}" alt="Impressum" title="Impressum">
+                        <span class="journal_imprint_text">Impressum</span>
+                        </div>
                     {% else %}
-                        {% include "elements/press_footer.html" %}
+                          {% include "press/elements/press_footer.html" %}
                     {% endif %}
-                </p></small>
+                </small>
             </div>
-            <div class="col-md-5 text-right">
+            <div class="col-md-4 text-right">
                 <small><p>
                     <ul class="list-inline">
                         <li class="list-inline-item"><a href="/site/privacy/">{% trans "Privacy Policy" %}</a></li>
