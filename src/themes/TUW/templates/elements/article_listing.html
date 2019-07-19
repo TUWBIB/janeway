@@ -33,6 +33,7 @@
                         {% if not forloop.counter == article.frozen_authors.all|length|add:-1 %},
                         {% endif %}{% endif %}{% endfor %}
                 </h6>
+                {% if not suppress_issue_data %}
                 <p class="card-text">
                     <span class="date"><i class="fa fa-calendar"></i> {{ article.date_published|date:"Y-m-d" }}</span> 
                     
@@ -48,6 +49,7 @@
                     </a>
                     {% endfor %}
                 </p>
+                {% endif %}
                 </a>
             </div>
         </div>
