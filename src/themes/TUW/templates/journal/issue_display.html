@@ -15,7 +15,7 @@
                         <ul>
                             {% for issue in issues %}
                             {% if issue.issue_type == 'Issue' %}
-                                <li><a href="{% url 'journal_issue' issue.id %}">{{ issue.display_title }} </a></li>
+                                <li><a href="{% url 'journal_issue' issue.id %}">{{ issue.tuw_display_title }} </a></li>
                             {% else %}
                                 <li><a href="{% url 'journal_collection' issue.id %}">{{ issue.issue_title }} </a></li>
                             {% endif %}
@@ -45,7 +45,7 @@
                 <img class="card-img img-fluid article-img" src="{{ issue.large_image.url }}" alt="Card image">
             </div>
         {% else %}
-            <h2 class="em">{{ issue.display_title }}</h2>
+            <h2 class="em">{{ issue.tuw_display_title }}</h2>
             <p>{{ issue.issue_description|safe }}</p>
         {% endif %}
         </a>
