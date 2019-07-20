@@ -92,7 +92,7 @@
             {% endfor %}
         </div>
         <div class="col">
-            <h1 class="mainheader">Journal Article</h1>
+            <h1 class="mainheader">{% trans "Journal Article" %}</h1>
             <table class="infotable">
                 <tbody>
                     <tr>
@@ -101,7 +101,7 @@
                     </tr>
                     {% if article.frozen_authors.all %}
                     <tr>
-                        <th>Author</th>
+                        <th>{% trans "Author" %}</th>
                         <td>
                             {% for author in article.frozen_authors.all %}
                             {% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %}& {% endif %}
@@ -140,13 +140,13 @@
 -->
                     {% if article.keywords.all %}
                     <tr>
-                        <th>Keywords</th>
+                        <th>{% trans "Keywords (English)" %}</th>
                         <td>{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                     </tr>
                     {% endif %}
                     {% if article.keywords_de.all %}
                     <tr>
-                        <th>Keywords (German)</th>
+                        <th>{% trans "Keywords (German)" %}</th>
                         <td>{% for keyword in article.keywords_de.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                     </tr>
                     {% endif %}
