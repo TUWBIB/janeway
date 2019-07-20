@@ -1821,13 +1821,18 @@ def view_issue_galley(request, issue_id, galley_id):
                                      journal=request.journal,
     )
     
+
+    print (issue_id,galley_id)
+    print (issue_object)
+
     issue_galley = get_object_or_404(
         models.IssueGalley,
         pk=galley_id,
         issue__pk=issue_id,
     )
+    print (issue_galley.file)
 
-    return files.serve_pdf_galley_to_browser(
+    return files.serve_issue_galley_to_browser(
         request,
         issue_galley.file,
         issue_object
