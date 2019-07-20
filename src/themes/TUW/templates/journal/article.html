@@ -186,9 +186,6 @@
             <table class="infotable">
                 <tbody>
                     <tr>
-<<<<<<< HEAD
-                        <td>{{ article.license.text }}</th>
-=======
                         {% if article.license.tuw_cc_img_url %}
                         <th>                      
                             <img alt="{{article.license.short_name}}" src="{{article.license.tuw_cc_img_url}}">
@@ -196,7 +193,6 @@
                         {% endif %}
 
 <!--                        <td>{{ article.license.text }}</td> -->
->>>>>>> 0004dd3a... fix license indent
                         <td>
                             <a href="{{article.license.url}}">{{ article.license.short_name }}</a>
                         </td>
