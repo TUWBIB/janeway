@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-25 14:43+0000\n"
+"POT-Creation-Date: 2019-07-20 21:43+0200\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,53 +18,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: core/example_settings.py:194 core/settings.py:198
-#: core/settings/dev_settings.py:198 core/settings/kraftwerk.py:200
-msgid "English"
-msgstr "Englisch"
-
-#: core/example_settings.py:195 core/settings.py:199
-#: core/settings/dev_settings.py:199
-msgid "French"
-msgstr "Französisch"
-
-#: core/example_settings.py:196 core/settings.py:200
-#: core/settings/dev_settings.py:200
-msgid "German"
-msgstr "Deutsch"
-
-#: core/forms.py:82
+#: core/forms.py:87
 msgid "Password 1"
 msgstr "Passwort 1"
 
-#: core/forms.py:83
+#: core/forms.py:88
 msgid "Password 2"
 msgstr "Passwort 2"
 
-#: core/forms.py:100
-#: themes/OLH/templates/core/accounts/orcid_registration.html:33
-#: themes/OLH/templates/press/core/login.html:29
-#: themes/material/templates/core/login.html:26
+#: core/forms.py:106
+#: themes/OLH/templates/core/accounts/orcid_registration.html:32
+#: themes/OLH/templates/press/core/login.html:30
 msgid "Password"
 msgstr "Passwort"
 
-#: core/forms.py:101
 # Andrae: Übersetzung unsauber
+#: core/forms.py:107
 msgid "Repeat Password"
 msgstr "Passwort wiederholen"
 
-#: core/forms.py:104 journal/forms.py:46
-#, python-format
 # Andrae: Live-System-Test
+#: core/forms.py:110 core/forms.py:407 journal/forms.py:53
+#, python-format
 msgid "What is %(num1)i %(operator)s %(num2)i? "
 msgstr "Wie viel ist %(num1)i %(operator)s %(num2)i? "
 
-#: core/forms.py:105 journal/forms.py:47
+#: core/forms.py:111 journal/forms.py:54
 msgid "Answer this question: "
 msgstr "Beantworten Sie folgende Frage: "
 
-#: core/homepage_elements/carousel/models.py:9
+#: core/forms.py:408
+msgid "Anti-spam captcha"
+msgstr ""
+
+#: core/forms.py:441
+#, fuzzy
+#| msgid "Email"
+msgid "E-mail"
+msgstr "E-Mail"
+
+#: core/homepage_elements/about/hooks.py:23
+#: themes/OLH/templates/journal/homepage_elements/about.html:7
+#: themes/TUW/templates/journal/homepage_elements/about.html:4
+#: themes/default/templates/journal/homepage_elements/about.html:4
+msgid "About this Journal"
+msgstr "Über diese Zeitschrift"
+
 # Andrae: Übersetzung unsauber? Kontext unbekannt
+#: core/homepage_elements/carousel/models.py:9
 msgid "Off"
 msgstr "Aus"
 
@@ -74,6 +75,7 @@ msgstr "Aus"
 msgid "Latest Articles"
 msgstr "Aktuelle Artikel"
 
+# Andrae: Live-System-Test, ggf. original belassen
 #: core/homepage_elements/carousel/models.py:11
 #: themes/OLH/templates/core/news/index.html:5
 #: themes/OLH/templates/core/news/index.html:10
@@ -84,11 +86,10 @@ msgstr "Aktuelle Artikel"
 #: themes/OLH/templates/press/core/news/item.html:5
 #: themes/material/templates/core/nav.html:75
 #: themes/material/templates/core/news/index.html:5
-#: themes/material/templates/core/news/item.html:4
+#: themes/material/templates/core/news/item.html:5
 #: themes/material/templates/press/core/news/index.html:5
 #: themes/material/templates/press/core/news/index.html:10
 #: themes/material/templates/press/core/news/item.html:5
-# Andrae: Live-System-Test, ggf. original belassen
 msgid "News"
 msgstr "Neuigkeiten"
 
@@ -106,61 +107,75 @@ msgstr "Aktuelle Artikel und Neuigkeiten"
 msgid "Selected Articles and News"
 msgstr "Ausgewählte Artikel und Neuigkeiten"
 
-#: core/models.py:177 templates/admin/submission/submit_authors.html:66
+#: core/janeway_global_settings.py:229
+msgid "English"
+msgstr "Englisch"
+
+#: core/janeway_global_settings.py:230
+msgid "French"
+msgstr "Französisch"
+
+#: core/janeway_global_settings.py:231
+msgid "German"
+msgstr "Deutsch"
+
+#: core/models.py:179 templates/admin/submission/submit_authors.html:66
 #: themes/OLH/templates/core/accounts/get_reset_token.html:26
-#: themes/OLH/templates/core/accounts/orcid_registration.html:30
+#: themes/OLH/templates/core/accounts/orcid_registration.html:29
 #: themes/OLH/templates/preprints/authors.html:57
-#: themes/OLH/templates/press/core/login.html:26
+#: themes/OLH/templates/press/core/login.html:27
+#: themes/TUW/templates/core/accounts/get_reset_token.html:16
+#: themes/TUW/templates/preprints/authors.html:63
 #: themes/default/templates/core/accounts/get_reset_token.html:16
 #: themes/default/templates/preprints/authors.html:63
 #: themes/material/templates/core/accounts/get_reset_token.html:18
-#: themes/material/templates/core/login.html:22
 msgid "Email"
 msgstr "E-Mail"
 
-#: core/models.py:178
+#: core/models.py:180
 msgid "Username"
 msgstr "Benutzername"
 
-#: core/models.py:180
+#: core/models.py:182
 msgid "First name"
 msgstr "Vorname"
 
-#: core/models.py:181
+#: core/models.py:183
 msgid "Middle name"
 msgstr "Zweiter Vorname"
 
-#: core/models.py:182
+#: core/models.py:184
 msgid "Last name"
 msgstr "Nachname"
 
-#: core/models.py:186
+#: core/models.py:188
 msgid "Salutation"
 msgstr "Anrede"
 
-#: core/models.py:187
 # Andrae: Übersetzung unsauber
+#: core/models.py:189
 msgid "Biography"
 msgstr "Biographie"
 
-#: core/models.py:188
+#: core/models.py:190
 msgid "ORCiD"
 msgstr "ORCiD"
 
-#: core/models.py:189
+#: core/models.py:191
 msgid "Institution"
 msgstr "Institution"
 
-#: core/models.py:190
 # Andrae: Übersetzung unsauber: besser fakultät?
+#: core/models.py:192
 msgid "Department"
 msgstr "Institut"
 
-#: core/models.py:202 themes/OLH/templates/core/accounts/public_profile.html:15
+#: core/models.py:204 themes/OLH/templates/core/accounts/public_profile.html:15
 msgid "Country"
 msgstr "Land"
 
-#: core/models.py:591 core/models.py:708
+# Andrae: Live-System-Test
+#: core/models.py:642 core/models.py:799
 #: templates/admin/submission/submit_files.html:42
 #: templates/admin/submission/submit_files.html:81
 #: templates/admin/submission/submit_review.html:84
@@ -169,132 +184,194 @@ msgstr "Land"
 #: themes/OLH/templates/preprints/review.html:95
 #: themes/OLH/templates/preprints/submit_files.html:38
 #: themes/OLH/templates/preprints/submit_files.html:74
+#: themes/TUW/templates/preprints/review.html:77
+#: themes/TUW/templates/preprints/review.html:96
+#: themes/TUW/templates/preprints/submit_files.html:41
+#: themes/TUW/templates/preprints/submit_files.html:78
 #: themes/default/templates/preprints/review.html:77
 #: themes/default/templates/preprints/review.html:96
 #: themes/default/templates/preprints/submit_files.html:41
 #: themes/default/templates/preprints/submit_files.html:78
-# Andrae: Live-System-Test
 msgid "Label"
 msgstr "Label wozu?"
 
-#: core/models.py:592 core/models.py:709
+#: core/models.py:643 core/models.py:800
 msgid "Description"
 msgstr "Beschreibung"
 
-#: core/models.py:935
 # Andrae: Übersetzung unsauber
+#: core/models.py:1030
 msgid "Your contact email address"
 msgstr "Ihre Kontakt-E-Mail-Adresse"
 
-#: core/models.py:936 themes/default/templates/preprints/review.html:41
 # Andrae: Live-System-Test
+#: core/models.py:1031 themes/TUW/templates/preprints/review.html:41
+#: themes/default/templates/preprints/review.html:41
 msgid "Subject"
 msgstr "Betreff"
 
-#: core/models.py:937
+#: core/models.py:1032
 msgid "Your message"
 msgstr "Ihre Nachricht"
 
-#: journal/views.py:1151
+#: core/validators.py:13
+#, python-brace-format
+msgid ""
+"Extension {extension} is not allowed. Allowed extensions are: {validator."
+"extensions}"
+msgstr ""
+
+#: core/validators.py:15
+#, python-brace-format
+msgid ""
+"MIME type {mimetype} is not valid. Valid types are: {validator.mimetypes}"
+msgstr ""
+
 # Andrae: Live-System-Test
+#: journal/views.py:1394
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
 "login."
 msgstr ""
-"Sie müssen eingeloggt sein um Gutachter_in zu werden. Klicken Sie auf den nachfolgenden "
-"Button um sich anzumelden."
+"Sie müssen eingeloggt sein um Gutachter_in zu werden. Klicken Sie auf den "
+"nachfolgenden Button um sich anzumelden."
 
-#: journal/views.py:1156
+#: journal/views.py:1399
 msgid ""
 "You are not yet a reviewer for this journal. Click the button below to "
 "become a reviewer."
 msgstr ""
-"Sie sind noch kein_e Gutachter_in dieser Zeitschrift. Klicken Sie auf den nachfolgenden "
-"Button um Gutachter_in zu werden."
+"Sie sind noch kein_e Gutachter_in dieser Zeitschrift. Klicken Sie auf den "
+"nachfolgenden Button um Gutachter_in zu werden."
 
-#: journal/views.py:1161
+#: journal/views.py:1404
 msgid "You are already a reviewer."
 msgstr "Sie sind bereits Gutachter_in."
 
-#: journal/views.py:1165
+#: journal/views.py:1408
 msgid "You are now a reviewer"
 msgstr "Sie sind nun Gutachter_in."
 
-#: preprint/forms.py:19 submission/forms.py:66
+#: preprint/forms.py:19 submission/forms.py:68
 #: templates/admin/submission/submit_review.html:30
-#: themes/OLH/templates/journal/articles.html:65
+#: themes/OLH/templates/journal/articles.html:66
 #: themes/OLH/templates/preprints/list.html:67
 #: themes/OLH/templates/preprints/review.html:25
 #: themes/OLH/templates/preprints/search.html:52
+#: themes/TUW/templates/journal/article.html:99
+#: themes/TUW/templates/journal/articles.html:60
 #: themes/default/templates/journal/articles.html:60
-#: themes/material/templates/journal/articles.html:60
+#: themes/material/templates/journal/articles.html:61
 #: themes/material/templates/preprints/list.html:78
 msgid "Title"
 msgstr "Titel"
 
-#: preprint/forms.py:20 submission/forms.py:67
+#: preprint/forms.py:20 submission/forms.py:70 submission/forms.py:71
 #: templates/admin/submission/submit_review.html:31
 #: themes/OLH/templates/preprints/review.html:26
+#: themes/TUW/templates/preprints/review.html:27
 #: themes/default/templates/preprints/review.html:27
 msgid "Subtitle"
 msgstr "Untertitel"
 
-#: preprint/forms.py:22 submission/forms.py:69
 # Andrae: Live-System-Test
+#: preprint/forms.py:22 submission/forms.py:72
 msgid "Enter your article's abstract here"
 msgstr "Fügen Sie die Zusammenfassung Ihres Artikels hier ein"
 
-#: submission/models.py:301
+#: submission/forms.py:69
+#, fuzzy
+#| msgid "Title"
+msgid "Title (de)"
+msgstr "Titel"
+
+# Andrae: Live-System-Test
+#: submission/forms.py:73
+#, fuzzy
+#| msgid "Enter your article's abstract here"
+msgid "Enter your article's abstract here (de)"
+msgstr "Fügen Sie die Zusammenfassung Ihres Artikels hier ein"
+
+#: submission/models.py:312
 #, fuzzy
 #| msgid "Articles"
 msgid "Your article title"
 msgstr "Der Titel Ihres Artikels"
 
-#: submission/models.py:303
+#: submission/models.py:314
 msgid "Subtitle of the article display format; Title: Subtitle"
 msgstr "Anzeigeformat des Untertitels; Titel: Untertitel"
 
-#: submission/models.py:309
+#: submission/models.py:318
+msgid ""
+"Please avoid pasting content from word processors as they can add unwanted "
+"styling to the abstract. You can retype the abstract here or copy and paste "
+"it into notepad/a plain text editor before pasting here."
+msgstr ""
+
+#: submission/models.py:327
 msgid "The primary language of the article"
 msgstr "Die primäre Sprache des Artikels"
 
-#: submission/models.py:1191 templates/admin/submission/submit_files.html:70
+#: submission/models.py:334
+#, fuzzy
+#| msgid "Articles"
+msgid "Your article title (de)"
+msgstr "Der Titel Ihres Artikels"
+
+#: submission/models.py:336
+#, fuzzy
+#| msgid "Subtitle of the article display format; Title: Subtitle"
+msgid "Subtitle of the article display format; Title: Subtitle (de)"
+msgstr "Anzeigeformat des Untertitels; Titel: Untertitel"
+
+#: submission/models.py:337
+#, fuzzy
+#| msgid "Abstract"
+msgid "Abstract (de)"
+msgstr "Zusammenfassung"
+
 # Andrae: Übersetzung unsauber
+#: submission/models.py:1349 templates/admin/submission/submit_files.html:70
 msgid "Figures and Data Files"
 msgstr "Abbildungen und Datenfiles"
 
-#: submission/models.py:1194
 # Andrae: Live-System-Test
+#: submission/models.py:1356
 msgid "The default license applied when no option is presented"
-msgstr "Die Standard-Lizenz der Zeitschrift kommt zur Anwendung, wenn keine Auswahl gegeben ist."
+msgstr ""
+"Die Standard-Lizenz der Zeitschrift kommt zur Anwendung, wenn keine Auswahl "
+"gegeben ist."
 
-#: submission/models.py:1196
 # Andrae: Live-System-Test
+#: submission/models.py:1363
 msgid "The default language of articles when lang is hidden"
-msgstr "Die Standard-Sprache kommt für Artikel zur Anwendung, wenn lang versteckt ist."
+msgstr ""
+"Die Standard-Sprache kommt für Artikel zur Anwendung, wenn lang versteckt "
+"ist."
 
-#: submission/models.py:1198
 # Andrae: Live-System-Test
+#: submission/models.py:1369
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 
-#: templates/admin/elements/publisher_notes.html:34
 # Andrae: Live-System-Test
+#: templates/admin/elements/publisher_notes.html:34
 msgid "Add A Publisher Note"
 msgstr "Füge eine Verlagsanmerkung hinzu"
 
-#: templates/admin/elements/publisher_notes.html:43
 # Andrae: Live-System-Test
+#: templates/admin/elements/publisher_notes.html:43
 msgid "Add Publisher Note"
 msgstr "Verlagsanmerkung hinzufügen"
 
-#: templates/admin/elements/publisher_notes.html:54
 # Andrae: Live-System-Test
+#: templates/admin/elements/publisher_notes.html:54
 msgid "Edit A Publisher Note"
 msgstr "Bearbeite die Verlagsanmerkung"
 
-#: templates/admin/elements/publisher_notes.html:63
 # Andrae: Live-System-Test
+#: templates/admin/elements/publisher_notes.html:63
 msgid "Save Publisher Note"
 msgstr "Speichere Verlagsanmerkung"
 
@@ -303,6 +380,8 @@ msgstr "Speichere Verlagsanmerkung"
 #: themes/OLH/templates/elements/submit/author.html:8
 #: themes/OLH/templates/preprints/authors.html:42
 #: themes/OLH/templates/preprints/authors.html:44
+#: themes/TUW/templates/elements/submit/author.html:10
+#: themes/TUW/templates/preprints/authors.html:49
 #: themes/default/templates/elements/submit/author.html:10
 #: themes/default/templates/preprints/authors.html:49
 msgid "Add New Author"
@@ -310,6 +389,7 @@ msgstr "Füge neue_n Autor_in hinzu"
 
 #: templates/admin/elements/submit/author.html:64
 #: themes/OLH/templates/elements/submit/author.html:64
+#: themes/TUW/templates/elements/submit/author.html:65
 #: themes/default/templates/elements/submit/author.html:65
 msgid "Add Author"
 msgstr "Füge Autor_in hinzu"
@@ -317,26 +397,31 @@ msgstr "Füge Autor_in hinzu"
 #: templates/admin/elements/submit/file.html:7
 #: themes/OLH/templates/elements/submit/file.html:6
 #: themes/OLH/templates/elements/submit/preprint_file.html:6
+#: themes/TUW/templates/elements/submit/file.html:8
+#: themes/TUW/templates/elements/submit/preprint_file.html:8
 #: themes/default/templates/elements/submit/file.html:8
 #: themes/default/templates/elements/submit/preprint_file.html:8
 msgid "Add New File"
 msgstr "Füge neue Datei hinzu"
 
+# Andrae: Übersetzung fehlt
 #: templates/admin/elements/submit/file.html:12
 #: themes/OLH/templates/elements/submit/file.html:8
+#: themes/TUW/templates/elements/submit/file.html:17
 #: themes/default/templates/elements/submit/file.html:17
-# Andrae: Übersetzung fehlt
 msgid ""
 "Please supply any original figure files or supporting information. The "
 "journal urges you to submit this document to a repository such as Figshare "
 "so that a DOI can be assigned to it, but this is not required."
 msgstr ""
-"Stellen Sie bitte originale Abbildungen und Supplemente zur Verfügung. Die Zeitschrift "
-"hält Sie dazu an das Dokument in ein Repositorium wie Figshare oder Zenodo zu laden, "
-"damit dafür eine DOI registriert werden kann - dies ist nicht verpflichtend."
+"Stellen Sie bitte originale Abbildungen und Supplemente zur Verfügung. Die "
+"Zeitschrift hält Sie dazu an das Dokument in ein Repositorium wie Figshare "
+"oder Zenodo zu laden, damit dafür eine DOI registriert werden kann - dies "
+"ist nicht verpflichtend."
 
 #: templates/admin/elements/submit/file.html:15
 #: themes/OLH/templates/elements/submit/file.html:11
+#: themes/TUW/templates/elements/submit/file.html:20
 #: themes/default/templates/elements/submit/file.html:20
 msgid ""
 "Please upload your manuscript file, it should be in PDF, RTF, ODT or DOC/X "
@@ -344,30 +429,49 @@ msgid ""
 "file is required at this stage."
 msgstr ""
 "Bitte laden Sie Ihr Manuskript im Format PDF, RTF, ODT oder DOC/X hoch. "
-"LaTeX-Dateien können zu einem späteren Zeitpunk angenomen werden, im aktuellen "
-"Stadium ist eine einfache, lesbare Datei notwendig."
+"LaTeX-Dateien können zu einem späteren Zeitpunk angenomen werden, im "
+"aktuellen Stadium ist eine einfache, lesbare Datei notwendig."
 
 #: templates/admin/elements/submit/file.html:17
 #: themes/OLH/templates/elements/submit/file.html:13
+#: themes/TUW/templates/elements/submit/file.html:22
 #: themes/default/templates/elements/submit/file.html:22
 msgid ""
 "Please upload your manuscript file, it should be in RTF, ODT or DOC/X "
 "format. LaTeX may be accepted later in the process but a simple, readable "
 "file is required at this stage."
 msgstr ""
-"Bitte laden Sie Ihr Manuskript im Format RTF, ODT oder DOC/X hoch. "
-"LaTeX-Dateien können zu einem späteren Zeitpunk angenomen werden, im aktuellen "
+"Bitte laden Sie Ihr Manuskript im Format RTF, ODT oder DOC/X hoch. LaTeX-"
+"Dateien können zu einem späteren Zeitpunk angenomen werden, im aktuellen "
 "Stadium ist eine einfache, lesbare Datei notwendig."
 
 #: templates/admin/elements/submit/file.html:61
 #: themes/OLH/templates/elements/submit/file.html:25
 #: themes/OLH/templates/elements/submit/preprint_file.html:25
+#: themes/TUW/templates/elements/submit/file.html:32
+#: themes/TUW/templates/elements/submit/preprint_file.html:33
 #: themes/default/templates/elements/submit/file.html:32
 #: themes/default/templates/elements/submit/preprint_file.html:33
 msgid "Add File"
 msgstr "Füge Datei hinzu"
 
+#: templates/admin/submission/manager/delete_license.html:26
+msgid ""
+"This license is currently used by the following articles. If you delete it "
+"these articles will no longer have a license listed."
+msgstr ""
+
+#: templates/admin/submission/manager/delete_license.html:27
+msgid ""
+"You should only delete this license if you are absolutley sure you want to "
+"remove it."
+msgstr ""
+
 #: templates/admin/submission/start.html:7
+#: themes/TUW/templates/preprints/authors.html:5
+#: themes/TUW/templates/preprints/review.html:5
+#: themes/TUW/templates/preprints/submit_files.html:5
+#: themes/TUW/templates/preprints/submit_start.html:7
 #: themes/default/templates/preprints/authors.html:5
 #: themes/default/templates/preprints/review.html:5
 #: themes/default/templates/preprints/submit_files.html:5
@@ -379,55 +483,60 @@ msgstr "Artikel einreichen"
 msgid "Author Agreement"
 msgstr "Autor_innenvertrag"
 
-#: templates/admin/submission/start.html:11
 # Andrae: Live-System-Test
+#: templates/admin/submission/start.html:11
 msgid ""
 "Please carefully read through the statements below before checking items"
 msgstr ""
 "Bitte lesen Sie den nachfolgenden Text genau durch, bevor Sie zustimmen."
 
 #: templates/admin/submission/start.html:30
-#: themes/OLH/templates/journal/submissions.html:49
-#: themes/default/templates/journal/submissions.html:51
-#: themes/material/templates/journal/submissions.html:66
+#: themes/OLH/templates/journal/submissions.html:56
+#: themes/TUW/templates/journal/submissions.html:60
+#: themes/default/templates/journal/submissions.html:60
+#: themes/material/templates/journal/submissions.html:71
 msgid "Publication Fees"
 msgstr "Publikationskosten"
 
-#: templates/admin/submission/start.html:36
 # Andrae: Übersetzung unsauber, Mehrzahl fehlt
+#: templates/admin/submission/start.html:36
 msgid "Author(s) agrees to the above statement"
 msgstr "Der_die Autor_in stimmt zu"
 
 #: templates/admin/submission/start.html:42
-#: themes/OLH/templates/journal/submissions.html:39
-#: themes/default/templates/journal/submissions.html:41
-#: themes/material/templates/journal/submissions.html:47
+#: themes/OLH/templates/journal/submissions.html:42
+#: themes/TUW/templates/journal/submissions.html:46
+#: themes/default/templates/journal/submissions.html:46
+#: themes/material/templates/journal/submissions.html:48
 msgid "Submission Checklist"
 msgstr "Checkliste für die Einreichung"
 
-#: templates/admin/submission/start.html:48
 # Andrae: Übersetzung unsauber, Mehrzahl fehlt
+#: templates/admin/submission/start.html:48
 msgid "Author(s) confirms that this article adheres to the above requirements"
-msgstr "Der_die Autor_in bestätigt, dass der Artikel den oben genannten Anforderungen entspricht"
+msgstr ""
+"Der_die Autor_in bestätigt, dass der Artikel den oben genannten "
+"Anforderungen entspricht"
 
 #: templates/admin/submission/start.html:54
-#: themes/OLH/templates/journal/submissions.html:42
-#: themes/default/templates/journal/submissions.html:44
-#: themes/material/templates/journal/submissions.html:57
+#: themes/OLH/templates/journal/submissions.html:47
+#: themes/TUW/templates/journal/submissions.html:51
+#: themes/default/templates/journal/submissions.html:51
+#: themes/material/templates/journal/submissions.html:60
 msgid "Copyright Notice"
 msgstr "Urheberrechtsvermerk"
 
-#: templates/admin/submission/start.html:60
 # Andrae: Live-System-Test
+#: templates/admin/submission/start.html:60
 msgid ""
 "Author(s) agrees to copyright notice, which will apply to this submission if "
 "accepted"
 msgstr ""
-"Autor_in(nen) stimmen dem Urheberrechtsvermerk zu, welcher für die Einreichung "
-"bei Annahme zur Publikation zur Anwendung kommt."
+"Autor_in(nen) stimmen dem Urheberrechtsvermerk zu, welcher für die "
+"Einreichung bei Annahme zur Publikation zur Anwendung kommt."
 
-#: templates/admin/submission/start.html:66
 # Andrae: Übersetzung fehlt
+#: templates/admin/submission/start.html:66
 msgid "Competing Interests"
 msgstr "Konkurrierende Interessen"
 
@@ -436,53 +545,60 @@ msgid "Comments to the Editor"
 msgstr "Kommentare an den_die Editor_in"
 
 #: templates/admin/submission/start.html:82
-#: themes/OLH/templates/journal/submissions.html:30
+#: themes/OLH/templates/journal/submissions.html:28
 #: themes/OLH/templates/preprints/submit_start.html:97
-#: themes/default/templates/journal/submissions.html:29
-#: themes/material/templates/journal/submissions.html:35
+#: themes/TUW/templates/journal/submissions.html:27
+#: themes/default/templates/journal/submissions.html:27
+#: themes/material/templates/journal/submissions.html:31
 msgid "Start Submission"
 msgstr "Starte Einreichung"
 
 #: templates/admin/submission/submit_authors.html:5
 #: templates/admin/submission/timeline.html:20
 #: templates/admin/submission/timeline.html:21
+#: themes/TUW/templates/preprints/authors.html:11
 #: themes/default/templates/preprints/authors.html:11
 msgid "Author Information"
 msgstr "Autor_inneninformation"
 
 #: templates/admin/submission/submit_authors.html:18
 #: themes/OLH/templates/preprints/authors.html:22
+#: themes/TUW/templates/preprints/authors.html:20
 #: themes/default/templates/preprints/authors.html:20
 msgid "Search for Existing Authors"
 msgstr "Suche nach existierenden Autor_innen"
 
 #: templates/admin/submission/submit_authors.html:25
 #: themes/OLH/templates/preprints/authors.html:27
+#: themes/TUW/templates/preprints/authors.html:25
 #: themes/default/templates/preprints/authors.html:25
 msgid ""
 "Search for a user using email address or ORCiD. If a user is matched, they "
 "will be automatically added as an author. This search only returns exact "
 "matches."
 msgstr ""
-"Sie können mittels E-Mail-Adresse oder ORCiD nach einer Person suchen. Wenn ein "
-"Eintrag gefunden wird, wird dieser automatisch als Autor_in hinzugefügt. "
+"Sie können mittels E-Mail-Adresse oder ORCiD nach einer Person suchen. Wenn "
+"ein Eintrag gefunden wird, wird dieser automatisch als Autor_in hinzugefügt. "
 "Die Suche muss mit dem Treffer exakt übereinstimmen."
 
 #: templates/admin/submission/submit_authors.html:31
 #: themes/OLH/templates/preprints/authors.html:33
+#: themes/TUW/templates/preprints/authors.html:31
 #: themes/default/templates/preprints/authors.html:31
 msgid "Search by email address or ORCiD"
 msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 
 #: templates/admin/submission/submit_authors.html:35
-#: themes/OLH/templates/journal/search.html:6
+#: themes/OLH/templates/journal/search.html:8
 #: themes/OLH/templates/preprints/authors.html:37
-#: themes/default/templates/journal/search.html:5
+#: themes/TUW/templates/journal/search.html:7
+#: themes/TUW/templates/journal/search.html:9
+#: themes/TUW/templates/preprints/authors.html:35
 #: themes/default/templates/journal/search.html:7
+#: themes/default/templates/journal/search.html:9
 #: themes/default/templates/preprints/authors.html:35
-#: themes/material/templates/journal/search.html:4
-#: themes/material/templates/journal/search.html:33
-#: themes/material/templates/journal/search.html:35
+#: themes/material/templates/journal/search.html:7
+#: themes/material/templates/journal/search.html:66
 msgid "Search"
 msgstr "Suche"
 
@@ -490,64 +606,71 @@ msgstr "Suche"
 msgid "Add Authors"
 msgstr "Füge Autor_in hinzu"
 
-#: templates/admin/submission/submit_authors.html:44
-#: themes/default/templates/preprints/authors.html:42
 # Andrae: Live-System-Test
+#: templates/admin/submission/submit_authors.html:44
+#: themes/TUW/templates/preprints/authors.html:42
+#: themes/default/templates/preprints/authors.html:42
 msgid ""
 "By default, your account is the owner of this submission, but is not an "
 "Author on record. You can add yourself using the button below."
 msgstr ""
-"Standardmäßig gehört Ihrem Account die Einreichung, Sie sind jedoch "
-"nicht als Autor_in der Publikation angeführt. Sie können sich selbst über "
-"den nachfolgenden Button hinzufügen."
+"Standardmäßig gehört Ihrem Account die Einreichung, Sie sind jedoch nicht "
+"als Autor_in der Publikation angeführt. Sie können sich selbst über den "
+"nachfolgenden Button hinzufügen."
 
 #: templates/admin/submission/submit_authors.html:46
+#: themes/TUW/templates/preprints/authors.html:44
 #: themes/default/templates/preprints/authors.html:44
 msgid "Add Self as Author"
 msgstr "Mich als Autor_in hinzufügen"
 
+# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:48
 #: themes/OLH/templates/preprints/authors.html:43
+#: themes/TUW/templates/preprints/authors.html:47
 #: themes/default/templates/preprints/authors.html:47
-# Andrae: Live-System-Test
 msgid ""
 "If you cannot find the author record by searching, and you are not the only "
 "author, you can add one by clicking the button below. This will open a popup "
 "modal for you to complete their details."
 msgstr ""
-"Wenn Sie über die Suche keinen Eintrag finden, und Sie nicht alleinige_r " 
-"Autor_in sind, fügen Sie eine weitere Person über den Button unten hinzu. Dieser öffnet "
-"ein Popup-Fenster, wo die notwendigen Informationen eintragen werden können."
+"Wenn Sie über die Suche keinen Eintrag finden, und Sie nicht alleinige_r "
+"Autor_in sind, fügen Sie eine weitere Person über den Button unten hinzu. "
+"Dieser öffnet ein Popup-Fenster, wo die notwendigen Informationen eintragen "
+"werden können."
 
+# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:55
 #: templates/admin/submission/submit_authors.html:58
 #: themes/OLH/templates/preprints/authors.html:49
+#: themes/TUW/templates/preprints/authors.html:55
 #: themes/default/templates/preprints/authors.html:55
-# Andrae: Live-System-Test
 msgid "Current Authors"
 msgstr "Derzeitige Autor_innen"
 
 #: templates/admin/submission/submit_authors.html:65
 #: themes/OLH/templates/preprints/authors.html:56
+#: themes/TUW/templates/preprints/authors.html:62
 #: themes/default/templates/preprints/authors.html:62
 msgid "Name"
 msgstr "Name"
 
 #: templates/admin/submission/submit_authors.html:82
 #: themes/OLH/templates/preprints/authors.html:73
+#: themes/TUW/templates/preprints/authors.html:78
 #: themes/default/templates/preprints/authors.html:78
 msgid "No authors yet, add one!"
 msgstr "Noch keine Autor_innen, fügen Sie eine_n hinzu!"
 
-#: templates/admin/submission/submit_authors.html:89
 # Andrae: Live-System-Test
+#: templates/admin/submission/submit_authors.html:89
 msgid ""
 "You are required to select a main author, this author will receive the "
 "communications regarding your articles process through our systems. This "
 "does not have to be you."
 msgstr ""
-"Sie müssen eine_n Hauptautor_in wählen, welche_r über den weiteren Verlauf des Artikels "
-"informiert wird. Diese Person müssen nicht Sie sein."
+"Sie müssen eine_n Hauptautor_in wählen, welche_r über den weiteren Verlauf "
+"des Artikels informiert wird. Diese Person müssen nicht Sie sein."
 
 #: templates/admin/submission/submit_authors.html:90
 msgid "Select main author"
@@ -555,9 +678,12 @@ msgstr "Hauptautor_in wählen"
 
 #: templates/admin/submission/submit_authors.html:100
 #: templates/admin/submission/submit_files.html:113
-#: templates/admin/submission/submit_info.html:98
+#: templates/admin/submission/submit_info.html:93
 #: themes/OLH/templates/preprints/authors.html:83
 #: themes/OLH/templates/preprints/submit_files.html:105
+#: themes/TUW/templates/preprints/authors.html:89
+#: themes/TUW/templates/preprints/submit_files.html:109
+#: themes/TUW/templates/preprints/submit_start.html:69
 #: themes/default/templates/preprints/authors.html:89
 #: themes/default/templates/preprints/submit_files.html:109
 #: themes/default/templates/preprints/submit_start.html:69
@@ -570,14 +696,16 @@ msgstr "Dateien hochladen"
 
 #: templates/admin/submission/submit_files.html:23
 #: themes/OLH/templates/preprints/submit_files.html:21
+#: themes/TUW/templates/preprints/submit_files.html:23
 #: themes/default/templates/preprints/submit_files.html:23
 msgid "Submission guidelines"
 msgstr "Leitfaden für die Einreichung"
 
+# Andrae: Live-System-Test
 #: templates/admin/submission/submit_files.html:23
 #: themes/OLH/templates/preprints/submit_files.html:21
+#: themes/TUW/templates/preprints/submit_files.html:23
 #: themes/default/templates/preprints/submit_files.html:23
-# Andrae: Live-System-Test
 msgid ""
 "To upload a file, select it\n"
 "                    using one of the 'Choose file' buttons, then upload it "
@@ -586,12 +714,14 @@ msgid ""
 "(label, description etc.)"
 msgstr ""
 "Um eine Datei hochzuladen, wählen Sie diese\n"
-"                    über einen der 'Choose file'-Buttons und laden Sie sie über den "
-"'Upload file'-Button daneben hoch. Danach werden Sie\n"
-"                    nach zusätzlichen Informationen (Label, Beschreibung etc.) gefragt."
+"                    über einen der 'Choose file'-Buttons und laden Sie sie "
+"über den 'Upload file'-Button daneben hoch. Danach werden Sie\n"
+"                    nach zusätzlichen Informationen (Label, Beschreibung "
+"etc.) gefragt."
 
 #: templates/admin/submission/submit_files.html:27
 #: themes/OLH/templates/preprints/submit_files.html:24
+#: themes/TUW/templates/preprints/submit_files.html:26
 #: themes/default/templates/preprints/submit_files.html:26
 msgid "Manuscript File"
 msgstr "Manuskript-Datei"
@@ -600,6 +730,8 @@ msgstr "Manuskript-Datei"
 #: templates/admin/submission/submit_files.html:75
 #: themes/OLH/templates/preprints/submit_files.html:31
 #: themes/OLH/templates/preprints/submit_files.html:68
+#: themes/TUW/templates/preprints/submit_files.html:34
+#: themes/TUW/templates/preprints/submit_files.html:72
 #: themes/default/templates/preprints/submit_files.html:34
 #: themes/default/templates/preprints/submit_files.html:72
 msgid "Upload"
@@ -613,6 +745,10 @@ msgstr "Hochladen"
 #: themes/OLH/templates/preprints/review.html:96
 #: themes/OLH/templates/preprints/submit_files.html:39
 #: themes/OLH/templates/preprints/submit_files.html:75
+#: themes/TUW/templates/preprints/review.html:78
+#: themes/TUW/templates/preprints/review.html:97
+#: themes/TUW/templates/preprints/submit_files.html:42
+#: themes/TUW/templates/preprints/submit_files.html:79
 #: themes/default/templates/preprints/review.html:78
 #: themes/default/templates/preprints/review.html:97
 #: themes/default/templates/preprints/submit_files.html:42
@@ -628,6 +764,10 @@ msgstr "Dateiname"
 #: themes/OLH/templates/preprints/review.html:105
 #: themes/OLH/templates/preprints/submit_files.html:56
 #: themes/OLH/templates/preprints/submit_files.html:91
+#: themes/TUW/templates/preprints/review.html:87
+#: themes/TUW/templates/preprints/review.html:106
+#: themes/TUW/templates/preprints/submit_files.html:59
+#: themes/TUW/templates/preprints/submit_files.html:95
 #: themes/default/templates/preprints/review.html:87
 #: themes/default/templates/preprints/review.html:106
 #: themes/default/templates/preprints/submit_files.html:59
@@ -638,6 +778,8 @@ msgstr "Keine Dateien hochgeladen"
 #: templates/admin/submission/submit_info.html:7
 #: templates/admin/submission/submit_review.html:27
 #: themes/OLH/templates/preprints/review.html:22
+#: themes/TUW/templates/preprints/review.html:23
+#: themes/TUW/templates/preprints/submit_start.html:17
 #: themes/default/templates/preprints/review.html:23
 #: themes/default/templates/preprints/submit_start.html:17
 #, fuzzy
@@ -645,48 +787,55 @@ msgstr "Keine Dateien hochgeladen"
 msgid "Article Info"
 msgstr "Artikelinformation"
 
-#: templates/admin/submission/submit_info.html:17
-#: themes/default/templates/preprints/submit_start.html:21
 # Andrae: COAR-Vocabulary
+#: templates/admin/submission/submit_info.html:17
+#: themes/TUW/templates/preprints/submit_start.html:21
+#: themes/default/templates/preprints/submit_start.html:21
 msgid "This article is a preprint"
 msgstr "Dieser Artikel ist ein Preprint"
 
-#: templates/admin/submission/submit_info.html:113
 # Andrae: Live-System-Test
+#: templates/admin/submission/submit_info.html:108
 msgid "allows the following licenses for submission"
 msgstr "erlaubt die folgenden Lizenzen für die Einreichung"
 
+# Andrae: Live-System-Test
 #: templates/admin/submission/submit_review.html:10
 #: templates/admin/submission/timeline.html:35
 #: templates/admin/submission/timeline.html:36
 #: themes/OLH/templates/preprints/review.html:11
+#: themes/TUW/templates/preprints/review.html:11
 #: themes/default/templates/preprints/review.html:11
-# Andrae: Live-System-Test
 msgid "Review"
 msgstr "Begutachtung"
 
 #: templates/admin/submission/submit_review.html:24
 #: themes/OLH/templates/preprints/review.html:18
+#: themes/TUW/templates/preprints/review.html:19
 #: themes/default/templates/preprints/review.html:19
 msgid "Comments to Editor"
 msgstr "Kommentare an den_die Editor_in"
 
 #: templates/admin/submission/submit_review.html:41
-#: themes/OLH/templates/journal/article.html:170
-#: themes/OLH/templates/journal/print.html:112
-#: themes/OLH/templates/preprints/article.html:39
+#: themes/OLH/templates/journal/article.html:177
+#: themes/OLH/templates/journal/print.html:110
+#: themes/OLH/templates/preprints/article.html:38
 #: themes/OLH/templates/preprints/review.html:33
-#: themes/default/templates/journal/article.html:137
-#: themes/default/templates/journal/print.html:112
+#: themes/TUW/templates/journal/print.html:110
+#: themes/TUW/templates/preprints/article.html:38
+#: themes/TUW/templates/preprints/review.html:34
+#: themes/default/templates/journal/article.html:131
+#: themes/default/templates/journal/print.html:110
 #: themes/default/templates/preprints/article.html:38
 #: themes/default/templates/preprints/review.html:34
-#: themes/material/templates/journal/article.html:129
-#: themes/material/templates/preprints/article.html:44
+#: themes/material/templates/journal/article.html:132
+#: themes/material/templates/preprints/article.html:43
 msgid "Abstract"
 msgstr "Zusammenfassung"
 
 #: templates/admin/submission/submit_review.html:49
 #: themes/OLH/templates/preprints/review.html:39
+#: themes/TUW/templates/preprints/review.html:40
 #: themes/default/templates/preprints/review.html:40
 msgid "Language"
 msgstr "Sprache"
@@ -698,13 +847,15 @@ msgstr "Abschnitt"
 
 #: templates/admin/submission/submit_review.html:51
 #: themes/OLH/templates/preprints/review.html:41
+#: themes/TUW/templates/preprints/review.html:42
 #: themes/default/templates/preprints/review.html:42
-#: themes/material/templates/journal/article.html:314
+#: themes/material/templates/journal/article.html:324
 msgid "Licence"
 msgstr "Lizenz"
 
 #: templates/admin/submission/submit_review.html:60
 #: themes/OLH/templates/preprints/review.html:51
+#: themes/TUW/templates/preprints/review.html:52
 #: themes/default/templates/preprints/review.html:52
 #, fuzzy
 #| msgid "Articles"
@@ -713,6 +864,7 @@ msgstr "Autor_inneninformation"
 
 #: templates/admin/submission/submit_review.html:70
 #: themes/OLH/templates/preprints/review.html:61
+#: themes/TUW/templates/preprints/review.html:62
 #: themes/default/templates/preprints/review.html:62
 msgid "No authors yet! Add one."
 msgstr "Noch keine Autor_innen! Fügen Sie eine_n hinzu."
@@ -721,6 +873,7 @@ msgstr "Noch keine Autor_innen! Fügen Sie eine_n hinzu."
 #: templates/admin/submission/timeline.html:28
 #: templates/admin/submission/timeline.html:29
 #: themes/OLH/templates/preprints/review.html:70
+#: themes/TUW/templates/preprints/review.html:71
 #: themes/default/templates/preprints/review.html:71
 #, fuzzy
 #| msgid "Articles"
@@ -729,25 +882,29 @@ msgstr "Artikel-Dateien"
 
 #: templates/admin/submission/submit_review.html:81
 #: themes/OLH/templates/preprints/review.html:73
+#: themes/TUW/templates/preprints/review.html:74
 #: themes/default/templates/preprints/review.html:74
 msgid "Manuscript Files"
 msgstr "Manuskript-Datei"
 
 #: templates/admin/submission/submit_review.html:101
 #: themes/OLH/templates/preprints/review.html:92
+#: themes/TUW/templates/preprints/review.html:93
 #: themes/default/templates/preprints/review.html:93
 msgid "Figure/Data"
 msgstr "Abbildungen/Daten"
 
+# Andrae: Übersetzung unsauber
 #: templates/admin/submission/submit_review.html:125
 #: themes/OLH/templates/preprints/review.html:113
+#: themes/TUW/templates/preprints/review.html:115
 #: themes/default/templates/preprints/review.html:115
-# Andrae: Übersetzung unsauber
 msgid "Complete"
 msgstr "Fertig"
 
 #: templates/admin/submission/submit_review.html:125
 #: themes/OLH/templates/preprints/review.html:113
+#: themes/TUW/templates/preprints/review.html:115
 #: themes/default/templates/preprints/review.html:115
 #: themes/material/templates/core/nav.html:87
 msgid "Submission"
@@ -762,6 +919,20 @@ msgstr "Einreichung gestartet"
 msgid "Article Information"
 msgstr "Artikelinformation"
 
+#: templates/common/elements/hijack-notification.html:6
+#, python-format
+msgid "You are currently working on behalf of %(user)s."
+msgstr ""
+
+#: templates/common/elements/hijack-notification.html:10
+#, python-format
+msgid "release %(user)s"
+msgstr ""
+
+#: templates/common/elements/hijack-notification.html:14
+msgid "hide"
+msgstr ""
+
 #: themes/OLH/templates/403.html:17
 msgid "Permission Denied"
 msgstr "Zugriff verweigert"
@@ -773,48 +944,42 @@ msgstr "Seite wurde nicht gefunden"
 #: themes/OLH/templates/404.html:14
 msgid "Sorry, the page you were looking for was not found."
 msgstr ""
-"Entschuldigung, die von Ihnen angeforderte Seite konnte "
-"leider nicht gefunden werden."
+"Entschuldigung, die von Ihnen angeforderte Seite konnte leider nicht "
+"gefunden werden."
 
-#: themes/OLH/templates/500.html:5
-#: themes/OLH/templates/elements/journal/box_article.html:24
-#: themes/OLH/templates/journal/issue.html:4
-#: themes/OLH/templates/journal/issues.html:26
-#: themes/default/templates/elements/article_listing.html:37
-#: themes/default/templates/journal/issues.html:19
-#: themes/material/templates/elements/article_listing.html:32
-#: themes/material/templates/journal/issue_display.html:34
-#: themes/material/templates/journal/issues.html:25
 # Andrae: Live-System-Test, oder Ausgabe?
+#: themes/OLH/templates/500.html:5 themes/OLH/templates/journal/issue.html:4
+#: themes/material/templates/elements/journal/issue_sidebar.html:8
+#: themes/material/templates/elements/journal/issue_sidebar.html:12
 msgid "Issue"
 msgstr "Heft"
 
-#: themes/OLH/templates/500.html:13
 # Andrae: Übersetzung nicht notwendig?
+#: themes/OLH/templates/500.html:13
 msgid "Server Error"
 msgstr "Serverfehler"
 
 #: themes/OLH/templates/500.html:14
 msgid "Sorry, there was a server error. Our team has been notified."
 msgstr ""
-"Entschuldigung, ein Serverfehler ist aufgetreten. Unser Team "
-"wurde benachrichtigt."
+"Entschuldigung, ein Serverfehler ist aufgetreten. Unser Team wurde "
+"benachrichtigt."
 
 #: themes/OLH/templates/core/accounts/activate_account.html:5
 #: themes/OLH/templates/core/accounts/activate_account.html:22
 msgid "Activate Account"
 msgstr "Benutzerkonto aktivieren"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/activate_account.html:23
 #: themes/material/templates/core/accounts/activate_account.html:15
-# Andrae: Live-System-Test
 msgid "Your account is now active. You can now"
 msgstr "Ihr Konto ist nun aktiviert. Sie können nun"
 
 #: themes/OLH/templates/core/accounts/activate_account.html:23
-#: themes/OLH/templates/core/accounts/activate_account.html:28
+#: themes/OLH/templates/core/accounts/activate_account.html:29
 #: themes/material/templates/core/accounts/activate_account.html:15
-#: themes/material/templates/core/accounts/activate_account.html:22
+#: themes/material/templates/core/accounts/activate_account.html:23
 #, fuzzy
 #| msgid "Login"
 msgid "login"
@@ -823,98 +988,49 @@ msgstr "anmelden"
 #: themes/OLH/templates/core/accounts/activate_account.html:24
 #: themes/material/templates/core/accounts/activate_account.html:17
 msgid "Please note, you will not be able to refresh this page."
-msgstr ""
-"Bitte beachten Sie, dass Sie die Seite nicht "
-"aktualisieren können."
+msgstr "Bitte beachten Sie, dass Sie die Seite nicht aktualisieren können."
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/activate_account.html:26
 #: themes/material/templates/core/accounts/activate_account.html:20
-# Andrae: Live-System-Test
 msgid "Error"
 msgstr "Fehler"
 
-#: themes/OLH/templates/core/accounts/edit_profile.html:20
-#: themes/material/templates/core/accounts/edit_profile.html:15
-msgid "Change Your Email Address"
-msgstr "Ändern Sie die E-Mail-Adresse"
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:21
-# Andrae: Live-System-Test
+#: themes/OLH/templates/core/accounts/activate_account.html:28
 msgid ""
-"\n"
-"                <p>If you want to change your email address you may do so "
-"below, however, you will be logged out and your\n"
-"                account will be marked as inactive until you follow the "
-"instructions in the verfication email. <strong>Note: </strong>\n"
-"                Changing your email address will also change your username "
-"as these are one and the same.</p>\n"
-"                "
+"There was no inactive account with this activation code found. It is "
+"possible that your account is already active, you can check by attempting to"
 msgstr ""
-"\n"
-"                <p>Wenn Sie Ihre E-Mail-Adresse ändern möchten, können Sie das nachfolgend tun, "
-"beachten Sie jedoch, dass Sie abgemeldet werden und Ihr\n"
-"                Account solange inaktiv ist, bis Sie der Anleitung in der "
-"Verifikations-E-Mail gefolgt sind. <strong>Note: </strong>\n"
-"                Mit Ihrer E-Mail-Adresse ändert sich auch Ihr Benutzername, "
-"nachdem die beiden ein und dasselbe sind.</p>\n"
-"                "
 
-#: themes/OLH/templates/core/accounts/edit_profile.html:29
-#: themes/material/templates/core/accounts/edit_profile.html:26
-msgid "Update Email Address"
-msgstr "E-Mail-Adresse aktualisieren"
+#: themes/OLH/templates/core/accounts/edit_profile.html:4
+#: themes/default/templates/core/accounts/edit_profile.html:4
+#: themes/material/templates/core/accounts/edit_profile.html:4
+msgid "Edit Profile"
+msgstr "Profil bearbeiten"
 
-#: themes/OLH/templates/core/accounts/edit_profile.html:38
-#: themes/OLH/templates/core/accounts/edit_profile.html:56
-#: themes/material/templates/core/accounts/edit_profile.html:49
-#: themes/material/templates/core/accounts/edit_profile.html:68
-msgid "Update Password"
-msgstr "Passwort aktualisieren"
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:39
-#: themes/material/templates/core/accounts/edit_profile.html:50
-msgid ""
-"You can update your password by entering your existing password plus your "
-"new password."
-msgstr ""
-"Sie können Ihr Passwort durch Eingabe des derzeitigen plus Ihres neuen "
-"Passworts ändern."
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:44
-#: themes/material/templates/core/accounts/edit_profile.html:56
-msgid "Current Password"
-msgstr "Derzeitiges Passwort"
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:48
-#: themes/material/templates/core/accounts/edit_profile.html:60
-msgid "New Password"
-msgstr "Neues Passwort"
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:52
-#: themes/material/templates/core/accounts/edit_profile.html:64
-msgid "Enter Password Again"
-msgstr "Geben Sie das Passwort erneut ein"
-
-#: themes/OLH/templates/core/accounts/edit_profile.html:72
 #: themes/OLH/templates/core/accounts/get_reset_token.html:5
-#: themes/material/templates/core/accounts/edit_profile.html:84
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:58
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:74
 msgid "Update"
 msgstr "Aktualisieren"
 
 #: themes/OLH/templates/core/accounts/get_reset_token.html:25
+#: themes/TUW/templates/core/accounts/get_reset_token.html:15
 #: themes/default/templates/core/accounts/get_reset_token.html:15
 #: themes/material/templates/core/accounts/get_reset_token.html:14
 msgid "Enter your email address to begin the reset process"
-msgstr "Geben Sie Ihre E-Mail-Adresse ein um mit der Zurücksetzung zu beginnen."
+msgstr ""
+"Geben Sie Ihre E-Mail-Adresse ein um mit der Zurücksetzung zu beginnen."
 
 #: themes/OLH/templates/core/accounts/get_reset_token.html:27
 msgid "somebody"
 msgstr "jemand"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/get_reset_token.html:29
+#: themes/TUW/templates/core/accounts/get_reset_token.html:21
 #: themes/default/templates/core/accounts/get_reset_token.html:21
 #: themes/material/templates/core/accounts/get_reset_token.html:21
-# Andrae: Live-System-Test
 msgid "Request Token"
 msgstr "Token anfordern"
 
@@ -923,48 +1039,61 @@ msgstr "Token anfordern"
 msgid "Unregistered ORCiD"
 msgstr "ORCiD nicht registriert"
 
-#: themes/OLH/templates/core/accounts/orcid_registration.html:29
-#: themes/OLH/templates/core/base.html:123
-#: themes/OLH/templates/core/login.html:5 themes/OLH/templates/core/nav.html:79
+#: themes/OLH/templates/core/accounts/orcid_registration.html:20
+msgid ""
+"The ORCiD you logged in with is not currently linked with an account in our "
+"system. You can either register a new account, or login with an existing "
+"account to link your ORCiD for future use."
+msgstr ""
+
+#: themes/OLH/templates/core/accounts/orcid_registration.html:28
+#: themes/OLH/templates/core/base.html:108
+#: themes/OLH/templates/core/login.html:6 themes/OLH/templates/core/nav.html:79
 #: themes/OLH/templates/journal/become_reviewer.html:16
-#: themes/OLH/templates/journal/submissions.html:29
-#: themes/OLH/templates/press/core/login.html:4
-#: themes/OLH/templates/press/nav.html:53
-#: themes/default/templates/core/login.html:5
+#: themes/OLH/templates/journal/submissions.html:27
+#: themes/OLH/templates/press/core/login.html:5
+#: themes/OLH/templates/press/nav.html:58
+#: themes/TUW/templates/core/login.html:6
+#: themes/TUW/templates/journal/become_reviewer.html:13
+#: themes/TUW/templates/journal/submissions.html:26
+#: themes/default/templates/core/login.html:6
 #: themes/default/templates/journal/become_reviewer.html:13
-#: themes/default/templates/journal/submissions.html:28
-#: themes/material/templates/core/login.html:5
-#: themes/material/templates/core/login.html:31
+#: themes/default/templates/journal/submissions.html:26
+#: themes/material/templates/core/login.html:6
+#: themes/material/templates/core/login.html:32
 #: themes/material/templates/core/nav.html:107
 #: themes/material/templates/journal/become_reviewer.html:16
-#: themes/material/templates/journal/submissions.html:34
+#: themes/material/templates/journal/submissions.html:30
 #: themes/material/templates/press/nav.html:39
 #: themes/material/templates/press/nav.html:63
 msgid "Login"
 msgstr "Anmeldung"
 
-#: themes/OLH/templates/core/accounts/orcid_registration.html:38
-#: themes/OLH/templates/press/core/login.html:33
+#: themes/OLH/templates/core/accounts/orcid_registration.html:37
+#: themes/OLH/templates/press/core/login.html:34
 #, fuzzy
 #| msgid "Forgotten your password?"
 msgid "Forgot your password?"
 msgstr "Passwort vergessen"
 
-#: themes/OLH/templates/core/accounts/orcid_registration.html:49
-#: themes/OLH/templates/core/accounts/orcid_registration.html:51
+#: themes/OLH/templates/core/accounts/orcid_registration.html:48
+#: themes/OLH/templates/core/accounts/orcid_registration.html:50
 #: themes/OLH/templates/core/accounts/register.html:6
 #: themes/OLH/templates/core/accounts/register.html:83
-#: themes/OLH/templates/core/base.html:123
+#: themes/OLH/templates/core/base.html:108
 #: themes/OLH/templates/core/nav.html:80
-#: themes/OLH/templates/journal/submissions.html:28
-#: themes/OLH/templates/press/nav.html:54
+#: themes/OLH/templates/journal/submissions.html:26
+#: themes/OLH/templates/press/nav.html:59
+#: themes/TUW/templates/core/accounts/register.html:6
+#: themes/TUW/templates/core/accounts/register.html:34
+#: themes/TUW/templates/journal/submissions.html:25
 #: themes/default/templates/core/accounts/register.html:6
 #: themes/default/templates/core/accounts/register.html:34
-#: themes/default/templates/journal/submissions.html:27
+#: themes/default/templates/journal/submissions.html:25
 #: themes/material/templates/core/accounts/register.html:7
 #: themes/material/templates/core/accounts/register.html:32
 #: themes/material/templates/core/nav.html:108
-#: themes/material/templates/journal/submissions.html:33
+#: themes/material/templates/journal/submissions.html:29
 #: themes/material/templates/press/nav.html:40
 #: themes/material/templates/press/nav.html:64
 msgid "Register"
@@ -972,7 +1101,7 @@ msgstr "Registrieren"
 
 #: themes/OLH/templates/core/accounts/public_profile.html:5
 #: themes/material/templates/core/nav.html:136
-#: themes/material/templates/core/nav.html:174
+#: themes/material/templates/core/nav.html:171
 #: themes/material/templates/press/nav.html:79
 #: themes/material/templates/press/nav.html:90
 msgid "Profile"
@@ -982,32 +1111,33 @@ msgstr "Profil"
 msgid "Roles"
 msgstr "Rollen"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/public_profile.html:14
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid "Salutation"
 msgid "Affiliation"
 msgstr "Affiliation"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/public_profile.html:18
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid "Salutation"
 msgid "Publications"
 msgstr "Publikationen"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:30
+#: themes/TUW/templates/core/accounts/register.html:22
 #: themes/default/templates/core/accounts/register.html:22
 #: themes/material/templates/core/accounts/register.html:19
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid "Regsiter for"
 msgid "Register for"
 msgstr "Registrieren für"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:32
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid ""
 #| "Your password should be at minimum 12 characters long. It does not need "
 #| "to contain specific characters but you should make it as long as "
@@ -1020,21 +1150,22 @@ msgid ""
 "                            read on <a href=\"#\" data-open=\"password-modal"
 "\">password guide</a>."
 msgstr ""
-"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine bestimmten "
-"Zeichen enthalten, aber Sie sollten es so lange wie möglich machen. Weitere "
-"Informationen finden Sie in der <a href=\"#\" data-open=\"password-modal"
-"\">Kennwort-Anleitung.</a>"
+"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
+"bestimmten Zeichen enthalten, aber Sie sollten es so lange wie möglich "
+"machen. Weitere Informationen finden Sie in der <a href=\"#\" data-open="
+"\"password-modal\">Kennwort-Anleitung.</a>"
 
+# Andrae: Live-System-Test, Kontext korrekt?
 #: themes/OLH/templates/core/accounts/register.html:78
 #: themes/material/templates/core/accounts/register.html:30
-# Andrae: Live-System-Test, Kontext korrekt?
 msgid "By registering an account you agree to our"
-msgstr "Durch das Anlegen eines Account erteilen Sie Ihre Zustimmung zu unseren"
+msgstr ""
+"Durch das Anlegen eines Account erteilen Sie Ihre Zustimmung zu unseren"
 
 #: themes/OLH/templates/core/accounts/register.html:79
-#: themes/OLH/templates/core/base.html:165
-#: themes/OLH/templates/press/core/base.html:110
-#: themes/default/templates/core/base.html:83
+#: themes/OLH/templates/core/base.html:150
+#: themes/TUW/templates/core/base.html:105
+#: themes/default/templates/core/base.html:84
 #: themes/material/templates/core/accounts/register.html:30
 msgid "Privacy Policy"
 msgstr "Datenschutz-Bestimmungen"
@@ -1051,20 +1182,22 @@ msgstr "Kennwort-Anleitung"
 msgid "When it comes to passwords, length is better than complexity."
 msgstr "Gute Passwörter zeichnen sich durch Länge, nicht Komplexität aus."
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:95
 #: themes/OLH/templates/core/accounts/reset_password.html:45
-# Andrae: Live-System-Test
+#: themes/material/templates/core/accounts/register.html:43
+#: themes/material/templates/core/accounts/reset_password.html:38
 msgid ""
 "Its a common myth that a short and complex password (Jfjfy&65^87) is more "
 "secure than a long and uncomplicated password (our awesome moon base rocks)."
 msgstr ""
 "Es ist ein weit verbreitetes Märchen, dass ein kurzes, komplexes Passwort "
-"(Jfjfy&65^87) sicherer sei als ein langes, unkompliziertes "
-"(Wia mas mocht, is foisch)."
+"(Jfjfy&65^87) sicherer sei als ein langes, unkompliziertes (Wia mas mocht, "
+"is foisch)."
 
+# Andrae: Berechnung korrekt? passwortcheck.ch
 #: themes/OLH/templates/core/accounts/register.html:96
 #: themes/OLH/templates/core/accounts/reset_password.html:46
-# Andrae: Berechnung korrekt? passwortcheck.ch
 msgid ""
 "We recommend selecting a long, but easy to remember password such as our "
 "awesome moon base rocks which would take an estimated septillion years to "
@@ -1072,12 +1205,15 @@ msgid ""
 "over 600 years on a standard computer."
 msgstr ""
 "Wir empfehlen ein langes, dafür einfach zu merkendes Passwort zu wählen: "
-"Unser längeres Beispiel Wia mas mocht, is foisch würde mehrere Millionen Jahre "
-"brauchen um geknackt zu werden, das komplexe Jfjfy&65^87 kann auf einem Standardgerät "
-"in etwas unter 4.000 Jahre gefunden werden."
+"Unser längeres Beispiel Wia mas mocht, is foisch würde mehrere Millionen "
+"Jahre brauchen um geknackt zu werden, das komplexe Jfjfy&65^87 kann auf "
+"einem Standardgerät in etwas unter 4.000 Jahre gefunden werden."
 
 #: themes/OLH/templates/core/accounts/reset_password.html:6
 #: themes/OLH/templates/core/accounts/reset_password.html:33
+#: themes/TUW/templates/core/accounts/get_reset_token.html:4
+#: themes/TUW/templates/core/accounts/reset_password.html:5
+#: themes/TUW/templates/core/accounts/reset_password.html:25
 #: themes/default/templates/core/accounts/get_reset_token.html:4
 #: themes/default/templates/core/accounts/reset_password.html:5
 #: themes/default/templates/core/accounts/reset_password.html:25
@@ -1088,14 +1224,16 @@ msgid "Reset Password"
 msgstr "Passwort zurücksetzen"
 
 #: themes/OLH/templates/core/accounts/reset_password.html:26
+#: themes/TUW/templates/core/accounts/reset_password.html:16
 #: themes/default/templates/core/accounts/reset_password.html:16
 #: themes/material/templates/core/accounts/reset_password.html:16
 msgid "Enter your new password twice to complete the reset process"
-msgstr "Geben Sie Ihr Passwort zweimal ein um den Rücksetzprozess abzuschließen."
+msgstr ""
+"Geben Sie Ihr Passwort zweimal ein um den Rücksetzprozess abzuschließen."
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/reset_password.html:27
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid ""
 #| "Your password should be at minimum 12 characters long. It does not need "
 #| "to contain specific characters but you should make it as long as "
@@ -1114,19 +1252,21 @@ msgstr ""
 "Informationen finden Sie auf der <a href=\"#\" data-open=\"password-modal"
 "\">Kennwort-Anleitung.</a>"
 
-#: themes/OLH/templates/core/base.html:166
-#: themes/OLH/templates/press/core/base.html:111
-#: themes/default/templates/core/base.html:84
+#: themes/OLH/templates/core/base.html:151
+#: themes/TUW/templates/core/base.html:106
+#: themes/default/templates/core/base.html:85
 msgid "Sitemap"
 msgstr "Sitemap"
 
-#: themes/OLH/templates/core/base.html:167
+#: themes/OLH/templates/core/base.html:152
 #: themes/OLH/templates/journal/contact.html:6
 #: themes/OLH/templates/journal/contact.html:31
-#: themes/OLH/templates/press/core/base.html:112
 #: themes/OLH/templates/press/journal/contact.html:5
 #: themes/OLH/templates/press/journal/contact.html:18
-#: themes/default/templates/core/base.html:85
+#: themes/TUW/templates/core/base.html:107
+#: themes/TUW/templates/journal/contact.html:6
+#: themes/TUW/templates/journal/contact.html:26
+#: themes/default/templates/core/base.html:86
 #: themes/default/templates/journal/contact.html:6
 #: themes/default/templates/journal/contact.html:26
 #: themes/material/templates/core/nav.html:90
@@ -1135,43 +1275,69 @@ msgstr "Sitemap"
 msgid "Contact"
 msgstr "Kontakt"
 
-#: themes/OLH/templates/core/login.html:30
-#: themes/OLH/templates/press/core/login.html:24
-#: themes/default/templates/core/login.html:18
+#: themes/OLH/templates/core/login.html:32
+#: themes/OLH/templates/press/core/login.html:25
+#: themes/TUW/templates/core/login.html:19
+#: themes/default/templates/core/login.html:19
 msgid "Log in with your account"
 msgstr "Melden Sie sich mit Ihrem Konto an"
 
-#: themes/OLH/templates/core/login.html:31
-#: themes/default/templates/core/login.html:20
-#: themes/material/templates/core/login.html:36
+#: themes/OLH/templates/core/login.html:33
+#: themes/TUW/templates/core/login.html:21
+#: themes/default/templates/core/login.html:21
+#: themes/material/templates/core/login.html:37
 msgid "Log in with ORCiD"
 msgstr "Einloggen mit ORCiD"
 
 #: themes/OLH/templates/core/login.html:42
+#: themes/TUW/templates/core/login.html:38
 #: themes/default/templates/core/login.html:38
 msgid "Log in"
 msgstr "Einloggen"
 
 #: themes/OLH/templates/core/login.html:43
+#: themes/TUW/templates/core/login.html:42
 #: themes/default/templates/core/login.html:42
 msgid "Forgotten your password?"
 msgstr "Passwort vergessen"
 
 #: themes/OLH/templates/core/login.html:44
+#: themes/TUW/templates/core/login.html:46
 #: themes/default/templates/core/login.html:46
 msgid "Register a new account"
 msgstr "Neuen Account anlegen"
 
+#: themes/OLH/templates/core/nav.html:27
+#: themes/OLH/templates/elements/journal/issue_sidebar.html:10
+#: themes/OLH/templates/journal/collections.html:6
+#: themes/OLH/templates/journal/collections.html:8
+#: themes/OLH/templates/journal/collections.html:15
+#: themes/TUW/templates/core/nav.html:36
+#: themes/TUW/templates/journal/collections.html:6
+#: themes/TUW/templates/journal/collections.html:7
+#: themes/TUW/templates/journal/issue_display.html:25
+#: themes/default/templates/core/nav.html:37
+#: themes/default/templates/elements/journal/issue_sidebar.html:9
+#: themes/default/templates/journal/collections.html:6
+#: themes/default/templates/journal/collections.html:7
+#: themes/material/templates/core/nav.html:35
+#: themes/material/templates/elements/journal/issue_sidebar.html:17
+#: themes/material/templates/journal/collections.html:6
+#: themes/material/templates/journal/collections.html:7
+msgid "Collections"
+msgstr "Sammlungen"
+
+# Andrae: Live-System-Test
 #: themes/OLH/templates/core/news/index.html:11
 #: themes/material/templates/core/news/index.html:11
 #: themes/material/templates/press/core/news/index.html:11
-# Andrae: Live-System-Test
 msgid "Filtering tag"
 msgstr "Filter-Tag"
 
 #: themes/OLH/templates/core/news/index.html:30
 #: themes/OLH/templates/journal/homepage_elements/news.html:15
 #: themes/OLH/templates/press/core/news/index.html:30
+#: themes/TUW/templates/journal/homepage_elements/news.html:16
 #: themes/default/templates/journal/homepage_elements/news.html:16
 #: themes/material/templates/core/news/index.html:30
 #: themes/material/templates/journal/homepage_elements/news.html:23
@@ -1185,245 +1351,342 @@ msgstr "Weiterlesen"
 msgid "This journal currently has no news items to display."
 msgstr "Es gibt zu dieser Zeitschrift derzeit keine Neuigkeiten."
 
-#: themes/OLH/templates/elements/journal/box_article.html:23
-#: themes/OLH/templates/journal/issues.html:24
-#: themes/default/templates/elements/article_listing.html:36
-#: themes/default/templates/journal/issues.html:19
-#: themes/material/templates/elements/article_listing.html:31
-#: themes/material/templates/journal/issues.html:25
-msgid "Volume"
-msgstr "Band"
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:6
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:5
+msgid "Change Your Email Address"
+msgstr "Ändern Sie die E-Mail-Adresse"
+
+# Andrae: Live-System-Test
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:7
+msgid ""
+"\n"
+"                <p>If you want to change your email address you may do so "
+"below, however, you will be logged out and your\n"
+"                account will be marked as inactive until you follow the "
+"instructions in the verfication email. <strong>Note: </strong>\n"
+"                Changing your email address will also change your username "
+"as these are one and the same.</p>\n"
+"                "
+msgstr ""
+"\n"
+"                <p>Wenn Sie Ihre E-Mail-Adresse ändern möchten, können Sie "
+"das nachfolgend tun, beachten Sie jedoch, dass Sie abgemeldet werden und "
+"Ihr\n"
+"                Account solange inaktiv ist, bis Sie der Anleitung in der "
+"Verifikations-E-Mail gefolgt sind. <strong>Note: </strong>\n"
+"                Mit Ihrer E-Mail-Adresse ändert sich auch Ihr Benutzername, "
+"nachdem die beiden ein und dasselbe sind.</p>\n"
+"                "
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:15
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:16
+msgid "Update Email Address"
+msgstr "E-Mail-Adresse aktualisieren"
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:24
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:42
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:39
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:58
+msgid "Update Password"
+msgstr "Passwort aktualisieren"
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:25
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:40
+msgid ""
+"You can update your password by entering your existing password plus your "
+"new password."
+msgstr ""
+"Sie können Ihr Passwort durch Eingabe des derzeitigen plus Ihres neuen "
+"Passworts ändern."
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:30
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:46
+msgid "Current Password"
+msgstr "Derzeitiges Passwort"
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:34
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:50
+msgid "New Password"
+msgstr "Neues Passwort"
+
+#: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:38
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:54
+msgid "Enter Password Again"
+msgstr "Geben Sie das Passwort erneut ein"
+
+#: themes/OLH/templates/elements/journal/issue_sidebar.html:6
+#: themes/OLH/templates/journal/article.html:210
+#: themes/OLH/templates/preprints/article.html:115
+#: themes/TUW/templates/journal/issue_display.html:21
+#: themes/TUW/templates/preprints/article.html:112
+#: themes/default/templates/elements/journal/issue_sidebar.html:5
+#: themes/default/templates/journal/article.html:225
+#: themes/default/templates/preprints/article.html:112
+#: themes/material/templates/elements/journal/issue_sidebar.html:4
+#: themes/material/templates/preprints/article.html:133
+msgid "Downloads"
+msgstr "Downloads"
+
+#: themes/OLH/templates/elements/journal/issue_sidebar.html:7
+#: themes/OLH/templates/elements/journal/issue_sidebar.html:8
+msgid "Download Issue"
+msgstr "Heft herunterladen"
+
+#: themes/OLH/templates/elements/journal/issue_sidebar.html:9
+#: themes/TUW/templates/journal/issue_display.html:24
+#: themes/default/templates/elements/journal/issue_sidebar.html:8
+#: themes/material/templates/elements/journal/issue_sidebar.html:16
+msgid "Issue Archive"
+msgstr "Heftarchiv"
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:8
+#: themes/TUW/templates/elements/submit/preprint_file.html:17
 #: themes/default/templates/elements/submit/preprint_file.html:17
 msgid "Please supply any supporting information or data files."
 msgstr "Bitte laden Sie hier Supplemente oder Datenfiles hoch."
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:11
+#: themes/TUW/templates/elements/submit/preprint_file.html:20
 #: themes/default/templates/elements/submit/preprint_file.html:20
 msgid "Please upload your manuscript file, it should be in PDF format."
 msgstr "Bitte laden Sie hier Ihr Manuskript als PDF hoch."
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:13
+#: themes/TUW/templates/elements/submit/preprint_file.html:22
 #: themes/default/templates/elements/submit/preprint_file.html:22
 msgid ""
 "Please upload your manuscript file, it should be in PDF, RTF, ODT or DOC/X "
 "format."
 msgstr "Bitte laden Sie hier Ihr Manuskript als PDF, RTF, ODT oder DOC/X hoch."
 
-#: themes/OLH/templates/journal/article.html:91
-#: themes/OLH/templates/journal/print.html:97
-#: themes/OLH/templates/preprints/article.html:24
-#: themes/default/templates/journal/article.html:106
-#: themes/default/templates/journal/print.html:97
+#: themes/OLH/templates/journal/article.html:92
+#: themes/OLH/templates/journal/article.html:260
+#: themes/OLH/templates/journal/print.html:95
+#: themes/OLH/templates/preprints/article.html:23
+#: themes/TUW/templates/journal/print.html:95
+#: themes/TUW/templates/preprints/article.html:23
+#: themes/default/templates/journal/article.html:95
+#: themes/default/templates/journal/article.html:164
+#: themes/default/templates/journal/print.html:95
 #: themes/default/templates/preprints/article.html:23
-#: themes/material/templates/journal/article.html:228
-#: themes/material/templates/preprints/article.html:29
+#: themes/material/templates/journal/article.html:231
+#: themes/material/templates/preprints/article.html:28
 msgid "Authors"
 msgstr "Autor_innen"
 
-#: themes/OLH/templates/journal/article.html:91
-#: themes/OLH/templates/journal/print.html:97
-#: themes/default/templates/journal/article.html:107
-#: themes/default/templates/journal/print.html:97
+#: themes/OLH/templates/journal/article.html:92
+#: themes/OLH/templates/journal/print.html:95
+#: themes/TUW/templates/journal/article.html:104
+#: themes/TUW/templates/journal/print.html:95
+#: themes/default/templates/journal/article.html:96
+#: themes/default/templates/journal/print.html:95
 msgid "Author"
 msgstr "Autor_in"
 
-#: themes/OLH/templates/journal/article.html:133
+#: themes/OLH/templates/journal/article.html:135
 msgid "Share"
 msgstr "Teilen"
 
-#: themes/OLH/templates/journal/article.html:148
 # Andrae: Live-System-Test, Kontext korrekt?
+#: themes/OLH/templates/journal/article.html:150
 msgid "Dyslexia"
 msgstr "Dyslexie"
 
-#: themes/OLH/templates/journal/article.html:152
-#: themes/OLH/templates/journal/article.html:153
 #: themes/OLH/templates/journal/article.html:154
+#: themes/OLH/templates/journal/article.html:155
+#: themes/OLH/templates/journal/article.html:156
+#: themes/default/templates/journal/article.html:183
+#: themes/material/templates/journal/article.html:264
 msgid "View"
 msgstr "Ansehen"
 
-#: themes/OLH/templates/journal/article.html:173
-#: themes/OLH/templates/journal/print.html:115
+#: themes/OLH/templates/journal/article.html:180
+#: themes/OLH/templates/journal/print.html:113
+#: themes/OLH/templates/journal/search.html:56
 #: themes/OLH/templates/preprints/list.html:68
 #: themes/OLH/templates/preprints/search.html:53
-#: themes/default/templates/journal/article.html:140
-#: themes/default/templates/journal/print.html:115
-#: themes/material/templates/journal/article.html:138
+#: themes/TUW/templates/journal/print.html:113
+#: themes/TUW/templates/journal/search.html:46
+#: themes/default/templates/journal/article.html:134
+#: themes/default/templates/journal/print.html:113
+#: themes/default/templates/journal/search.html:46
+#: themes/material/templates/journal/article.html:141
+#: themes/material/templates/journal/search.html:57
 #: themes/material/templates/preprints/list.html:79
 msgid "Keywords"
 msgstr "Schlagwörter"
 
-#: themes/OLH/templates/journal/article.html:175
-#: themes/OLH/templates/journal/print.html:117
-#: themes/default/templates/journal/article.html:144
-#: themes/default/templates/journal/print.html:117
-#: themes/material/templates/journal/article.html:146
+#: themes/OLH/templates/journal/article.html:182
+#: themes/OLH/templates/journal/print.html:115
+#: themes/TUW/templates/journal/print.html:115
+#: themes/default/templates/journal/article.html:138
+#: themes/default/templates/journal/print.html:115
+#: themes/material/templates/journal/article.html:149
 msgid "How to Cite"
 msgstr "Zitiervorschlag"
 
-#: themes/OLH/templates/journal/article.html:180
-#: themes/default/templates/journal/article.html:149
-#: themes/material/templates/journal/article.html:155
 # Andrae: Übersetzung unsauber
+#: themes/OLH/templates/journal/article.html:187
+#: themes/default/templates/journal/article.html:143
+#: themes/material/templates/journal/article.html:158
 msgid "Publisher Notes"
 msgstr "Verlagsanmerkungen"
 
-#: themes/OLH/templates/journal/article.html:197
-#: themes/OLH/templates/preprints/article.html:115
-#: themes/default/templates/journal/article.html:210
-#: themes/default/templates/preprints/article.html:111
-#: themes/material/templates/preprints/article.html:133
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/article.html:204
+#: themes/OLH/templates/preprints/article.html:114
+#: themes/TUW/templates/preprints/article.html:111
+#: themes/default/templates/journal/article.html:224
+#: themes/default/templates/preprints/article.html:111
+#: themes/material/templates/preprints/article.html:132
 msgid "Views"
 msgstr "Aufrufe"
 
-#: themes/OLH/templates/journal/article.html:203
-#: themes/OLH/templates/journal/issue_display.html:42
-#: themes/OLH/templates/preprints/article.html:116
-#: themes/default/templates/journal/article.html:211
-#: themes/default/templates/journal/issue_display.html:33
-#: themes/default/templates/preprints/article.html:112
-#: themes/material/templates/journal/issue_display.html:31
-#: themes/material/templates/preprints/article.html:134
-msgid "Downloads"
-msgstr "Downloads"
-
-#: themes/OLH/templates/journal/article.html:208
+#: themes/OLH/templates/journal/article.html:215
 msgid "Alt Metrics"
 msgstr "Altmetriken"
 
-#: themes/OLH/templates/journal/article.html:219
-#: themes/OLH/templates/preprints/article.html:106
-#: themes/default/templates/journal/article.html:191
+#: themes/OLH/templates/journal/article.html:226
+#: themes/OLH/templates/preprints/article.html:105
+#: themes/TUW/templates/journal/article.html:118
+#: themes/TUW/templates/preprints/article.html:102
+#: themes/default/templates/journal/article.html:201
 #: themes/default/templates/preprints/article.html:102
-#: themes/material/templates/preprints/article.html:124
+#: themes/material/templates/preprints/article.html:123
 msgid "Published on"
 msgstr "Veröffentlicht am"
 
-#: themes/OLH/templates/journal/article.html:222
-#: themes/default/templates/journal/article.html:193
+#: themes/OLH/templates/journal/article.html:229
+#: themes/TUW/templates/journal/article.html:123
+#: themes/default/templates/journal/article.html:203
 msgid "Accepted on"
 msgstr "Akzeptiert am"
 
-#: themes/OLH/templates/journal/article.html:227
-#: themes/OLH/templates/journal/submissions.html:67
-#: themes/default/templates/journal/article.html:195
-#: themes/material/templates/journal/submissions.html:88
+#: themes/OLH/templates/journal/article.html:234
+#: themes/OLH/templates/journal/submissions.html:79
+#: themes/default/templates/journal/article.html:205
+#: themes/material/templates/journal/submissions.html:98
 msgid "Peer Reviewed"
 msgstr "Begutachtet"
 
-#: themes/OLH/templates/journal/article.html:230
-#: themes/OLH/templates/preprints/article.html:107
-#: themes/default/templates/journal/article.html:197
+#: themes/OLH/templates/journal/article.html:237
+#: themes/OLH/templates/preprints/article.html:106
+#: themes/TUW/templates/preprints/article.html:103
+#: themes/default/templates/journal/article.html:207
 #: themes/default/templates/preprints/article.html:103
-#: themes/material/templates/preprints/article.html:125
+#: themes/material/templates/preprints/article.html:124
 msgid "License"
 msgstr "Lizenz"
 
-#: themes/OLH/templates/journal/article.html:237
-#: themes/default/templates/journal/article.html:158
-#, fuzzy
-#| msgid "Articles"
-msgid "Article"
-msgstr "Artikel"
-
-#: themes/OLH/templates/journal/article.html:250
-#: themes/OLH/templates/journal/article.html:254
-#: themes/OLH/templates/preprints/article.html:96
-#: themes/OLH/templates/preprints/article.html:100
-#: themes/OLH/templates/preprints/article.html:139
-#: themes/default/templates/journal/article.html:170
-#: themes/default/templates/journal/article.html:174
+# # Andrae: Live-System-Test, Kontext korrekt?
+#: themes/OLH/templates/journal/article.html:269
+#: themes/OLH/templates/journal/article.html:273
+#: themes/OLH/templates/preprints/article.html:95
+#: themes/OLH/templates/preprints/article.html:99
+#: themes/OLH/templates/preprints/article.html:138
+#: themes/TUW/templates/journal/article.html:174
+#: themes/TUW/templates/preprints/article.html:92
+#: themes/TUW/templates/preprints/article.html:96
+#: themes/TUW/templates/preprints/article.html:118
+#: themes/default/templates/journal/article.html:175
+#: themes/default/templates/journal/article.html:179
 #: themes/default/templates/preprints/article.html:92
 #: themes/default/templates/preprints/article.html:96
 #: themes/default/templates/preprints/article.html:118
-#: themes/material/templates/journal/article.html:250
-#: themes/material/templates/journal/article.html:256
-#: themes/material/templates/preprints/article.html:114
-#: themes/material/templates/preprints/article.html:118
-#: themes/material/templates/preprints/article.html:140
-## Andrae: Live-System-Test, Kontext korrekt?
+#: themes/material/templates/journal/article.html:254
+#: themes/material/templates/journal/article.html:260
+#: themes/material/templates/preprints/article.html:113
+#: themes/material/templates/preprints/article.html:117
+#: themes/material/templates/preprints/article.html:139
 msgid "Download"
 msgstr "Herunterladen"
 
-#: themes/OLH/templates/journal/article.html:262
-#: themes/default/templates/journal/article.html:180
-#: themes/material/templates/journal/article.html:267
-#, fuzzy
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/article.html:287
+#: themes/default/templates/journal/article.html:190
+#: themes/material/templates/journal/article.html:277
+#, fuzzy
 #| msgid "Articles"
 msgid "Supplementary Files"
 msgstr "Ergänzende Dateien"
 
-#: themes/OLH/templates/journal/article.html:275
-#: themes/default/templates/journal/article.html:202
-#: themes/material/templates/journal/article.html:281
 # Andrae: Live-System-Test, Kontext korrekt?
+#: themes/OLH/templates/journal/article.html:300
+#: themes/default/templates/journal/article.html:212
+#: themes/material/templates/journal/article.html:291
 msgid "Non Specialist Summary"
 msgstr "Populärwissenschaftliche Zusammenfassung"
 
-#: themes/OLH/templates/journal/article.html:277
+#: themes/OLH/templates/journal/article.html:302
 msgid "View Summary"
 msgstr "Zusammenfassung ansehen"
 
-#: themes/OLH/templates/journal/article.html:283
+#: themes/OLH/templates/journal/article.html:308
 msgid "Jump to"
 msgstr "Springe zu"
 
-#: themes/OLH/templates/journal/article.html:290
+#: themes/OLH/templates/journal/article.html:324
 msgid "File Checksums (MD5)"
 msgstr "Datei-Prüfsumme (MD5)"
 
-#: themes/OLH/templates/journal/articles.html:6
-#: themes/OLH/templates/journal/articles.html:22
-#: themes/OLH/templates/journal/search.html:16
+#: themes/OLH/templates/journal/articles.html:7
+#: themes/OLH/templates/journal/articles.html:23
+#: themes/OLH/templates/journal/search.html:26
+#: themes/TUW/templates/journal/articles.html:5
+#: themes/TUW/templates/journal/articles.html:7
 #: themes/default/templates/journal/articles.html:5
 #: themes/default/templates/journal/articles.html:7
 #: themes/material/templates/core/nav.html:78
-#: themes/material/templates/journal/articles.html:5
-#: themes/material/templates/journal/articles.html:7
-#: themes/material/templates/journal/articles.html:12
-#: themes/material/templates/journal/search.html:12
+#: themes/material/templates/journal/articles.html:6
+#: themes/material/templates/journal/articles.html:8
+#: themes/material/templates/journal/articles.html:13
+#: themes/material/templates/journal/search.html:22
 msgid "Articles"
 msgstr "Artikel"
 
-#: themes/OLH/templates/journal/articles.html:50
-#: themes/default/templates/journal/articles.html:45
-#: themes/material/templates/journal/articles.html:52
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/articles.html:51
+#: themes/TUW/templates/journal/articles.html:45
+#: themes/default/templates/journal/articles.html:45
+#: themes/material/templates/journal/articles.html:53
 msgid "Show"
 msgstr "Anzeigen"
 
-#: themes/OLH/templates/journal/articles.html:60
-#: themes/default/templates/journal/articles.html:55
-#: themes/material/templates/journal/articles.html:55
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/articles.html:61
+#: themes/TUW/templates/journal/articles.html:55
+#: themes/default/templates/journal/articles.html:55
+#: themes/material/templates/journal/articles.html:56
 msgid "Sort"
 msgstr "Sortieren"
 
-#: themes/OLH/templates/journal/articles.html:63
+#: themes/OLH/templates/journal/articles.html:64
+#: themes/TUW/templates/journal/articles.html:58
 #: themes/default/templates/journal/articles.html:58
-#: themes/material/templates/journal/articles.html:58
+#: themes/material/templates/journal/articles.html:59
 msgid "Date"
 msgstr "Datum"
 
-#: themes/OLH/templates/journal/articles.html:70
-#: themes/OLH/templates/journal/articles.html:78
-#: themes/OLH/templates/journal/search.html:30
-#: themes/OLH/templates/press/press_journals.html:77
-#: themes/OLH/templates/press/press_journals.html:78
+#: themes/OLH/templates/journal/articles.html:71
+#: themes/OLH/templates/journal/articles.html:79
+#: themes/OLH/templates/journal/search.html:52
+#: themes/OLH/templates/press/press_journals.html:83
+#: themes/OLH/templates/press/press_journals.html:84
+#: themes/TUW/templates/journal/articles.html:65
+#: themes/TUW/templates/journal/articles.html:74
+#: themes/TUW/templates/journal/search.html:60
 #: themes/default/templates/journal/articles.html:65
 #: themes/default/templates/journal/articles.html:74
-#: themes/material/templates/journal/articles.html:65
-#: themes/material/templates/journal/articles.html:76
+#: themes/default/templates/journal/search.html:60
+#: themes/material/templates/journal/articles.html:66
+#: themes/material/templates/journal/articles.html:77
 msgid "Filter"
 msgstr "Filtern"
 
-#: themes/OLH/templates/journal/articles.html:79
+#: themes/OLH/templates/journal/articles.html:80
+#: themes/TUW/templates/journal/articles.html:77
 #: themes/default/templates/journal/articles.html:77
-#: themes/material/templates/journal/articles.html:79
+#: themes/material/templates/journal/articles.html:80
 #, fuzzy
 #| msgid "Articles"
 msgid "Clear Filters"
@@ -1432,6 +1695,9 @@ msgstr "Filterung entfernen"
 #: themes/OLH/templates/journal/become_reviewer.html:5
 #: themes/OLH/templates/journal/become_reviewer.html:10
 #: themes/OLH/templates/journal/become_reviewer.html:20
+#: themes/TUW/templates/journal/become_reviewer.html:4
+#: themes/TUW/templates/journal/become_reviewer.html:5
+#: themes/TUW/templates/journal/become_reviewer.html:17
 #: themes/default/templates/journal/become_reviewer.html:4
 #: themes/default/templates/journal/become_reviewer.html:5
 #: themes/default/templates/journal/become_reviewer.html:17
@@ -1442,37 +1708,28 @@ msgstr "Filterung entfernen"
 msgid "Become a Reviewer"
 msgstr "Gutachter_in werden"
 
-#: themes/OLH/templates/journal/collections.html:6
-#: themes/OLH/templates/journal/collections.html:8
-#: themes/OLH/templates/journal/collections.html:15
-#: themes/OLH/templates/journal/issue_display.html:45
-#: themes/default/templates/journal/issue_display.html:36
-#: themes/material/templates/journal/collections.html:6
-#: themes/material/templates/journal/collections.html:7
-#: themes/material/templates/journal/issue_display.html:39
-msgid "Collections"
-msgstr "Sammlungen"
-
-#: themes/OLH/templates/journal/collections.html:25
 # Andrae: Live-System-Test, Übersetzung inkorrekt
+#: themes/OLH/templates/journal/collections.html:25
 msgid "Launched"
 msgstr "Gestartet"
 
+# Andrae: Live-System-Test, Übersetzung inkorrekt
 #: themes/OLH/templates/journal/contact.html:17
+#: themes/TUW/templates/journal/contact.html:15
 #: themes/default/templates/journal/contact.html:15
 #: themes/material/templates/journal/contact.html:19
-# Andrae: Live-System-Test, Übersetzung inkorrekt
 msgid "Journal Representatives"
 msgstr "Zeitschriften-Ansprechpersonen"
 
+# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/contact.html:19
 #: themes/OLH/templates/press/journal/contact.html:11
 #: themes/material/templates/journal/contact.html:21
-# Andrae: Live-System-Test
 msgid "Press Representatives"
 msgstr "Medienvertreter_innen"
 
 #: themes/OLH/templates/journal/contact.html:26
+#: themes/TUW/templates/journal/contact.html:21
 #: themes/default/templates/journal/contact.html:21
 #: themes/material/templates/journal/contact.html:30
 msgid "Contact Information"
@@ -1480,12 +1737,14 @@ msgstr "Kontaktinformation"
 
 #: themes/OLH/templates/journal/contact.html:35
 #: themes/OLH/templates/press/journal/contact.html:22
+#: themes/TUW/templates/journal/contact.html:32
 #: themes/default/templates/journal/contact.html:32
 msgid "Who would you like to contact?"
 msgstr "Wen möchten Sie kontaktieren?"
 
 #: themes/OLH/templates/journal/contact.html:44
 #: themes/OLH/templates/press/journal/contact.html:30
+#: themes/TUW/templates/journal/contact.html:42
 #: themes/default/templates/journal/contact.html:42
 #: themes/material/templates/journal/contact.html:51
 msgid "Send Message"
@@ -1499,13 +1758,8 @@ msgstr "Mitteilung abschicken"
 msgid "Editorial Team"
 msgstr "Redaktionsteam"
 
-#: themes/OLH/templates/journal/homepage_elements/about.html:7
-#: themes/default/templates/journal/homepage_elements/about.html:4
-#: themes/material/templates/journal/homepage_elements/about.html:7
-msgid "About this Journal"
-msgstr "Über diese Zeitschrift"
-
 #: themes/OLH/templates/journal/homepage_elements/featured.html:6
+#: themes/TUW/templates/journal/homepage_elements/featured.html:6
 #: themes/default/templates/journal/homepage_elements/featured.html:6
 #: themes/material/templates/journal/homepage_elements/featured.html:6
 #, fuzzy
@@ -1520,12 +1774,13 @@ msgstr "Ausgewählte Artikel"
 msgid "Featured Journals"
 msgstr "Ausgewählte Zeitschriften"
 
-#: themes/OLH/templates/journal/homepage_elements/journals.html:28
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/homepage_elements/journals.html:28
 msgid "Unnamed Journal"
 msgstr "Namenlose Zeitschrift"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:9
+#: themes/TUW/templates/journal/homepage_elements/news.html:8
 #: themes/default/templates/journal/homepage_elements/news.html:8
 #: themes/material/templates/journal/homepage_elements/news.html:11
 msgid "Latest News"
@@ -1533,9 +1788,10 @@ msgstr "Aktuelle Nachrichten"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:13
 #: themes/OLH/templates/press/core/news/item.html:33
+#: themes/TUW/templates/journal/homepage_elements/news.html:13
 #: themes/default/templates/journal/homepage_elements/news.html:13
 #: themes/material/templates/core/news/index.html:26
-#: themes/material/templates/core/news/item.html:20
+#: themes/material/templates/core/news/item.html:21
 #: themes/material/templates/journal/homepage_elements/news.html:17
 #: themes/material/templates/press/core/news/index.html:26
 #: themes/material/templates/press/core/news/item.html:21
@@ -1543,30 +1799,24 @@ msgid "Posted by"
 msgstr "Veröffentlicht von"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:18
+#: themes/TUW/templates/journal/homepage_elements/news.html:19
 #: themes/default/templates/journal/homepage_elements/news.html:19
 msgid "This journal currently has no news items to display"
 msgstr "Es gibt zu dieser Zeitschrift derzeit keine Neuigkeiten."
 
 #: themes/OLH/templates/journal/homepage_elements/preprints.html:6
+#: themes/TUW/templates/journal/homepage_elements/preprints.html:6
 #: themes/default/templates/journal/homepage_elements/preprints.html:6
 #, fuzzy
 #| msgid "Articles"
 msgid "Featured Preprints"
 msgstr "Ausgewählte Preprints"
 
-#: themes/OLH/templates/journal/issue_display.html:43
-msgid "Download Issue"
-msgstr "Heft herunterladen"
-
-#: themes/OLH/templates/journal/issue_display.html:44
-#: themes/default/templates/journal/issue_display.html:35
-#: themes/material/templates/journal/issue_display.html:38
-msgid "Issue Archive"
-msgstr "Heftarchiv"
-
 #: themes/OLH/templates/journal/issues.html:6
 #: themes/OLH/templates/journal/issues.html:8
 #: themes/OLH/templates/journal/issues.html:15
+#: themes/TUW/templates/journal/issues.html:6
+#: themes/TUW/templates/journal/issues.html:8
 #: themes/default/templates/journal/issues.html:6
 #: themes/default/templates/journal/issues.html:8
 #: themes/material/templates/core/nav.html:81
@@ -1575,21 +1825,24 @@ msgstr "Heftarchiv"
 msgid "Issues"
 msgstr "Hefte"
 
-#: themes/OLH/templates/journal/issues.html:27
-#: themes/default/templates/journal/issues.html:19
-#: themes/material/templates/journal/issues.html:25
-#, fuzzy
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/issues.html:25
+#: themes/TUW/templates/journal/issues.html:21
+#: themes/default/templates/journal/issues.html:21
+#: themes/material/templates/journal/issues.html:28
+#, fuzzy
 #| msgid "Sitemap"
 msgid "items"
 msgstr "Objekte"
 
-#: themes/OLH/templates/journal/issues.html:34
+#: themes/OLH/templates/journal/issues.html:32
 msgid "There are no issues published in this journal yet."
 msgstr "In dieser Zeitschrift wurden noch keine Hefte Veröffentlicht."
 
 #: themes/OLH/templates/journal/submissions.html:5
 #: themes/OLH/templates/journal/submissions.html:22
+#: themes/TUW/templates/journal/submissions.html:5
+#: themes/TUW/templates/journal/submissions.html:21
 #: themes/default/templates/journal/submissions.html:5
 #: themes/default/templates/journal/submissions.html:21
 #: themes/material/templates/journal/submissions.html:6
@@ -1597,29 +1850,11 @@ msgstr "In dieser Zeitschrift wurden noch keine Hefte Veröffentlicht."
 msgid "Submissions"
 msgstr "Einreichungen"
 
-#: themes/OLH/templates/journal/submissions.html:24
-#: themes/default/templates/journal/submissions.html:23
-# Andrae: Live-System-Test
-msgid ""
-"This page is designed to help you ensure your submission is ready for and "
-"fits the scope of "
-msgstr ""
-"Auf dieser Seite finden Sie Informationen um sicherzustellen, dass Ihre Einreichung "
-"der Ausrichtung der Zeitschrift entspricht."
-
-#: themes/OLH/templates/journal/submissions.html:25
-#: themes/default/templates/journal/submissions.html:24
-msgid ""
-"Before submitting you should read over the guidelines here, then register an "
-"account (or login if you have an existing account)"
-msgstr ""
-"Bevor Sie einreichen, stellen Sie sicher, dass Sie den Leitfaden gelesen haben und "
-"legen Sie einen Account (bzw. melden Sie sich) an."
-
-#: themes/OLH/templates/journal/submissions.html:33
+#: themes/OLH/templates/journal/submissions.html:32
 #: themes/OLH/templates/preprints/about.html:15
-#: themes/default/templates/journal/submissions.html:32
-#: themes/material/templates/journal/submissions.html:39
+#: themes/TUW/templates/journal/submissions.html:31
+#: themes/default/templates/journal/submissions.html:31
+#: themes/material/templates/journal/submissions.html:36
 #: themes/material/templates/preprints/about.html:4
 #: themes/material/templates/preprints/about.html:9
 #: themes/material/templates/press/nav.html:99
@@ -1627,58 +1862,66 @@ msgstr ""
 msgid "About"
 msgstr "Über"
 
-#: themes/OLH/templates/journal/submissions.html:36
-#: themes/default/templates/journal/submissions.html:35
-#: themes/material/templates/journal/submissions.html:43
 # Andrae: Live-System-Test
+#: themes/OLH/templates/journal/submissions.html:37
+#: themes/TUW/templates/journal/submissions.html:36
+#: themes/default/templates/journal/submissions.html:36
+#: themes/material/templates/journal/submissions.html:42
 msgid "Focus and Scope for"
 msgstr "Ausrichtung von"
 
-#: themes/OLH/templates/journal/submissions.html:45
-#: themes/default/templates/journal/submissions.html:47
-#: themes/material/templates/journal/submissions.html:61
+#: themes/OLH/templates/journal/submissions.html:51
+#: themes/TUW/templates/journal/submissions.html:55
+#: themes/default/templates/journal/submissions.html:55
+#: themes/material/templates/journal/submissions.html:65
 msgid "Licences"
 msgstr "Lizenzen"
 
-#: themes/OLH/templates/journal/submissions.html:46
-#: themes/default/templates/journal/submissions.html:48
+#: themes/OLH/templates/journal/submissions.html:52
+#: themes/TUW/templates/journal/submissions.html:56
+#: themes/TUW/templates/preprints/submit_start.html:88
+#: themes/default/templates/journal/submissions.html:56
 #: themes/default/templates/preprints/submit_start.html:88
-#: themes/material/templates/journal/submissions.html:62
+#: themes/material/templates/journal/submissions.html:66
 msgid "allows the following licences for submission"
 msgstr "erlaubt folgende Lizenzen für die Einreichung"
 
-#: themes/OLH/templates/journal/submissions.html:52
-#: themes/default/templates/journal/submissions.html:38
-#: themes/material/templates/journal/article.html:324
-#: themes/material/templates/journal/submissions.html:71
+#: themes/OLH/templates/journal/submissions.html:61
+#: themes/TUW/templates/journal/submissions.html:41
+#: themes/default/templates/journal/submissions.html:41
+#: themes/material/templates/journal/article.html:334
+#: themes/material/templates/journal/submissions.html:78
 msgid "Peer Review"
 msgstr "Begutachtung"
 
-#: themes/OLH/templates/journal/submissions.html:55
-#: themes/default/templates/journal/submissions.html:54
-#: themes/material/templates/journal/submissions.html:75
+#: themes/OLH/templates/journal/submissions.html:66
+#: themes/TUW/templates/journal/submissions.html:65
+#: themes/default/templates/journal/submissions.html:65
+#: themes/material/templates/journal/submissions.html:84
 msgid "Publication Cycle"
 msgstr "Publikationszyklus"
 
-#: themes/OLH/templates/journal/submissions.html:58
-#: themes/default/templates/journal/submissions.html:57
-#: themes/material/templates/journal/submissions.html:79
+#: themes/OLH/templates/journal/submissions.html:70
+#: themes/TUW/templates/journal/submissions.html:69
+#: themes/default/templates/journal/submissions.html:69
+#: themes/material/templates/journal/submissions.html:89
 msgid "Sections"
 msgstr "Abschnitte"
 
-#: themes/OLH/templates/journal/submissions.html:64
-#: themes/material/templates/journal/submissions.html:85
+#: themes/OLH/templates/journal/submissions.html:76
+#: themes/material/templates/journal/submissions.html:95
 #, fuzzy
 #| msgid "Salutation"
 msgid "Public Submissions"
 msgstr "Öffentliche Einreichungen"
 
-#: themes/OLH/templates/journal/submissions.html:70
-#: themes/material/templates/journal/submissions.html:91
 # Andrae: Übersetzung unsauber: indexiert oder indiziert
+#: themes/OLH/templates/journal/submissions.html:82
+#: themes/material/templates/journal/submissions.html:101
 msgid "Indexed"
 msgstr "Indiziert"
 
+# COAR-Vocabulary
 #: themes/OLH/templates/preprints/about.html:4
 #: themes/OLH/templates/preprints/about.html:15
 #: themes/OLH/templates/preprints/home.html:15
@@ -1696,50 +1939,62 @@ msgstr "Indiziert"
 #: themes/material/templates/press/nav.html:107
 #: themes/material/templates/press/nav.html:108
 #, fuzzy
-# COAR-Vocabulary
 #| msgid "Articles"
 msgid "Preprints"
 msgstr "Preprints"
 
-#: themes/OLH/templates/preprints/article.html:52
+#: themes/OLH/templates/preprints/article.html:18
+#: themes/material/templates/preprints/article.html:19
+msgid ""
+"This article is a preprint, it has not been peer reviewed or had any "
+"extensive editorial over-sight."
+msgstr ""
+
+#: themes/OLH/templates/preprints/article.html:51
 #: themes/OLH/templates/preprints/submit_start.html:72
+#: themes/TUW/templates/preprints/article.html:49
 #: themes/default/templates/preprints/article.html:49
-#: themes/material/templates/preprints/article.html:64
+#: themes/material/templates/preprints/article.html:63
 msgid "Comments"
 msgstr "Kommentare"
 
-#: themes/OLH/templates/preprints/article.html:86
+#: themes/OLH/templates/preprints/article.html:85
 msgid ""
 "There are no comments or no comments have been made public for this article."
 msgstr ""
-"Es gibt keine Kommentare oder die Kommentare zu diesem Artikel wurden auf nicht sichtbar "
-"gestellt."
+"Es gibt keine Kommentare oder die Kommentare zu diesem Artikel wurden auf "
+"nicht sichtbar gestellt."
 
-#: themes/OLH/templates/preprints/article.html:104
+#: themes/OLH/templates/preprints/article.html:103
+#: themes/TUW/templates/preprints/article.html:100
 #: themes/default/templates/preprints/article.html:100
-#: themes/material/templates/preprints/article.html:122
+#: themes/material/templates/preprints/article.html:121
 msgid "Metadata"
 msgstr "Metadaten"
 
-#: themes/OLH/templates/preprints/article.html:113
-#: themes/default/templates/journal/article.html:208
+#: themes/OLH/templates/preprints/article.html:112
+#: themes/TUW/templates/preprints/article.html:109
+#: themes/default/templates/journal/article.html:222
 #: themes/default/templates/preprints/article.html:109
-#: themes/material/templates/preprints/article.html:131
+#: themes/material/templates/preprints/article.html:130
 msgid "Metrics"
 msgstr "Metriken"
 
-#: themes/OLH/templates/preprints/article.html:118
-#: themes/default/templates/journal/article.html:220
+#: themes/OLH/templates/preprints/article.html:117
+#: themes/TUW/templates/preprints/article.html:124
+#: themes/default/templates/journal/article.html:234
 #: themes/default/templates/preprints/article.html:124
-#: themes/material/templates/preprints/article.html:146
+#: themes/material/templates/preprints/article.html:145
 #, fuzzy
 #| msgid "Salutation"
 msgid "Citation"
 msgstr "Zitierung"
 
-#: themes/OLH/templates/preprints/article.html:131
+#: themes/OLH/templates/preprints/article.html:130
 #: themes/OLH/templates/preprints/list.html:6
 #: themes/OLH/templates/preprints/list.html:15
+#: themes/TUW/templates/preprints/list.html:6
+#: themes/TUW/templates/preprints/list.html:14
 #: themes/default/templates/preprints/list.html:6
 #: themes/default/templates/preprints/list.html:14
 #: themes/material/templates/preprints/list.html:6
@@ -1747,20 +2002,21 @@ msgstr "Zitierung"
 msgid "All Preprints"
 msgstr "Alle Preprints"
 
-#: themes/OLH/templates/preprints/article.html:135
+#: themes/OLH/templates/preprints/article.html:134
+#: themes/TUW/templates/preprints/article.html:114
 #: themes/default/templates/preprints/article.html:114
-#: themes/material/templates/preprints/article.html:136
+#: themes/material/templates/preprints/article.html:135
 msgid "Versions"
 msgstr "Versionen"
 
-#: themes/OLH/templates/preprints/article.html:142
 # Andrae: Übersetzung unsauber
+#: themes/OLH/templates/preprints/article.html:141
 msgid "This is the only version of the preprint."
 msgstr "Dies ist die einzige Version dieses Preprints"
 
+# Andrae: Übersetzung unsauber
 #: themes/OLH/templates/preprints/authors.html:7
 #: themes/OLH/templates/preprints/authors.html:15
-# Andrae: Übersetzung unsauber
 msgid "Preprint Authors"
 msgstr "Autor_innen des Preprints"
 
@@ -1770,23 +2026,24 @@ msgstr "Autor_innen des Preprints"
 msgid "Add authors to"
 msgstr "Autor_innen hinzufügen zu"
 
-#: themes/OLH/templates/preprints/authors.html:80
-#: themes/default/templates/preprints/authors.html:86
 # Andrae: Live-System-Test
+#: themes/OLH/templates/preprints/authors.html:80
+#: themes/TUW/templates/preprints/authors.html:86
+#: themes/default/templates/preprints/authors.html:86
 msgid ""
 "When you've added all the authors, select Save and Continue to move to the "
 "next step of your submission."
 msgstr ""
-"Wenn Sie alle Autor_innen hinzugefügt haben, klicken Sie *Speichern und Weiter* um "
-"zum nächsten Schritt der Einreichung zu gelangen."
+"Wenn Sie alle Autor_innen hinzugefügt haben, klicken Sie *Speichern und "
+"Weiter* um zum nächsten Schritt der Einreichung zu gelangen."
 
 #: themes/OLH/templates/preprints/editors.html:5
 #: themes/OLH/templates/preprints/editors.html:16
 msgid "Preprint Editors"
 msgstr "Preprint-Editor_innen"
 
-#: themes/OLH/templates/preprints/editors.html:46
 # Andrae: Live-System-Test
+#: themes/OLH/templates/preprints/editors.html:46
 msgid "This repository has no subjects or editors to display."
 msgstr "Dieses Repositorium hat noch keine Themenbereiche oder Editor_innen."
 
@@ -1801,9 +2058,9 @@ msgstr "Weiterlesen"
 msgid "preprints"
 msgstr "Preprints"
 
+# Andrae: Übersetzung fehlt
 #: themes/OLH/templates/preprints/home.html:30
 #: themes/material/templates/preprints/home.html:25
-# Andrae: Übersetzung fehlt
 msgid "or view list of"
 msgstr ""
 
@@ -1821,17 +2078,17 @@ msgstr "Alle Preprints"
 msgid "Latest Preprints"
 msgstr "Aktuelle Preprints"
 
+# Andrae: Live-System-test
 #: themes/OLH/templates/preprints/list.html:61
 #: themes/OLH/templates/preprints/search.html:46
 #, fuzzy
-# Andrae: Live-System-test
 #| msgid "Articles"
 msgid "Search preprints"
 msgstr "Durchsuche Preprints"
 
+# Andrae: Live-System-test
 #: themes/OLH/templates/preprints/list.html:65
 #: themes/OLH/templates/preprints/search.html:50
-# Andrae: Live-System-test
 msgid "Searching by"
 msgstr "Suche nach"
 
@@ -1866,6 +2123,8 @@ msgstr "Preprint-Einreichung begutachten"
 
 #: themes/OLH/templates/preprints/search.html:6
 #: themes/OLH/templates/preprints/search.html:14
+#: themes/TUW/templates/preprints/search.html:6
+#: themes/TUW/templates/preprints/search.html:14
 #: themes/default/templates/preprints/search.html:6
 #: themes/default/templates/preprints/search.html:14
 #: themes/material/templates/preprints/home.html:18
@@ -1885,7 +2144,9 @@ msgstr "Preprint einreichen"
 
 #: themes/OLH/templates/preprints/submit_start.html:15
 msgid "Please read the following carefully before you submit your preprints."
-msgstr "Bitte lesen Sie die nachfolgende Information genau durch, bevor Sie Ihr Preprint einreichen."
+msgstr ""
+"Bitte lesen Sie die nachfolgende Information genau durch, bevor Sie Ihr "
+"Preprint einreichen."
 
 #: themes/OLH/templates/preprints/submit_start.html:33
 #: themes/OLH/templates/preprints/submit_start.html:74
@@ -1893,10 +2154,10 @@ msgid ""
 "If you have any additional information you'd like to supply to the preprints "
 "editor, do so here"
 msgstr ""
-"Fügen Sie hier zusätzliche Informationen ein, welche Sie den Preprint-Editor_innen zur Verfügung "
-"stellen möchten."
+"Fügen Sie hier zusätzliche Informationen ein, welche Sie den Preprint-"
+"Editor_innen zur Verfügung stellen möchten."
 
-#: themes/OLH/templates/preprints/submit_start.html:55
+#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:33
 msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
 
@@ -1904,41 +2165,41 @@ msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
 msgid "Additional Fields"
 msgstr "Zusätzliche Felder"
 
-#: themes/OLH/templates/press/core/login.html:25
+#: themes/OLH/templates/press/core/login.html:26
 #, fuzzy
 #| msgid "Log in with ORCiD"
 msgid "Login with ORCiD"
 msgstr "Einloggen mit ORCiD"
 
-#: themes/OLH/templates/press/core/login.html:32
+#: themes/OLH/templates/press/core/login.html:33
 #, fuzzy
 #| msgid "Log in"
 msgid "Log In"
 msgstr "Einloggen"
 
-#: themes/OLH/templates/press/core/news/index.html:37
 # Andrae: Live-System-Test
+#: themes/OLH/templates/press/core/news/index.html:37
 msgid "This press currently has no news items to display."
 msgstr "Es gibt zu diesem Verlag derzeit keine Neuigkeiten"
 
+# Andrae: Live-System-Test, Kontext unklar
 #: themes/OLH/templates/press/core/news/item.html:33
 #: themes/material/templates/core/news/index.html:26
-#: themes/material/templates/core/news/item.html:20
+#: themes/material/templates/core/news/item.html:21
 #: themes/material/templates/press/core/news/index.html:26
 #: themes/material/templates/press/core/news/item.html:21
-# Andrae: Live-System-Test, Kontext unklar
 msgid "on"
 msgstr "auf"
 
-#: themes/OLH/templates/press/core/news/item.html:40
-#: themes/material/templates/core/news/item.html:25
-#: themes/material/templates/press/core/news/item.html:26
 # Andrae: Live-System-Test
+#: themes/OLH/templates/press/core/news/item.html:40
+#: themes/material/templates/core/news/item.html:26
+#: themes/material/templates/press/core/news/item.html:26
 msgid "Tags"
 msgstr "Tags"
 
 #: themes/OLH/templates/press/core/news/item.html:45
-#: themes/material/templates/core/news/item.html:33
+#: themes/material/templates/core/news/item.html:34
 #: themes/material/templates/press/core/news/item.html:34
 msgid "Back to News List"
 msgstr "Zurück zur Neuigkeiten-Liste"
@@ -1947,6 +2208,11 @@ msgstr "Zurück zur Neuigkeiten-Liste"
 msgid "Journals"
 msgstr "Zeitschriften"
 
+#: themes/OLH/templates/press/press_journals.html:47
+msgid "Disciplines"
+msgstr ""
+
+#: themes/TUW/templates/core/accounts/register.html:24
 #: themes/default/templates/core/accounts/register.html:24
 #, fuzzy
 #| msgid ""
@@ -1963,14 +2229,15 @@ msgid ""
 "target=\"#passwordmodal\"> password guide</a>\n"
 "                                ."
 msgstr ""
-"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine bestimmten "
-"Zeichen enthalten, aber es sollte so lang wie möglich sein. Weitere "
-"Informationen finden Sie in der < <a href=\"#\" data-toggle=\"modal\" data-"
-"target=\"#passwordmodal\"> Kennwort-Anleitung.</a>\n"
+"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
+"bestimmten Zeichen enthalten, aber es sollte so lang wie möglich sein. "
+"Weitere Informationen finden Sie in der < <a href=\"#\" data-toggle=\"modal"
+"\" data-target=\"#passwordmodal\"> Kennwort-Anleitung.</a>\n"
 
+# Andrae: Live-System-Test
+#: themes/TUW/templates/core/accounts/reset_password.html:17
 #: themes/default/templates/core/accounts/reset_password.html:17
 #, fuzzy
-# Andrae: Live-System-Test
 #| msgid ""
 #| "Your password should be at minimum 12 characters long. It does not need "
 #| "to contain specific characters but you should make it as long as "
@@ -1987,78 +2254,73 @@ msgid ""
 msgstr ""
 "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine\n"
 "                                    bestimmten Zeichen enthalten,\n"
-"                                    aber es sollte so lang wie möglich sein. Weitere "
-"Informationen finden Sie in der\n"
+"                                    aber es sollte so lang wie möglich sein. "
+"Weitere Informationen finden Sie in der\n"
 "                                    <a href=\"#\" data-toggle=\"modal\" data-"
 "target=\"#passwordmodal\">Kennwort-\n"
 "                                       Anleitung</a>."
 
+#: themes/TUW/templates/elements/submit/author.html:67
 #: themes/default/templates/elements/submit/author.html:67
 msgid "Close"
 msgstr "Schließen"
 
-#: themes/default/templates/journal/article.html:188
-msgid "Information"
-msgstr "Information"
+#: themes/TUW/templates/journal/article.html:95
+msgid "Journal Article"
+msgstr "Artikel"
 
-#: themes/default/templates/journal/article.html:213
-msgid "Twitter"
-msgstr "Twitter"
+#: themes/TUW/templates/journal/article.html:129
+msgid "Published by"
+msgstr "Veröffentlicht"
 
-#: themes/default/templates/journal/article.html:215
-msgid "Wikipedia"
-msgstr "Wikipedia"
+#: themes/TUW/templates/journal/article.html:143
+#| msgid "Keywords (English)"
+msgid "Keywords (English)"
+msgstr "Schlagwörter (Englisch)"
 
-#: themes/default/templates/journal/article.html:217
-msgid "Reddit"
-msgstr "Reddit"
+#: themes/TUW/templates/journal/article.html:149
+#| msgid "Keywords (German)"
+msgid "Keywords (German)"
+msgstr "Schlagwörter (Deutsch)"
 
+#: themes/TUW/templates/journal/article.html:185
+msgid "Abstract (English)"
+msgstr "Zusammenfassung (Englisch)"
+
+#: themes/TUW/templates/journal/article.html:193
+msgid "Abstract (German)"
+msgstr "Zusammenfassung (Deutsch)"
+
+#: themes/TUW/templates/preprints/submit_files.html:12
 #: themes/default/templates/preprints/submit_files.html:12
 msgid "Upload Files"
 msgstr "Dateien hochladen"
 
-#: themes/material/templates/core/accounts/edit_profile.html:6
-msgid "Edit Profile"
-msgstr "Profil bearbeiten"
+#: themes/default/templates/journal/article.html:152
+msgid "Article"
+msgstr "Artikel"
 
-#: themes/material/templates/core/accounts/edit_profile.html:16
+#: themes/default/templates/journal/article.html:198
+msgid "Information"
+msgstr "Information"
+
+#: themes/default/templates/journal/article.html:227
+msgid "Twitter"
+msgstr "Twitter"
+
+#: themes/default/templates/journal/article.html:229
+msgid "Wikipedia"
+msgstr "Wikipedia"
+
+#: themes/default/templates/journal/article.html:231
+msgid "Reddit"
+msgstr "Reddit"
+
+#: themes/material/templates/core/accounts/activate_account.html:22
 msgid ""
-"If you want to change your email address you may do so below, however, you "
-"will be logged out and your account will be marked as inactive until you "
-"follow the instructions in the verification email."
+"There was no inactive account with this activation code found. It is "
+"possible that your account is already active, you can check by attempting to "
 msgstr ""
-"Sie können Ihre E-Mail-Adresse weiter unten ändern, jedoch werden Sie ausgeloggt "
-"und Ihr Account wird auf inaktiv gesetzt bis Sie den Anweisungen in der "
-"Verifikations-E-Mail nachgekommen sind."
-
-
-#: themes/material/templates/core/accounts/edit_profile.html:17
-msgid "Note:"
-msgstr "Anmerkung:"
-
-#: themes/material/templates/core/accounts/edit_profile.html:18
-msgid ""
-"Changing your email address will also change your username as these are one "
-"and the same."
-msgstr ""
-"Ihre E-Mail-Adresse zu ändern bedeutet auch die Änderung Ihres Benutzernamens, da "
-"diese ein und derselbe Eintrag sind."
-
-#: themes/material/templates/core/accounts/edit_profile.html:24
-msgid "Email Address"
-msgstr "E-Mail-Adresse"
-
-#: themes/material/templates/core/accounts/edit_profile.html:34
-msgid "Data Export"
-msgstr "Datenexport"
-
-#: themes/material/templates/core/accounts/edit_profile.html:35
-msgid "You may export your data into a JSON file for reuse."
-msgstr "Sie können Ihre Daten zur Weiterverwendung als JSON exportieren."
-
-#: themes/material/templates/core/accounts/edit_profile.html:38
-msgid "Export"
-msgstr "Exportieren"
 
 #: themes/material/templates/core/accounts/register.html:22
 #, fuzzy
@@ -2076,14 +2338,18 @@ msgid ""
 "password guide</a>\n"
 "                        ."
 msgstr ""
-"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine\n"
-"                                    bestimmten Zeichen enthalten,\n"
-"                                    aber es sollte so lang wie möglich sein. Weitere "
-"Informationen finden Sie in der <a href=\"#passwordmodal\" class=\"modal-trigger\"> "
-"Kennwort-Anleitung.</a>\n"
+"Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
+"bestimmten Zeichen enthalten, aber es sollte so lang wie möglich sein. "
+"Weitere Informationen finden Sie in der < <a href=\"#\" data-toggle=\"modal"
+"\" data-target=\"#passwordmodal\"> Kennwort-Anleitung.</a>\n"
 
-#: themes/material/templates/core/accounts/register.html:45
-#: themes/material/templates/core/accounts/reset_password.html:40
+# "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine\n"
+# "                                    bestimmten Zeichen enthalten,"
+# "aber es sollte so lang wie möglich sein.\n"
+# "Weitere Informationen finden Sie in der <a href=\"#passwordmodal\" class="
+# "\"modal-trigger\"> Kennwort-Anleitung.</a>\n"
+#: themes/material/templates/core/accounts/register.html:44
+#: themes/material/templates/core/accounts/reset_password.html:39
 msgid ""
 "We recommend selecting a long, but easy to remember password such as <i>our "
 "awesome moon base\n"
@@ -2094,18 +2360,12 @@ msgid ""
 msgstr ""
 "Wir empfehlen ein langes, dafür einfach zu merkendes Passwort zu wählen: "
 "Unser längeres Beispiel <i>Wia mas mocht, is\n"
-"                foisch</i> würde mehrere Millionen Jahre brauchen um geknackt "
-"zu werden, das komplexe\n"
-"                <i>Jfjfy&65^87</i> kann auf einem Standardgerät in etwas unter "
-"4.000 Jahre gefunden werden."
+"                foisch</i> würde mehrere Millionen Jahre brauchen um "
+"geknackt zu werden, das komplexe\n"
+"                <i>Jfjfy&65^87</i> kann auf einem Standardgerät in etwas "
+"unter 4.000 Jahre gefunden werden."
 
 #: themes/material/templates/core/accounts/reset_password.html:17
-#, fuzzy
-#| msgid ""
-#| "Your password should be at minimum 12 characters long. It does not need "
-#| "to contain specific characters but you should make it as long as "
-#| "possible. For more information read on <a href=\"#\" data-open=\"password-"
-#| "modal\">password guide</a>."
 msgid ""
 "Your password should be at minimum 12 characters long. It does not\n"
 "                                    need to contain specific\n"
@@ -2116,19 +2376,15 @@ msgid ""
 msgstr ""
 "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine\n"
 "                                    bestimmten Zeichen enthalten,\n"
-"                                    aber es sollte so lang wie möglich sein. Weitere "
-"Informationen finden Sie in der <a href=\"#passwordmodal\" class=\"modal-trigger\"> "
-"Kennwort-Anleitung.</a>"
+"                                    aber es sollte so lang wie möglich sein. "
+"Weitere Informationen finden Sie in der <a href=\"#passwordmodal\" class="
+"\"modal-trigger\"> Kennwort-Anleitung.</a>"
 
-#: themes/material/templates/core/login.html:32
-#, fuzzy
-#| msgid "Regsiter for"
+#: themes/material/templates/core/login.html:33
 msgid "Register an Account"
 msgstr "Einen Account anlegen"
 
-#: themes/material/templates/core/login.html:33
-#, fuzzy
-#| msgid "Forgotten your password?"
+#: themes/material/templates/core/login.html:34
 msgid "Reset Your Password"
 msgstr "Passwort vergessen"
 
@@ -2143,15 +2399,10 @@ msgstr "Home"
 msgid "Account"
 msgstr "Account"
 
-#: themes/material/templates/core/nav.html:117
+#: themes/material/templates/core/nav.html:118
 #: themes/material/templates/core/nav.html:141
 msgid "Dashboard"
 msgstr "Dashboard"
-
-#: themes/material/templates/core/nav.html:118
-#: themes/material/templates/core/nav.html:142
-msgid "Kanban"
-msgstr "Kanban"
 
 #: themes/material/templates/core/nav.html:120
 #: themes/material/templates/core/nav.html:144
@@ -2159,6 +2410,11 @@ msgstr "Kanban"
 #: themes/material/templates/press/nav.html:111
 msgid "Submit"
 msgstr "Einreichen"
+
+#: themes/material/templates/core/nav.html:122
+#: themes/material/templates/core/nav.html:142
+msgid "Kanban"
+msgstr "Kanban"
 
 #: themes/material/templates/core/nav.html:123
 #: themes/material/templates/core/nav.html:147
@@ -2168,14 +2424,14 @@ msgid "Manager"
 msgstr "Manager_in"
 
 #: themes/material/templates/core/nav.html:134
-#: themes/material/templates/core/nav.html:172
+#: themes/material/templates/core/nav.html:169
 #: themes/material/templates/press/nav.html:77
 #: themes/material/templates/press/nav.html:88
 msgid "Admin"
 msgstr "Admin"
 
 #: themes/material/templates/core/nav.html:137
-#: themes/material/templates/core/nav.html:175
+#: themes/material/templates/core/nav.html:172
 #: themes/material/templates/press/nav.html:80
 #: themes/material/templates/press/nav.html:91
 msgid "Logout"
@@ -2195,66 +2451,131 @@ msgstr "Zeitschriften-Information bearbeiten"
 msgid "Edit Page"
 msgstr "Seite bearbeiten"
 
-#: themes/material/templates/core/nav.html:156
 # Andrae: Live-System-Test
+#: themes/material/templates/core/nav.html:156
 msgid "Manage Editorial Team"
 msgstr "Editor_innen-Team verwalten"
+
+#: themes/material/templates/core/nav.html:159
+#, fuzzy
+#| msgid "Edit Profile"
+msgid "Edit Article"
+msgstr "Profil bearbeiten"
+
+#: themes/material/templates/core/nav.html:162
+#, fuzzy
+#| msgid "View Issue"
+msgid "Edit Issue"
+msgstr "Heft ansehen"
+
+#: themes/material/templates/core/nav.html:165
+msgid "Edit News Item"
+msgstr ""
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:6
+msgid ""
+"If you want to change your email address you may do so below, however, you "
+"will be logged out and your account will be marked as inactive until you "
+"follow the instructions in the verification email."
+msgstr ""
+"Sie können Ihre E-Mail-Adresse weiter unten ändern, jedoch werden Sie "
+"ausgeloggt und Ihr Account wird auf inaktiv gesetzt bis Sie den Anweisungen "
+"in der Verifikations-E-Mail nachgekommen sind."
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:7
+msgid "Note:"
+msgstr "Anmerkung:"
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:8
+msgid ""
+"Changing your email address will also change your username as these are one "
+"and the same."
+msgstr ""
+"Ihre E-Mail-Adresse zu ändern bedeutet auch die Änderung Ihres "
+"Benutzernamens, da diese ein und derselbe Eintrag sind."
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:14
+msgid "Email Address"
+msgstr "E-Mail-Adresse"
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:24
+msgid "Data Export"
+msgstr "Datenexport"
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:25
+msgid "You may export your data into a JSON file for reuse."
+msgstr "Sie können Ihre Daten zur Weiterverwendung als JSON exportieren."
+
+#: themes/material/templates/elements/accounts/edit_profile_body_block.html:28
+msgid "Export"
+msgstr "Exportieren"
 
 #: themes/material/templates/elements/accounts/user_form.html:6
 msgid "Core Data"
 msgstr "Stammdaten"
 
-#: themes/material/templates/elements/accounts/user_form.html:33
+#: themes/material/templates/elements/accounts/user_form.html:36
 msgid "Social Media and Accounts"
 msgstr "Soziale Medien und Accounts"
 
-#: themes/material/templates/elements/accounts/user_form.html:57
 # Andrae: Live-System-Test
+#: themes/material/templates/elements/accounts/user_form.html:60
 msgid "Biography and Signature"
 msgstr "Biographie und Signatur"
 
-#: themes/material/templates/elements/accounts/user_form.html:66
+#: themes/material/templates/elements/accounts/user_form.html:69
 msgid "Review Interests"
 msgstr "Interessensfelder der Begutachtung"
 
-#: themes/material/templates/elements/accounts/user_form.html:67
+#: themes/material/templates/elements/accounts/user_form.html:70
 msgid "Hit Enter to add a new interest"
 msgstr "Drücken Sie die Eingabetaste um ein neues Interessensfeld hinzuzufügen"
 
-#: themes/material/templates/elements/accounts/user_form.html:87
+#: themes/material/templates/elements/accounts/user_form.html:90
 msgid "Options"
 msgstr "Optionen"
+
+#: themes/material/templates/elements/journal/issue_sidebar.html:8
+#: themes/material/templates/elements/journal/issue_sidebar.html:12
+msgid "Collection"
+msgstr "Sammlung"
 
 #: themes/material/templates/elements/summary_modal.html:9
 msgid "This article has no summary"
 msgstr "Dieser Artikel hat keine Zusammenfassung"
 
-#: themes/material/templates/journal/article.html:289
+#: themes/material/templates/journal/article.html:299
 msgid "Dates"
 msgstr "Daten"
 
-#: themes/material/templates/journal/article.html:294
+#: themes/material/templates/journal/article.html:304
 msgid "Submitted"
 msgstr "Eingereicht"
 
-#: themes/material/templates/journal/article.html:299
+#: themes/material/templates/journal/article.html:309
 msgid "Accepted"
 msgstr "Akzeptiert"
 
-#: themes/material/templates/journal/article.html:304
+#: themes/material/templates/journal/article.html:314
 msgid "Published"
 msgstr "Veröffentlicht"
 
-#: themes/material/templates/journal/article.html:328
+#: themes/material/templates/journal/article.html:339
+#, fuzzy
+#| msgid "This article has not been peer reviewed."
+msgid "This article has been peer reviewed."
+msgstr "Dieser Artikel wurde noch nicht begutachtet."
+
+#: themes/material/templates/journal/article.html:343
 msgid "This article has not been peer reviewed."
 msgstr "Dieser Artikel wurde noch nicht begutachtet."
 
-#: themes/material/templates/journal/article.html:335
+#: themes/material/templates/journal/article.html:359
 msgid "File Checksums"
 msgstr "Datei-Prüfsumme"
 
-#: themes/material/templates/journal/article.html:350
-#: themes/material/templates/journal/submissions.html:121
+#: themes/material/templates/journal/article.html:374
+#: themes/material/templates/journal/submissions.html:131
 msgid "Table of Contents"
 msgstr "Inhaltsverzeichnis"
 
@@ -2266,51 +2587,25 @@ msgstr "Sammlung ansehen"
 msgid "There are no collections to display"
 msgstr "Es gibt derzeit keine Sammlungen zur Ansicht"
 
-#: themes/material/templates/journal/issue_display.html:34
-msgid "Collection"
-msgstr "Sammlung"
-
-#: themes/material/templates/journal/issues.html:28
+#: themes/material/templates/journal/issues.html:31
 msgid "View Issue"
 msgstr "Heft ansehen"
 
-#: themes/material/templates/journal/search.html:17
-#, fuzzy
 # Andrae: Live-System-Test
+#: themes/material/templates/journal/search.html:27
+#, fuzzy
 #| msgid "Articles"
 msgid "No articles to display."
 msgstr "Keine Artikel zur Ansicht"
 
-#: themes/material/templates/journal/search.html:26
-#, fuzzy
 # Andrae: Live-System-Test, Übersetzung inkorrekt
+#: themes/material/templates/journal/search.html:36
+#, fuzzy
 #| msgid "Articles"
 msgid "Searching"
 msgstr "Sucht"
 
-#: themes/material/templates/journal/search.html:28
-msgid "Enter a search term to display results."
-msgstr "Geben Sie einen Suchbegriff ein um ein Ergebnis anzuzeigen"
-
-#: themes/material/templates/journal/submissions.html:27
-# Andrae: Übersetzung fehlt
-msgid ""
-"This page is designed to help you ensure your submission is ready for and "
-"fits\n"
-"                        the scope of "
-msgstr ""
-
-#: themes/material/templates/journal/submissions.html:29
-msgid ""
-"Before submitting you should read over the guidelines here, then register "
-"an\n"
-"                        account (or login if you have an existing account)"
-msgstr ""
-"Bevor Sie einreichen, stellen Sie sicher, dass Sie den Leitfaden gelesen haben und "
-"legen Sie einen\n"
-"                        Account (bzw. melden Sie sich) an."
-
-#: themes/material/templates/journal/submissions.html:52
+#: themes/material/templates/journal/submissions.html:54
 msgid "Acceptance Criteria"
 msgstr "Kriterien für die Annahme"
 
@@ -2346,9 +2641,9 @@ msgstr "Autor_innen-Institution"
 msgid "menu"
 msgstr "Menü"
 
+# Andrae: Übersetzung unsauber
 #: themes/material/templates/press/nav.html:98
 #: themes/material/templates/press/nav.html:107
-# Andrae: Übersetzung unsauber
 msgid "All"
 msgstr "Alles"
 
@@ -2360,3 +2655,33 @@ msgstr "Alles"
 #| msgid "Articles"
 msgid "Preprint"
 msgstr "Preprint"
+
+#~ msgid "Volume"
+#~ msgstr "Band"
+
+# Andrae: Live-System-Test
+#~ msgid ""
+#~ "This page is designed to help you ensure your submission is ready for and "
+#~ "fits the scope of "
+#~ msgstr ""
+#~ "Auf dieser Seite finden Sie Informationen um sicherzustellen, dass Ihre "
+#~ "Einreichung der Ausrichtung der Zeitschrift entspricht."
+
+#~ msgid ""
+#~ "Before submitting you should read over the guidelines here, then register "
+#~ "an account (or login if you have an existing account)"
+#~ msgstr ""
+#~ "Bevor Sie einreichen, stellen Sie sicher, dass Sie den Leitfaden gelesen "
+#~ "haben und legen Sie einen Account (bzw. melden Sie sich) an."
+
+#~ msgid "Enter a search term to display results."
+#~ msgstr "Geben Sie einen Suchbegriff ein um ein Ergebnis anzuzeigen"
+
+#~ msgid ""
+#~ "Before submitting you should read over the guidelines here, then register "
+#~ "an\n"
+#~ "                        account (or login if you have an existing account)"
+#~ msgstr ""
+#~ "Bevor Sie einreichen, stellen Sie sicher, dass Sie den Leitfaden gelesen "
+#~ "haben und legen Sie einen\n"
+#~ "                        Account (bzw. melden Sie sich) an."
