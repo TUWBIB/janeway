@@ -257,6 +257,7 @@ def delete_author(request, article_id, author_id):
 
     if article.correspondence_author == author:
         article.correspondence_author = None
+        article.save()
 
     try:
         ordering = models.ArticleAuthorOrder.objects.get(
