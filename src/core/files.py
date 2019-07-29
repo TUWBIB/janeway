@@ -211,6 +211,16 @@ def check_in_memory_mime(in_memory_file):
     return mime
 
 
+def check_in_memory_mime_with_types(in_memory_file, mime_types):
+    mime = magic.from_buffer(in_memory_file.read(), mime=True)
+    
+    for mime_type in mime_types:
+        if mime_type == mime:
+            return True
+
+    return False
+
+
 def copy_file_to_folder(file_to_handle, filename, folder_structure):
     """ Copy a local file to the disk in the specified folder
 
