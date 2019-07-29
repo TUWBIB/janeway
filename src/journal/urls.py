@@ -184,4 +184,9 @@ urlpatterns = [
         ''.format(DOI_REGEX_PATTERN),
         views.doi_redirect,
         name='doi_redirect'),
+
+    # Newsletter
+    url(r'^newsletter/',
+        views.newsletter,
+        name='newsletter'),
 ]
