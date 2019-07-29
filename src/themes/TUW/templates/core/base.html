@@ -43,21 +43,35 @@
 {% endblock navbar %}
 
 <!-- Begin page content -->
-<div class="container">
+<div class="fluid-container">
     <div class="row">
-        <div class="col-md-12">
-            <h2>{% block page_title %}{% endblock page_title %}</h2>
+        <div class="col">
+            <div class="row justify-content-end">
+                <div class="sidebar">
+                    {% block sidebar %}{% endblock sidebar %}
+                </div>
+            </div>
         </div>
+        <div class="col">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>{% block page_title %}{% endblock page_title %}</h2>
+                    </div>
+                </div>
+        
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissable">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        {{ message|linebreaksbr }}
+                    </div>
+                {% endfor %}
+                {% block body %}
+                {% endblock body %}
+            </div>
+        </div>
+        <div class="col"></div>
     </div>
-
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissable">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            {{ message|linebreaksbr }}
-        </div>
-    {% endfor %}
-    {% block body %}
-    {% endblock body %}
 </div>
 
 <footer class="footer">

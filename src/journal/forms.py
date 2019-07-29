@@ -22,6 +22,10 @@ SEARCH_SORT_OPTIONS = [
         ('-date_published', 'Newest'),
         ('date_published', 'Oldest'),
       ]
+TITLE_ADDRESS_OPTIONS = [
+    ('Mr', 'Mr'),
+    ('Ms', 'Ms'),
+]
 
 
 class JournalForm(forms.ModelForm):
@@ -104,3 +108,14 @@ class IssueDisplayForm(forms.ModelForm):
             'display_issue_year',
             'display_issue_title',
         )
+
+class NewsletterForm(forms.Form):
+    confirm = forms.BooleanField(widget=forms.CheckboxInput())
+    email = forms.EmailField()
+    confirm_email = forms.EmailField()
+    title_address = forms.ChoiceField(widget=forms.Select, choices=TITLE_ADDRESS_OPTIONS, required=False)
+    title = forms.CharField(required=False)
+    firstName = forms.CharField(required=False)
+    lastName = forms.CharField()
+    affiliation = forms.CharField(required=False)
+    honeypot = forms.CharField(widget=forms.HiddenInput())

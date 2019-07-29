@@ -1857,3 +1857,19 @@ def doi_redirect(request, identifier_type, identifier):
         raise Http404()
 
     return redirect(article_object.local_url)
+
+def newsletter(request):
+    """
+    Renders newsletter page
+    :param request: HttpRequest
+    :return: a rendered template of the newsletter
+    """
+
+    newsletter_form = forms.NewsletterForm()
+
+    template = 'journal/newsletter.html'
+    context = {
+        'newsletter_form': newsletter_form,
+    }
+
+    return render(request, template, context)

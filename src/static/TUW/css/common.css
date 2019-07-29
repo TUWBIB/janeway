@@ -18,6 +18,10 @@ h2 {
     
 }
 
+body > .fluid-container {
+    padding: 60px 15px 0;
+}
+
 .navbar {
     padding: 0;
     background-color: transparent;
@@ -50,6 +54,35 @@ h2 {
 
 .navbar-light .navbar-nav .nav-link:hover {
     color: #ddd;
+}
+
+.sidebar {
+    min-width: 250px;
+    padding: 10px;
+    padding-top: 40px;
+}
+
+.sidebar-header {
+    border-bottom: 1px solid #e4e4e4;
+    border-top: 1px solid #e4e4e4;
+    font-weight: bold;
+    color: #777676;
+    background-color: #f8f8f8;
+    padding: 1px 1px 1px 15px;
+    font-size: 1em;
+}
+
+.sidebar-content {
+    padding: 5px;
+    padding-left: 20px;
+}
+
+.newsletter-form input {
+    width: 100%;
+}
+
+.newsletter-form select {
+    width: 100%;
 }
 
 .subheader {
