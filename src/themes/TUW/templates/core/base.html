@@ -74,7 +74,7 @@
             </div>
             <div class="col-md-6">
                 <small>
-                    {% if request.journal.code == "JFM" %}
+                    {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
                         <div class=wrapper>
                         <img class="journal_logo" src="{% static "TUW/img/ifm-logo-footer-schrift.png"%}" style="height:65px; margin-right: 20px;">
                         <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Journal for Facility Management">
@@ -84,7 +84,7 @@
                         <img class="journal_imprint_img" src="{% static "TUW/img/info_18px.png"%}" alt="Impressum" title="Impressum">
                         <span class="journal_imprint_text">Impressum</span>
                         </div>
-                    {% elif request.journal.code == "OES" %}
+                    {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
                         <div class=wrapper>
                         <img class="journal_logo" src="{% static "TUW/img/ifip_h54px.png"%}" style="height:65px; margin-right: 20px;">
                         <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Der Öffentliche Sektor">
