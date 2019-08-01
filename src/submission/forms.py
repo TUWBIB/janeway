@@ -172,7 +172,7 @@ class ArticleInfo(KeywordModelForm):
 
         if request:
             import submission.models as submission_models
-            posted_keywords_de = request.POST.get('keywords_de',None).split(',')
+            posted_keywords_de = request.POST.get('keywords_de','').split(',')
             for keyword_de in posted_keywords_de:
                 if keyword_de != '':
                     obj, _ = submission_models.KeywordDe.objects.get_or_create(
