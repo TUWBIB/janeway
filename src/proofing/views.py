@@ -14,9 +14,11 @@ from django.http import HttpResponse
 from django.db.models import Q
 
 from proofing import models as proofing_models
-from security.decorators import proofing_manager_or_editor_required, proofing_manager_for_article_required, \
-    proofreader_or_typesetter_required, proofreader_for_article_required, \
-    typesetter_for_corrections_required
+from security.decorators import (
+    proofing_manager_or_editor_required, proofing_manager_for_article_required,
+    proofreader_or_typesetter_required, proofreader_for_article_required,
+    typesetter_for_corrections_required, proofing_manager_roles,
+)
 from submission import models as submission_models
 from core import models as core_models, files
 from proofing import models, logic, forms
@@ -25,7 +27,7 @@ from journal import models as journal_models
 from journal.views import article_figure
 
 
-@proofing_manager_or_editor_required
+@proofing_manager_roles
 def proofing_list(request):
     """
     Displays lists of articles and proofing assignments
@@ -493,12 +495,8 @@ def request_typesetting_changes(request, article_id, proofing_task_id):
     """
     article = get_object_or_404(submission_models.Article, pk=article_id)
     proofing_task = get_object_or_404(models.ProofingTask, pk=proofing_task_id)
-
-    if request.GET.get('comments') == 'true':
-        comments = proofing_task.review_comments()
-        form = forms.AssignTypesetter(comments=comments)
-    else:
-        form = forms.AssignTypesetter()
+    form = forms.AssignTypesetter()
+    comments = proofing_task.review_comments()
 
     if request.POST:
         form = forms.AssignTypesetter(request.POST)
@@ -513,16 +511,23 @@ def request_typesetting_changes(request, article_id, proofing_task_id):
             form.add_error(None, 'You must select at least one galley.')
 
         if form.is_valid():
-            typeset_task = form.save(commit=False)
-            typeset_task.proofing_task = proofing_task
-            typeset_task.typesetter = user
-            typeset_task.save()
+            typeset_task = form.save(
+                proofing_task,
+                user,
+                comments,
+                commit=True,
+            )
             typeset_task.galleys.add(*galleys)
             typeset_task.files.add(*files)
 
-            return redirect(reverse('notify_typesetter_changes', kwargs={'article_id': article.pk,
-                                                                         'proofing_task_id': proofing_task.pk,
-                                                                         'typeset_task_id': typeset_task.pk}))
+            return redirect(
+                reverse(
+                    'notify_typesetter_changes',
+                    kwargs={'article_id': article.pk,
+                            'proofing_task_id': proofing_task.pk,
+                            'typeset_task_id': typeset_task.pk},
+                )
+            )
 
     template = 'proofing/request_typesetting_changes.html'
     context = {
@@ -532,6 +537,7 @@ def request_typesetting_changes(request, article_id, proofing_task_id):
         'user': user if request.POST else None,
         'galleys': galleys if request.POST else None,
         'form': form,
+        'comments': comments,
     }
 
     return render(request, template, context)
