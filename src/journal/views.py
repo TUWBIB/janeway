@@ -52,11 +52,15 @@ def home(request):
     :return: a rendered template of the journal homepage
     """
     issues_objects = models.Issue.objects.filter(journal=request.journal)
-    sections = submission_models.Section.objects.filter(journal=request.journal)
+    sections = submission_models.Section.objects.filter(
+        journal=request.journal,
+    )
 
-    homepage_elements = core_models.HomepageElement.objects.filter(content_type=request.model_content_type,
-                                                                   object_id=request.journal.pk,
-                                                                   active=True).order_by('sequence')
+    homepage_elements = core_models.HomepageElement.objects.filter(
+        content_type=request.model_content_type,
+        object_id=request.journal.pk,
+        active=True).order_by('sequence')
+    homepage_element_names = [el.name for el in homepage_elements]
 
     template = 'journal/index.html'
     context = {
@@ -66,19 +70,21 @@ def home(request):
     }
 
     # call all registered plugin block hooks to get relevant contexts
-    for hook in settings.PLUGIN_HOOKS.get('yield_homepage_element_context', []):
-        try:
-            hook_module = plugin_loader.import_module(hook.get('module'))
-            function = getattr(hook_module, hook.get('function'))
-            element_context = function(request, homepage_elements)
 
-            for k, v in element_context.items():
-                context[k] = v
-        except utils_models.Plugin.DoesNotExist as e:
-            if settings.DEBUG:
-                logger.debug(e)
-            else:
-                pass
+    for hook in settings.PLUGIN_HOOKS.get('yield_homepage_element_context', []):
+        if hook.get('name') in homepage_element_names:
+            try:
+                hook_module = plugin_loader.import_module(hook.get('module'))
+                function = getattr(hook_module, hook.get('function'))
+                element_context = function(request, homepage_elements)
+
+                for k, v in element_context.items():
+                    context[k] = v
+            except utils_models.Plugin.DoesNotExist as e:
+                if settings.DEBUG:
+                    logger.debug(e)
+                else:
+                    pass
 
     return render(request, template, context)
 
@@ -162,7 +168,7 @@ def issues(request):
     """
     issue_objects = models.Issue.objects.filter(
         journal=request.journal,
-        issue_type='Issue',
+        issue_type__code='issue',
         date__lte=timezone.now(),
     )
     template = 'journal/issues.html'
@@ -229,17 +235,24 @@ def issue(request, issue_id, show_sidebar=True):
 
 
 @has_journal
-def collections(request):
+def collections(request, issue_type_code="collection"):
     """
     Displays a list of collection Issues.
     :param request: request object
     :return: a rendered template of the collections
     """
-    collections = models.Issue.objects.filter(journal=request.journal, issue_type='Collection')
+    issue_type = get_object_or_404(
+        models.IssueType,
+        journal=request.journal,
+        code=issue_type_code,
+    )
+    collections = models.Issue.objects.filter(
+        journal=request.journal, issue_type=issue_type)
 
     template = 'journal/collections.html'
     context = {
         'collections': collections,
+        'issue_type': issue_type,
     }
 
     return render(request, template, context)
@@ -480,15 +493,32 @@ def replace_article_file(request, identifier_type, identifier, file_id):
 
     if request.POST:
 
-        if 'replacement' in request.POST:
+        if 'replacement' in request.POST and request.FILES:
             uploaded_file = request.FILES.get('replacement-file')
             files.overwrite_file(
                     uploaded_file,
                     file_to_replace,
                     ('articles', article_to_replace.pk),
             )
+        elif not request.FILES and 'back' not in request.POST:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                'No file uploaded',
+            )
 
-        return redirect(request.GET.get('return', 'core_dashboard'))
+            url = '{url}?return={get}'.format(
+                url=reverse('article_file_replace',
+                            kwargs={'identifier_type': 'id',
+                                    'identifier': article_to_replace.pk,
+                                    'file_id': file_to_replace.pk}
+                            ),
+                get=request.GET.get('return', ''),
+            )
+
+            return redirect(url)
+
+        return redirect(request.GET.get('return', reverse('core_dashboard')))
 
     template = "journal/replace_file.html"
     context = {
@@ -706,7 +736,7 @@ def article_figure(request, article_id, galley_id, file_name):
     return files.serve_file(request, figure, figure_article)
 
 
-@production_user_or_editor_required
+@editor_user_required
 def publish(request):
     """
     Displays a list of articles in pre publication for the current journal
@@ -724,7 +754,7 @@ def publish(request):
     return render(request, template, context)
 
 
-@production_user_or_editor_required
+@editor_user_required
 def publish_article(request, article_id):
     """
     View allows user to set an article for publication
@@ -741,7 +771,7 @@ def publish_article(request, article_id):
 
     doi_data, doi = logic.get_doi_data(article)
     issues = request.journal.issues()
-    new_issue_form = issue_forms.NewIssue()
+    new_issue_form = issue_forms.NewIssue(journal=article.journal)
     modal = request.GET.get('m', None)
     pubdate_errors = []
 
@@ -836,7 +866,7 @@ def publish_article(request, article_id):
 
 
 @require_POST
-@production_user_or_editor_required
+@editor_user_required
 def publish_article_check(request, article_id):
     """
     A POST only view that updates checklist items on the prepublication page.
@@ -884,11 +914,11 @@ def manage_issues(request, issue_id=None, event=None):
     """
     from core.logic import resize_and_crop
     issue_list = models.Issue.objects.filter(journal=request.journal)
-    issue, modal, form, galley_form = None, None, issue_forms.NewIssue(), None
+    issue, modal, form, galley_form = None, None, issue_forms.NewIssue(journal=request.journal), None
 
     if issue_id:
         issue = get_object_or_404(models.Issue, pk=issue_id)
-        form = issue_forms.NewIssue(instance=issue)
+        form = issue_forms.NewIssue(instance=issue, journal=issue.journal)
         galley_form = issue_forms.IssueGalleyForm()
         if event == 'edit':
             modal = 'issue'
@@ -917,9 +947,9 @@ def manage_issues(request, issue_id=None, event=None):
             return redirect(reverse('manage_issues'))
 
         if issue:
-            form = issue_forms.NewIssue(request.POST, request.FILES, instance=issue)
+            form = issue_forms.NewIssue(request.POST, request.FILES, instance=issue, journal=request.journal)
         else:
-            form = issue_forms.NewIssue(request.POST, request.FILES)
+            form = issue_forms.NewIssue(request.POST, request.FILES, journal=request.journal)
 
         if form.is_valid():
             save_issue = form.save(commit=False)

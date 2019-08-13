@@ -3,7 +3,7 @@ boto==2.46.1
 bs4==0.0.1
 colorlog==3.1.4
 chardet==3.0.4
-Django==1.11.22
+Django==1.11.23
 -e git+https://github.com/GabrielUlici/django-bootstrap4@d230ec23d9f8f08c1505e0679ce0c6dba8090f0a#egg=django_bootstrap4
 -e git+https://github.com/BirkbeckCTP/django-foundation-form.git#egg=foundationform
 django-debug-toolbar==1.8
@@ -46,4 +46,5 @@ ua-parser==0.7.2
 user-agents==1.0.1
 -e git+https://github.com/BirkbeckCTP/django-materialize.git@bcfbfd9150887328dddce965674c84b2b6e6b785#egg=django_materialize
 django-hijack
+geoip2
 pdf2image
