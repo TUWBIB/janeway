@@ -210,7 +210,6 @@ class ArticleMetrics:
 
 
 def store_article_access(request, article, access_type, galley_type='view'):
-    from core import models as core_models
 
     try:
         user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))
@@ -235,12 +234,6 @@ def store_article_access(request, article, access_type, galley_type='view'):
         ).count()
 
         if not check:
-
-            country = None
-            try:
-                country = core_models.Country.objects.get(code=code)
-            except core_models.Country.DoesNotExist:
-                pass    
 
             new_access = models.ArticleAccess.objects.create(
                 article=article,
