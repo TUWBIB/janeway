@@ -21,6 +21,7 @@ from django.http import HttpResponse
 from django.contrib.sessions.models import Session
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.conf import settings as django_settings
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -307,18 +308,29 @@ def orcid_registration(request, token):
 
 def activate_account(request, token):
     """
-    Activates a user account if an Account object with the matching token is found and is not already active.
+    Activates a user account if an Account object with the
+    matching token is found and is not already active.
     :param request: HttpRequest object
     :param token: string, Account.confirmation_token
     :return: HttpResponse object
     """
     try:
         account = models.Account.objects.get(confirmation_code=token, is_active=False)
+    except models.Account.DoesNotExist:
+        account = None
+
+    if account and request.POST:
         account.is_active = True
         account.confirmation_code = None
         account.save()
-    except models.Account.DoesNotExist:
-        account = None
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            'Account activated',
+        )
+
+        return redirect(reverse('core_login'))
 
     template = 'core/accounts/activate_account.html'
     context = {
@@ -344,10 +356,21 @@ def edit_profile(request):
             email_address = request.POST.get('email_address')
             try:
                 validate_email(email_address)
-                logic.handle_email_change(request, email_address)
-                return redirect(reverse('website_index'))
+                try:
+                    logic.handle_email_change(request, email_address)
+                    return redirect(reverse('website_index'))
+                except IntegrityError:
+                    messages.add_message(
+                        request,
+                        messages.WARNING,
+                        'An account with that email address already exists.',
+                    )
             except ValidationError:
-                messages.add_message(request, messages.WARNING, 'Email address is not valid.')
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    'Email address is not valid.',
+                )
 
         elif 'change_password' in request.POST:
             old_password = request.POST.get('current_password')
@@ -473,7 +496,7 @@ def dashboard(request):
         'assigned_articles_for_user_review_completed_count': review_models.ReviewAssignment.objects.filter(
             Q(is_complete=True) &
             Q(reviewer=request.user) &
-            Q(date_declined__isnull=False), article__journal=request.journal).count(),
+            Q(date_declined__isnull=True), article__journal=request.journal).count(),
 
         'copyeditor_requests': copyedit_models.CopyeditAssignment.objects.filter(
             Q(copyeditor=request.user) &
@@ -1426,18 +1449,27 @@ def plugin_list(request):
     plugin_list = list()
 
     if request.journal:
-        plugins = util_models.Plugin.objects.filter(enabled=True)
+        plugins = util_models.Plugin.objects.filter(
+            enabled=True,
+            homepage_element=False,
+        )
     else:
-        plugins = util_models.Plugin.objects.filter(enabled=True, press_wide=True)
+        plugins = util_models.Plugin.objects.filter(
+            enabled=True,
+            press_wide=True,
+            homepage_element=False,
+        )
 
     for plugin in plugins:
         try:
             module_name = "{0}.{1}.plugin_settings".format("plugins", plugin.name)
             plugin_settings = import_module(module_name)
-            plugin_list.append({'model': plugin,
-                                'manager_url': getattr(plugin_settings, 'MANAGER_URL', ''),
-                                'name': getattr(plugin_settings, 'PLUGIN_NAME')
-                                })
+            plugin_list.append(
+                {'model': plugin,
+                 'manager_url': getattr(plugin_settings, 'MANAGER_URL', ''),
+                 'name': getattr(plugin_settings, 'PLUGIN_NAME')
+                 },
+            )
         except ImportError as e:
             logger.error("Importing plugin %s failed: %s" % (plugin, e))
             pass

@@ -359,6 +359,11 @@ class Article(models.Model):
     manuscript_files = models.ManyToManyField('core.File', null=True, blank=True, related_name='manuscript_files')
     data_figure_files = models.ManyToManyField('core.File', null=True, blank=True, related_name='data_figure_files')
     supplementary_files = models.ManyToManyField('core.SupplementaryFile', null=True, blank=True, related_name='supp')
+    source_files = models.ManyToManyField(
+        'core.File',
+        blank=True,
+        related_name='source_files',
+    )
 
     # Galley
     render_galley = models.ForeignKey('core.Galley', related_name='render_galley', blank=True, null=True,
@@ -803,13 +808,17 @@ class Article(models.Model):
     def can_edit(self, user):
         # returns True if a user can edit an article
         # editing is always allowed when a user is staff
-        # otherwise, the user must own the article and it must not have already been published
+        # otherwise, the user must own the article and it
+        # must not have already been published
 
         if user.is_staff:
             return True
         elif user in self.section_editors():
             return True
-        elif not user.is_anonymous() and user.is_editor(request=None, journal=self.journal):
+        elif not user.is_anonymous() and user.is_editor(
+                request=None,
+                journal=self.journal,
+        ):
             return True
         else:
             if self.owner != user:
