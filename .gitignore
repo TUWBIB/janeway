@@ -117,6 +117,7 @@ src/auth\.json
 
 src/test\.txt
 venv/**
+src/.DS_Store
 .DS_Store
 src/\.vscode/
 src/vl2janeway
