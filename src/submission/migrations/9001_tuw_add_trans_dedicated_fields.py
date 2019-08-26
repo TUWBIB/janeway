@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0035_auto_20190712_2015'),
+        ('submission', '9000_tuw_add_visible_to_section'),
     ]
 
     operations = [
