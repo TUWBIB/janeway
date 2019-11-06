@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('journal', '0034_migrate_issue_types'),
+        ('journal', '0036_set_default_xslt'),
     ]
 
     operations = [
