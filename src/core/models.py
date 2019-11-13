@@ -842,7 +842,7 @@ class Galley(models.Model):
     def render(self):
         return files.render_xml(self.file, self.article, xsl_file=self.xsl_file)
 
-    def has_missing_image_files(self):
+    def has_missing_image_files(self, show_all=False):
         xml_file_contents = self.file.get_file(self.article)
 
         souped_xml = BeautifulSoup(xml_file_contents, 'lxml')
@@ -863,18 +863,23 @@ class Galley(models.Model):
                 # attempt to pull a URL from the specified attribute
                 url = os.path.basename(val.get(attribute, None))
 
-                try:
-                    try:
-                        self.images.get(original_filename=url)
-                    except File.MultipleObjectsReturned:
-                        self.images.filter(original_filename=url).first()
-                except File.DoesNotExist:
+                if show_all:
                     missing_elements.append(url)
+                else:
+                    if not self.images.filter(original_filename=url).first():
+                        missing_elements.append(url)
 
         if not missing_elements:
             return []
         else:
             return missing_elements
+
+    def all_images(self):
+        """
+        Returns all images/figures in a galley file.
+        :return: A list of image paths found in the galley
+        """
+        return self.has_missing_image_files(show_all=True)
 
     def file_content(self, dont_render=False):
         if self.file.mime_type == "text/html" or dont_render:
