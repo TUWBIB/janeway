@@ -258,7 +258,7 @@ def copy_article_file(article_to_copy_from, file_to_copy, article_to_copy_to):
     shutil.copy(file_to_copy.get_file_path(article_to_copy_from), file_path)
 
 
-def save_file_to_disk(file_to_handle, filename, folder_structure):
+def save_file_to_disk(file_to_handle, filename, folder_structure, chunk=True):
     """ Save a file to the disk in the specified folder
 
     :param file_to_handle: the file itself
@@ -274,8 +274,11 @@ def save_file_to_disk(file_to_handle, filename, folder_structure):
 
     # write the file to disk
     with open(path, 'wb') as fd:
-        for chunk in file_to_handle.chunks():
-            fd.write(chunk)
+        if chunk:
+            for chunk in file_to_handle.chunks():
+                fd.write(chunk)
+        else:
+            fd.write(file_to_handle)
 
 
 def get_file(file_to_get, article):
