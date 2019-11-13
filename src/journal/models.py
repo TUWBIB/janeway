@@ -442,7 +442,7 @@ class Issue(models.Model):
 
     @property
     def display_title(self):
-        if self.issue_type == 'Collection':
+        if self.issue_type.code != 'issue':
             return self.issue_title
 
         journal = self.journal
@@ -595,7 +595,10 @@ class Issue(models.Model):
             issue=Value(self.pk),
         ).values_list("order")
 
-        issue_articles = self.articles.all().prefetch_related(
+        issue_articles = self.articles.filter(
+            stage=submission_models.STAGE_PUBLISHED,
+            date_published__lte=timezone.now(),
+        ).prefetch_related(
             'authors', 'frozenauthor_set',
             'manuscript_files',
         ).select_related(
