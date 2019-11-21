@@ -55,6 +55,48 @@ class HistoricArticleAccess(models.Model):
         self.save()
 
 
+def object_types():
+    return (
+        ('book', 'Book'),
+        ('article', 'Article'),
+    )
+
+
+class AbstractForwardLink(models.Model):
+    article = models.ForeignKey('submission.Article', blank=True, null=True)
+    doi = models.CharField(max_length=255)
+    object_type = models.CharField(max_length=10, choices=object_types())
+    year = models.PositiveIntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class ArticleLink(AbstractForwardLink):
+    journal_title = models.TextField()
+    journal_issn = models.CharField(max_length=20)
+    article_title = models.TextField()
+    volume = models.CharField(max_length=10, blank=True, null=True)
+    issue = models.CharField(max_length=10, blank=True, null=True)
+
+    def __str__(self):
+        return 'Article Link: {}'.format(
+            self.article_title
+        )
+
+
+class BookLink(AbstractForwardLink):
+    title = models.TextField()
+    isbn_print = models.TextField()
+    isbn_electronic = models.TextField()
+    component_number = models.TextField()
+
+    def __str__(self):
+        return 'Book Link: {}'.format(
+            self.title
+        )
+
+
 def alt_metric_choices():
     return (
         ('twitter', 'Twitter'),
