@@ -1045,6 +1045,13 @@ class Article(models.Model):
         except ObjectDoesNotExist:
             return None
 
+    @property
+    def citation_count(self):
+        article_link_count = self.articlelink_set.all().count()
+        book_link_count = self.booklink_set.all().count()
+
+        return article_link_count + book_link_count
+
 
 class FrozenAuthor(models.Model):
     article = models.ForeignKey('submission.Article', blank=True, null=True)
