@@ -10,7 +10,9 @@
             class="fa fa-edit">&nbsp;</i>Edit</a>
 {% endif %}
 <h4>{{ article.title|safe }}</h4>
+{% if article.title_de %}<h4>{{ article.title_de|safe }}</h4>{% endif %}
 {% if article.subtitle %}<h4>{{ article.subtitle|safe }}</h4>{% endif %}
+{% if article.subtitle_de %}<h4>{{ article.subtitle_de|safe }}</h4>{% endif %}
 <table class="scroll small">
     <tr>
         <th>Section</th>
@@ -43,10 +45,22 @@
         <td colspan="4">{{ article.abstract|safe }}</td>
     </tr>
     <tr>
+        <th colspan="4">Abstract (De)</th>
+    </tr>
+    <tr>
+        <td colspan="4">{{ article.abstract_de|safe }}</td>
+    </tr>
+    <tr>
         <th colspan="4">Keywords</th>
     </tr>
     <tr>
         <td colspan="4">{% for keyword in article.keywords.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}No keywords recorded{% endfor %}</td>
+    </tr>
+    <tr>
+        <th colspan="4">Keywords (De)</th>
+    </tr>
+    <tr>
+        <td colspan="4">{% for keyword_de in article.keywords_de.all %}{{ keyword_de }}{% if not forloop.last %}, {% endif %}{% empty %}No keywords recorded{% endfor %}</td>
     </tr>
     {% if journal_settings.general.submission_summary %}
         <tr>
