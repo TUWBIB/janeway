@@ -10,7 +10,13 @@
             {% if request.journal.header_image %}
                 <img src="{{ request.journal.header_image.url }}" class="img-fluid">
             {% else %}
-            <img src="{% static "TUW/img/header.png" %}">
+                {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
+                    <img src="{% static "TUW/img/jfm_header.png" %}">
+                {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                    <img src="{% static "TUW/img/oes_header.png" %}">
+                {% else %}
+                    <img src="{% static "TUW/img/header.png" %}">
+                {% endif %}
             {% endif %}
         {% else %}
             <a href="/">{% svg request.press_cover %}</a>
