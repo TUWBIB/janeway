@@ -3,18 +3,6 @@
     font-size: 13.3px;
 }
 
-
-.halfsize {
-    float: right;
-    -moz-transform:scale(0.5);
-    -webkit-transform:scale(0.5);
-    transform:scale(0.5);    
-}
-
-.row {
-    width: 100%;
-}
-
 h1, h2, h3 {
     color: #274E90;
 }
