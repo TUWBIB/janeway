@@ -18,6 +18,32 @@ h2 {
     
 }
 
+#header {
+    background-color: red;
+}
+
+@media (max-width: 640px) 
+{
+    #header_label_jfm {
+        display: none !important;
+    }
+}
+
+@media (max-width: 910px) 
+{
+    #header_logo_jfm {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1324px) 
+{
+    #header_logo_bib {
+        display: none !important;
+    }
+}
+
+
 body > .fluid-container {
     padding: 60px 15px 0;
 }
