@@ -4,7 +4,7 @@
 {% load i18n %}
 {% load hooks %}
 
-<div class="container-fluid">
+<!--<div class="container-fluid">
         {% if request.journal %}
         {% if request.journal.header_image %}
             <img src="{{ request.journal.header_image.url }}" class="img-fluid">
@@ -20,10 +20,22 @@
     {% else %}
         <a href="/">{% svg request.press_cover %}</a>
     {% endif %}
-    </div>
+    </div>-->
 
-<div class="container-fluid text-right">
-        <img src="{% static "TUW2/img/TU_Wien_Bibliothek_CMYK.png" %}">
+<div class="container-fluid">
+    <div class="row" id="header">
+        {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
+            <div class="col">
+                <img id="header_label_jfm" src="{% static "TUW2/img/jfm/jfm_label_cropped_transparent.png" %}">
+            </div>
+            <div class="col">
+                <img id="header_logo_jfm" src="{% static "TUW2/img/jfm/jfm_logo_cropped_transparent.png" %}">
+            </div>
+            <div class="col text-align:right">
+                <img id="header_logo_bib" src="{% static "TUW2/img/TU_Wien_Bibliothek_CMYK_halfsize.png" %}">
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <nav class="navbar navbar-toggleable-sm navbar-light bg-light align-items-start">
