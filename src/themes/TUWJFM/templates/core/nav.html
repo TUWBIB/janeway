@@ -55,7 +55,22 @@
                 <li class="nav-item"><a href="{% url 'imprint' %}" class="nav-link">Imprint</a></li>
                 <li class="nav-item"><a href="{% url 'ethics' %}" class="nav-link">Publication Ethics and Publication Malpractice Statement</a></li>
 
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="About"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"">About</a>
+                    <div class="dropdown-menu" aria-labelledby="About">
+                            <a href="{% url 'mission_statement' %}" class="dropdown-item">Mission Statement</a>
+                            <a href="{% url 'scientific_committee' %}" class="dropdown-item">Scientific Committee</a>
+                            <a href="{% url 'call_for_papers' %}" class="dropdown-item">Call For Papers</a>
+                            <a href="{% url 'imprint' %}" class="dropdown-item">Imprint</a>
+                            <a href="{% url 'ethics' %}" class="dropdown-item">Publication Ethics and Publication Malpractice Statement</a>
+                   </div>
 
+                </li>
+
+
+
+                
                 {% if request.journal.nav_news %}
                     <li class="nav-item"><a href="{% url 'core_news_list' %}" class="nav-link">News</a></li>{% endif %}
     
@@ -105,8 +120,10 @@
                         <li class="nav-item"><a href="{{ item.url }}" class="nav-link">{{ item.link_name }}</a></li>
                     {% endif %}
                 {% endfor %}
+<!--                
                 {% if request.journal.nav_contact %}
                     <li class="nav-item"><a href="{% url 'contact' %}" class="nav-link">Contact</a></li>{% endif %}
+-->
                 {% hook 'nav_block' %}
                 {% if request.journal.nav_start and not journal_settings.general.disable_journal_submission %}
                     <li class="nav-item"><a href="{% url 'submission_start' %}" class="nav-link"><i
