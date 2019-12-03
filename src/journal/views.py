@@ -1542,7 +1542,6 @@ def sitemap(request):
     }
     return render(request, template, context, content_type="application/xml")
 
-
 def search(request):
     """
     Allows a user to search for articles by name or author name.
@@ -1951,4 +1950,35 @@ def newsletter(request):
         'newsletter_form': newsletter_form,
     }
 
+    return render(request, template, context)
+
+# added TUW
+def imprint(request):
+    template = 'journal/imprint.html'
+    context= { }
+    return render(request, template, context)
+
+def contact_static(request):
+    template = 'journal/contact_static.html'
+    context= { }
+    return render(request, template, context)
+
+def mission_statement(request):
+    template = 'journal/mission_statement.html'
+    context= { }
+    return render(request, template, context)
+
+def scientific_committee(request):
+    template = 'journal/scientific_committee.html'
+    context= { }
+    return render(request, template, context)
+
+def call_for_papers(request):
+    template = 'journal/call_for_papers.html'
+    context= { }
+    return render(request, template, context)
+
+def ethics(request):
+    template = 'journal/ethics.html'
+    context= { }
     return render(request, template, context)

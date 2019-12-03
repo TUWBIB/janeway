@@ -195,4 +195,25 @@ urlpatterns = [
         views.send_user_email, name='send_user_email'),
     url(r'^email/user/(?P<user_id>\d+)/article/(?P<article_id>\d+)/$',
         views.send_user_email, name='send_user_email_article'),
+
+
+    # added TUW
+    # Imprint
+    url(r'^imprint/$',
+        views.imprint, name='imprint'),
+    # Contact (static, no form)
+    url(r'^contact_static/$',
+        views.contact_static, name='contact_static'),
+    # Mission statement
+    url(r'^mission_statement/$',
+        views.mission_statement, name='mission_statement'),
+    # Scientific committee
+    url(r'^scientific_committee/$',
+        views.scientific_committee, name='scientific_committee'),
+    # Call for papers
+    url(r'^call_for_papers/$',
+        views.call_for_papers, name='call_for_papers'),
+    # Ethics
+    url(r'^ethics/$',
+        views.ethics, name='ethics'),
 ]
