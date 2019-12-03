@@ -1,0 +1,225 @@
+{% extends "core/base.html" %}
+{% load static from staticfiles %}
+{% load hooks %}
+{% load i18n %}
+{% load files %} `
+
+{% block title %}{{ article.authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
+    {{ journal_settings.general.journal_name | striptags }} {% endblock %}
+
+{% block head %}
+
+    <!-- Commented out meta fields are TODO -->
+
+    <!-- <meta name="DC.Coverage.spatial" xml:lang="en" content="London"/> -->
+
+    <!-- <meta name="DC.Coverage.temporal" xml:lang="en" content="long-eighteenth century"/> -->
+
+
+    <meta name="DC.Date.created" scheme="ISO8601" content="{{ article.date_published }}"/>
+    <meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="{{ article.date_submitted }}"/>
+    <meta name="DC.Date.issued" scheme="ISO8601" content="{{ article.date_published }}"/>
+    <meta name="DC.Date.modified" scheme="ISO8601" content="{{ article.date_published }}"/>
+
+    <meta name="DC.Description" xml:lang="en" content="{{ article.abstract | striptags }}"/>
+
+    <meta name="DC.Format" scheme="IMT" content="xml"/>
+    <meta name="DC.Format" scheme="IMT" content="pdf"/>
+    <meta name="DC.Identifier.pageNumber" content="{{ article.page_number }}"/>
+    {% if article.identifier.id_type == "doi" %}
+        <meta name="DC.Identifier.DOI" content="{{ article.identifier.identifier }}"/>{% endif %}
+    <meta name="DC.Identifier.URI" content="{{ article.url }}"/>
+    <meta name="DC.Language" scheme="ISO639-1" content="{{ article.language }}"/>
+    <meta name="DC.Rights" content="{{ article.licence.text | striptags }}"/>
+    <meta name="DC.Source" content="{{ journal_settings.general.journal_name }}"/>
+    <meta name="DC.Source.ISSN" content="{{ journal_settings.general.issn }}"/>
+    <meta name="DC.Source.Issue" content="{{ article.issue.issue }}"/>
+    <meta name="DC.Source.Volume" content="{{ article.issue.volume }}"/>
+    <meta name="DC.Source.URI" content="{% journal_url 'website_index' %}"/>
+    <meta name="DC.Title" content="{{ article.title | striptags }}"/>
+
+    <meta name="citation_journal_title" content="{{ journal_settings.general.journal_name }}"/>
+    <meta name="citation_issn" content="{{ journal_settings.general.issn }}"/>
+    {% for author in article.frozen_authors.all %}
+        <meta name="citation_author" content="{{ author.full_name }}"/>
+        {% if not '@journal.org' in author.author.email %}
+            <meta name="citation_author_email" content="{{ author.author.email }}"/>{% endif %}
+        <meta name="citation_author_institution" content="{{ author.institution }}"/>{% endfor %}
+    <meta name="citation_title" content="{{ article.title | striptags }}"/>
+    <meta name="citation_publication_date" content="{{ article.date_published }}"/>
+    <meta name="citation_volume" content="{{ article.issue.volume }}"/>
+    <meta name="citation_issue" content="{{ article.issue.issue }}"/>{% if article.identifier.id_type == "doi" %}
+    <meta name="citation_doi" content="{{ article.identifier.identifier }}"/>{% endif %}
+    <meta name="citation_abstract_html_url" content="{{ article.url }}"/>
+    <meta name="citation_language" content="{{ article.language }}"/>
+
+    {% if article.keywords %}
+        <meta name="citation_keywords" xml:lang="en" content="
+
+
+
+
+
+                {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
+    {% endif %}
+
+    {% for pdf in pdfs %}
+        <meta name="citation_pdf_url" content="{% url 'article_file_download' identifier_type identifier pdf.id %}"/>
+    {% endfor %}
+    {% include "elements/journal/social_meta.html" %}
+{% endblock %}
+
+{% block body %}
+    
+    <div class="row">
+        <div class="col-4"> 
+            {% for galley in galleys %}
+            <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">
+            {% if article.large_image_file.id %}
+                <img class="card-img img-fluid article-img"
+                        src="{% url 'article_file_download' 'id' article.id article.large_image_file.id %}"
+                        alt="{{ article.title | striptags }}">
+            {% elif journal.default_large_image %}
+                <img class="card-img img-fluid article-img"
+                        src="{{ journal.default_large_image.url }}"
+                        alt="{{ article.title | striptags }}">
+            {% else %}
+                <img class="card-img"
+                        src=""
+                        alt="{{ article.title | striptags }}">
+            {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        <div class="col">
+            <h1 class="mainheader">{% trans "Journal Article" %}</h1>
+            <table class="infotable">
+                <tbody>
+                    <tr>
+                        <th>{% trans "Title" %}</th>
+                        <td>{{ article.title }}</td>
+                    </tr>
+                    {% if article.frozen_authors.all %}
+                    <tr>
+                        <th>{% trans "Author" %}</th>
+                        <td>
+                            {% for author in article.frozen_authors.all %}
+                            {% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %}& {% endif %}
+                            {{ author.citation_name }}
+                            {% if author.author.orcid %}
+                            <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUW/img/orcid_16x16.png" %}"></a>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if article.is_published %}
+                    <tr>
+                            <th>{% trans "Published on" %}</th>
+                            <td>{{ article.date_published|date:"d M Y" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                            <th>{% trans "Accepted on" %}</th>
+                            <td>{{ article.date_accepted|date:"d M Y" }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if article.publisher %}
+                    <tr>
+                        <th>{% trans "Published by" %}</th>
+                        <td>{{ article.publisher}}</td>
+                    </tr>
+                    {% endif %}
+<!--                    
+                    {% if article.edition %}
+                    <tr>
+                        <th>Edition</th>
+                        <td>{{ article.edition }}</td>
+                    </tr>
+                    {% endif %}
+-->
+                    {% if article.keywords.all %}
+                    <tr>
+                        <th>{% trans "Keywords (English)" %}</th>
+                        <td>{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    </tr>
+                    {% endif %}
+                    {% if article.keywords_de.all %}
+                    <tr>
+                        <th>{% trans "Keywords (German)" %}</th>
+                        <td>{% for keyword in article.keywords_de.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    </tr>
+                    {% endif %}
+                    {% for x in article.get_identifiers %}
+                        {% if x.id_type == "urn" %}
+                    <tr>
+                        <th>URN</th>
+                        <td><a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                    </tr>
+                    {% endif %}
+                    {% if x.id_type == "ac" %}
+                    <tr>
+                        <th>AC</th>
+                        <td><a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                    </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h2 class="subheader">Links</h2>
+            <table class="infotable">
+                <tbody>
+                    {% for galley in galleys %}
+                    <tr>
+                        <th>{% if forloop.first %} {% trans "Download" %} {% endif %}</th>
+                        <td>
+                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title }} [{% file_size galley.file article %}]</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if article.abstract %}
+            <div id="article">
+                {% if article.abstract != '' %}
+                    <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
+                    <p>{{ article.abstract | safe }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if article.abstract_de %}
+            <div id="article">
+                {% if article.abstract_de != '' %}
+                    <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
+                    <p>{{ article.abstract_de | safe }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if article.license %}
+            <h2 class="subheader">License</h2>
+            <table class="infotable">
+                <tbody>
+                    <tr>
+                        {% if article.license.tuw_cc_img_url %}
+                        <th>                      
+                            <img alt="{{article.license.short_name}}" src="{{article.license.tuw_cc_img_url}}">
+                        </th>
+                        {% endif %}
+
+<!--                        <td>{{ article.license.text }}</td> -->
+                        <td>
+                            <a href="{{article.license.url}}">{{ article.license.name }}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %} 
+
+{% block js %}
+    <script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+    {% hook 'article_js_block' %}
+{% endblock js %}
