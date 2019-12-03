@@ -1,0 +1,198 @@
+* {
+    font-family: Roboto, Verdana, "Helvetica Neue", Arial;
+    font-size: 13.3px;
+}
+
+h1, h2, h3 {
+    color: #274E90;
+}
+
+h1 {
+    font-size: 120%;
+    max-width: 55em;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+
+/*
+#header {
+    background-color: red;
+}
+*/
+
+
+.tac
+{
+    text-align: center;
+}
+
+.tar
+{
+    text-align: right;
+}
+
+.image_section img{
+    display: block;
+}
+
+@media (max-width:640px){
+    .image_section img:first-child{
+        display:none;
+    }
+}
+
+@media (max-width: 640px) 
+{
+    #header_label_jfm {
+        display: none !important;
+    }
+}
+
+@media (max-width: 400px) 
+{
+    #header_logo_jfm {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1324px) 
+{
+    #header_logo_bib {
+        display: none !important;
+    }
+}
+
+
+body > .fluid-container {
+    padding: 60px 15px 0;
+}
+
+.navbar {
+    padding: 0;
+    background-color: transparent;
+    flex-direction: column;
+}
+
+.navbar form {
+    height: 100%;
+}
+
+.navigation {
+    background-color: #103a59;
+    padding: 2px;
+    padding-top: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.navigation > ul > li {
+    border-right: 1px solid #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: -2px;
+    padding-top: 2px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #fff;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #ddd;
+}
+
+.sidebar {
+    min-width: 250px;
+    padding: 10px;
+    padding-top: 40px;
+}
+
+.sidebar-header {
+    border-bottom: 1px solid #e4e4e4;
+    border-top: 1px solid #e4e4e4;
+    font-weight: bold;
+    color: #777676;
+    background-color: #f8f8f8;
+    padding: 1px 1px 1px 15px;
+    font-size: 1em;
+}
+
+.sidebar-content {
+    padding: 5px;
+    padding-left: 20px;
+}
+
+.newsletter-form input {
+    width: 100%;
+}
+
+.newsletter-form select {
+    width: 100%;
+}
+
+.subheader {
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+    color: #666;
+    padding: .3em .4em .2em 2px;
+    font-size: 13.3px;
+}
+
+.infotable {
+    margin-bottom: 1em;
+}
+
+.infotable th {
+    color: #666;
+    width: 11em;
+    padding: 0em 4px 0;
+    font-weight: normal;
+    vertical-align: top;
+}
+
+.fa-file-pdf-o {
+    color: #0275d8;
+}
+
+.wrapper {
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 100px 20px 160px 20px 160px;
+    grid-template-rows: 30px 30px;
+    background-color: #fff;
+    color: #444;
+    grid-template-areas: 
+        "a b c f g" 
+        "a d e x y"; 
+    align-items: center;
+    justify-items: start;
+    }
+
+    .journal_logo {
+        grid-area: a;
+    }
+
+    .journal_phone_img {
+        grid-area: b;
+    }
+
+    .journal_phone_text {
+        grid-area: c;
+        
+    }
+
+    .journal_email_img {
+        grid-area: d;
+    }
+
+    .journal_email_text {
+        grid-area: e;
+    }
+
+    .journal_imprint_img {
+        grid-area: f;
+    }
+
+    .journal_imprint_text {
+        grid-area: g;
+    }
