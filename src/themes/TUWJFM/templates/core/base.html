@@ -88,57 +88,34 @@
             </div>
             <div class="col-md-6">
                 <small>
-                    {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-                        <div class=wrapper>
-                        <img class="journal_logo" src="{% static "TUW/img/ifm-logo-footer-schrift.png"%}" style="height:65px; margin-right: 20px;">
-                        <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Journal for Facility Management">
-                        <span class="journal_phone_text">+43-1-58801-42701</span>
-                        <img class="journal_email_img" src="{% static "TUW/img/pic_mail.png"%}" alt="mail" title="E-Mail Redaktion Journal for Facility Management">
-                        <span class="journal_email_text"><a href="mailto:office@ifm.tuwien.ac.at">office@ifm.tuwien.ac.at</a> </span>
-                        <img class="journal_imprint_img" src="{% static "TUW/img/info_18px.png"%}" alt="Impressum" title="Impressum">
-                        <span class="journal_imprint_text">Impressum</span>
-                        </div>
-                    {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-                        <div class=wrapper>
-                        <img class="journal_logo" src="{% static "TUW/img/ifip_h54px.png"%}" style="height:65px; margin-right: 20px;">
-                        <img class="journal_phone_img" src="{% static "TUW/img/pic_phone.png"%}" alt="phone" title="Telefon - Der Öffentliche Sektor">
-                        <span class="journal_phone_text">+43-1-58801-280321</span>
-                        <img class="journal_email_img" src="{% static "TUW/img/pic_mail.png"%}" alt="mail" title="E-Mail Redaktion Der Öffentliche Sektor">
-                        <span class="journal_email_text"><a href="mailto:oes@ifip.tuwien.ac.at">oes@ifip.tuwien.ac.at</a> </span>
-                        <img class="journal_imprint_img" src="{% static "TUW/img/info_18px.png"%}" alt="Impressum" title="Impressum">
-                        <span class="journal_imprint_text">Impressum</span>
-                        </div>
-                    {% else %}
-                          {% include "press/elements/press_footer.html" %}
-                    {% endif %}
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <a href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
+                        </li>
+                        <li class="list-inline-item">
+                            {% if LANGUAGE_CODE == 'de' %}
+                                <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Datenschutzerklaerung_Websites.pdf">
+                            {% else %}
+                                <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Data_Protection_Declaration_Websites.pdf">
+                            {% endif %}
+                            {% trans "Privacy Policy" %}
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="{% url 'contact' %}">{% trans "Contact" %}</a>
+                        </li>
+                    </ul>
                 </small>
             </div>
             <div class="col-md-4 text-right">
                 <small><p>
                     <ul class="list-inline">
-                        <li class="list-inline-item"><a href="/site/privacy/">{% trans "Privacy Policy" %}</a></li>
+<!--                        <li class="list-inline-item"><a href="/site/privacy/">{% trans "Privacy Policy" %}</a></li>
                         <li class="list-inline-item"><a href="/sitemap">{% trans "Sitemap" %}</a></li>
                         <li class="list-inline-item"><a href="{% url 'contact' %}">{% trans "Contact" %}</a></li>
                         {% if not request.user.is_authenticated %}
                             <li><a href="{% url 'core_login' %}">Login</a></li>{% endif %}
-                        {% if journal_settings.general.switch_language %}
-                            <li class="list-inline-item">
-                                <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-                                    <input name="next" type="hidden" value="{{ request.PATH }}"/>
-                                    <select name="language" onchange="this.form.submit()">
-                                        {% get_current_language as LANGUAGE_CODE %}
-                                        {% get_available_languages as LANGUAGES %}
-                                        {% get_language_info_list for LANGUAGES as languages %}
-                                        {% for language in languages %}
-                                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
-                                                    selected{% endif %}>
-                                                {{ language.name_local }} ({{ language.code }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
-                            </li>
-                        {% endif %}
+-->
                     </ul>
                     </p></small>
             </div>

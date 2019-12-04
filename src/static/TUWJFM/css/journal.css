@@ -14,12 +14,15 @@ h1 {
     margin-bottom: 1em;
 }
 
-/*
-#header {
-    background-color: red;
-}
-*/
 
+#header {
+    background-color: cyan;
+}
+
+#tuw-logo {
+    width: 93.0667px;
+    height: 93.0667px;
+}
 
 .tac
 {
@@ -78,7 +81,8 @@ body > .fluid-container {
 }
 
 .navigation {
-    background-color: #103a59;
+/*    background-color: #103a59; */
+    background-color: #006699;
     padding: 2px;
     padding-top: 2px;
     padding-left: 20px;
@@ -92,6 +96,8 @@ body > .fluid-container {
     margin-top: -2px;
     padding-top: 2px;
 }
+
+
 
 .navbar-light .navbar-nav .nav-link {
     color: #fff;
