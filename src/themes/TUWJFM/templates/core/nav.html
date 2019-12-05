@@ -178,9 +178,9 @@
             <li class="nav-item">
             <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
                     {% csrf_token %}
-                    <input class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
+                    <input id="searchField" class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
                     <input type="hidden" name="sort" value="title">
-                    <button class="btn my-2 my-sm-0" type="submit">Search</button>
+                    <button id="searchBtn" class="btn my-2 my-sm-0" type="submit">Search</button>
             </form>            
             </li>
             {% if journal_settings.general.switch_language %}
@@ -208,7 +208,24 @@
         </div>
     </nav>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#searchBtn').prop('disabled',true);
+        if($('#searchField').val().length <3 )
+                $('#searchBtn').prop('disabled',true);            
+            else
+                $('#searchBtn').prop('disabled',false);
 
+        $('#searchField').keyup(function()
+        {
+            if($(this).val().length <3 )
+                $('#searchBtn').prop('disabled',true);            
+            else
+                $('#searchBtn').prop('disabled',false);
+        })
+    });
+    </script>
 
 
 
