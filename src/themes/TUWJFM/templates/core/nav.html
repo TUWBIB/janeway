@@ -25,15 +25,17 @@
 <div class="container-fluid">
     <div class="row mb-1" id="header">
         {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-            <div class="col d-none d-sm-block">
-                <img style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}">
+
+-            <div class="col d-none d-md-block">
+                <img class="img-fluid" style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}">
             </div>
-            <div class="col d-none d-lg-block" style="text-align: center;">
-                <img src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}">
+            <div class="col d-none d-lg-block" style="text-align: left;">
+                <img class="img-fluid" src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}">
             </div>
             <div class="col d-none d-xl-block align-self-end" style="text-align: right;"> 
-                <img src="{% static "TUWJFM/img/TU_Wien_Bibliothek_250x53.png" %}">
+                <img class="img-fluid" src="{% static "TUWJFM/img/TU_Wien_Bibliothek_250x53.png" %}">
             </div>
+            <div class="col-2"></div>
             {% endif %}
 <!--            <svg version="1.1" id="tuw-logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 97 97" style="enable-background:new 0 0 97 97;" xml:space="preserve">
                 <g>
@@ -47,9 +49,10 @@
                                     </g>
         </svg>-->
     </div>
+
 </div>
 
-<nav class="navbar navbar-toggleable-sm navbar-light bg-light align-items-start">
+<nav class="navbar navbar-toggleable-md navbar-light bg-light align-items-start">
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -60,12 +63,12 @@
                 {% if request.journal.nav_home %}
                 <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">Home</a></li>{% endif %}
 
-                <li class="nav-item"><a href="{% url 'mission_statement' %}" class="nav-link">Mission Statement</a></li>
+<!--                <li class="nav-item"><a href="{% url 'mission_statement' %}" class="nav-link">Mission Statement</a></li>
                 <li class="nav-item"><a href="{% url 'scientific_committee' %}" class="nav-link">Scientific Committee</a></li>
                 <li class="nav-item"><a href="{% url 'call_for_papers' %}" class="nav-link">Call For Papers</a></li>
                 <li class="nav-item"><a href="{% url 'imprint' %}" class="nav-link">Imprint</a></li>
                 <li class="nav-item"><a href="{% url 'ethics' %}" class="nav-link">Publication Ethics and Publication Malpractice Statement</a></li>
-
+-->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="" id="About"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"">About</a>
@@ -81,13 +84,13 @@
 
                 
                 {% if request.journal.nav_news %}
-                    <li class="nav-item"><a href="{% url 'core_news_list' %}" class="nav-link">News</a></li>{% endif %}
+                    <li class="nav-item"><a href="{% url 'core_news_list' %}" class="nav-link">{% trans "News" %}</a></li>{% endif %}
     
                 {% if request.journal.nav_articles %}
-                    <li class="nav-item"><a href="{% url 'journal_articles' %}" class="nav-link">Articles</a>
+                    <li class="nav-item"><a href="{% url 'journal_articles' %}" class="nav-link">{% trans "Articles" %}</a>
                     </li>{% endif %}
                 {% if request.journal.nav_issues %}
-                    <li class="nav-item"><a href="{% url 'journal_issues' %}" class="nav-link">Issues</a></li>{% endif %}
+                    <li class="nav-item"><a href="{% url 'journal_issues' %}" class="nav-link">{% trans "Issues" %}</a></li>{% endif %}
     
     
                 {% if journal_settings.general.enable_editorial_display %}
