@@ -43,7 +43,7 @@
                         {% csrf_token %}
                         <div class="form-group">
                             <label>{% trans "Show" %}
-                                <select name="show" class="form-control">
+                                <select name="show" class="form-control" onchange="this.form.submit();">
                                     <option value="10"{% if show == 10 %} selected="selected"{% endif %}>10</option>
                                     <option value="20"{% if show == 20 %} selected="selected"{% endif %}>20</option>
                                     <option value="50"{% if show == 50 %} selected="selected"{% endif %}>50</option>
@@ -53,7 +53,7 @@
                         </div>
                         <div class="form-group">
                             <label>{% trans "Sort" %}
-                                <select name="sort" class="form-control">
+                                <select name="sort" class="form-control" onchange="this.form.submit();">
                                     <option value="-date_published"{% if sort == "date_published" %}
                                             selected="selected"{% endif %}>{% trans "Date" %}</option>
                                     <option value="title"{% if sort == "title" %}
