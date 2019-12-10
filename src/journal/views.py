@@ -1982,3 +1982,8 @@ def ethics(request):
     template = 'journal/ethics.html'
     context= { }
     return render(request, template, context)
+
+def info_for_authors(request):
+    template = 'journal/info_for_authors.html'
+    context= { }
+    return render(request, template, context)

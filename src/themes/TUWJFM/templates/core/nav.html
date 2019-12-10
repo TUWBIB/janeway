@@ -61,7 +61,20 @@
         <div class="navigation collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 {% if request.journal.nav_home %}
-                <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">Home</a></li>{% endif %}
+                <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">
+                    {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}                
+                        Journal for Facility Managment
+                    {% elif request.journal.code == "OES" or request.journal.code == "OES" %}
+                        {% if LANGUAGE_CODE == "de" %}                
+                            Der öffentliche Sektor
+                        {% else %}
+                            The public sector
+                        {% endif %}
+                    {% else %}
+                        Home
+                    {% endif %}
+                </a></li>
+                {% endif %}
 
 <!--                <li class="nav-item"><a href="{% url 'mission_statement' %}" class="nav-link">Mission Statement</a></li>
                 <li class="nav-item"><a href="{% url 'scientific_committee' %}" class="nav-link">Scientific Committee</a></li>
@@ -73,13 +86,21 @@
                     <a class="nav-link dropdown-toggle" href="" id="About"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"">About</a>
                     <div class="dropdown-menu" aria-labelledby="About">
+                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}                
                             <a href="{% url 'mission_statement' %}" class="dropdown-item">Mission Statement</a>
                             <a href="{% url 'scientific_committee' %}" class="dropdown-item">Scientific Committee</a>
                             <a href="{% url 'call_for_papers' %}" class="dropdown-item">Call For Papers</a>
-                            <a href="{% url 'imprint' %}" class="dropdown-item">Imprint</a>
+                            <a href="{% url 'imprint' %}" class="dropdown-item">{% trans "Imprint" %}</a>
                             <a href="{% url 'ethics' %}" class="dropdown-item">Publication Ethics and Publication Malpractice Statement</a>
-                   </div>
 
+                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                                <a href="{% url 'mission_statement' %}" class="dropdown-item">Mission Statement</a>
+                                <a href="{% url 'scientific_committee' %}" class="dropdown-item">Editorial Board</a>
+                                <a href="{% url 'imprint' %}" class="dropdown-item">{% trans "Imprint" %}</a>
+                                <a href="{% url 'info_for_authors' %}" class="dropdown-item">{% trans "Information for authors" %}</a>
+                            {% else %}
+                            {% endif %}
+                   </div>
                 </li>
 
                 
