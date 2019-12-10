@@ -6,10 +6,20 @@
 {% block title %}Imprint {% endblock %}
 
 {% block body %}
-{% if LANGUAGE_CODE == 'en' %}
-    {% include "journal/scientific_committee_en.html" %}
-{% endif %}
-{% if LANGUAGE_CODE == 'de' %}
-    {% include "journal/scientific_committee_de.html" %}
+{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}    
+    {% if LANGUAGE_CODE == 'en' %}
+        {% include "journal/scientific_committee_jfm_en.html" %}
+    {% endif %}
+    {% if LANGUAGE_CODE == 'de' %}
+        {% include "journal/scientific_committee_jfm_de.html" %}
+    {% endif %}
+{% elif request.journal.code == "OES" or request.journal.code == "OEST" %}           
+    {% if LANGUAGE_CODE == 'en' %}
+        {% include "journal/scientific_committee_oes_en.html" %}
+    {% endif %}
+    {% if LANGUAGE_CODE == 'de' %}
+        {% include "journal/scientific_committee_oes_de.html" %}
+    {% endif %}
+{% else %}
 {% endif %}
 {% endblock body %}

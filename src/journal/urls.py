@@ -216,4 +216,8 @@ urlpatterns = [
     # Ethics
     url(r'^ethics/$',
         views.ethics, name='ethics'),
+    # Information_for_authors
+    url(r'^info_for_authors/$',
+        views.info_for_authors, name='info_for_authors'),
+
 ]

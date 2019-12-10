@@ -77,7 +77,7 @@
 <footer class="footer">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col">
                 {% if request.journal.press_image_override %}
                     {% svg request.journal_cover %}
                 {% elif 'svg' in request.press_cover %}
@@ -86,7 +86,9 @@
                     <a href="https://janeway.systems">{% svg "static/common/img/sample/janeway.svg" %}</a>
                 {% endif %}
             </div>
-            <div class="col-md-10 text-center">
+        </div>
+        <div class="row">
+            <div class="col text-center">
                 <small>
                     <ul class="list-inline">
                         <li class="list-inline-item">

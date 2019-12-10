@@ -3,22 +3,22 @@
 {% load i18n %}
 {% load recaptcha2 %}
 
-{% block title %}Imprint {% endblock %}
+{% block title %}Information for Authors{% endblock %}
 
 {% block body %}
 {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}                
     {% if LANGUAGE_CODE == 'en' %}
-        {% include "journal/imprint_jfm_en.html" %}
+        {% include "journal/info_for_authors_jfm_en.html" %}
     {% endif %}
     {% if LANGUAGE_CODE == 'de' %}
-        {% include "journal/imprint_jfm_de.html" %}
+        {% include "journal/info_for_authors_jfm_de.html" %}
     {% endif %}
 {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}           
     {% if LANGUAGE_CODE == 'en' %}
-        {% include "journal/imprint_oes_en.html" %}
+        {% include "journal/info_for_authors_oes_en.html" %}
     {% endif %}
     {% if LANGUAGE_CODE == 'de' %}
-        {% include "journal/imprint_oes_de.html" %}
+        {% include "journal/info_for_authors_oes_de.html" %}
     {% endif %}
 {% else %}
 {% endif %}
