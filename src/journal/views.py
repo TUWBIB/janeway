@@ -133,11 +133,19 @@ def articles(request):
     pinned_articles = [pin.article for pin in models.PinnedArticle.objects.filter(
         journal=request.journal)]
     pinned_article_pks = [article.pk for article in pinned_articles]
-    article_objects = submission_models.Article.objects.filter(journal=request.journal,
-                                                               date_published__lte=timezone.now(),
-                                                               section__pk__in=filters).prefetch_related(
-        'frozenauthor_set').order_by(sort).exclude(
-        pk__in=pinned_article_pks)
+
+    if len(filters)>0:
+        article_objects = submission_models.Article.objects.filter(journal=request.journal,
+                                                                date_published__lte=timezone.now(),
+                                                                section__pk__in=filters).prefetch_related(
+            'frozenauthor_set').order_by(sort).exclude(
+            pk__in=pinned_article_pks)
+    else:
+        article_objects = submission_models.Article.objects.filter(journal=request.journal,
+                                                                date_published__lte=timezone.now(),
+                                                                ).prefetch_related(
+            'frozenauthor_set').order_by(sort).exclude(
+            pk__in=pinned_article_pks)
 
     paginator = Paginator(article_objects, show)
 
