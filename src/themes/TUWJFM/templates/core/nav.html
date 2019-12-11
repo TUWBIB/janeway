@@ -27,13 +27,13 @@
         {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
 
 -            <div class="col d-none d-md-block">
-                <img class="img-fluid" style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}">
+                <a href="{% url 'website_index' %}"><img class="img-fluid" style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}"></a>
             </div>
             <div class="col d-none d-lg-block" style="text-align: left;">
-                <img class="img-fluid" src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}">
+                <a href="http://www.ifm.tuwien.ac.at"> <img class="img-fluid" src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}"></a>
             </div>
             <div class="col d-none d-xl-block align-self-end" style="text-align: right;"> 
-                <img class="img-fluid" src="{% static "TUWJFM/img/TU_Wien_Bibliothek_250x53.png" %}">
+                <a href="https://tuwien.ac.at/bibliothek"><img class="img-fluid" src="{% static "TUWJFM/img/TU_Wien_Bibliothek_250x53.png" %}"></a>
             </div>
             <div class="col-2"></div>
             {% endif %}
@@ -84,7 +84,7 @@
 -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="" id="About"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"">About</a>
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"">{% trans "About" %}</a>
                     <div class="dropdown-menu" aria-labelledby="About">
                             {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}                
                             <a href="{% url 'mission_statement' %}" class="dropdown-item">Mission Statement</a>
@@ -202,9 +202,9 @@
             <li class="nav-item">
             <form method="POST" action="{% url 'search' %}" class="form-inline mt-2 mt-md-0">
                     {% csrf_token %}
-                    <input id="searchField" class="form-control mr-sm-2" type="text" placeholder="Search" name="article_search">
+                    <input id="searchField" class="form-control mr-sm-2" type="text" placeholder='{% trans "Search" %}'' name="article_search">
                     <input type="hidden" name="sort" value="title">
-                    <button id="searchBtn" class="btn my-2 my-sm-0" type="submit">Search</button>
+                    <button id="searchBtn" class="btn my-2 my-sm-0" type="submit">{% trans "Search" %}</button>
             </form>            
             </li>
             {% if journal_settings.general.switch_language %}

@@ -216,7 +216,7 @@ else:
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'en'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Vienna'
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'core', 'locales')
 ] + plugin_installed_apps.load_plugin_locales(BASE_DIR)
@@ -228,7 +228,7 @@ def ugettext(s):
 
 LANGUAGES = (
     ('en', ugettext('English')),
-    ('fr', ugettext('French')),
+#    ('fr', ugettext('French')),
     ('de', ugettext('German')),
 )
 
