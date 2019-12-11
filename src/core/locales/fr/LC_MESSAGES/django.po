@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-10 12:09+0100\n"
+"POT-Creation-Date: 2019-12-11 09:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,10 +106,6 @@ msgstr "Derniers Articles et Nouvelles"
 #: src/core/janeway_global_settings.py:230
 msgid "English"
 msgstr "Anglais"
-
-#: src/core/janeway_global_settings.py:231
-msgid "French"
-msgstr "Français"
 
 #: src/core/janeway_global_settings.py:232
 msgid "German"
@@ -228,7 +224,7 @@ msgid ""
 "MIME type {mimetype} is not valid. Valid types are: {validator.mimetypes}"
 msgstr ""
 
-#: src/journal/views.py:1432
+#: src/journal/views.py:1440
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
 "login."
@@ -236,7 +232,7 @@ msgstr ""
 "Vous devez vous connecter avant de devenir un réviseur. Cliquez sur le "
 "bouton ci-dessous pour vous connecter"
 
-#: src/journal/views.py:1437
+#: src/journal/views.py:1445
 msgid ""
 "You are not yet a reviewer for this journal. Click the button below to "
 "become a reviewer."
@@ -244,11 +240,11 @@ msgstr ""
 "Vous n'êtes pas encore critique pour ce journal. Cliquez sur le bouton ci-"
 "dessous pour devenir réviseur"
 
-#: src/journal/views.py:1442
+#: src/journal/views.py:1450
 msgid "You are already a reviewer."
 msgstr "Vous êtes déjà un relecteur"
 
-#: src/journal/views.py:1446
+#: src/journal/views.py:1454
 msgid "You are now a reviewer"
 msgstr "Vous êtes maintenant un réviseur"
 
@@ -620,6 +616,8 @@ msgstr "Recherche par adresse e-mail ou ORCiD"
 #: src/themes/TUW/templates/journal/search.html:7
 #: src/themes/TUW/templates/journal/search.html:9
 #: src/themes/TUW/templates/preprints/authors.html:35
+#: src/themes/TUWJFM/templates/core/nav.html:205
+#: src/themes/TUWJFM/templates/core/nav.html:207
 #: src/themes/TUWJFM/templates/journal/search.html:7
 #: src/themes/TUWJFM/templates/journal/search.html:9
 #: src/themes/TUWJFM/templates/preprints/authors.html:35
@@ -1223,8 +1221,8 @@ msgstr ""
 #: src/themes/OLH/templates/core/accounts/register.html:79
 #: src/themes/OLH/templates/core/base.html:151
 #: src/themes/TUW/templates/core/base.html:119
-#: src/themes/TUWJFM/templates/core/base.html:101
-#: src/themes/TUWJFM/templates/core/base.html:113
+#: src/themes/TUWJFM/templates/core/base.html:103
+#: src/themes/TUWJFM/templates/core/base.html:115
 #: src/themes/default/templates/core/base.html:84
 #: src/themes/material/templates/core/accounts/register.html:30
 msgid "Privacy Policy"
@@ -1311,7 +1309,7 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/base.html:152
 #: src/themes/TUW/templates/core/base.html:120
-#: src/themes/TUWJFM/templates/core/base.html:114
+#: src/themes/TUWJFM/templates/core/base.html:116
 #: src/themes/default/templates/core/base.html:85
 msgid "Sitemap"
 msgstr "Plan du site"
@@ -1324,8 +1322,8 @@ msgstr "Plan du site"
 #: src/themes/TUW/templates/core/base.html:121
 #: src/themes/TUW/templates/journal/contact.html:6
 #: src/themes/TUW/templates/journal/contact.html:26
-#: src/themes/TUWJFM/templates/core/base.html:105
-#: src/themes/TUWJFM/templates/core/base.html:115
+#: src/themes/TUWJFM/templates/core/base.html:107
+#: src/themes/TUWJFM/templates/core/base.html:117
 #: src/themes/TUWJFM/templates/journal/contact.html:6
 #: src/themes/TUWJFM/templates/journal/contact.html:26
 #: src/themes/default/templates/core/base.html:86
@@ -1973,6 +1971,7 @@ msgstr "Soumissions"
 #: src/themes/OLH/templates/journal/submissions.html:32
 #: src/themes/OLH/templates/preprints/about.html:15
 #: src/themes/TUW/templates/journal/submissions.html:31
+#: src/themes/TUWJFM/templates/core/nav.html:87
 #: src/themes/TUWJFM/templates/journal/submissions.html:31
 #: src/themes/default/templates/journal/submissions.html:31
 #: src/themes/material/templates/journal/submissions.html:36
@@ -2512,7 +2511,7 @@ msgstr "Soumission"
 msgid "Upload Files"
 msgstr ""
 
-#: src/themes/TUWJFM/templates/core/base.html:93
+#: src/themes/TUWJFM/templates/core/base.html:95
 #: src/themes/TUWJFM/templates/core/nav.html:93
 #: src/themes/TUWJFM/templates/core/nav.html:99
 #, fuzzy
@@ -2525,6 +2524,16 @@ msgstr "Fichier manuscrit"
 #| msgid "Author Information"
 msgid "Information for authors"
 msgstr "Informations de l'auteur"
+
+#: src/themes/TUWJFM/templates/journal/search.html:38
+msgid "Search titles, subtitles, keywords, and authors"
+msgstr ""
+
+#: src/themes/TUWJFM/templates/journal/search.html:55
+#, fuzzy
+#| msgid "Article Files"
+msgid "Sort articles by"
+msgstr "Fichiers d'article"
 
 #: src/themes/default/templates/journal/article.html:92
 msgid "Article"
@@ -2893,6 +2902,9 @@ msgstr ""
 #| msgid "Manuscript Files"
 msgid "Preprint"
 msgstr "Fichier manuscrit"
+
+#~ msgid "French"
+#~ msgstr "Français"
 
 #~ msgid ""
 #~ "Author(s) agrees to copyright notice, which will apply to this submission "

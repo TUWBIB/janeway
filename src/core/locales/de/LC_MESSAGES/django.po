@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-10 12:09+0100\n"
+"POT-Creation-Date: 2019-12-11 09:01+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -110,10 +110,6 @@ msgstr "Ausgewählte Artikel und Neuigkeiten"
 #: src/core/janeway_global_settings.py:230
 msgid "English"
 msgstr "Englisch"
-
-#: src/core/janeway_global_settings.py:231
-msgid "French"
-msgstr "Französisch"
 
 #: src/core/janeway_global_settings.py:232
 msgid "German"
@@ -238,7 +234,7 @@ msgid ""
 msgstr ""
 
 # Andrae: Live-System-Test
-#: src/journal/views.py:1432
+#: src/journal/views.py:1440
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
 "login."
@@ -246,7 +242,7 @@ msgstr ""
 "Sie müssen eingeloggt sein um Gutachter_in zu werden. Klicken Sie auf den "
 "nachfolgenden Button um sich anzumelden."
 
-#: src/journal/views.py:1437
+#: src/journal/views.py:1445
 msgid ""
 "You are not yet a reviewer for this journal. Click the button below to "
 "become a reviewer."
@@ -254,11 +250,11 @@ msgstr ""
 "Sie sind noch kein_e Gutachter_in dieser Zeitschrift. Klicken Sie auf den "
 "nachfolgenden Button um Gutachter_in zu werden."
 
-#: src/journal/views.py:1442
+#: src/journal/views.py:1450
 msgid "You are already a reviewer."
 msgstr "Sie sind bereits Gutachter_in."
 
-#: src/journal/views.py:1446
+#: src/journal/views.py:1454
 msgid "You are now a reviewer"
 msgstr "Sie sind nun Gutachter_in."
 
@@ -632,6 +628,8 @@ msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 #: src/themes/TUW/templates/journal/search.html:7
 #: src/themes/TUW/templates/journal/search.html:9
 #: src/themes/TUW/templates/preprints/authors.html:35
+#: src/themes/TUWJFM/templates/core/nav.html:205
+#: src/themes/TUWJFM/templates/core/nav.html:207
 #: src/themes/TUWJFM/templates/journal/search.html:7
 #: src/themes/TUWJFM/templates/journal/search.html:9
 #: src/themes/TUWJFM/templates/preprints/authors.html:35
@@ -1252,8 +1250,8 @@ msgstr ""
 #: src/themes/OLH/templates/core/accounts/register.html:79
 #: src/themes/OLH/templates/core/base.html:151
 #: src/themes/TUW/templates/core/base.html:119
-#: src/themes/TUWJFM/templates/core/base.html:101
-#: src/themes/TUWJFM/templates/core/base.html:113
+#: src/themes/TUWJFM/templates/core/base.html:103
+#: src/themes/TUWJFM/templates/core/base.html:115
 #: src/themes/default/templates/core/base.html:84
 #: src/themes/material/templates/core/accounts/register.html:30
 msgid "Privacy Policy"
@@ -1347,7 +1345,7 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/base.html:152
 #: src/themes/TUW/templates/core/base.html:120
-#: src/themes/TUWJFM/templates/core/base.html:114
+#: src/themes/TUWJFM/templates/core/base.html:116
 #: src/themes/default/templates/core/base.html:85
 msgid "Sitemap"
 msgstr "Sitemap"
@@ -1360,8 +1358,8 @@ msgstr "Sitemap"
 #: src/themes/TUW/templates/core/base.html:121
 #: src/themes/TUW/templates/journal/contact.html:6
 #: src/themes/TUW/templates/journal/contact.html:26
-#: src/themes/TUWJFM/templates/core/base.html:105
-#: src/themes/TUWJFM/templates/core/base.html:115
+#: src/themes/TUWJFM/templates/core/base.html:107
+#: src/themes/TUWJFM/templates/core/base.html:117
 #: src/themes/TUWJFM/templates/journal/contact.html:6
 #: src/themes/TUWJFM/templates/journal/contact.html:26
 #: src/themes/default/templates/core/base.html:86
@@ -2010,6 +2008,7 @@ msgstr "Einreichungen"
 #: src/themes/OLH/templates/journal/submissions.html:32
 #: src/themes/OLH/templates/preprints/about.html:15
 #: src/themes/TUW/templates/journal/submissions.html:31
+#: src/themes/TUWJFM/templates/core/nav.html:87
 #: src/themes/TUWJFM/templates/journal/submissions.html:31
 #: src/themes/default/templates/journal/submissions.html:31
 #: src/themes/material/templates/journal/submissions.html:36
@@ -2018,7 +2017,7 @@ msgstr "Einreichungen"
 #: src/themes/material/templates/press/nav.html:99
 #: src/themes/material/templates/press/nav.html:108
 msgid "About"
-msgstr "Über"
+msgstr "Über diese Zeitschrift"
 
 # Andrae: Live-System-Test
 #: src/themes/OLH/templates/journal/submissions.html:37
@@ -2391,6 +2390,14 @@ msgstr ""
 #: src/themes/TUW/templates/core/accounts/register.html:24
 #: src/themes/TUWJFM/templates/core/accounts/register.html:24
 #: src/themes/default/templates/core/accounts/register.html:24
+#, fuzzy
+#| msgid ""
+#| "Your password should be at minimum 12 characters long. It does not need\n"
+#| "                                to contain specific characters but you "
+#| "should make it as long as possible. For more\n"
+#| "                                information read on\n"
+#| "                                <a href=\"#\" data-toggle=\"modal\" data-"
+#| "target=\"#passwordmodal\"> password guide</a>\n"
 msgid ""
 "Your password should be at minimum 12 characters long. It does not need\n"
 "                                to contain specific characters but you "
@@ -2398,6 +2405,7 @@ msgid ""
 "                                information read on\n"
 "                                <a href=\"#\" data-toggle=\"modal\" data-"
 "target=\"#passwordmodal\"> password guide</a>\n"
+"                                ."
 msgstr ""
 "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
 "bestimmten Zeichen enthalten, aber es sollte so lang wie möglich sein. "
@@ -2475,24 +2483,20 @@ msgstr "Sammlungen"
 #: src/themes/TUWJFM/templates/journal/newsletter.html:7
 #: src/themes/TUWJFM/templates/journal/newsletter.html:9
 msgid "Newsletter"
-msgstr ""
+msgstr "Newsletter"
 
 #: src/themes/TUW/templates/journal/newsletter.html:48
 #: src/themes/TUWJFM/templates/journal/newsletter.html:48
 msgid "Confirm Email"
-msgstr ""
+msgstr "Email bestätigen"
 
 #: src/themes/TUW/templates/journal/newsletter.html:69
 #: src/themes/TUWJFM/templates/journal/newsletter.html:69
-#, fuzzy
-#| msgid "First name"
 msgid "Firstname"
 msgstr "Vorname"
 
 #: src/themes/TUW/templates/journal/newsletter.html:75
 #: src/themes/TUWJFM/templates/journal/newsletter.html:75
-#, fuzzy
-#| msgid "Last name"
 msgid "Lastname"
 msgstr "Nachname"
 
@@ -2511,7 +2515,7 @@ msgstr "Einreichen"
 msgid "Upload Files"
 msgstr "Dateien hochladen"
 
-#: src/themes/TUWJFM/templates/core/base.html:93
+#: src/themes/TUWJFM/templates/core/base.html:95
 #: src/themes/TUWJFM/templates/core/nav.html:93
 #: src/themes/TUWJFM/templates/core/nav.html:99
 msgid "Imprint"
@@ -2520,6 +2524,14 @@ msgstr "Impressum"
 #: src/themes/TUWJFM/templates/core/nav.html:100
 msgid "Information for authors"
 msgstr "Information für AutorInnen"
+
+#: src/themes/TUWJFM/templates/journal/search.html:38
+msgid "Search titles, subtitles, keywords, and authors"
+msgstr "Suche nach Titel, Subtiteln, Schlagwörtern und Autoren"
+
+#: src/themes/TUWJFM/templates/journal/search.html:55
+msgid "Sort articles by"
+msgstr "Artikel sortieren nach"
 
 #: src/themes/default/templates/journal/article.html:92
 msgid "Article"
@@ -2776,6 +2788,12 @@ msgstr "Eingereicht"
 msgid "Accepted"
 msgstr "Akzeptiert"
 
+#: src/themes/material/templates/journal/article.html:287
+#, fuzzy
+#| msgid "This article has not been peer reviewed."
+msgid "This article has been peer reviewed."
+msgstr "Dieser Artikel wurde noch nicht begutachtet."
+
 #: src/themes/material/templates/journal/article.html:291
 msgid "This article has not been peer reviewed."
 msgstr "Dieser Artikel wurde noch nicht begutachtet."
@@ -2865,6 +2883,9 @@ msgstr "Alles"
 #| msgid "Articles"
 msgid "Preprint"
 msgstr "Preprint"
+
+#~ msgid "French"
+#~ msgstr "Französisch"
 
 # Andrae: Live-System-Test
 #~ msgid ""
