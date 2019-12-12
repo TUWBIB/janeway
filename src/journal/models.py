@@ -458,11 +458,18 @@ class Issue(models.Model):
             return self.issue_title
 
         journal = self.journal
+        issuestr = ""
 
         volume = "Volume {}".format(
             self.volume) if journal.display_issue_volume else ""
-        issue = "Issue {}".format(
-            self.tuw_issue_str) if journal.display_issue_number else ""
+
+        if journal.display_issue_number:
+            if self.tuw_issue_str is not None:
+                issuestr = "Issue {}".format(self.tuw_issue_str)
+            elif self.issue is not None:
+                issuestr = "Issue {}".format(self.issue)
+        issue=issuestr
+
         year = "{}".format(
             self.tuw_year) if journal.display_issue_year else ""
         title = "{}".format(
