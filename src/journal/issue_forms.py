@@ -15,7 +15,8 @@ class NewIssue(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["issue_type"].queryset = models.IssueType.objects.filter(
             journal=journal)
-
+        self.fields["tuw_vlid"].required = False
+        
     class Meta:
         model = models.Issue
         fields = ('issue_title', 'volume', 'issue', 'date', 'issue_description', 'cover_image', 'large_image',
