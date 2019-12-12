@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-11 09:01+0100\n"
+"POT-Creation-Date: 2019-12-12 11:34+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgstr "Aktuelle Artikel"
 #: src/themes/OLH/templates/press/core/news/index.html:5
 #: src/themes/OLH/templates/press/core/news/index.html:10
 #: src/themes/OLH/templates/press/core/news/item.html:5
-#: src/themes/TUWJFM/templates/core/nav.html:108
+#: src/themes/TUWJFM/templates/core/nav.html:103
 #: src/themes/material/templates/core/nav.html:72
 #: src/themes/material/templates/core/news/index.html:5
 #: src/themes/material/templates/core/news/item.html:5
@@ -281,6 +281,7 @@ msgstr "Titel"
 #: src/templates/admin/submission/submit_review.html:31
 #: src/themes/OLH/templates/preprints/review.html:26
 #: src/themes/TUW/templates/preprints/review.html:27
+#: src/themes/TUWJFM/templates/journal/article.html:110
 #: src/themes/TUWJFM/templates/preprints/review.html:27
 #: src/themes/default/templates/preprints/review.html:27
 msgid "Subtitle"
@@ -628,8 +629,8 @@ msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 #: src/themes/TUW/templates/journal/search.html:7
 #: src/themes/TUW/templates/journal/search.html:9
 #: src/themes/TUW/templates/preprints/authors.html:35
-#: src/themes/TUWJFM/templates/core/nav.html:205
-#: src/themes/TUWJFM/templates/core/nav.html:207
+#: src/themes/TUWJFM/templates/core/nav.html:200
+#: src/themes/TUWJFM/templates/core/nav.html:202
 #: src/themes/TUWJFM/templates/journal/search.html:7
 #: src/themes/TUWJFM/templates/journal/search.html:9
 #: src/themes/TUWJFM/templates/preprints/authors.html:35
@@ -1574,7 +1575,7 @@ msgstr "Autor_innen"
 #: src/themes/OLH/templates/journal/print.html:95
 #: src/themes/TUW/templates/journal/article.html:104
 #: src/themes/TUW/templates/journal/print.html:95
-#: src/themes/TUWJFM/templates/journal/article.html:104
+#: src/themes/TUWJFM/templates/journal/article.html:123
 #: src/themes/TUWJFM/templates/journal/print.html:95
 #: src/themes/default/templates/journal/article.html:36
 #: src/themes/default/templates/journal/print.html:95
@@ -1655,7 +1656,7 @@ msgstr "Zitierung"
 #: src/themes/OLH/templates/preprints/article.html:105
 #: src/themes/TUW/templates/journal/article.html:118
 #: src/themes/TUW/templates/preprints/article.html:102
-#: src/themes/TUWJFM/templates/journal/article.html:118
+#: src/themes/TUWJFM/templates/journal/article.html:137
 #: src/themes/TUWJFM/templates/preprints/article.html:102
 #: src/themes/default/templates/journal/article.html:141
 #: src/themes/default/templates/preprints/article.html:102
@@ -1665,7 +1666,7 @@ msgstr "Veröffentlicht am"
 
 #: src/themes/OLH/templates/journal/article.html:176
 #: src/themes/TUW/templates/journal/article.html:123
-#: src/themes/TUWJFM/templates/journal/article.html:123
+#: src/themes/TUWJFM/templates/journal/article.html:142
 #: src/themes/default/templates/journal/article.html:143
 msgid "Accepted on"
 msgstr "Akzeptiert am"
@@ -1697,7 +1698,7 @@ msgstr "Lizenz"
 #: src/themes/TUW/templates/preprints/article.html:92
 #: src/themes/TUW/templates/preprints/article.html:96
 #: src/themes/TUW/templates/preprints/article.html:118
-#: src/themes/TUWJFM/templates/journal/article.html:174
+#: src/themes/TUWJFM/templates/journal/article.html:193
 #: src/themes/TUWJFM/templates/preprints/article.html:92
 #: src/themes/TUWJFM/templates/preprints/article.html:96
 #: src/themes/TUWJFM/templates/preprints/article.html:118
@@ -1747,7 +1748,7 @@ msgstr "Datei-Prüfsumme (MD5)"
 #: src/themes/OLH/templates/journal/search.html:26
 #: src/themes/TUW/templates/journal/articles.html:5
 #: src/themes/TUW/templates/journal/articles.html:7
-#: src/themes/TUWJFM/templates/core/nav.html:111
+#: src/themes/TUWJFM/templates/core/nav.html:106
 #: src/themes/TUWJFM/templates/journal/articles.html:5
 #: src/themes/TUWJFM/templates/journal/articles.html:7
 #: src/themes/default/templates/journal/articles.html:5
@@ -1966,7 +1967,7 @@ msgstr "Ausgewählte Preprints"
 #: src/themes/OLH/templates/journal/issues.html:15
 #: src/themes/TUW/templates/journal/issues.html:6
 #: src/themes/TUW/templates/journal/issues.html:8
-#: src/themes/TUWJFM/templates/core/nav.html:114
+#: src/themes/TUWJFM/templates/core/nav.html:109
 #: src/themes/TUWJFM/templates/journal/issues.html:6
 #: src/themes/TUWJFM/templates/journal/issues.html:8
 #: src/themes/default/templates/journal/issues.html:6
@@ -2008,7 +2009,7 @@ msgstr "Einreichungen"
 #: src/themes/OLH/templates/journal/submissions.html:32
 #: src/themes/OLH/templates/preprints/about.html:15
 #: src/themes/TUW/templates/journal/submissions.html:31
-#: src/themes/TUWJFM/templates/core/nav.html:87
+#: src/themes/TUWJFM/templates/core/nav.html:82
 #: src/themes/TUWJFM/templates/journal/submissions.html:31
 #: src/themes/default/templates/journal/submissions.html:31
 #: src/themes/material/templates/journal/submissions.html:36
@@ -2445,27 +2446,27 @@ msgid "Journal Article"
 msgstr "Artikel"
 
 #: src/themes/TUW/templates/journal/article.html:129
-#: src/themes/TUWJFM/templates/journal/article.html:129
+#: src/themes/TUWJFM/templates/journal/article.html:148
 msgid "Published by"
 msgstr "Veröffentlicht"
 
 #: src/themes/TUW/templates/journal/article.html:143
-#: src/themes/TUWJFM/templates/journal/article.html:143
+#: src/themes/TUWJFM/templates/journal/article.html:162
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
 #: src/themes/TUW/templates/journal/article.html:149
-#: src/themes/TUWJFM/templates/journal/article.html:149
+#: src/themes/TUWJFM/templates/journal/article.html:168
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
 #: src/themes/TUW/templates/journal/article.html:185
-#: src/themes/TUWJFM/templates/journal/article.html:185
+#: src/themes/TUWJFM/templates/journal/article.html:204
 msgid "Abstract (English)"
 msgstr "Zusammenfassung (Englisch)"
 
 #: src/themes/TUW/templates/journal/article.html:193
-#: src/themes/TUWJFM/templates/journal/article.html:193
+#: src/themes/TUWJFM/templates/journal/article.html:212
 msgid "Abstract (German)"
 msgstr "Zusammenfassung (Deutsch)"
 
@@ -2516,14 +2517,22 @@ msgid "Upload Files"
 msgstr "Dateien hochladen"
 
 #: src/themes/TUWJFM/templates/core/base.html:95
-#: src/themes/TUWJFM/templates/core/nav.html:93
-#: src/themes/TUWJFM/templates/core/nav.html:99
+#: src/themes/TUWJFM/templates/core/nav.html:88
+#: src/themes/TUWJFM/templates/core/nav.html:94
 msgid "Imprint"
 msgstr "Impressum"
 
-#: src/themes/TUWJFM/templates/core/nav.html:100
+#: src/themes/TUWJFM/templates/core/nav.html:95
 msgid "Information for authors"
 msgstr "Information für AutorInnen"
+
+#: src/themes/TUWJFM/templates/journal/article.html:104
+msgid "Title (German)"
+msgstr "Titel (Deutsch)"
+
+#: src/themes/TUWJFM/templates/journal/article.html:116
+msgid "Subtitle (German)"
+msgstr "Subtitel (Deutsch)"
 
 #: src/themes/TUWJFM/templates/journal/search.html:38
 msgid "Search titles, subtitles, keywords, and authors"

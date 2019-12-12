@@ -99,6 +99,25 @@
                         <th>{% trans "Title" %}</th>
                         <td>{{ article.title }}</td>
                     </tr>
+                    {% if article.title_de %}
+                    <tr>
+                            <th>{% trans "Title (German)" %}</th>
+                            <td>{{ article.title_de }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if article.subtitle %}
+                    <tr>
+                            <th>{% trans "Subtitle" %}</th>
+                            <td>{{ article.subtitle }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if article.subtitle_de %}
+                    <tr>
+                            <th>{% trans "Subtitle (German)" %}</th>
+                            <td>{{ article.subtitle_de }}</td>
+                    </tr>
+                    {% endif %}
+    
                     {% if article.frozen_authors.all %}
                     <tr>
                         <th>{% trans "Author" %}</th>
