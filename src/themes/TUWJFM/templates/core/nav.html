@@ -22,34 +22,29 @@
     {% endif %}
     </div>-->
 
+
 <div class="container-fluid">
-    <div style="display:flex; justify-content:space-between;" id="header">
+    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap mb-2" id="header">
         {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-
-            <div class="col-3 d-none d-lg-block" style="text-align: left;">
-                <a href="http://www.ifm.tuwien.ac.at"> <img src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}"></a>
+            <div class="align-self-end">
+                <a href="http://www.ifm.tuwien.ac.at"> <img height="76px" src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}"></a>
             </div>
-            <div class="col-6 d-none d-md-block" style="text-align: center;">
-                <a href="{% url 'website_index' %}"><img style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}"></a>
-            </div>
-                <div class="col-3 d-none d-xl-block align-self-end" style="text-align: right;"> 
-                <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/TU_Wien_Bibliothek_250x53.png" %}"></a>
-            </div>
-            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-
-            
-            <div class="">
-                    <a href="http://www.ifip.tuwien.ac.at/"> <img src="{% static "TUWJFM/img/oes_logo_cropped_transparent.png" %}"></a>
-            </div>
-            <div class="">
-                <a href="{% url 'website_index' %}"><img height="76px" style="margin-top: -1px;" src="{% static "TUWJFM/img/oes_label_cropped_transparent.png" %}"></a>
-            </div>
-            <div class=""> 
+            <a href="{% url 'website_index' %}"><img height="90px" style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_label_576x68.png" %}"></a>
+            <div class="align-self-end">
                 <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/Bib.png" %}"></a>
             </div>
-            {% endif %}
+        {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+            <div class="align-self-end">
+                <a href="http://www.ifip.tuwien.ac.at/"> <img src="{% static "TUWJFM/img/oes_logo_cropped_transparent.png" %}"></a>
+            </div>
+            <a href="{% url 'website_index' %}"><img height="110px" src="{% static "TUWJFM/img/oes_label_cropped_transparent.png" %}"></a>
+            <div class="align-self-end">
+                <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/Bib.png" %}"></a>
+            </div>
+        {% endif %}
     </div>
 </div>
+    
 
 <div class="container-fluid">
 <nav class="navbar navbar-toggleable-md navbar-light bg-light align-items-center">
