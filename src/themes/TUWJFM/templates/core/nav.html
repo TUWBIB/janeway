@@ -65,7 +65,7 @@
                 <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">
                     {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}                
                         Journal for Facility Managment
-                    {% elif request.journal.code == "OES" or request.journal.code == "OES" %}
+                    {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
                         {% if LANGUAGE_CODE == "de" %}                
                             Der öffentliche Sektor
                         {% else %}
