@@ -5,21 +5,41 @@
     font-size: 13.3px;
 }
 
+.tuw-header {
+    height: 79px;
+    margin-bottom: 50px;
+}
+
+.tuw-header-middle {
+    height: 48px;
+}
+
+.tuw-header-lr {
+    height: 31px;
+}
+
 .tuw-navtop {
     background-color: #236794;
+    min-height: 60px;
 }
 
 .tuw-navbottom {
-    background-color:  #97d6f5;
+    background-color: #44a4db;
     margin-top: 10px;
 }
 
 .tuw-navbottom a {
-margin-right: 30px;
-color: #dddddd;
-font-weight: bold;
-font-size: small;
+    margin-right: 30px;
+    color: #dddddd;
+    font-weight: bold;
+    font-size: small;
 }
+
+#tuw-navtop {
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box}
+}
+
 
 h1, h2, h3 {
     color: #274E90;

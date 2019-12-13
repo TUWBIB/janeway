@@ -8,16 +8,7 @@
 
 {% block title %}{% trans "Newsletter" %}{% endblock %}
 
-{% block sidebar %}
-  <div class="sidebar-box">
-    <h4 class="sidebar-header">Kostenloses Abo</h4>
-    <ul class="nav sidebar-content">
-        <li><a href="{% url 'newsletter'">Anmelden</a></li>
-    </ul>
-  </div>
-{% endblock sidebar %}
 {% block body %}
-
           <div>
               <form class="newsletter-form row" method="POST" action="javascript:sendForm();">
                   {% csrf_token %}

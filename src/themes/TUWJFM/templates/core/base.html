@@ -43,7 +43,7 @@
 {% endblock navbar %}
 
 <!-- Begin page content -->
-<div class="fluid-container">
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             <div class="row justify-content-end">
@@ -75,7 +75,8 @@
 </div>
 
 <footer class="footer">
-    <div class="fluid-container d-flex align-content-center justify-content-center tuw-navbottom">
+    <nav class="navbar">
+    <div class="container-fluid d-flex align-content-center justify-content-center tuw-navbottom w-100">
              <a href="https://janeway.systems"><img src="{% static "TUWJFM/img/Janeway_grau.png" %}" style="height: 40px;"></a>                    
             {% if LANGUAGE_CODE == 'de' %}
             <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Datenschutzerklaerung_Websites.pdf">
@@ -87,6 +88,7 @@
             <a href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
             <a href="{% url 'contact' %}">{% trans "Contact" %}</a>
     </div>
+</nav>    
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
