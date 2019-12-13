@@ -24,7 +24,7 @@
 
 
 <div class="container-fluid">
-    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap mb-2" id="header">
+    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap mb-2">
         {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
             <div class="align-self-end">
                 <a href="http://www.ifm.tuwien.ac.at"> <img height="76px" src="{% static "TUWJFM/img/jfm_logo_cropped_transparent.png" %}"></a>
@@ -47,7 +47,7 @@
     
 
 <div class="container-fluid">
-<nav class="navbar navbar-toggleable-md navbar-light bg-light align-items-center">
+<nav class="navbar navbar-toggleable-md navbar-light align-items-center tuw-navtop">
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>

@@ -5,6 +5,22 @@
     font-size: 13.3px;
 }
 
+.tuw-navtop {
+    background-color: #236794;
+}
+
+.tuw-navbottom {
+    background-color:  #97d6f5;
+    margin-top: 10px;
+}
+
+.tuw-navbottom a {
+margin-right: 30px;
+color: #dddddd;
+font-weight: bold;
+font-size: small;
+}
+
 h1, h2, h3 {
     color: #274E90;
 }
@@ -14,28 +30,6 @@ h1 {
     max-width: 55em;
     font-weight: bold;
     margin-bottom: 1em;
-}
-
-
-/*
-#header {
-    background-color: cyan;
-}
-*/
-
-#tuw-logo {
-    width: 93.0667px;
-    height: 93.0667px;
-}
-
-.tac
-{
-    text-align: center;
-}
-
-.tar
-{
-    text-align: right;
 }
 
 .image_section img{
@@ -85,8 +79,7 @@ body > .fluid-container {
 }
 
 .navigation {
-    background-color: #103a59; 
-/*    background-color: #006699;*/
+    background-color: #236794; 
     padding: 2px;
     padding-top: 2px;
     padding-left: 20px;
@@ -102,13 +95,14 @@ body > .fluid-container {
 }
 
 
-
 .navbar-light .navbar-nav .nav-link {
     color: #fff;
 }
 
-.navbar-light .navbar-nav .nav-link:hover {
-    color: #ddd;
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link:focus 
+{
+    color: #dddddd;
 }
 
 .sidebar {
