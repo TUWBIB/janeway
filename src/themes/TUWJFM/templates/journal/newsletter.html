@@ -13,24 +13,7 @@
               <form class="newsletter-form row" method="POST" action="javascript:sendForm();">
                   {% csrf_token %}
                   <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-1">
-                          {{ newsletter_form.confirm }}
-                        </div>
-                        <div class="col-11">
-                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-                            <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of the" %}<strong>Journal of Facility Management.</strong>
-                            {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
-                            </label>
-                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-                            <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of" %}<strong>The public sector.</strong>
-                            {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
-                            </label>
-                            {% endif %}
-
-                      </div>
-                    </div>
-                      <div class="row align-items-center">
+                      <div class="row align-items-center" style="margin-top: 10px;">
                           <div class="col-1">
                               <label for="id_email">{% trans "Email" %}*</label>
                           </div>
@@ -39,7 +22,7 @@
                           </div>
                         </div>
 
-                    <div class="row align-items-center"">
+                    <div class="row align-items-center" style="margin-top: 10px;">
                         <div class="col-1">
                             <label for="id_confirm_email">{% trans "Confirm Email" %}*</label>
                          </div>
@@ -48,44 +31,66 @@
                         </div>
 
                     </div>
-                    <div class="row">
-                        <div class="col-4">
+                    <div class="row align-items-center" style="margin-top: 10px;">
+                        <div class="col-1">
                             <label for="id_title_address">{% trans "Title" %}</label>
-                            <div class=row>
-                              <div class="col-3">
-                                  {{ newsletter_form.title_address }}
-                              </div>
-                              <div class="col-9">
-                                  {{ newsletter_form.title }}
-                              </div>
-                            </div>
                         </div>
-                        <div class="col-2">
+                        <div class="col-1">
+                            {{ newsletter_form.title_address }}
+                        </div>
+                        <div class="col-3">
+                            {{ newsletter_form.title }}
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
+               
+                    <div class="row align-items-center" style="margin-top: 10px;">
+                        <div class="col-1">
                             <label for="id_firstname">{% trans "Firstname" %}</label>
+                          </div>
+                          <div class="col-4">
                             {{ newsletter_form.firstName }}
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
+                    <div class="row align-items-center" style="margin-top: 10px;">
+                        <div class="col-1">
                             <label for="id_lastName">{% trans "Lastname" %}*</label>
+                          </div>
+                          <div class="col-4">
                             {{ newsletter_form.lastName }}
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
+                    <div class="row align-items-center" style="margin-top: 10px;">
+                        <div class="col-1">
                             <label for="id_affiliation">{% trans "Affiliation" %}</label>
-                            {{ newsletter_form.affiliation }}
+                          </div>
+                          <div class="col-4">
+                              {{ newsletter_form.affiliation }}
                         </div>
                     </div>
+                    <div class="row align-items-center" style="margin-top: 10px;">
+                      <div class="col-1">
+                        {{ newsletter_form.confirm }}
+                      </div>
+                      <div class="col-6">
+                          {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
+                          <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of the" %}<strong>Journal of Facility Management.</strong>
+                          {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
+                          </label>
+                          {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                          <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of" %}<strong>The public sector.</strong>
+                          {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
+                          </label>
+                          {% endif %}
+
+                    </div>
+                  </div>
+
                     {{ newsletter_form.honeypot }}
-                    <div class="row">
+                    <div class="row align-items-center justify-items-center" style="margin-top: 10px;">
+                      <div class="col-1"></div>
                         <div class="col-4">
-                            <button class="success button" type="submit" name="submit_newsletter">{% trans "Submit" %}</button>
-                        </div>
+                                <button  class="success button" type="submit" name="submit_newsletter">{% trans "Suscribe" %}</button>
+                          </div>
                     </div>
                   </div>                    
               </form>
@@ -102,7 +107,7 @@
                   
                   if(confirm) {
                     if(email == emailConfirm) {
-                      var data = { vl_journal: 'ifm-journal', 
+                      var data = { vl_journal: 'oes', 
                                 email: email,
                                 institution: affiliation,
                                 username:  lastname,
