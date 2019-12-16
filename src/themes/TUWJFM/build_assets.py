@@ -21,7 +21,7 @@ def copy_file(source, destination):
 
 
 def create_paths():
-    base_path = os.path.join(settings.BASE_DIR, 'static', 'TUW2')
+    base_path = os.path.join(settings.BASE_DIR, 'static', 'TUWJFM')
     folders = ['css', 'js']
 
     for folder in folders:
