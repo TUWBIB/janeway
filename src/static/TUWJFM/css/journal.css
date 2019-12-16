@@ -6,16 +6,8 @@
 }
 
 .tuw-header {
-    height: 79px;
-    margin-bottom: 50px;
-}
-
-.tuw-header-middle {
-    height: 48px;
-}
-
-.tuw-header-lr {
-    height: 31px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 
 .tuw-navtop {
@@ -55,34 +47,6 @@ h1 {
 .image_section img{
     display: block;
 }
-
-@media (max-width:640px){
-    .image_section img:first-child{
-        display:none;
-    }
-}
-
-@media (max-width: 640px) 
-{
-    #header_label_jfm {
-        display: none !important;
-    }
-}
-
-@media (max-width: 400px) 
-{
-    #header_logo_jfm {
-        display: none !important;
-    }
-}
-
-@media (max-width: 1324px) 
-{
-    #header_logo_bib {
-        display: none !important;
-    }
-}
-
 
 body > .fluid-container {
     padding: 60px 15px 0;

@@ -4,53 +4,80 @@
 {% load i18n %}
 {% load hooks %}
 
-<!--<div class="container-fluid">
-        {% if request.journal %}
-        {% if request.journal.header_image %}
-            <img src="{{ request.journal.header_image.url }}" class="img-fluid">
-        {% else %}
-            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-                <img class=float-left" src="{% static "TUW2/img/jfm_header.png" %}">
-            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-                <img class=float-left" src="{% static "TUW2/img/oes_header.png" %}">
-            {% else %}
-                <img class=float-left" src="{% static "TUW2/img/header.png" %}">
-            {% endif %}
-        {% endif %}
-    {% else %}
-        <a href="/">{% svg request.press_cover %}</a>
-    {% endif %}
-    </div>-->
-
-
-<div class="container-fluid">
-    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap tuw-header">
-        {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-            <div class="align-self-end tuw-header-lr">
-                <a href="http://www.ifm.tuwien.ac.at"> <img src="{% static "TUWJFM/img/jfm_logo_150x62.png" %}"></a>
-            </div>
-            <div class="tuw-header-middle">
-                <a href="{% url 'website_index' %}"><img style="margin-top: -1px;" src="{% static "TUWJFM/img/jfm_title_848x100.png" %}"></a>
-            </div>
-            <div class="align-self-end tuw-header-lr">
-                <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
-            </div>
-
-
-        {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-            <div class="align-self-end tuw-header-lr">
-                <a href="http://www.ifip.tuwien.ac.at/"> <img src="{% static "TUWJFM/img/oes_logo_175x62.png" %}"></a>
-            </div>
-            <div class="tuw-header-middle">
-                <a href="{% url 'website_index' %}"><img src="{% static "TUWJFM/img/oes_title_676x100.png" %}"></a>
-            </div>
-            <div class="align-self-end tuw-header-lr">
-                <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
-            </div>
-        {% endif %}
+{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
+<div class="container-fluid d-none d-xl-block tuw-header">
+    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap">
+        <div class="align-self-end">
+            <a href="http://www.ifm.tuwien.ac.at"> <img src="{% static "TUWJFM/img/jfm_logo_150x62.png" %}"></a>
+        </div>
+        <div>
+            <a href="{% url 'website_index' %}"><img src="{% static "TUWJFM/img/jfm_title_848x100.png" %}"></a>
+        </div> 
+        <div class="align-self-end">
+            <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
+        </div>
     </div>
 </div>
-    
+
+<div class="container-fluid d-xl-none tuw-header ">
+    <div class="d-flex flex-row">
+        <div class="col-12 text-center">
+            <a href="{% url 'website_index' %}"><img class="img-fluid" src="{% static "TUWJFM/img/jfm_title_848x100.png" %}"></a>
+        </div>
+    </div>
+    <div class="d-flex flex-row flex-wrap">
+        <div class="col-6 text-center">
+            <div class="align-self-end">
+                <a href="http://www.ifm.tuwien.ac.at"> <img class="img-fluid" src="{% static "TUWJFM/img/jfm_logo_150x62.png" %}"></a>
+            </div>
+        </div>
+        <div class="col-6 text-center">
+            <div class="align-self-end">
+                <a href="https://tuwien.ac.at/bibliothek"><img class="img-fluid" src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+{% if request.journal.code == "OES" or request.journal.code == "OEST" %}
+<div class="container-fluid d-none d-xl-block tuw-header">
+    <div class="d-flex flex-row justify-content-between align-items-start flex-wrap">
+        <div class="align-self-end">
+            <a href="http://www.ifm.tuwien.ac.at"> <img src="{% static "TUWJFM/img/oes_logo_175x62.png" %}"></a>
+        </div>
+        <div>
+            <a href="{% url 'website_index' %}"><img src="{% static "TUWJFM/img/oes_title_676x100.png" %}"></a>
+        </div> 
+        <div class="align-self-end">
+            <a href="https://tuwien.ac.at/bibliothek"><img src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid d-xl-none tuw-header ">
+    <div class="d-flex flex-row">
+        <div class="col-12 text-center">
+            <a href="{% url 'website_index' %}"><img class="img-fluid" src="{% static "TUWJFM/img/oes_title_676x100.png" %}"></a>
+        </div>
+    </div>
+    <div class="d-flex flex-row flex-wrap">
+        <div class="col-6 text-center">
+            <div class="align-self-end">
+                <a href="http://www.ifm.tuwien.ac.at"> <img class="img-fluid" src="{% static "TUWJFM/img/oes_logo_175x62.png" %}"></a>
+            </div>
+        </div>
+        <div class="col-6 text-center">
+            <div class="align-self-end">
+                <a href="https://tuwien.ac.at/bibliothek"><img class="img-fluid" src="{% static "TUWJFM/img/tuw_bib_logo_276x62.png" %}"></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+  
 
     <div class="container-fluid">
         <nav class="navbar navbar-expand navbar-toggleable-md navbar-light">
