@@ -215,7 +215,7 @@
             </div>
             {% endif %}
             {% if article.license %}
-            <h2 class="subheader">License</h2>
+            <h2 class="subheader">{% trans "License" %}</h2>
             <table class="infotable">
                 <tbody>
                     <tr>
@@ -226,9 +226,15 @@
                         {% endif %}
 
 <!--                        <td>{{ article.license.text }}</td> -->
+                        {% if article.license.url != "https://creativecommons.org/licenses/authors" %}
                         <td>
                             <a href="{{article.license.url}}">{{ article.license.name }}</a>
                         </td>
+                        {% else %}
+                        <td>
+                            {{ article.license.name }}
+                        </td>
+                        {% endif %}
                     </tr>
                 </tbody>
             </table>
