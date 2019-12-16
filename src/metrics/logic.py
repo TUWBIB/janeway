@@ -241,6 +241,7 @@ def store_article_access(request, article, access_type, galley_type='view'):
                 identifier=identifier,
                 galley_type=galley_type,
                 country=country,
+                ip=ip
             )
 
             return new_access

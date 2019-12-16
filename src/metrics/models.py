@@ -21,6 +21,7 @@ class ArticleAccess(models.Model):
     accessed = models.DateTimeField(default=timezone.now)
     galley_type = models.CharField(max_length=200)
     country = models.ForeignKey('core.Country', blank=True, null=True)
+    ip = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return '[{0}] - {1} at {2}'.format(self.identifier, self.article.title, self.accessed)
