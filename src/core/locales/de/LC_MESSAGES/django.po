@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-17 20:24+0100\n"
+"POT-Creation-Date: 2019-12-17 20:39+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -617,8 +617,8 @@ msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 #: themes/TUW/templates/journal/search.html:7
 #: themes/TUW/templates/journal/search.html:9
 #: themes/TUW/templates/preprints/authors.html:35
-#: themes/TUWJFM/templates/core/nav.html:234
-#: themes/TUWJFM/templates/core/nav.html:236
+#: themes/TUWJFM/templates/core/nav.html:240
+#: themes/TUWJFM/templates/core/nav.html:242
 #: themes/TUWJFM/templates/journal/search.html:7
 #: themes/TUWJFM/templates/journal/search.html:9
 #: themes/TUWJFM/templates/preprints/authors.html:35
@@ -1909,7 +1909,7 @@ msgstr "Ausgewählte Preprints"
 #: themes/OLH/templates/journal/issues.html:15
 #: themes/TUW/templates/journal/issues.html:6
 #: themes/TUW/templates/journal/issues.html:8
-#: themes/TUWJFM/templates/core/nav.html:143
+#: themes/TUWJFM/templates/core/nav.html:144
 #: themes/TUWJFM/templates/journal/issues.html:6
 #: themes/TUWJFM/templates/journal/issues.html:8
 #: themes/default/templates/journal/issues.html:6
@@ -2430,6 +2430,11 @@ msgstr "Impressum"
 #: themes/TUWJFM/templates/core/nav.html:128
 msgid "Information for authors"
 msgstr "Information für AutorInnen"
+
+#: themes/TUWJFM/templates/core/nav.html:146
+msgctxt "fe_oes"
+msgid "Issues"
+msgstr "Ausgaben"
 
 #: themes/TUWJFM/templates/journal/newsletter.html:76
 msgid ""

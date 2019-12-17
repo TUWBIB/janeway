@@ -140,8 +140,14 @@
                     <li class="nav-item"><a href="{% url 'journal_articles' %}" class="nav-link">{% trans "Articles" %}</a>
                     </li>{% endif %}
                 {% if request.journal.nav_issues %}
-                    <li class="nav-item"><a href="{% url 'journal_issues' %}" class="nav-link">{% trans "Issues" %}</a></li>{% endif %}
-    
+                    {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+                        <li class="nav-item"><a href="{% url 'journal_issues' %}" class="nav-link">{% trans "Issues" %}</a></li>
+                    {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                        <li class="nav-item"><a href="{% url 'journal_issues' %}" class="nav-link">{% trans "Issues" context "fe_oes" %}</a></li>
+                    {% else %}
+                    {% endif %}
+                {% endif %}
+
     
                 {% if journal_settings.general.enable_editorial_display %}
                     {% if journal_settings.general.multi_page_editorial %}
