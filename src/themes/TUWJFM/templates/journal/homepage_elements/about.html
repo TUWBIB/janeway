@@ -1,7 +1,12 @@
 {% load i18n %}
+
 <div class="row" id="about_journal">
-    <div class="col-md-12">
-        <h2 class="index-header">{% trans "About this Journal" %}</h2>
-        <p>{{ journal_settings.general.journal_description|safe }}</p>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">{{ title_value }}</span>
+                <p>{{ about_content }}</p>
+            </div>
+        </div>
     </div>
 </div>
