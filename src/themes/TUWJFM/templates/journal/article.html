@@ -100,10 +100,12 @@
                         <td>{{ article.title }}</td>
                     </tr>
                     {% if article.title_de %}
-                    <tr>
-                            <th>{% trans "Title (German)" %}</th>
-                            <td>{{ article.title_de }}</td>
-                    </tr>
+                        {% if article.title_de != article.title %}
+                        <tr>
+                                <th>{% trans "Parallel title" %}</th>
+                                <td>{{ article.title_de }}</td>
+                        </tr>
+                        {% endif %}
                     {% endif %}
                     {% if article.subtitle %}
                     <tr>
@@ -112,10 +114,12 @@
                     </tr>
                     {% endif %}
                     {% if article.subtitle_de %}
-                    <tr>
-                            <th>{% trans "Subtitle (German)" %}</th>
-                            <td>{{ article.subtitle_de }}</td>
-                    </tr>
+                        {% if article.subtitle_de != article.subtitle %}
+                        <tr>
+                                <th>{% trans "Parallel subtitle" %}</th>
+                                <td>{{ article.subtitle_de }}</td>
+                        </tr>
+                        {% endif %}
                     {% endif %}
     
                     {% if article.frozen_authors.all %}
