@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-17 12:59+0100\n"
+"POT-Creation-Date: 2019-12-17 18:18+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,9 +55,8 @@ msgstr ""
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: core/homepage_elements/about/hooks.py:23
+#: core/homepage_elements/about/hooks.py:25
 #: themes/TUW/templates/journal/homepage_elements/about.html:4
-#: themes/TUWJFM/templates/journal/homepage_elements/about.html:4
 msgid "About this Journal"
 msgstr "Über diese Zeitschrift"
 
@@ -2307,13 +2306,22 @@ msgstr ""
 #: themes/TUW/templates/core/accounts/register.html:24
 #: themes/TUWJFM/templates/core/accounts/register.html:24
 #: themes/default/templates/core/accounts/register.html:24
+#, fuzzy
+#| msgid ""
+#| "Your password should be at minimum 12 characters long. It does not need\n"
+#| "                                to contain specific characters but you "
+#| "should make it as long as possible. For more\n"
+#| "                                information read on\n"
+#| "                                <a href=\"#\" data-toggle=\"modal\" data-"
+#| "target=\"#passwordmodal\"> password guide.</a>\n"
 msgid ""
 "Your password should be at minimum 12 characters long. It does not need\n"
 "                                to contain specific characters but you "
 "should make it as long as possible. For more\n"
 "                                information read on\n"
 "                                <a href=\"#\" data-toggle=\"modal\" data-"
-"target=\"#passwordmodal\"> password guide.</a>\n"
+"target=\"#passwordmodal\"> password guide</a>\n"
+"                                ."
 msgstr ""
 "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
 "bestimmten Zeichen enthalten, aber es sollte so lang wie möglich sein. "
@@ -2423,25 +2431,14 @@ msgstr "Impressum"
 msgid "Information for authors"
 msgstr "Information für AutorInnen"
 
-#: themes/TUWJFM/templates/journal/newsletter.html:76
-msgid "I'd like to be kept up to date by email about new issues of the"
-msgstr ""
-
-#: themes/TUWJFM/templates/journal/newsletter.html:77
-#: themes/TUWJFM/templates/journal/newsletter.html:81
+#: themes/TUWJFM/templates/journal/newsletter.html:75
 msgid ""
-"I hereby consent that my personal data is processed for the purpose of "
-"informing me about the journal. I may revoke my consent at any time under "
-"article 7 §3 of the General Data Protection Regulation."
+"I'd like to be kept up to date by email about new issues of the journal \\"
 msgstr ""
 
-#: themes/TUWJFM/templates/journal/newsletter.html:80
-msgid "I'd like to be kept up to date by email about new issues of"
-msgstr ""
-
-#: themes/TUWJFM/templates/journal/newsletter.html:92
-msgid "Suscribe"
-msgstr ""
+#: themes/TUWJFM/templates/journal/newsletter.html:83
+msgid "Subscribe"
+msgstr "Abonnieren"
 
 #: themes/TUWJFM/templates/journal/search.html:38
 msgid "Search titles, subtitles, keywords, and authors"
@@ -2478,13 +2475,22 @@ msgid ""
 msgstr ""
 
 #: themes/material/templates/core/accounts/register.html:22
+#, fuzzy
+#| msgid ""
+#| "Your password should be at minimum 12 characters long. It does not need\n"
+#| "                        to contain specific characters but you should "
+#| "make it as long as possible. For more\n"
+#| "                        information read on\n"
+#| "                        <a href=\"#passwordmodal\" class=\"modal-trigger"
+#| "\"> password guide.</a>\n"
 msgid ""
 "Your password should be at minimum 12 characters long. It does not need\n"
 "                        to contain specific characters but you should make "
 "it as long as possible. For more\n"
 "                        information read on\n"
 "                        <a href=\"#passwordmodal\" class=\"modal-trigger\"> "
-"password guide.</a>\n"
+"password guide</a>\n"
+"                        ."
 msgstr ""
 "Ihr Passwort sollte mindestens 12 Zeichen lang sein. Es muss keine "
 "bestimmten Zeichen enthalten, aber es sollte so lang wie möglich sein. "
@@ -2779,8 +2785,16 @@ msgstr "Alles"
 msgid "Preprint"
 msgstr "Preprint"
 
-#~ msgid "Title (German)"
-#~ msgstr "Titel (Deutsch)"
-
-#~ msgid "Subtitle (German)"
-#~ msgstr "Subtitel (Deutsch)"
+#~ msgid ""
+#~ "I'd like to be kept up to date by email about new issues of the journal "
+#~ "\"Der öffentliche Sektor / The Public Sector\". I hereby consent that my "
+#~ "personal data is processed for the purpose of informing me about the "
+#~ "journal. I may revoke my consent at any time under article 7 §3 of the "
+#~ "General Data Protection Regulation."
+#~ msgstr ""
+#~ "Ja, ich möchte über jede Neuerscheinung der Zeitschrift \"Der öffentliche "
+#~ "Sektor / The Public Sector\" per E-Mail informiert werden. Ich willige "
+#~ "ein, dass die von mir angegebenen personenbezogenen Daten zum Zweck der "
+#~ "Information über die Zeitschrift „Der Öffentliche Sektor / The public "
+#~ "sector“ verarbeitet werden. Ich kann meine Einwilligung gemäß Artikel 7 "
+#~ "Abs. 3 Datenschutz-Grundverordnung jederzeit widerrufen."

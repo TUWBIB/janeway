@@ -72,16 +72,7 @@
                         {{ newsletter_form.confirm }}
                       </div>
                       <div class="col-6">
-                          {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %}
-                          <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of the" %}<strong>Journal of Facility Management.</strong>
-                          {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
-                          </label>
-                          {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
-                          <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of" %}<strong>The public sector.</strong>
-                          {% trans "I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}
-                          </label>
-                          {% endif %}
-
+                          <label for="id_confirm">{% trans "I'd like to be kept up to date by email about new issues of the journal \"Der öffentliche Sektor / The Public Sector\". I hereby consent that my personal data is processed for the purpose of informing me about the journal. I may revoke my consent at any time under article 7 §3 of the General Data Protection Regulation." %}</label>
                     </div>
                   </div>
 
@@ -89,7 +80,7 @@
                     <div class="row align-items-center justify-items-center" style="margin-top: 10px;">
                       <div class="col-1"></div>
                         <div class="col-4">
-                                <button  class="success button" type="submit" name="submit_newsletter">{% trans "Suscribe" %}</button>
+                                <button  class="success button" type="submit" name="submit_newsletter">{% trans "Subscribe" %}</button>
                           </div>
                     </div>
                   </div>                    
