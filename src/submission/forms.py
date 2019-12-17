@@ -74,11 +74,11 @@ class ArticleInfo(KeywordModelForm):
 
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
-            'title_de': forms.TextInput(attrs={'placeholder': _('Title (de)')}),
+            'title_de': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
-            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
+            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Parallel subtitle')}),
             'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
-            'abstract_de': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (de)')}),
+            'abstract_de': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (German)')}),
         }
 
     def __init__(self, *args, **kwargs):

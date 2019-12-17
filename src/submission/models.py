@@ -311,7 +311,7 @@ class Article(models.Model):
     owner = models.ForeignKey('core.Account', null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=300, help_text=_('Your article title'))
     subtitle = models.CharField(max_length=300, blank=True, null=True,
-                                help_text=_('Subtitle of the article display format; Title: Subtitle'))
+                                help_text=_('Subtitle of the article'))
     abstract = models.TextField(
         blank=True,
         null=True,
@@ -331,11 +331,11 @@ class Article(models.Model):
 
 
     # TUW extensions
-    title_de = models.CharField(max_length=300, blank=True, null=True, help_text=_('Your article title (de)'))
+    title_de = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'))
     subtitle_de = models.CharField(max_length=300, blank=True, null=True,
-                                help_text=_('Subtitle of the article display format; Title: Subtitle (de)'))
-    abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (de)'))
-    keywords_de = models.ManyToManyField(KeywordDe, blank=True, null=True)
+                                help_text=_('Parallel subtitle of the article'))
+    abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
+    keywords_de = models.ManyToManyField(KeywordDe, blank=True, null=True, help_text=_('Keywords (German)'))
 
 
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
