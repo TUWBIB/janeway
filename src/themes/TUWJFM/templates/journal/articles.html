@@ -1,6 +1,8 @@
 {% extends "core/base.html" %}
 {% load hooks %}
 {% load i18n %}
+{% load pages %}
+{% load static %}
 
 {% block page_title %}{% trans "Articles" %}{% endblock %}
 
@@ -22,17 +24,21 @@
             {% endfor %}
 
             <div class="pagination-block">
-                <ul class="d-flex justify-content-center">
+                <ul class="d-flex justify-content-center align-content-center">
+                    <div class="align-self-center" style="margin-right: 15px;">
+                    {% trans "page" context "fe-pagination" %} {{ articles.number }} / {{ articles.paginator.num_pages }} 
+                    </div>                    
+                    <a style="margin-right: 10px;" href="?page=1" class="btn btn-primary" style="margin-right: ;">&laquo;</a>
                     {% if articles.has_previous %}
-                        <a href="?page={{ articles.previous_page_number }}" class="btn btn-primary">&laquo;</a>
+                        <a style="margin-right: 15px;"href="?page={{ articles.previous_page_number }}" class="btn btn-primary">&lsaquo;</a>
                         &nbsp;{% endif %}
-                    {{ articles.page.page_range }}
-                    {% for page in articles.paginator.page_range %}
-                        <a href="?page={{ page }}" class="btn btn-primary">{{ page }}</a>&nbsp;
-                    {% endfor %}
+                        <input id="nav_in" style="margin-right: 15px; width: 10ch;"type="text" value="{{ articles.number }}" maxlength="3">
+                        <input id="nav_goto" style="margin-right: 15px;"type="submit" value="{% trans "Go to page" context "fe-pagination" %}"">
+
                     {% if articles.has_next %}
-                        <a href="?page={{ articles.next_page_number }}" class="btn btn-primary">&raquo;</a>
+                        <a style="margin-right: 10px;" href="?page={{ articles.next_page_number }}" class="btn btn-primary">&rsaquo;</a>
                     {% endif %}
+                    <a href="?page={{ articles.paginator.num_pages }}" class="btn btn-primary">&raquo;</a>
                 </ul>
             </div>
         </div>
@@ -81,4 +87,30 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static "common/js/jq-ui.min.js" %}"></script>
+
+     <script type="text/javascript">
+        $(document).ready(function () 
+        {
+            $("#nav_goto").on("click", function(e){
+                e.preventDefault()
+                
+                val=$("#nav_in").val()
+
+                if (val == parseInt(val,10))
+                {
+                    if ((val>=1) && (val<={{ articles.paginator.num_pages }}))
+                    {
+                        var url = "{% url 'journal_articles' %}";
+                        url=url+"?page="
+                        url=url+val
+                        window.location = url
+                    }
+                }
+            })
+        })
+    </script>
 {% endblock %}
