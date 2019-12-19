@@ -77,7 +77,9 @@
 <footer class="footer">
     <nav class="navbar">
     <div class="container-fluid d-flex align-content-center justify-content-center tuw-navbottom w-100">
-             <a href="https://janeway.systems"><img src="{% static "TUWJFM/img/janeway_grau_110x28.png" %}"></a>                    
+            <div style="display: inline;">
+                <img style="margin-right: 30px;" src="{% static "TUWJFM/img/janeway_grau_110x28.png" %}" data-toggle="modal" data-target="#myModal">
+            </div>            
             {% if LANGUAGE_CODE == 'de' %}
             <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Datenschutzerklaerung_Websites.pdf">
             {% else %}
@@ -88,7 +90,30 @@
             <a href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
             <a href="{% url 'contact' %}">{% trans "Contact" %}</a>
     </div>
-</nav>    
+</nav>
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <div style="line-height: 30px;">
+           {% trans "Janeway developed by BirkbeckCTP" context "fe-agplv3" %}<br>
+           <a href="https://janeway.systems">https://janeway.systems</a><br>
+           {% trans "The modified source code is available on GitHub:" context "fe-agplv3" %}<br>
+           <a href="https://github.com/Beethro/janeway">https://github.com/Beethro/janeway</a><br>
+           <a href="https://github.com/Beethro/back_content">https://github.com/Beethro/back_content</a>
+          </div>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">{% trans "Close" context "fe-agplv3" %}</button>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>

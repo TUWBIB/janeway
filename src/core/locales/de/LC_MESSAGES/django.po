@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-18 12:09+0100\n"
+"POT-Creation-Date: 2019-12-19 11:22+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -260,7 +260,7 @@ msgstr "Sie sind nun Gutachter_in."
 #: themes/TUW/templates/journal/articles.html:60
 #: themes/TUW/templates/journal/newsletter.html:54
 #: themes/TUWJFM/templates/journal/article.html:99
-#: themes/TUWJFM/templates/journal/articles.html:89
+#: themes/TUWJFM/templates/journal/articles.html:66
 #: themes/TUWJFM/templates/journal/newsletter.html:36
 #: themes/default/templates/journal/articles.html:60
 #: themes/material/templates/journal/articles.html:90
@@ -1215,7 +1215,7 @@ msgstr ""
 #: themes/OLH/templates/core/accounts/register.html:79
 #: themes/OLH/templates/core/base.html:151
 #: themes/TUW/templates/core/base.html:119
-#: themes/TUWJFM/templates/core/base.html:86
+#: themes/TUWJFM/templates/core/base.html:88
 #: themes/default/templates/core/base.html:84
 #: themes/material/templates/core/accounts/register.html:30
 msgid "Privacy Policy"
@@ -1315,7 +1315,7 @@ msgstr "Sitemap"
 #: themes/TUW/templates/core/base.html:121
 #: themes/TUW/templates/journal/contact.html:6
 #: themes/TUW/templates/journal/contact.html:26
-#: themes/TUWJFM/templates/core/base.html:89
+#: themes/TUWJFM/templates/core/base.html:91
 #: themes/TUWJFM/templates/journal/contact.html:6
 #: themes/TUWJFM/templates/journal/contact.html:26
 #: themes/default/templates/core/base.html:86
@@ -1716,7 +1716,7 @@ msgstr "Artikel"
 # Andrae: Live-System-Test
 #: themes/OLH/templates/journal/articles.html:51
 #: themes/TUW/templates/journal/articles.html:45
-#: themes/TUWJFM/templates/journal/articles.html:74
+#: themes/TUWJFM/templates/journal/articles.html:51
 #: themes/default/templates/journal/articles.html:45
 #: themes/material/templates/journal/articles.html:82
 msgid "Show"
@@ -1725,7 +1725,7 @@ msgstr "Anzeigen"
 # Andrae: Live-System-Test
 #: themes/OLH/templates/journal/articles.html:61
 #: themes/TUW/templates/journal/articles.html:55
-#: themes/TUWJFM/templates/journal/articles.html:84
+#: themes/TUWJFM/templates/journal/articles.html:61
 #: themes/default/templates/journal/articles.html:55
 #: themes/material/templates/journal/articles.html:85
 msgid "Sort"
@@ -1733,7 +1733,7 @@ msgstr "Sortieren"
 
 #: themes/OLH/templates/journal/articles.html:64
 #: themes/TUW/templates/journal/articles.html:58
-#: themes/TUWJFM/templates/journal/articles.html:87
+#: themes/TUWJFM/templates/journal/articles.html:64
 #: themes/default/templates/journal/articles.html:58
 #: themes/material/templates/journal/articles.html:88
 msgid "Date"
@@ -1747,8 +1747,8 @@ msgstr "Datum"
 #: themes/TUW/templates/journal/articles.html:65
 #: themes/TUW/templates/journal/articles.html:74
 #: themes/TUW/templates/journal/search.html:60
-#: themes/TUWJFM/templates/journal/articles.html:94
-#: themes/TUWJFM/templates/journal/articles.html:103
+#: themes/TUWJFM/templates/journal/articles.html:71
+#: themes/TUWJFM/templates/journal/articles.html:80
 #: themes/TUWJFM/templates/journal/search.html:60
 #: themes/default/templates/journal/articles.html:65
 #: themes/default/templates/journal/articles.html:74
@@ -1760,7 +1760,7 @@ msgstr "Filtern"
 
 #: themes/OLH/templates/journal/articles.html:80
 #: themes/TUW/templates/journal/articles.html:77
-#: themes/TUWJFM/templates/journal/articles.html:106
+#: themes/TUWJFM/templates/journal/articles.html:83
 #: themes/default/templates/journal/articles.html:77
 #: themes/material/templates/journal/articles.html:109
 msgid "Clear Filters"
@@ -2421,11 +2421,26 @@ msgstr "Einreichen"
 msgid "Upload Files"
 msgstr "Dateien hochladen"
 
-#: themes/TUWJFM/templates/core/base.html:88
+#: themes/TUWJFM/templates/core/base.html:90
 #: themes/TUWJFM/templates/core/nav.html:121
 #: themes/TUWJFM/templates/core/nav.html:127
 msgid "Imprint"
 msgstr "Impressum"
+
+#: themes/TUWJFM/templates/core/base.html:101
+msgctxt "fe-agplv3"
+msgid "Janeway developed by BirkbeckCTP"
+msgstr "Janeway entwickelt von BirkbeckCTP"
+
+#: themes/TUWJFM/templates/core/base.html:103
+msgctxt "fe-agplv3"
+msgid "The modified source code is available on GitHub:"
+msgstr "Der angepasste Quellcode ist auf GitHub verfügbar:"
+
+#: themes/TUWJFM/templates/core/base.html:110
+msgctxt "fe-agplv3"
+msgid "Close"
+msgstr "Schließen"
 
 #: themes/TUWJFM/templates/core/nav.html:128
 msgid "Information for authors"
@@ -2436,12 +2451,12 @@ msgctxt "fe_oes"
 msgid "Issues"
 msgstr "Ausgaben"
 
-#: themes/TUWJFM/templates/journal/articles.html:47
+#: themes/TUWJFM/templates/journal/articles.html:29
 msgctxt "fe-pagination"
 msgid "page"
 msgstr "Seite"
 
-#: themes/TUWJFM/templates/journal/articles.html:54
+#: themes/TUWJFM/templates/journal/articles.html:36
 msgctxt "fe-pagination"
 msgid "Go to page"
 msgstr "Gehe zu Seite"
