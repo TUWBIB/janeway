@@ -18,6 +18,8 @@ from django.utils.safestring import mark_safe
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext
 
 from core import (
         files,
@@ -460,14 +462,28 @@ class Issue(models.Model):
         journal = self.journal
         issuestr = ""
 
-        volume = "Volume {}".format(
+
+
+        volume = _("Volume")
+        volume += " {}"
+        volume = volume.format(
             self.volume) if journal.display_issue_volume else ""
 
         if journal.display_issue_number:
             if self.tuw_issue_str is not None:
-                issuestr = "Issue {}".format(self.tuw_issue_str)
+                if journal.code=='OES':
+                    issuestr = pgettext("fe_oes","Issue")
+                else:
+                    issuestr = _("Issue")
+                issuestr += " {}"
+                issuestr = issuestr.format(self.tuw_issue_str)
             elif self.issue is not None:
-                issuestr = "Issue {}".format(self.issue)
+                if journal.code=='OES':
+                    issuestr = pgettext("fe_oes","Issue")
+                else:
+                    issuestr = _("Issue")
+                issuestr += " {}"
+                issuestr = issuestr.format(self.issue)
         issue=issuestr
 
         year = "{}".format(
