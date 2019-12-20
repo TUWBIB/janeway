@@ -3,13 +3,26 @@
 {% load hooks %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Issues" %}{% endblock %}
+{% block page_title %}
+{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+{% trans "Issues" %}
+{% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+{% trans "Issues" context "fe_oes" %}
+{% else %}
+{% endif %}
+{% endblock %}
 
-{% block title %}{% trans "Issues" %}{% endblock %}
-
+{% block title %}
+{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+{% trans "Issues" %}
+{% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+{% trans "Issues" context "fe_oes" %}
+{% else %}
+{% endif %}
+{% endblock %}
 
 {% block body %}
-
+      <div class="container-fluid">
           <div class="row">
           {% for issue in issues %}
             <div class="col-md-3">
@@ -29,4 +42,5 @@
               <h3>There are no issues published in this journal yet.</h3>
           {% endfor %}
           </div>
+        </div>          
 {% endblock %}
