@@ -11,19 +11,20 @@
 }
 
 .tuw-navtop {
-    background-color: #236794;
+    background-color: #236794; 
     min-height: 60px;
+
 }
 
 .tuw-navbottom {
-    background-color: #44a4db;
+    background-color: #236794; 
     margin-top: 10px;
 }
 
 .tuw-navbottom a {
     margin-right: 30px;
     color: #dddddd;
-    font-weight: bold;
+/*    font-weight: bold;*/
     font-size: small;
 }
 
@@ -63,7 +64,7 @@ body > .fluid-container {
 }
 
 .navigation {
-    background-color: #236794; 
+    background-color: #236794;
     padding: 2px;
     padding-top: 2px;
     padding-left: 20px;
