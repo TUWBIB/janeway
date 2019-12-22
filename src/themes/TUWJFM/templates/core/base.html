@@ -74,23 +74,41 @@
     </div>
 </div>
 
-<footer class="footer">
-    <nav class="navbar">
-    <div class="container-fluid d-flex align-content-center justify-content-center tuw-navbottom w-100">
-            <div style="display: inline;">
-                <img style="margin-right: 30px;" src="{% static "TUWJFM/img/janeway_grau_110x28.png" %}" data-toggle="modal" data-target="#myModal">
-            </div>            
-            {% if LANGUAGE_CODE == 'de' %}
-            <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Datenschutzerklaerung_Websites.pdf">
+<div class="container-fluid w-100" style="position: absolute; bottom: 0px; padding-left: 0px; padding-right: 0px;">
+    <nav class="navbar navbar-expand navbar-toggleable navbar-light">
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bottomnavbar" aria-controls="bottomnavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+  
+
+        <div class="navigation-bottom collapse navbar-collapse align-items-center" id="bottomnavbar">
+        <ul class="navbar-nav mx-auto">  
+            
+            <li class="nav-item">      
+            <a class="nav-link"><img src="{% static "TUWJFM/img/janeway_grau_110x28.png" %}" data-toggle="modal" data-target="#myModal">
+            </a>         
+            </li>            
+            <li class="nav-item">    
+              
+                {% if LANGUAGE_CODE == 'de' %}
+             <a class="nav-link" href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Datenschutzerklaerung_Websites.pdf">
             {% else %}
-            <a href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Data_Protection_Declaration_Websites.pdf">
+                <a class="nav-link" href="https://www.tuwien.at/fileadmin/Assets/dienstleister/Datenschutz_und_Dokumentenmanagement/Datenschutz/Data_Protection_Declaration_Websites.pdf">
             {% endif %}
             {% trans "Privacy Policy" %}
             </a>
-            <a href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
-            <a href="{% url 'contact' %}">{% trans "Contact" %}</a>
+            </li>            
+            <li class="nav-item">      
+                <a class="nav-link" href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
+            </li>        
+            <li>      
+                <a class="nav-link" href="{% url 'contact' %}">{% trans "Contact" %}</a>
+            </li> 
+            </ul>
     </div>
 </nav>
+</div>
 
 <!-- The Modal -->
 <div class="modal" id="myModal">
@@ -114,7 +132,6 @@
     </div>
   </div>
 
-</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
 <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>

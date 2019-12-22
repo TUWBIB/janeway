@@ -7,26 +7,28 @@
 
 .tuw-header {
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
 .tuw-navtop {
     background-color: #236794; 
     min-height: 60px;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 
 }
 
 .tuw-navbottom {
     background-color: #236794; 
-    margin-top: 10px;
+    margin-top: 1rem;
+    min-height: 60px;    
 }
 
 .tuw-navbottom a {
     margin-right: 30px;
-    color: #dddddd;
+    color: #ffffff;
 /*    font-weight: bold;*/
     font-size: small;
+
 }
 
 #tuw-navtop {
@@ -72,12 +74,33 @@ body > .fluid-container {
     padding-right: 20px;
 }
 
-.navigation > ul > li {
+.navigation > ul > li:not(:last-child) {
     border-right: 1px solid #fff;
     padding-left: 10px;
     padding-right: 10px;
     margin-top: -2px;
     padding-top: 2px;
+}
+
+.navigation > ul > li:last-child {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: -2px;
+    padding-top: 2px;
+}
+
+.navigation-bottom {
+    background-color: #236794;
+    padding: 2px;
+    padding-top: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.navigation-bottom > ul > li {
+    line-height: 40px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 
