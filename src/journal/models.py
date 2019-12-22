@@ -496,6 +496,26 @@ class Issue(models.Model):
         return mark_safe(" &bull; ".join((filter(None, title_list))))
 
     @property
+    def tuw_issue_count(self):
+        journal = self.journal
+        issuestr = ""
+
+        volume = "{}".format(self.volume) if journal.display_issue_volume else ""
+
+        if journal.display_issue_number:
+            if self.tuw_issue_str is not None:
+                issuestr = "{}".format(self.tuw_issue_str)
+            elif self.issue is not None:
+                issuestr = "{}".format(self.issue)
+        issue=issuestr
+
+        year = "{}".format(self.tuw_year) if journal.display_issue_year else ""
+
+        title_list = [volume, issue, year]
+
+        return mark_safe(" &bull; ".join((filter(None, title_list))))
+
+    @property
     def display_title(self):
         if self.issue_type.code != 'issue':
             return self.issue_title
