@@ -2374,7 +2374,7 @@ msgstr "Artikel"
 #: themes/TUW/templates/journal/article.html:129
 #: themes/TUWJFM/templates/journal/article.html:152
 msgid "Published by"
-msgstr "Veröffentlicht"
+msgstr "Veröffentlicht von"
 
 #: themes/TUW/templates/journal/article.html:143
 #: themes/TUWJFM/templates/journal/article.html:171
