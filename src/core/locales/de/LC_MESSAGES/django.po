@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-20 15:16+0100\n"
+"POT-Creation-Date: 2019-12-23 14:24+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -342,12 +342,12 @@ msgid "Parallel subtitle of the article"
 msgstr "Paralleler Subtitel des Artikels"
 
 #: submission/models.py:337 themes/TUW/templates/journal/article.html:193
-#: themes/TUWJFM/templates/journal/article.html:216
+#: themes/TUWJFM/templates/journal/article.html:221
 msgid "Abstract (German)"
 msgstr "Zusammenfassung (Deutsch)"
 
 #: submission/models.py:338 themes/TUW/templates/journal/article.html:149
-#: themes/TUWJFM/templates/journal/article.html:172
+#: themes/TUWJFM/templates/journal/article.html:177
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
@@ -1226,7 +1226,7 @@ msgstr ""
 #: themes/OLH/templates/core/accounts/register.html:79
 #: themes/OLH/templates/core/base.html:151
 #: themes/TUW/templates/core/base.html:119
-#: themes/TUWJFM/templates/core/base.html:88
+#: themes/TUWJFM/templates/core/base.html:99
 #: themes/default/templates/core/base.html:84
 #: themes/material/templates/core/accounts/register.html:30
 msgid "Privacy Policy"
@@ -1326,7 +1326,7 @@ msgstr "Sitemap"
 #: themes/TUW/templates/core/base.html:121
 #: themes/TUW/templates/journal/contact.html:6
 #: themes/TUW/templates/journal/contact.html:26
-#: themes/TUWJFM/templates/core/base.html:91
+#: themes/TUWJFM/templates/core/base.html:106
 #: themes/TUWJFM/templates/journal/contact.html:6
 #: themes/TUWJFM/templates/journal/contact.html:26
 #: themes/default/templates/core/base.html:86
@@ -1645,7 +1645,7 @@ msgstr "Begutachtet"
 #: themes/OLH/templates/journal/article.html:184
 #: themes/OLH/templates/preprints/article.html:106
 #: themes/TUW/templates/preprints/article.html:103
-#: themes/TUWJFM/templates/journal/article.html:222
+#: themes/TUWJFM/templates/journal/article.html:227
 #: themes/TUWJFM/templates/preprints/article.html:103
 #: themes/default/templates/journal/article.html:147
 #: themes/default/templates/preprints/article.html:103
@@ -1663,7 +1663,7 @@ msgstr "Lizenz"
 #: themes/TUW/templates/preprints/article.html:92
 #: themes/TUW/templates/preprints/article.html:96
 #: themes/TUW/templates/preprints/article.html:118
-#: themes/TUWJFM/templates/journal/article.html:197
+#: themes/TUWJFM/templates/journal/article.html:202
 #: themes/TUWJFM/templates/preprints/article.html:92
 #: themes/TUWJFM/templates/preprints/article.html:96
 #: themes/TUWJFM/templates/preprints/article.html:118
@@ -2377,12 +2377,12 @@ msgid "Published by"
 msgstr "Veröffentlicht"
 
 #: themes/TUW/templates/journal/article.html:143
-#: themes/TUWJFM/templates/journal/article.html:166
+#: themes/TUWJFM/templates/journal/article.html:171
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
 #: themes/TUW/templates/journal/article.html:185
-#: themes/TUWJFM/templates/journal/article.html:208
+#: themes/TUWJFM/templates/journal/article.html:213
 msgid "Abstract (English)"
 msgstr "Zusammenfassung (Englisch)"
 
@@ -2432,23 +2432,23 @@ msgstr "Einreichen"
 msgid "Upload Files"
 msgstr "Dateien hochladen"
 
-#: themes/TUWJFM/templates/core/base.html:90
+#: themes/TUWJFM/templates/core/base.html:103
 #: themes/TUWJFM/templates/core/nav.html:121
 #: themes/TUWJFM/templates/core/nav.html:127
 msgid "Imprint"
 msgstr "Impressum"
 
-#: themes/TUWJFM/templates/core/base.html:101
+#: themes/TUWJFM/templates/core/base.html:119
 msgctxt "fe-agplv3"
 msgid "Janeway developed by BirkbeckCTP"
 msgstr "Janeway entwickelt von BirkbeckCTP"
 
-#: themes/TUWJFM/templates/core/base.html:103
+#: themes/TUWJFM/templates/core/base.html:121
 msgctxt "fe-agplv3"
 msgid "The modified source code is available on GitHub:"
 msgstr "Der angepasste Quellcode ist auf GitHub verfügbar:"
 
-#: themes/TUWJFM/templates/core/base.html:110
+#: themes/TUWJFM/templates/core/base.html:128
 msgctxt "fe-agplv3"
 msgid "Close"
 msgstr "Schließen"
@@ -2467,6 +2467,10 @@ msgstr "Ausgaben"
 #: themes/TUWJFM/templates/elements/article_listing.html:30
 msgid "and"
 msgstr "und"
+
+#: themes/TUWJFM/templates/journal/article.html:157
+msgid "Published in"
+msgstr "Veröffentlicht in"
 
 #: themes/TUWJFM/templates/journal/articles.html:30
 msgctxt "fe-pagination"
