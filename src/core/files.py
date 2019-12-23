@@ -298,9 +298,14 @@ def get_file(file_to_get, article):
             content = content_file.read()
             return content
     except UnicodeDecodeError:
-        with open(path, 'r', encoding='utf-8') as content_file:
-            content = content_file.read()
-            return content
+        try:
+            with open(path, 'r', encoding='utf-8') as content_file:
+                content = content_file.read()
+                return content
+        except UnicodeDecodeError:
+            with open(path, 'rb') as content_file:
+                content = content_file.read()
+                return content
 
 
 def render_xml(file_to_render, article, xsl_file=None):
