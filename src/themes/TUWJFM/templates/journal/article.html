@@ -97,28 +97,26 @@
                 <tbody>
                     <tr>
                         <th>{% trans "Title" %}</th>
-                        <td>{{ article.title }}</td>
+                        <td>
+                        {{ article.title }}
+                        {% if article.subtitle %}
+                        <br>
+                        {{ article.subtitle }}
+                        {% endif %}
+                        </td>
                     </tr>
                     {% if article.title_de %}
                         {% if article.title_de != article.title %}
                         <tr>
                                 <th>{% trans "Parallel title" %}</th>
-                                <td>{{ article.title_de }}</td>
-                        </tr>
-                        {% endif %}
-                    {% endif %}
-                    {% if article.subtitle %}
-                    <tr>
-                            <th>{% trans "Subtitle" %}</th>
-                            <td>{{ article.subtitle }}</td>
-                    </tr>
-                    {% endif %}
-                    {% if article.subtitle_de %}
-                        {% if article.subtitle_de != article.subtitle %}
-                        <tr>
-                                <th>{% trans "Parallel subtitle" %}</th>
-                                <td>{{ article.subtitle_de }}</td>
-                        </tr>
+                                <td>
+                                {{ article.title_de }}
+                                {% if article.subtitle_de %}
+                                <br>
+                                {{ article.subtitle_de }}
+                                {% endif %}
+                                </td>                                
+                            </tr>
                         {% endif %}
                     {% endif %}
     
