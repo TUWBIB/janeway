@@ -179,17 +179,27 @@
                     </tr>
                     {% endif %}
                     {% for x in article.get_identifiers %}
+                        {% if x.id_type == "ac" %}
+                        <tr>
+                            <th>AC</th>
+                            <td><a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for x in article.get_identifiers %}
+                        {% if x.id_type == "doi" %}
+                        <tr>
+                            <th>DOI</th>
+                            <td><a href="https://doi.org/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for x in article.get_identifiers %}
                         {% if x.id_type == "urn" %}
-                    <tr>
-                        <th>URN</th>
-                        <td><a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
-                    </tr>
-                    {% endif %}
-                    {% if x.id_type == "ac" %}
-                    <tr>
-                        <th>AC</th>
-                        <td><a href="http://katalog.ub.tuwien.ac.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
-                    </tr>
+                        <tr>
+                            <th>URN</th>
+                            <td><a href="https://resolver.obvsg.at/{{ x.identifier }}">{{ x.identifier }}</a></td>
+                        </tr>
                         {% endif %}
                     {% endfor %}
                 </tbody>
