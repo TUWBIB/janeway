@@ -271,14 +271,16 @@
     <script type="text/javascript">
     $(document).ready(function(){
         $('#searchBtn').prop('disabled',true);
-        if($('#searchField').val().length <3 )
+        var length=$(this).val().length;
+        if (length<3 || length>100)
                 $('#searchBtn').prop('disabled',true);            
             else
                 $('#searchBtn').prop('disabled',false);
 
         $('#searchField').keyup(function()
         {
-            if($(this).val().length <3 )
+            var length=$(this).val().length;
+            if (length<3 || length>100)
                 $('#searchBtn').prop('disabled',true);            
             else
                 $('#searchBtn').prop('disabled',false);
