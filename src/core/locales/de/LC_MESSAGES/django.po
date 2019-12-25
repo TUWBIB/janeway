@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-23 14:24+0100\n"
+"POT-Creation-Date: 2019-12-25 09:03+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -268,7 +268,7 @@ msgstr "Sie sind bereits Gutachter_in."
 msgid "You are now a reviewer"
 msgstr "Sie sind nun Gutachter_in."
 
-#: preprint/forms.py:19 submission/forms.py:76
+#: preprint/forms.py:19 submission/forms.py:76 submission/forms.py:91
 #: templates/admin/submission/submit_review.html:30
 #: themes/OLH/templates/journal/articles.html:66
 #: themes/OLH/templates/preprints/list.html:67
@@ -286,33 +286,39 @@ msgstr "Sie sind nun Gutachter_in."
 msgid "Title"
 msgstr "Titel"
 
-#: preprint/forms.py:20 submission/forms.py:78
+#: preprint/forms.py:20 submission/forms.py:77 submission/forms.py:92
 #: templates/admin/submission/submit_review.html:31
 #: themes/OLH/templates/preprints/review.html:26
 #: themes/TUW/templates/preprints/review.html:27
-#: themes/TUWJFM/templates/journal/article.html:112
 #: themes/TUWJFM/templates/preprints/review.html:27
 #: themes/default/templates/preprints/review.html:27
 msgid "Subtitle"
-msgstr "Untertitel"
+msgstr "Subtitel"
 
 # Andrae: Live-System-Test
 #: preprint/forms.py:22 submission/forms.py:80
 msgid "Enter your article's abstract here"
 msgstr "Fügen Sie die Zusammenfassung Ihres Artikels hier ein"
 
-#: submission/forms.py:77 themes/TUWJFM/templates/journal/article.html:105
+#: submission/forms.py:78 submission/forms.py:93
+#: themes/TUWJFM/templates/journal/article.html:111
 msgid "Parallel title"
 msgstr "Paralleltitel"
 
-#: submission/forms.py:79 themes/TUWJFM/templates/journal/article.html:119
-msgid "Parallel subtitle"
-msgstr "Paralleler Subtitel"
+#: submission/forms.py:79 submission/forms.py:94
+msgid "Subtitle of parallel title"
+msgstr "Subtitel des Paralleltitels"
 
 # Andrae: Live-System-Test
 #: submission/forms.py:81
 msgid "Enter your article's abstract here (German)"
 msgstr "Fügen Sie die deutschprachige Zusammenfassung ihres Artikels hier ein"
+
+#: submission/forms.py:95 submission/models.py:337
+#: themes/TUW/templates/journal/article.html:193
+#: themes/TUWJFM/templates/journal/article.html:229
+msgid "Abstract (German)"
+msgstr "Zusammenfassung (Deutsch)"
 
 #: submission/models.py:312
 msgid "Your article title"
@@ -338,16 +344,12 @@ msgid "Parallel title of the article"
 msgstr "Paralleltitel des Artikels"
 
 #: submission/models.py:336
-msgid "Parallel subtitle of the article"
-msgstr "Paralleler Subtitel des Artikels"
+msgid "Subtitle of the parallel title of the article"
+msgstr "Subtitel des Paralleltitel des Artikels"
 
-#: submission/models.py:337 themes/TUW/templates/journal/article.html:193
-#: themes/TUWJFM/templates/journal/article.html:221
-msgid "Abstract (German)"
-msgstr "Zusammenfassung (Deutsch)"
-
-#: submission/models.py:338 themes/TUW/templates/journal/article.html:149
-#: themes/TUWJFM/templates/journal/article.html:177
+#: submission/models.py:338 templates/admin/submission/edit/metadata.html:94
+#: themes/TUW/templates/journal/article.html:149
+#: themes/TUWJFM/templates/journal/article.html:175
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
@@ -492,6 +494,25 @@ msgstr ""
 #: templates/admin/proofing/proofing_article.html:270
 msgid "proofreaders"
 msgstr ""
+
+#: templates/admin/submission/edit/metadata.html:88
+#: themes/OLH/templates/journal/article.html:127
+#: themes/OLH/templates/journal/print.html:113
+#: themes/OLH/templates/journal/search.html:56
+#: themes/OLH/templates/preprints/list.html:68
+#: themes/OLH/templates/preprints/search.html:53
+#: themes/TUW/templates/journal/print.html:113
+#: themes/TUW/templates/journal/search.html:46
+#: themes/TUWJFM/templates/journal/print.html:113
+#: themes/TUWJFM/templates/journal/search.html:46
+#: themes/default/templates/journal/article.html:74
+#: themes/default/templates/journal/print.html:113
+#: themes/default/templates/journal/search.html:46
+#: themes/material/templates/journal/article.html:81
+#: themes/material/templates/journal/search.html:50
+#: themes/material/templates/preprints/list.html:79
+msgid "Keywords"
+msgstr "Schlagwörter"
 
 #: templates/admin/submission/manager/delete_license.html:26
 msgid ""
@@ -1541,7 +1562,7 @@ msgstr "Autor_innen"
 #: themes/OLH/templates/journal/print.html:95
 #: themes/TUW/templates/journal/article.html:104
 #: themes/TUW/templates/journal/print.html:95
-#: themes/TUWJFM/templates/journal/article.html:127
+#: themes/TUWJFM/templates/journal/article.html:125
 #: themes/TUWJFM/templates/journal/print.html:95
 #: themes/default/templates/journal/article.html:36
 #: themes/default/templates/journal/print.html:95
@@ -1564,24 +1585,6 @@ msgstr "Dyslexie"
 #: themes/material/templates/journal/article.html:212
 msgid "View"
 msgstr "Ansehen"
-
-#: themes/OLH/templates/journal/article.html:127
-#: themes/OLH/templates/journal/print.html:113
-#: themes/OLH/templates/journal/search.html:56
-#: themes/OLH/templates/preprints/list.html:68
-#: themes/OLH/templates/preprints/search.html:53
-#: themes/TUW/templates/journal/print.html:113
-#: themes/TUW/templates/journal/search.html:46
-#: themes/TUWJFM/templates/journal/print.html:113
-#: themes/TUWJFM/templates/journal/search.html:46
-#: themes/default/templates/journal/article.html:74
-#: themes/default/templates/journal/print.html:113
-#: themes/default/templates/journal/search.html:46
-#: themes/material/templates/journal/article.html:81
-#: themes/material/templates/journal/search.html:50
-#: themes/material/templates/preprints/list.html:79
-msgid "Keywords"
-msgstr "Schlagwörter"
 
 #: themes/OLH/templates/journal/article.html:129
 #: themes/OLH/templates/journal/print.html:115
@@ -1620,7 +1623,7 @@ msgstr "Zitierung"
 #: themes/OLH/templates/preprints/article.html:105
 #: themes/TUW/templates/journal/article.html:118
 #: themes/TUW/templates/preprints/article.html:102
-#: themes/TUWJFM/templates/journal/article.html:141
+#: themes/TUWJFM/templates/journal/article.html:139
 #: themes/TUWJFM/templates/preprints/article.html:102
 #: themes/default/templates/journal/article.html:141
 #: themes/default/templates/preprints/article.html:102
@@ -1630,7 +1633,7 @@ msgstr "Veröffentlicht am"
 
 #: themes/OLH/templates/journal/article.html:176
 #: themes/TUW/templates/journal/article.html:123
-#: themes/TUWJFM/templates/journal/article.html:146
+#: themes/TUWJFM/templates/journal/article.html:144
 #: themes/default/templates/journal/article.html:143
 msgid "Accepted on"
 msgstr "Akzeptiert am"
@@ -1645,7 +1648,7 @@ msgstr "Begutachtet"
 #: themes/OLH/templates/journal/article.html:184
 #: themes/OLH/templates/preprints/article.html:106
 #: themes/TUW/templates/preprints/article.html:103
-#: themes/TUWJFM/templates/journal/article.html:227
+#: themes/TUWJFM/templates/journal/article.html:235
 #: themes/TUWJFM/templates/preprints/article.html:103
 #: themes/default/templates/journal/article.html:147
 #: themes/default/templates/preprints/article.html:103
@@ -1663,7 +1666,7 @@ msgstr "Lizenz"
 #: themes/TUW/templates/preprints/article.html:92
 #: themes/TUW/templates/preprints/article.html:96
 #: themes/TUW/templates/preprints/article.html:118
-#: themes/TUWJFM/templates/journal/article.html:202
+#: themes/TUWJFM/templates/journal/article.html:210
 #: themes/TUWJFM/templates/preprints/article.html:92
 #: themes/TUWJFM/templates/preprints/article.html:96
 #: themes/TUWJFM/templates/preprints/article.html:118
@@ -2372,17 +2375,17 @@ msgid "Journal Article"
 msgstr "Artikel"
 
 #: themes/TUW/templates/journal/article.html:129
-#: themes/TUWJFM/templates/journal/article.html:152
+#: themes/TUWJFM/templates/journal/article.html:150
 msgid "Published by"
 msgstr "Veröffentlicht von"
 
 #: themes/TUW/templates/journal/article.html:143
-#: themes/TUWJFM/templates/journal/article.html:171
+#: themes/TUWJFM/templates/journal/article.html:169
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
 #: themes/TUW/templates/journal/article.html:185
-#: themes/TUWJFM/templates/journal/article.html:213
+#: themes/TUWJFM/templates/journal/article.html:221
 msgid "Abstract (English)"
 msgstr "Zusammenfassung (Englisch)"
 
@@ -2468,7 +2471,7 @@ msgstr "Ausgaben"
 msgid "and"
 msgstr "und"
 
-#: themes/TUWJFM/templates/journal/article.html:157
+#: themes/TUWJFM/templates/journal/article.html:155
 msgid "Published in"
 msgstr "Veröffentlicht in"
 

@@ -1,6 +1,8 @@
 {% load settings %}
 {% load roles %}
 {% load static from staticfiles %}
+{% load i18n %}
+
 
 {% user_has_role request 'editor' as user_is_editor %}
 {% user_has_role request 'production' as user_is_production %}

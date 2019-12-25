@@ -74,9 +74,9 @@ class ArticleInfo(KeywordModelForm):
 
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
-            'title_de': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
-            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Parallel subtitle')}),
+            'title_de': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
+            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Subtitle of parallel title')}),
             'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
             'abstract_de': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (German)')}),
         }
@@ -87,6 +87,14 @@ class ArticleInfo(KeywordModelForm):
         journal = kwargs.pop('journal', None)
 
         super(ArticleInfo, self).__init__(*args, **kwargs)
+
+        self.fields['title'].label=_('Title')
+        self.fields['subtitle'].label=_('Subtitle')
+        self.fields['title_de'].label=_('Parallel title')
+        self.fields['subtitle_de'].label=_('Subtitle of parallel title')
+        self.fields['abstract_de'].label=_('Abstract (German)')
+
+
         if 'instance' in kwargs:
             article = kwargs['instance']
             self.fields['section'].queryset = models.Section.objects.language().fallbacks('en').filter(

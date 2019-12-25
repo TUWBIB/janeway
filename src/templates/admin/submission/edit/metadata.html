@@ -1,6 +1,8 @@
 {% extends "admin/core/base.html" %}}
 {% load foundation %}
 {% load static from staticfiles %}
+{% load i18n %}
+
 
 {% block title %}Edit Metadata - {{ article.pk }}{% endblock title %}
 
@@ -83,13 +85,13 @@
                         </div>
                      </div>
                     <div class="large-12 columns">
-                        <label for="id_keywords">Keywords</label>
+                        <label for="id_keywords">{% trans "Keywords" %}</label>
                         <input type="text" id="id_keywords" name="keywords" value="
                                 {% if form.cleaned_data.keywords %}{{ form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
                         Hit Enter to add a new keyword.
                     </div>
                     <div class="large-12 columns">
-                        <label for="id_keywords_de">Keywords (De)</label>
+                        <label for="id_keywords_de">{% trans "Keywords (German)" %}</label>
                         <input type="text" id="id_keywords_de" name="keywords_de" value="
                                 {% if form.cleaned_data.keywords_de %}{{ form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
                         Hit Enter to add a new keyword.

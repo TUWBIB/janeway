@@ -333,7 +333,7 @@ class Article(models.Model):
     # TUW extensions
     title_de = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'))
     subtitle_de = models.CharField(max_length=300, blank=True, null=True,
-                                help_text=_('Parallel subtitle of the article'))
+                                help_text=_('Subtitle of the parallel title of the article'))
     abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
     keywords_de = models.ManyToManyField(KeywordDe, blank=True, null=True, help_text=_('Keywords (German)'))
 
