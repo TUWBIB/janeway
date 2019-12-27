@@ -28,7 +28,7 @@
                 </a>
                 <h6 class="card-subtitle mb-2 text-muted">{% for author in article.frozen_authors.all %}{% if forloop.last %}
                     {% if article.frozen_authors.all|length > 1 %} {% trans "and" %}
-                    {% endif %}{% endif %}{{ author.full_name }}
+                    {% endif %}{% endif %}{{ author.last_name }}{% if author.first_name %}, {{ author.first_name }}{% endif %}
                     {% if not forloop.last %}
                         {% if not forloop.counter == article.frozen_authors.all|length|add:-1 %},
                         {% endif %}{% endif %}{% endfor %}
