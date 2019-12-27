@@ -125,8 +125,8 @@
                         <th>{% trans "Author" %}</th>
                         <td>
                             {% for author in article.frozen_authors.all %}
-                            {% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %}& {% endif %}
-                            {{ author.citation_name }}
+                            {% if not forloop.first and not forloop.last %} ; {% elif forloop.last and not forloop.first %}& {% endif %}
+                            {{ author.last_name }}, {{ author.first_name }}
                             {% if author.author.orcid %}
                             <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUW/img/orcid_16x16.png" %}"></a>
                             {% endif %}
