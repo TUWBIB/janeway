@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-25 16:07+0100\n"
+"POT-Creation-Date: 2019-12-27 23:41+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,7 +37,6 @@ msgstr "Passwort"
 msgid "Repeat Password"
 msgstr "Passwort wiederholen"
 
-# Andrae: Live-System-Test
 #: core/forms.py:110 core/forms.py:408 journal/forms.py:57
 #, python-format
 msgid "What is %(num1)i %(operator)s %(num2)i? "
@@ -167,12 +166,11 @@ msgstr "Institut"
 msgid "Country"
 msgstr "Land"
 
-# Andrae: Live-System-Test
 #: core/models.py:642 core/models.py:799
 #: templates/admin/submission/submit_files.html:42
 #: templates/admin/submission/submit_files.html:81
-#: templates/admin/submission/submit_review.html:84
-#: templates/admin/submission/submit_review.html:104
+#: templates/admin/submission/submit_review.html:137
+#: templates/admin/submission/submit_review.html:157
 #: themes/OLH/templates/preprints/review.html:76
 #: themes/OLH/templates/preprints/review.html:95
 #: themes/OLH/templates/preprints/submit_files.html:38
@@ -190,18 +188,16 @@ msgstr "Land"
 #: themes/default/templates/preprints/submit_files.html:41
 #: themes/default/templates/preprints/submit_files.html:78
 msgid "Label"
-msgstr "Label wozu?"
+msgstr "Typ"
 
 #: core/models.py:643 core/models.py:800
 msgid "Description"
 msgstr "Beschreibung"
 
-# Andrae: Übersetzung unsauber
 #: core/models.py:1059
 msgid "Your contact email address"
 msgstr "Ihre Kontakt-E-Mail-Adresse"
 
-# Andrae: Live-System-Test
 #: core/models.py:1060 themes/TUW/templates/preprints/review.html:41
 #: themes/TUWJFM/templates/preprints/review.html:41
 #: themes/default/templates/preprints/review.html:41
@@ -229,13 +225,11 @@ msgstr ""
 msgid "Volume"
 msgstr "Jahrgang"
 
-# Andrae: Live-System-Test, oder Ausgabe?
 #: journal/models.py:475 journal/models.py:482
 msgctxt "fe_oes"
 msgid "Issue"
 msgstr "Ausgabe"
 
-# Andrae: Live-System-Test, oder Ausgabe?
 #: journal/models.py:477 journal/models.py:484 themes/OLH/templates/500.html:5
 #: themes/OLH/templates/journal/issue.html:4
 #: themes/material/templates/elements/journal/issue_sidebar.html:8
@@ -243,7 +237,6 @@ msgstr "Ausgabe"
 msgid "Issue"
 msgstr "Heft"
 
-# Andrae: Live-System-Test
 #: journal/views.py:1440
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
@@ -295,30 +288,84 @@ msgstr "Titel"
 msgid "Subtitle"
 msgstr "Subtitel"
 
-# Andrae: Live-System-Test
 #: preprint/forms.py:22 submission/forms.py:80
 msgid "Enter your article's abstract here"
 msgstr "Fügen Sie die Zusammenfassung Ihres Artikels hier ein"
 
 #: submission/forms.py:78 submission/forms.py:93
+#: templates/admin/submission/submit_review.html:40
 #: themes/TUWJFM/templates/journal/article.html:111
 msgid "Parallel title"
 msgstr "Paralleltitel"
 
 #: submission/forms.py:79 submission/forms.py:94
+#: templates/admin/submission/submit_review.html:41
 msgid "Subtitle of parallel title"
 msgstr "Subtitel des Paralleltitels"
 
-# Andrae: Live-System-Test
 #: submission/forms.py:81
 msgid "Enter your article's abstract here (German)"
 msgstr "Fügen Sie die deutschprachige Zusammenfassung ihres Artikels hier ein"
 
-#: submission/forms.py:95 submission/models.py:337
+#: submission/forms.py:95 templates/admin/elements/metadata.html:46
+#: templates/admin/submission/submit_review.html:52
+#: themes/OLH/templates/journal/article.html:124
+#: themes/OLH/templates/journal/print.html:110
+#: themes/OLH/templates/preprints/article.html:38
+#: themes/OLH/templates/preprints/review.html:33
+#: themes/TUW/templates/journal/print.html:110
+#: themes/TUW/templates/preprints/article.html:38
+#: themes/TUW/templates/preprints/review.html:34
+#: themes/TUWJFM/templates/journal/print.html:110
+#: themes/TUWJFM/templates/preprints/article.html:38
+#: themes/TUWJFM/templates/preprints/review.html:34
+#: themes/default/templates/journal/article.html:71
+#: themes/default/templates/journal/print.html:110
+#: themes/default/templates/preprints/article.html:38
+#: themes/default/templates/preprints/review.html:34
+#: themes/material/templates/journal/article.html:72
+#: themes/material/templates/preprints/article.html:43
+msgid "Abstract"
+msgstr "Zusammenfassung"
+
+#: submission/forms.py:96 submission/models.py:337
+#: templates/admin/submission/submit_review.html:61
 #: themes/TUW/templates/journal/article.html:193
-#: themes/TUWJFM/templates/journal/article.html:231
+#: themes/TUWJFM/templates/journal/article.html:230
 msgid "Abstract (German)"
 msgstr "Zusammenfassung (Deutsch)"
+
+#: submission/forms.py:97 templates/admin/submission/submit_review.html:85
+#: themes/OLH/templates/preprints/review.html:39
+#: themes/TUW/templates/preprints/review.html:40
+#: themes/TUWJFM/templates/preprints/review.html:40
+#: themes/default/templates/preprints/review.html:40
+msgid "Language"
+msgstr "Sprache"
+
+#: submission/forms.py:98 themes/OLH/templates/journal/article.html:184
+#: themes/OLH/templates/preprints/article.html:106
+#: themes/TUW/templates/preprints/article.html:103
+#: themes/TUWJFM/templates/journal/article.html:236
+#: themes/TUWJFM/templates/preprints/article.html:103
+#: themes/default/templates/journal/article.html:147
+#: themes/default/templates/preprints/article.html:103
+#: themes/material/templates/preprints/article.html:124
+msgid "License"
+msgstr "Lizenz"
+
+#: submission/forms.py:99 templates/admin/submission/submit_review.html:86
+#: themes/OLH/templates/preprints/review.html:40
+msgid "Section"
+msgstr "Abschnitt"
+
+#: submission/forms.py:100
+msgid "Page Numbers"
+msgstr "Seiten (von - bis)"
+
+#: submission/forms.py:101
+msgid "Primary Issue"
+msgstr "Zugeordnetes Heft"
 
 #: submission/models.py:312
 msgid "Your article title"
@@ -348,51 +395,52 @@ msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitel des Artikels"
 
 #: submission/models.py:338 templates/admin/submission/edit/metadata.html:94
+#: templates/admin/submission/submit_info.html:95
+#: templates/admin/submission/submit_review.html:77
 #: themes/TUW/templates/journal/article.html:149
-#: themes/TUWJFM/templates/journal/article.html:177
+#: themes/TUWJFM/templates/journal/article.html:176
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
-# Andrae: Übersetzung unsauber
 #: submission/models.py:1365 templates/admin/submission/submit_files.html:70
 msgid "Figures and Data Files"
 msgstr "Abbildungen und Datenfiles"
 
-# Andrae: Live-System-Test
 #: submission/models.py:1372
 msgid "The default license applied when no option is presented"
 msgstr ""
 "Die Standard-Lizenz der Zeitschrift kommt zur Anwendung, wenn keine Auswahl "
 "gegeben ist."
 
-# Andrae: Live-System-Test
 #: submission/models.py:1379
 msgid "The default language of articles when lang is hidden"
 msgstr ""
 "Die Standard-Sprache kommt für Artikel zur Anwendung, wenn lang versteckt "
 "ist."
 
-# Andrae: Live-System-Test
 #: submission/models.py:1385
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 
-# Andrae: Live-System-Test
+#: templates/admin/elements/metadata.html:61
+#: templates/admin/elements/metadata.html:67
+#: templates/admin/submission/submit_review.html:73
+#: templates/admin/submission/submit_review.html:80
+msgid "No keywords recorded"
+msgstr "Keine Schlagwörter erfasst"
+
 #: templates/admin/elements/publisher_notes.html:34
 msgid "Add A Publisher Note"
 msgstr "Füge eine Verlagsanmerkung hinzu"
 
-# Andrae: Live-System-Test
 #: templates/admin/elements/publisher_notes.html:43
 msgid "Add Publisher Note"
 msgstr "Verlagsanmerkung hinzufügen"
 
-# Andrae: Live-System-Test
 #: templates/admin/elements/publisher_notes.html:54
 msgid "Edit A Publisher Note"
 msgstr "Bearbeite die Verlagsanmerkung"
 
-# Andrae: Live-System-Test
 #: templates/admin/elements/publisher_notes.html:63
 msgid "Save Publisher Note"
 msgstr "Speichere Verlagsanmerkung"
@@ -431,7 +479,6 @@ msgstr "Füge Autor_in hinzu"
 msgid "Add New File"
 msgstr "Füge neue Datei hinzu"
 
-# Andrae: Übersetzung fehlt
 #: templates/admin/elements/submit/file.html:12
 #: themes/OLH/templates/elements/submit/file.html:8
 #: themes/TUW/templates/elements/submit/file.html:17
@@ -496,6 +543,8 @@ msgid "proofreaders"
 msgstr ""
 
 #: templates/admin/submission/edit/metadata.html:88
+#: templates/admin/submission/submit_info.html:85
+#: templates/admin/submission/submit_review.html:70
 #: themes/OLH/templates/journal/article.html:127
 #: themes/OLH/templates/journal/print.html:113
 #: themes/OLH/templates/journal/search.html:56
@@ -513,6 +562,15 @@ msgstr ""
 #: themes/material/templates/preprints/list.html:79
 msgid "Keywords"
 msgstr "Schlagwörter"
+
+#: templates/admin/submission/edit/metadata.html:91
+#: templates/admin/submission/edit/metadata.html:97
+#: templates/admin/submission/submit_info.html:87
+#: templates/admin/submission/submit_info.html:97
+#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
+#: utils/forms.py:37
+msgid "Hit Enter to add a new keyword."
+msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
 
 #: templates/admin/submission/manager/delete_license.html:26
 msgid ""
@@ -546,7 +604,6 @@ msgstr "Artikel einreichen"
 msgid "Author Agreement"
 msgstr "Autor_innenvertrag"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/start.html:11
 msgid ""
 "Please carefully read through the statements below before checking items"
@@ -674,7 +731,6 @@ msgstr "Suche"
 msgid "Add Authors"
 msgstr "Füge Autor_in hinzu"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:44
 #: themes/TUW/templates/preprints/authors.html:42
 #: themes/TUWJFM/templates/preprints/authors.html:42
@@ -694,7 +750,6 @@ msgstr ""
 msgid "Add Self as Author"
 msgstr "Mich als Autor_in hinzufügen"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:48
 #: themes/OLH/templates/preprints/authors.html:43
 #: themes/TUW/templates/preprints/authors.html:47
@@ -710,7 +765,6 @@ msgstr ""
 "Dieser öffnet ein Popup-Fenster, wo die notwendigen Informationen eintragen "
 "werden können."
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:55
 #: templates/admin/submission/submit_authors.html:58
 #: themes/OLH/templates/preprints/authors.html:49
@@ -736,7 +790,6 @@ msgstr "Name"
 msgid "No authors yet, add one!"
 msgstr "Noch keine Autor_innen, fügen Sie eine_n hinzu!"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_authors.html:89
 msgid ""
 "You are required to select a main author, this author will receive the "
@@ -752,7 +805,7 @@ msgstr "Hauptautor_in wählen"
 
 #: templates/admin/submission/submit_authors.html:100
 #: templates/admin/submission/submit_files.html:113
-#: templates/admin/submission/submit_info.html:93
+#: templates/admin/submission/submit_info.html:120
 #: themes/OLH/templates/preprints/authors.html:83
 #: themes/OLH/templates/preprints/submit_files.html:105
 #: themes/TUW/templates/preprints/authors.html:89
@@ -779,7 +832,6 @@ msgstr "Dateien hochladen"
 msgid "Submission guidelines"
 msgstr "Leitfaden für die Einreichung"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_files.html:23
 #: themes/OLH/templates/preprints/submit_files.html:21
 #: themes/TUW/templates/preprints/submit_files.html:23
@@ -821,8 +873,8 @@ msgstr "Hochladen"
 
 #: templates/admin/submission/submit_files.html:43
 #: templates/admin/submission/submit_files.html:82
-#: templates/admin/submission/submit_review.html:85
-#: templates/admin/submission/submit_review.html:105
+#: templates/admin/submission/submit_review.html:138
+#: templates/admin/submission/submit_review.html:158
 #: themes/OLH/templates/preprints/review.html:77
 #: themes/OLH/templates/preprints/review.html:96
 #: themes/OLH/templates/preprints/submit_files.html:39
@@ -844,8 +896,8 @@ msgstr "Dateiname"
 
 #: templates/admin/submission/submit_files.html:60
 #: templates/admin/submission/submit_files.html:98
-#: templates/admin/submission/submit_review.html:94
-#: templates/admin/submission/submit_review.html:114
+#: templates/admin/submission/submit_review.html:147
+#: templates/admin/submission/submit_review.html:167
 #: themes/OLH/templates/preprints/review.html:86
 #: themes/OLH/templates/preprints/review.html:105
 #: themes/OLH/templates/preprints/submit_files.html:56
@@ -885,12 +937,16 @@ msgstr "Artikelinformation"
 msgid "This article is a preprint"
 msgstr "Dieser Artikel ist ein Preprint"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_info.html:108
+#: templates/admin/submission/submit_review.html:99
+#: themes/OLH/templates/preprints/submit_start.html:83
+msgid "Additional Fields"
+msgstr "Zusätzliche Felder"
+
+#: templates/admin/submission/submit_info.html:135
 msgid "allows the following licenses for submission"
 msgstr "erlaubt die folgenden Lizenzen für die Einreichung"
 
-# Andrae: Live-System-Test
 #: templates/admin/submission/submit_review.html:10
 #: templates/admin/submission/timeline.html:35
 #: templates/admin/submission/timeline.html:36
@@ -909,40 +965,7 @@ msgstr "Begutachtung"
 msgid "Comments to Editor"
 msgstr "Kommentare an den_die Editor_in"
 
-#: templates/admin/submission/submit_review.html:41
-#: themes/OLH/templates/journal/article.html:124
-#: themes/OLH/templates/journal/print.html:110
-#: themes/OLH/templates/preprints/article.html:38
-#: themes/OLH/templates/preprints/review.html:33
-#: themes/TUW/templates/journal/print.html:110
-#: themes/TUW/templates/preprints/article.html:38
-#: themes/TUW/templates/preprints/review.html:34
-#: themes/TUWJFM/templates/journal/print.html:110
-#: themes/TUWJFM/templates/preprints/article.html:38
-#: themes/TUWJFM/templates/preprints/review.html:34
-#: themes/default/templates/journal/article.html:71
-#: themes/default/templates/journal/print.html:110
-#: themes/default/templates/preprints/article.html:38
-#: themes/default/templates/preprints/review.html:34
-#: themes/material/templates/journal/article.html:72
-#: themes/material/templates/preprints/article.html:43
-msgid "Abstract"
-msgstr "Zusammenfassung"
-
-#: templates/admin/submission/submit_review.html:49
-#: themes/OLH/templates/preprints/review.html:39
-#: themes/TUW/templates/preprints/review.html:40
-#: themes/TUWJFM/templates/preprints/review.html:40
-#: themes/default/templates/preprints/review.html:40
-msgid "Language"
-msgstr "Sprache"
-
-#: templates/admin/submission/submit_review.html:50
-#: themes/OLH/templates/preprints/review.html:40
-msgid "Section"
-msgstr "Abschnitt"
-
-#: templates/admin/submission/submit_review.html:51
+#: templates/admin/submission/submit_review.html:87
 #: themes/OLH/templates/preprints/review.html:41
 #: themes/TUW/templates/preprints/review.html:42
 #: themes/TUWJFM/templates/preprints/review.html:42
@@ -951,7 +974,7 @@ msgstr "Abschnitt"
 msgid "Licence"
 msgstr "Lizenz"
 
-#: templates/admin/submission/submit_review.html:60
+#: templates/admin/submission/submit_review.html:113
 #: themes/OLH/templates/preprints/review.html:51
 #: themes/TUW/templates/preprints/review.html:52
 #: themes/TUWJFM/templates/preprints/review.html:52
@@ -959,7 +982,7 @@ msgstr "Lizenz"
 msgid "Author Info"
 msgstr "Autor_inneninformation"
 
-#: templates/admin/submission/submit_review.html:70
+#: templates/admin/submission/submit_review.html:123
 #: themes/OLH/templates/preprints/review.html:61
 #: themes/TUW/templates/preprints/review.html:62
 #: themes/TUWJFM/templates/preprints/review.html:62
@@ -967,7 +990,7 @@ msgstr "Autor_inneninformation"
 msgid "No authors yet! Add one."
 msgstr "Noch keine Autor_innen! Fügen Sie eine_n hinzu."
 
-#: templates/admin/submission/submit_review.html:78
+#: templates/admin/submission/submit_review.html:131
 #: templates/admin/submission/timeline.html:28
 #: templates/admin/submission/timeline.html:29
 #: themes/OLH/templates/preprints/review.html:70
@@ -977,7 +1000,7 @@ msgstr "Noch keine Autor_innen! Fügen Sie eine_n hinzu."
 msgid "Article Files"
 msgstr "Artikel-Dateien"
 
-#: templates/admin/submission/submit_review.html:81
+#: templates/admin/submission/submit_review.html:134
 #: themes/OLH/templates/preprints/review.html:73
 #: themes/TUW/templates/preprints/review.html:74
 #: themes/TUWJFM/templates/preprints/review.html:74
@@ -985,7 +1008,7 @@ msgstr "Artikel-Dateien"
 msgid "Manuscript Files"
 msgstr "Manuskript-Datei"
 
-#: templates/admin/submission/submit_review.html:101
+#: templates/admin/submission/submit_review.html:154
 #: themes/OLH/templates/preprints/review.html:92
 #: themes/TUW/templates/preprints/review.html:93
 #: themes/TUWJFM/templates/preprints/review.html:93
@@ -994,7 +1017,7 @@ msgid "Figure/Data"
 msgstr "Abbildungen/Daten"
 
 # Andrae: Übersetzung unsauber
-#: templates/admin/submission/submit_review.html:125
+#: templates/admin/submission/submit_review.html:178
 #: themes/OLH/templates/preprints/review.html:113
 #: themes/TUW/templates/preprints/review.html:115
 #: themes/TUWJFM/templates/preprints/review.html:115
@@ -1002,7 +1025,7 @@ msgstr "Abbildungen/Daten"
 msgid "Complete"
 msgstr "Fertig"
 
-#: templates/admin/submission/submit_review.html:125
+#: templates/admin/submission/submit_review.html:178
 #: themes/OLH/templates/preprints/review.html:113
 #: themes/TUW/templates/preprints/review.html:115
 #: themes/TUWJFM/templates/preprints/review.html:115
@@ -1070,7 +1093,6 @@ msgstr "Benutzerkonto aktivieren"
 msgid "You can complete the activation process by clicking the button below."
 msgstr ""
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/activate_account.html:29
 #: themes/material/templates/core/accounts/activate_account.html:23
 msgid "Error"
@@ -1112,7 +1134,6 @@ msgstr ""
 msgid "somebody"
 msgstr "jemand"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/get_reset_token.html:29
 #: themes/TUW/templates/core/accounts/get_reset_token.html:21
 #: themes/TUWJFM/templates/core/accounts/get_reset_token.html:21
@@ -1202,19 +1223,16 @@ msgstr "Profil"
 msgid "Roles"
 msgstr "Rollen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/public_profile.html:14
 #: themes/TUW/templates/journal/newsletter.html:81
 #: themes/TUWJFM/templates/journal/newsletter.html:64
 msgid "Affiliation"
 msgstr "Affiliation"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/public_profile.html:18
 msgid "Publications"
 msgstr "Publikationen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:30
 #: themes/TUW/templates/core/accounts/register.html:22
 #: themes/TUWJFM/templates/core/accounts/register.html:22
@@ -1223,7 +1241,6 @@ msgstr "Publikationen"
 msgid "Register for"
 msgstr "Registrieren für"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:32
 msgid ""
 "Your password should be at minimum 12 characters long. It does not need to\n"
@@ -1237,7 +1254,6 @@ msgstr ""
 "machen. Weitere Informationen finden Sie in der <a href=\"#\" data-open="
 "\"password-modal\">Kennwort-Anleitung.</a>"
 
-# Andrae: Live-System-Test, Kontext korrekt?
 #: themes/OLH/templates/core/accounts/register.html:78
 #: themes/material/templates/core/accounts/register.html:30
 msgid "By registering an account you agree to our"
@@ -1265,7 +1281,6 @@ msgstr "Kennwort-Anleitung"
 msgid "When it comes to passwords, length is better than complexity."
 msgstr "Gute Passwörter zeichnen sich durch Länge, nicht Komplexität aus."
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/register.html:95
 #: themes/OLH/templates/core/accounts/reset_password.html:45
 #: themes/material/templates/core/accounts/register.html:43
@@ -1318,7 +1333,6 @@ msgid "Enter your new password twice to complete the reset process"
 msgstr ""
 "Geben Sie Ihr Passwort zweimal ein um den Rücksetzprozess abzuschließen."
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/accounts/reset_password.html:27
 msgid ""
 "Your password should be at minimum 12 characters long. It does not need to\n"
@@ -1396,7 +1410,6 @@ msgstr "Passwort vergessen"
 msgid "Register a new account"
 msgstr "Neuen Account anlegen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/core/news/index.html:11
 #: themes/material/templates/core/news/index.html:11
 #: themes/material/templates/press/core/news/index.html:11
@@ -1426,7 +1439,6 @@ msgstr "Es gibt zu dieser Zeitschrift derzeit keine Neuigkeiten."
 msgid "Change Your Email Address"
 msgstr "Ändern Sie die E-Mail-Adresse"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/elements/accounts/edit_profile_body_block.html:7
 msgid ""
 "\n"
@@ -1562,7 +1574,7 @@ msgstr "Autor_innen"
 #: themes/OLH/templates/journal/print.html:95
 #: themes/TUW/templates/journal/article.html:104
 #: themes/TUW/templates/journal/print.html:95
-#: themes/TUWJFM/templates/journal/article.html:125
+#: themes/TUWJFM/templates/journal/article.html:124
 #: themes/TUWJFM/templates/journal/print.html:95
 #: themes/default/templates/journal/article.html:36
 #: themes/default/templates/journal/print.html:95
@@ -1603,7 +1615,6 @@ msgstr "Zitiervorschlag"
 msgid "Publisher Notes"
 msgstr "Verlagsanmerkungen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/article.html:151
 #: themes/OLH/templates/preprints/article.html:114
 #: themes/TUW/templates/preprints/article.html:111
@@ -1623,7 +1634,7 @@ msgstr "Zitierung"
 #: themes/OLH/templates/preprints/article.html:105
 #: themes/TUW/templates/journal/article.html:118
 #: themes/TUW/templates/preprints/article.html:102
-#: themes/TUWJFM/templates/journal/article.html:139
+#: themes/TUWJFM/templates/journal/article.html:138
 #: themes/TUWJFM/templates/preprints/article.html:102
 #: themes/default/templates/journal/article.html:141
 #: themes/default/templates/preprints/article.html:102
@@ -1633,7 +1644,7 @@ msgstr "Veröffentlicht am"
 
 #: themes/OLH/templates/journal/article.html:176
 #: themes/TUW/templates/journal/article.html:123
-#: themes/TUWJFM/templates/journal/article.html:144
+#: themes/TUWJFM/templates/journal/article.html:143
 #: themes/default/templates/journal/article.html:143
 msgid "Accepted on"
 msgstr "Akzeptiert am"
@@ -1645,18 +1656,6 @@ msgstr "Akzeptiert am"
 msgid "Peer Reviewed"
 msgstr "Begutachtet"
 
-#: themes/OLH/templates/journal/article.html:184
-#: themes/OLH/templates/preprints/article.html:106
-#: themes/TUW/templates/preprints/article.html:103
-#: themes/TUWJFM/templates/journal/article.html:237
-#: themes/TUWJFM/templates/preprints/article.html:103
-#: themes/default/templates/journal/article.html:147
-#: themes/default/templates/preprints/article.html:103
-#: themes/material/templates/preprints/article.html:124
-msgid "License"
-msgstr "Lizenz"
-
-# # Andrae: Live-System-Test, Kontext korrekt?
 #: themes/OLH/templates/journal/article.html:216
 #: themes/OLH/templates/journal/article.html:220
 #: themes/OLH/templates/preprints/article.html:95
@@ -1666,7 +1665,7 @@ msgstr "Lizenz"
 #: themes/TUW/templates/preprints/article.html:92
 #: themes/TUW/templates/preprints/article.html:96
 #: themes/TUW/templates/preprints/article.html:118
-#: themes/TUWJFM/templates/journal/article.html:212
+#: themes/TUWJFM/templates/journal/article.html:211
 #: themes/TUWJFM/templates/preprints/article.html:92
 #: themes/TUWJFM/templates/preprints/article.html:96
 #: themes/TUWJFM/templates/preprints/article.html:118
@@ -1683,14 +1682,12 @@ msgstr "Lizenz"
 msgid "Download"
 msgstr "Herunterladen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/article.html:234
 #: themes/default/templates/journal/article.html:130
 #: themes/material/templates/journal/article.html:225
 msgid "Supplementary Files"
 msgstr "Ergänzende Dateien"
 
-# Andrae: Live-System-Test, Kontext korrekt?
 #: themes/OLH/templates/journal/article.html:247
 #: themes/default/templates/journal/article.html:152
 #: themes/material/templates/journal/article.html:239
@@ -1727,7 +1724,6 @@ msgstr "Datei-Prüfsumme (MD5)"
 msgid "Articles"
 msgstr "Artikel"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/articles.html:51
 #: themes/TUW/templates/journal/articles.html:45
 #: themes/TUWJFM/templates/journal/articles.html:52
@@ -1736,7 +1732,6 @@ msgstr "Artikel"
 msgid "Show"
 msgstr "Anzeigen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/articles.html:61
 #: themes/TUW/templates/journal/articles.html:55
 #: themes/TUWJFM/templates/journal/articles.html:62
@@ -1814,6 +1809,7 @@ msgid "Journal Representatives"
 msgstr "Zeitschriften-Ansprechpersonen"
 
 # Andrae: Live-System-Test
+# Beethro: Kontext Vertreter_innen des "Plattformbetreibers" ?
 #: themes/OLH/templates/journal/contact.html:19
 #: themes/OLH/templates/press/journal/contact.html:11
 #: themes/material/templates/journal/contact.html:21
@@ -1871,7 +1867,6 @@ msgstr "Ausgewählte Artikel"
 msgid "Featured Journals"
 msgstr "Ausgewählte Zeitschriften"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/homepage_elements/journals.html:28
 #: themes/OLH/templates/press/homepage_elements/journals_and_html.html:30
 msgid "Unnamed Journal"
@@ -1934,7 +1929,6 @@ msgstr "Ausgewählte Preprints"
 msgid "Issues"
 msgstr "Hefte"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/issues.html:25
 #: themes/TUW/templates/journal/issues.html:29
 #: themes/TUWJFM/templates/journal/issues.html:35
@@ -1974,7 +1968,6 @@ msgstr "Einreichungen"
 msgid "About"
 msgstr "Über diese Zeitschrift"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/journal/submissions.html:37
 #: themes/TUW/templates/journal/submissions.html:36
 #: themes/TUWJFM/templates/journal/submissions.html:36
@@ -2144,7 +2137,6 @@ msgstr "Autor_innen des Preprints"
 msgid "Add authors to"
 msgstr "Autor_innen hinzufügen zu"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/preprints/authors.html:80
 #: themes/TUW/templates/preprints/authors.html:86
 #: themes/TUWJFM/templates/preprints/authors.html:86
@@ -2161,7 +2153,6 @@ msgstr ""
 msgid "Preprint Editors"
 msgstr "Preprint-Editor_innen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/preprints/editors.html:46
 msgid "This repository has no subjects or editors to display."
 msgstr "Dieses Repositorium hat noch keine Themenbereiche oder Editor_innen."
@@ -2191,13 +2182,11 @@ msgstr "Alle Preprints"
 msgid "Latest Preprints"
 msgstr "Aktuelle Preprints"
 
-# Andrae: Live-System-test
 #: themes/OLH/templates/preprints/list.html:61
 #: themes/OLH/templates/preprints/search.html:46
 msgid "Search preprints"
 msgstr "Durchsuche Preprints"
 
-# Andrae: Live-System-test
 #: themes/OLH/templates/preprints/list.html:65
 #: themes/OLH/templates/preprints/search.html:50
 msgid "Searching by"
@@ -2266,14 +2255,6 @@ msgstr ""
 "Fügen Sie hier zusätzliche Informationen ein, welche Sie den Preprint-"
 "Editor_innen zur Verfügung stellen möchten."
 
-#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
-msgid "Hit Enter to add a new keyword."
-msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
-
-#: themes/OLH/templates/preprints/submit_start.html:83
-msgid "Additional Fields"
-msgstr "Zusätzliche Felder"
-
 #: themes/OLH/templates/press/core/login.html:26
 msgid "Login with ORCiD"
 msgstr "Einloggen mit ORCiD"
@@ -2282,7 +2263,6 @@ msgstr "Einloggen mit ORCiD"
 msgid "Log In"
 msgstr "Einloggen"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/press/core/news/index.html:37
 msgid "This press currently has no news items to display."
 msgstr "Es gibt zu diesem Verlag derzeit keine Neuigkeiten"
@@ -2296,7 +2276,6 @@ msgstr "Es gibt zu diesem Verlag derzeit keine Neuigkeiten"
 msgid "on"
 msgstr "auf"
 
-# Andrae: Live-System-Test
 #: themes/OLH/templates/press/core/news/item.html:40
 #: themes/material/templates/core/news/item.html:26
 #: themes/material/templates/press/core/news/item.html:26
@@ -2342,7 +2321,6 @@ msgstr ""
 "Weitere Informationen finden Sie in der < <a href=\"#\" data-toggle=\"modal"
 "\" data-target=\"#passwordmodal\"> Kennwort-Anleitung.</a>\n"
 
-# Andrae: Live-System-Test
 #: themes/TUW/templates/core/accounts/reset_password.html:17
 #: themes/TUWJFM/templates/core/accounts/reset_password.html:17
 #: themes/default/templates/core/accounts/reset_password.html:17
@@ -2375,17 +2353,17 @@ msgid "Journal Article"
 msgstr "Artikel"
 
 #: themes/TUW/templates/journal/article.html:129
-#: themes/TUWJFM/templates/journal/article.html:150
+#: themes/TUWJFM/templates/journal/article.html:149
 msgid "Published by"
 msgstr "Veröffentlicht von"
 
 #: themes/TUW/templates/journal/article.html:143
-#: themes/TUWJFM/templates/journal/article.html:171
+#: themes/TUWJFM/templates/journal/article.html:170
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
 #: themes/TUW/templates/journal/article.html:185
-#: themes/TUWJFM/templates/journal/article.html:223
+#: themes/TUWJFM/templates/journal/article.html:222
 msgid "Abstract (English)"
 msgstr "Zusammenfassung (Englisch)"
 
@@ -2471,11 +2449,11 @@ msgstr "Ausgaben"
 msgid "and"
 msgstr "und"
 
-#: themes/TUWJFM/templates/journal/article.html:155
+#: themes/TUWJFM/templates/journal/article.html:154
 msgid "Published in"
 msgstr "Veröffentlicht in"
 
-#: themes/TUWJFM/templates/journal/article.html:157
+#: themes/TUWJFM/templates/journal/article.html:156
 msgid "pages"
 msgstr "Seiten"
 
@@ -2658,15 +2636,13 @@ msgstr "Manager_in"
 
 #: themes/material/templates/core/nav.html:122
 #: themes/material/templates/core/nav.html:154
-#, fuzzy
-#| msgid "Edit Profile"
 msgid "Edit Article"
-msgstr "Profil bearbeiten"
+msgstr "Artikel bearbeiten"
 
 #: themes/material/templates/core/nav.html:125
 #: themes/material/templates/core/nav.html:157
 msgid "Edit Issue"
-msgstr "Heft ansehen"
+msgstr "Heft bearbeiten"
 
 #: themes/material/templates/core/nav.html:129
 #: themes/material/templates/core/nav.html:164
@@ -2694,7 +2670,6 @@ msgstr "Zeitschriften-Information bearbeiten"
 msgid "Edit Page"
 msgstr "Seite bearbeiten"
 
-# Andrae: Live-System-Test
 #: themes/material/templates/core/nav.html:151
 msgid "Manage Editorial Team"
 msgstr "Editor_innen-Team verwalten"
@@ -2749,7 +2724,6 @@ msgstr "Stammdaten"
 msgid "Social Media and Accounts"
 msgstr "Soziale Medien und Accounts"
 
-# Andrae: Live-System-Test
 #: themes/material/templates/elements/accounts/user_form.html:60
 msgid "Biography and Signature"
 msgstr "Biographie und Signatur"
@@ -2816,7 +2790,6 @@ msgstr "Es gibt derzeit keine Sammlungen zur Ansicht"
 msgid "View Issue"
 msgstr "Heft ansehen"
 
-# Andrae: Live-System-Test
 #: themes/material/templates/journal/search.html:23
 msgid "No articles to display."
 msgstr "Keine Artikel zur Ansicht"

@@ -33,11 +33,19 @@ class KeywordModelForm(ModelForm):
     keywords = CharField(
             required=False, help_text=_("Hit Enter to add a new keyword."))
 
+    keywords_de = CharField(
+            required=False, help_text=_("Hit Enter to add a new keyword."))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_keywords = self.instance.keywords.values_list("word", flat=True)
         field = self.fields["keywords"]
         field.initial = ",".join(current_keywords)
+
+        current_keywords_de = self.instance.keywords_de.values_list("word", flat=True)
+        field = self.fields["keywords_de"]
+        field.initial = ",".join(current_keywords_de)
+
 
     def save(self, commit=True, *args, **kwargs):
         instance = super().save(commit=commit, *args, **kwargs)
@@ -52,6 +60,18 @@ class KeywordModelForm(ModelForm):
         for keyword in instance.keywords.all():
             if keyword.word not in posted_keywords:
                 instance.keywords.remove(keyword)
+
+
+        posted_keywords_de = self.cleaned_data.get('keywords_de', '').split(',')
+        for keyword_de in posted_keywords:
+            if keyword_de != '':
+                obj, _ = submission_models.KeywordDe.objects.get_or_create(
+                        word=keyword_de)
+                instance.keywords_de.add(obj)
+
+        for keyword_de in instance.keywords_de.all():
+            if keyword_de.word not in posted_keywords_de:
+                instance.keywords_de.remove(keyword_de)
 
         if commit:
             instance.save()

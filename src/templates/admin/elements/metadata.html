@@ -43,28 +43,28 @@
         <td colspan="2">{{ article.date_submitted }}</td>
     </tr>
     <tr>
-        <th colspan="4">Abstract</th>
+        <th colspan="4">{% trans "Abstract" %}</th>
     </tr>
     <tr>
         <td colspan="4">{{ article.abstract|safe }}</td>
     </tr>
     <tr>
-        <th colspan="4">Abstract (De)</th>
+        <th colspan="4">{% Abstract (Germman) %}</th>
     </tr>
     <tr>
         <td colspan="4">{{ article.abstract_de|safe }}</td>
     </tr>
     <tr>
-        <th colspan="4">Keywords</th>
+        <th colspan="4">{% Keywords %}</th>
     </tr>
     <tr>
-        <td colspan="4">{% for keyword in article.keywords.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}No keywords recorded{% endfor %}</td>
+        <td colspan="4">{% for keyword in article.keywords.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
     </tr>
     <tr>
-        <th colspan="4">Keywords (De)</th>
+        <th colspan="4">{% Keywords (German) %}</th>
     </tr>
     <tr>
-        <td colspan="4">{% for keyword_de in article.keywords_de.all %}{{ keyword_de }}{% if not forloop.last %}, {% endif %}{% empty %}No keywords recorded{% endfor %}</td>
+        <td colspan="4">{% for keyword_de in article.keywords_de.all %}{{ keyword_de }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
     </tr>
     {% if journal_settings.general.submission_summary %}
         <tr>
