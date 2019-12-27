@@ -356,6 +356,7 @@ def submit_review(request, article_id):
     :return: HttpResponse or HttpRedirect
     """
     article = get_object_or_404(models.Article, pk=article_id)
+    additional_fields = models.FieldAnswer.objects.filter(article=article)
 
     if article.current_step < 4 and not request.user.is_staff:
         return redirect(
@@ -399,6 +400,7 @@ def submit_review(request, article_id):
     template = "admin/submission//submit_review.html"
     context = {
         'article': article,
+        'additional_fields': additional_fields,
     }
 
     return render(request, template, context)

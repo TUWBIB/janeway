@@ -92,7 +92,13 @@ class ArticleInfo(KeywordModelForm):
         self.fields['subtitle'].label=_('Subtitle')
         self.fields['title_de'].label=_('Parallel title')
         self.fields['subtitle_de'].label=_('Subtitle of parallel title')
+        self.fields['abstract'].label=_('Abstract')
         self.fields['abstract_de'].label=_('Abstract (German)')
+        self.fields['language'].label=_('Language')
+        self.fields['license'].label=_('License')
+        self.fields['section'].label=_('Section')
+        self.fields['page_numbers'].label = _('Page Numbers')
+        self.fields['primary_issue'].label = _('Primary Issue')
 
 
         if 'instance' in kwargs:
