@@ -236,9 +236,9 @@
                         that._lastTag().removeClass('remove ui-state-highlight');
                     }
 
+                    // suppress submit on enter if input empty
                     if ((event.which === $.ui.keyCode.ENTER && that.tagInput.val() === '')) 
                     {
-                        console.log("here");
                         event.preventDefault();
                     }
 
