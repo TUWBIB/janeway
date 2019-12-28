@@ -183,10 +183,17 @@ class ArticleInfo(KeywordModelForm):
                     self.fields[element.name].label = element.name
 
                     if article:
+                        default_publisher = setting_handler.get_setting('general', 'default_publisher', journal).processed_value
+                        default_publication_place = setting_handler.get_setting('general', 'default_publication_place', journal).processed_value
+                        
                         try:
                             check_for_answer = models.FieldAnswer.objects.get(field=element, article=article)
                             self.fields[element.name].initial = check_for_answer.answer
                         except models.FieldAnswer.DoesNotExist:
+                            if self.fields[element.name].label == 'publisher' and default_publisher is not None:
+                                self.fields[element.name].initial = default_publisher
+                            if self.fields[element.name].label == 'publication_place' and default_publication_place is not None:
+                                self.fields[element.name].initial = default_publication_place
                             pass
 
     def save(self, commit=True, request=None):
