@@ -417,7 +417,7 @@ def edit_metadata(request, article_id):
     article = get_object_or_404(models.Article, pk=article_id)
     additional_fields = models.Field.objects.filter(journal=request.journal)
     submission_summary = setting_handler.get_setting('general', 'submission_summary', request.journal).processed_value
-    info_form = forms.ArticleInfo(instance=article, additional_fields=additional_fields, submission_summary=submission_summary)
+    info_form = forms.ArticleInfo(instance=article, journal=request.journal, additional_fields=additional_fields, submission_summary=submission_summary)
     frozen_author, modal = None, None
     return_param = request.GET.get('return')
     reverse_url = '{0}?return={1}'.format(reverse('edit_metadata', kwargs={'article_id': article.pk}), return_param)
@@ -431,7 +431,7 @@ def edit_metadata(request, article_id):
     if request.POST:
 
         if 'metadata' in request.POST:
-            info_form = forms.ArticleInfo(request.POST, instance=article, submission_summary=submission_summary)
+            info_form = forms.ArticleInfo(request.POST, instance=article, journal=request.journal, additional_fields=additional_fields, submission_summary=submission_summary)
 
             if info_form.is_valid():
                 info_form.save(request=request)
