@@ -2,6 +2,7 @@
 {% load foundation %}
 {% load static from staticfiles %}
 {% load i18n %}
+{% load field %}
 
 
 {% block title %}Edit Metadata - {{ article.pk }}{% endblock title %}
@@ -19,7 +20,7 @@
         <div class="row expanded">
             <form method="POST"{% if journal_settings.general.abstract_required %} novalidate{% endif %}>
                 <div class="title-area">
-                    <h2>Edit Metadata</h2>
+                    <h2>{% trans "Edit Metadata" %}</h2>
                     <a class="button" href="{{ return }}"><i class="fa fa-arrow-left"></i>Back</a>
                 </div>
                 <div class="content">
@@ -97,19 +98,39 @@
                         {% trans "Hit Enter to add a new keyword." %}
                     </div>
                 </div>
+
+                {% if additional_fields %}
+                    <div class="title-area">
+                        <h2>{% trans "Additional Fields" context "bc"%}</h2>
+                    </div>
+                    <div class="content">
+                    {% for additional_field in additional_fields %}
+                        {% get_form_field info_form additional_field.name as field %}
+                        <div class="{{ field.field.widget.attrs.div_class }} columns">
+                            {{ field|foundation }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="title-area">
-                    <h2>Authors</h2>
-                    <a href="#" class="button" data-open="author">Add Author</a>
+                    <h2>{% trans "Authors" %}</h2>
+                    <a href="#" class="button" data-open="author">{% trans "Add Author" %}</a>
                 </div>
                 <div class="content">
                     <table class="small scroll">
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Institution</th>
-                            <th>Correspondence Author</th>
+                            <th>{% trans "Full Name" %}</th>
+                            <th>{% trans "First Name" %}</th>
+                            <th>{% trans "Middle Name" %}</th>
+                            <th>{% trans "Last Name" %}</th>
+                            <th>{% trans "Email" %}</th>
+                            <th>{% trans "Institution" %}</th>
+                            <th>{% trans "Departement" %}</th>
+                            <th>{% trans "Country" %}</th>
+                            <th>{% trans "Correspondence Author" %}</th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -119,8 +140,13 @@
                             <tr id="authors-{{ f_author.pk }}">
                                 <td><i class="fa fa-sort"></i></td>
                                 <td>{{ f_author.full_name }}</td>
+                                <td>{% if f_author.first_name %}{{ f_author.first_name }}{% endif %}</td>
+                                <td>{% if f_author.middle_name %}{{ f_author.middle_name }}{% endif %}</td>
+                                <td>{% if f_author.last_name %}{{ f_author.last_name }}{% endif %}</td>
                                 <td>{{ f_author.author.email }}</td>
-                                <td>{{ f_author.institution }}</td>
+                                <td>{% if f_author.institution %}{{ f_author.institution }}{% endif %}</td>
+                                <td>{% if f_author.department %}{{ f_author.department }}{% endif %}</td>
+                                <td>{{ f_author.country.name }}</td>
                                 <td>{% if f_author.author == article.correspondence_author %}
                                     <i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}</td>
                                 <td><a href="?author={{ f_author.pk }}&return={{ return }}"><i

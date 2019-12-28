@@ -8,11 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-<<<<<<< HEAD
-"POT-Creation-Date: 2019-12-28 01:36+0100\n"
-=======
-"POT-Creation-Date: 2019-12-27 23:41+0100\n"
->>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
+"POT-Creation-Date: 2019-12-28 09:29+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +55,6 @@ msgid "E-mail"
 msgstr "E-Mail"
 
 #: core/homepage_elements/about/hooks.py:25
-#: themes/TUW/templates/journal/homepage_elements/about.html:4
 msgid "About this Journal"
 msgstr "Über diese Zeitschrift"
 
@@ -111,14 +106,12 @@ msgstr "Englisch"
 msgid "German"
 msgstr "Deutsch"
 
-#: core/models.py:179 templates/admin/submission/submit_authors.html:66
+#: core/models.py:179 templates/admin/submission/edit/metadata.html:129
+#: templates/admin/submission/submit_authors.html:66
 #: themes/OLH/templates/core/accounts/get_reset_token.html:26
 #: themes/OLH/templates/core/accounts/orcid_registration.html:29
 #: themes/OLH/templates/preprints/authors.html:57
 #: themes/OLH/templates/press/core/login.html:27
-#: themes/TUW/templates/core/accounts/get_reset_token.html:16
-#: themes/TUW/templates/journal/newsletter.html:42
-#: themes/TUW/templates/preprints/authors.html:63
 #: themes/TUWJFM/templates/core/accounts/get_reset_token.html:16
 #: themes/TUWJFM/templates/journal/newsletter.html:18
 #: themes/TUWJFM/templates/preprints/authors.html:63
@@ -157,7 +150,7 @@ msgstr "Biographie"
 msgid "ORCiD"
 msgstr "ORCiD"
 
-#: core/models.py:191
+#: core/models.py:191 templates/admin/submission/edit/metadata.html:130
 msgid "Institution"
 msgstr "Institution"
 
@@ -166,7 +159,8 @@ msgstr "Institution"
 msgid "Department"
 msgstr "Institut"
 
-#: core/models.py:204 themes/OLH/templates/core/accounts/public_profile.html:15
+#: core/models.py:204 templates/admin/submission/edit/metadata.html:132
+#: themes/OLH/templates/core/accounts/public_profile.html:15
 msgid "Country"
 msgstr "Land"
 
@@ -179,10 +173,6 @@ msgstr "Land"
 #: themes/OLH/templates/preprints/review.html:95
 #: themes/OLH/templates/preprints/submit_files.html:38
 #: themes/OLH/templates/preprints/submit_files.html:74
-#: themes/TUW/templates/preprints/review.html:77
-#: themes/TUW/templates/preprints/review.html:96
-#: themes/TUW/templates/preprints/submit_files.html:41
-#: themes/TUW/templates/preprints/submit_files.html:78
 #: themes/TUWJFM/templates/preprints/review.html:77
 #: themes/TUWJFM/templates/preprints/review.html:96
 #: themes/TUWJFM/templates/preprints/submit_files.html:41
@@ -202,8 +192,7 @@ msgstr "Beschreibung"
 msgid "Your contact email address"
 msgstr "Ihre Kontakt-E-Mail-Adresse"
 
-#: core/models.py:1060 themes/TUW/templates/preprints/review.html:41
-#: themes/TUWJFM/templates/preprints/review.html:41
+#: core/models.py:1060 themes/TUWJFM/templates/preprints/review.html:41
 #: themes/default/templates/preprints/review.html:41
 msgid "Subject"
 msgstr "Betreff"
@@ -271,9 +260,6 @@ msgstr "Sie sind nun Gutachter_in."
 #: themes/OLH/templates/preprints/list.html:67
 #: themes/OLH/templates/preprints/review.html:25
 #: themes/OLH/templates/preprints/search.html:52
-#: themes/TUW/templates/journal/article.html:99
-#: themes/TUW/templates/journal/articles.html:60
-#: themes/TUW/templates/journal/newsletter.html:54
 #: themes/TUWJFM/templates/journal/article.html:99
 #: themes/TUWJFM/templates/journal/articles.html:67
 #: themes/TUWJFM/templates/journal/newsletter.html:36
@@ -286,7 +272,6 @@ msgstr "Titel"
 #: preprint/forms.py:20 submission/forms.py:77 submission/forms.py:92
 #: templates/admin/submission/submit_review.html:31
 #: themes/OLH/templates/preprints/review.html:26
-#: themes/TUW/templates/preprints/review.html:27
 #: themes/TUWJFM/templates/preprints/review.html:27
 #: themes/default/templates/preprints/review.html:27
 msgid "Subtitle"
@@ -317,9 +302,6 @@ msgstr "Fügen Sie die deutschprachige Zusammenfassung ihres Artikels hier ein"
 #: themes/OLH/templates/journal/print.html:110
 #: themes/OLH/templates/preprints/article.html:38
 #: themes/OLH/templates/preprints/review.html:33
-#: themes/TUW/templates/journal/print.html:110
-#: themes/TUW/templates/preprints/article.html:38
-#: themes/TUW/templates/preprints/review.html:34
 #: themes/TUWJFM/templates/journal/print.html:110
 #: themes/TUWJFM/templates/preprints/article.html:38
 #: themes/TUWJFM/templates/preprints/review.html:34
@@ -333,19 +315,14 @@ msgid "Abstract"
 msgstr "Zusammenfassung"
 
 #: submission/forms.py:96 submission/models.py:337
-<<<<<<< HEAD
 #: templates/admin/elements/metadata.html:52
-=======
->>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 #: templates/admin/submission/submit_review.html:61
-#: themes/TUW/templates/journal/article.html:193
 #: themes/TUWJFM/templates/journal/article.html:230
 msgid "Abstract (German)"
 msgstr "Zusammenfassung (Deutsch)"
 
 #: submission/forms.py:97 templates/admin/submission/submit_review.html:85
 #: themes/OLH/templates/preprints/review.html:39
-#: themes/TUW/templates/preprints/review.html:40
 #: themes/TUWJFM/templates/preprints/review.html:40
 #: themes/default/templates/preprints/review.html:40
 msgid "Language"
@@ -353,7 +330,6 @@ msgstr "Sprache"
 
 #: submission/forms.py:98 themes/OLH/templates/journal/article.html:184
 #: themes/OLH/templates/preprints/article.html:106
-#: themes/TUW/templates/preprints/article.html:103
 #: themes/TUWJFM/templates/journal/article.html:236
 #: themes/TUWJFM/templates/preprints/article.html:103
 #: themes/default/templates/journal/article.html:147
@@ -402,42 +378,36 @@ msgstr "Paralleltitel des Artikels"
 msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitel des Artikels"
 
-<<<<<<< HEAD
 #: submission/models.py:338 templates/admin/elements/metadata.html:64
-#: templates/admin/submission/edit/metadata.html:94
-=======
-#: submission/models.py:338 templates/admin/submission/edit/metadata.html:94
->>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
+#: templates/admin/submission/edit/metadata.html:95
 #: templates/admin/submission/submit_info.html:95
 #: templates/admin/submission/submit_review.html:77
-#: themes/TUW/templates/journal/article.html:149
 #: themes/TUWJFM/templates/journal/article.html:176
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
-#: submission/models.py:1365 templates/admin/submission/submit_files.html:70
+#: submission/models.py:1375 templates/admin/submission/submit_files.html:70
 msgid "Figures and Data Files"
 msgstr "Abbildungen und Datenfiles"
 
-#: submission/models.py:1372
+#: submission/models.py:1382
 msgid "The default license applied when no option is presented"
 msgstr ""
 "Die Standard-Lizenz der Zeitschrift kommt zur Anwendung, wenn keine Auswahl "
 "gegeben ist."
 
-#: submission/models.py:1379
+#: submission/models.py:1389
 msgid "The default language of articles when lang is hidden"
 msgstr ""
 "Die Standard-Sprache kommt für Artikel zur Anwendung, wenn lang versteckt "
 "ist."
 
-#: submission/models.py:1385
+#: submission/models.py:1395
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 
-<<<<<<< HEAD
 #: templates/admin/elements/metadata.html:58
-#: templates/admin/submission/edit/metadata.html:88
+#: templates/admin/submission/edit/metadata.html:89
 #: templates/admin/submission/submit_info.html:85
 #: templates/admin/submission/submit_review.html:70
 #: themes/OLH/templates/journal/article.html:127
@@ -445,8 +415,6 @@ msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 #: themes/OLH/templates/journal/search.html:56
 #: themes/OLH/templates/preprints/list.html:68
 #: themes/OLH/templates/preprints/search.html:53
-#: themes/TUW/templates/journal/print.html:113
-#: themes/TUW/templates/journal/search.html:46
 #: themes/TUWJFM/templates/journal/print.html:113
 #: themes/TUWJFM/templates/journal/search.html:46
 #: themes/default/templates/journal/article.html:74
@@ -458,8 +426,6 @@ msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 msgid "Keywords"
 msgstr "Schlagwörter"
 
-=======
->>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 #: templates/admin/elements/metadata.html:61
 #: templates/admin/elements/metadata.html:67
 #: templates/admin/submission/submit_review.html:73
@@ -488,8 +454,6 @@ msgstr "Speichere Verlagsanmerkung"
 #: themes/OLH/templates/elements/submit/author.html:8
 #: themes/OLH/templates/preprints/authors.html:42
 #: themes/OLH/templates/preprints/authors.html:44
-#: themes/TUW/templates/elements/submit/author.html:10
-#: themes/TUW/templates/preprints/authors.html:49
 #: themes/TUWJFM/templates/elements/submit/author.html:10
 #: themes/TUWJFM/templates/preprints/authors.html:49
 #: themes/default/templates/elements/submit/author.html:10
@@ -498,8 +462,8 @@ msgid "Add New Author"
 msgstr "Füge neue_n Autor_in hinzu"
 
 #: templates/admin/elements/submit/author.html:64
+#: templates/admin/submission/edit/metadata.html:118
 #: themes/OLH/templates/elements/submit/author.html:64
-#: themes/TUW/templates/elements/submit/author.html:65
 #: themes/TUWJFM/templates/elements/submit/author.html:65
 #: themes/default/templates/elements/submit/author.html:65
 msgid "Add Author"
@@ -508,8 +472,6 @@ msgstr "Füge Autor_in hinzu"
 #: templates/admin/elements/submit/file.html:7
 #: themes/OLH/templates/elements/submit/file.html:6
 #: themes/OLH/templates/elements/submit/preprint_file.html:6
-#: themes/TUW/templates/elements/submit/file.html:8
-#: themes/TUW/templates/elements/submit/preprint_file.html:8
 #: themes/TUWJFM/templates/elements/submit/file.html:8
 #: themes/TUWJFM/templates/elements/submit/preprint_file.html:8
 #: themes/default/templates/elements/submit/file.html:8
@@ -519,7 +481,6 @@ msgstr "Füge neue Datei hinzu"
 
 #: templates/admin/elements/submit/file.html:12
 #: themes/OLH/templates/elements/submit/file.html:8
-#: themes/TUW/templates/elements/submit/file.html:17
 #: themes/TUWJFM/templates/elements/submit/file.html:17
 #: themes/default/templates/elements/submit/file.html:17
 msgid ""
@@ -534,7 +495,6 @@ msgstr ""
 
 #: templates/admin/elements/submit/file.html:15
 #: themes/OLH/templates/elements/submit/file.html:11
-#: themes/TUW/templates/elements/submit/file.html:20
 #: themes/TUWJFM/templates/elements/submit/file.html:20
 #: themes/default/templates/elements/submit/file.html:20
 msgid ""
@@ -548,7 +508,6 @@ msgstr ""
 
 #: templates/admin/elements/submit/file.html:17
 #: themes/OLH/templates/elements/submit/file.html:13
-#: themes/TUW/templates/elements/submit/file.html:22
 #: themes/TUWJFM/templates/elements/submit/file.html:22
 #: themes/default/templates/elements/submit/file.html:22
 msgid ""
@@ -563,8 +522,6 @@ msgstr ""
 #: templates/admin/elements/submit/file.html:61
 #: themes/OLH/templates/elements/submit/file.html:25
 #: themes/OLH/templates/elements/submit/preprint_file.html:25
-#: themes/TUW/templates/elements/submit/file.html:32
-#: themes/TUW/templates/elements/submit/preprint_file.html:33
 #: themes/TUWJFM/templates/elements/submit/file.html:32
 #: themes/TUWJFM/templates/elements/submit/preprint_file.html:33
 #: themes/default/templates/elements/submit/file.html:32
@@ -580,46 +537,68 @@ msgstr ""
 msgid "proofreaders"
 msgstr ""
 
-<<<<<<< HEAD
-#: templates/admin/submission/edit/metadata.html:91
-#: templates/admin/submission/edit/metadata.html:97
-#: templates/admin/submission/submit_info.html:87
-#: templates/admin/submission/submit_info.html:97
-#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
-#: utils/forms.py:37
-msgid "Hit Enter to add a new keyword."
-msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
-=======
-#: templates/admin/submission/edit/metadata.html:88
-#: templates/admin/submission/submit_info.html:85
-#: templates/admin/submission/submit_review.html:70
-#: themes/OLH/templates/journal/article.html:127
-#: themes/OLH/templates/journal/print.html:113
-#: themes/OLH/templates/journal/search.html:56
-#: themes/OLH/templates/preprints/list.html:68
-#: themes/OLH/templates/preprints/search.html:53
-#: themes/TUW/templates/journal/print.html:113
-#: themes/TUW/templates/journal/search.html:46
-#: themes/TUWJFM/templates/journal/print.html:113
-#: themes/TUWJFM/templates/journal/search.html:46
-#: themes/default/templates/journal/article.html:74
-#: themes/default/templates/journal/print.html:113
-#: themes/default/templates/journal/search.html:46
-#: themes/material/templates/journal/article.html:81
-#: themes/material/templates/journal/search.html:50
-#: themes/material/templates/preprints/list.html:79
-msgid "Keywords"
-msgstr "Schlagwörter"
->>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
+#: templates/admin/submission/edit/metadata.html:23
+#, fuzzy
+#| msgid "Metadata"
+msgid "Edit Metadata"
+msgstr "Metadaten"
 
-#: templates/admin/submission/edit/metadata.html:91
-#: templates/admin/submission/edit/metadata.html:97
+#: templates/admin/submission/edit/metadata.html:92
+#: templates/admin/submission/edit/metadata.html:98
 #: templates/admin/submission/submit_info.html:87
 #: templates/admin/submission/submit_info.html:97
 #: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
 #: utils/forms.py:37
 msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
+
+#: templates/admin/submission/edit/metadata.html:104
+#, fuzzy
+#| msgid "Additional Fields"
+msgctxt "bc"
+msgid "Additional Fields"
+msgstr "Zusätzliche Felder"
+
+#: templates/admin/submission/edit/metadata.html:117
+#: themes/OLH/templates/journal/article.html:39
+#: themes/OLH/templates/journal/article.html:207
+#: themes/OLH/templates/journal/print.html:95
+#: themes/OLH/templates/preprints/article.html:23
+#: themes/TUWJFM/templates/journal/print.html:95
+#: themes/TUWJFM/templates/preprints/article.html:23
+#: themes/default/templates/journal/article.html:35
+#: themes/default/templates/journal/article.html:104
+#: themes/default/templates/journal/print.html:95
+#: themes/default/templates/preprints/article.html:23
+#: themes/material/templates/journal/article.html:179
+#: themes/material/templates/preprints/article.html:28
+msgid "Authors"
+msgstr "Autor_innen"
+
+#: templates/admin/submission/edit/metadata.html:125
+msgid "Full Name"
+msgstr "Vollständiger Name"
+
+#: templates/admin/submission/edit/metadata.html:126
+msgid "First Name"
+msgstr "Vorname"
+
+#: templates/admin/submission/edit/metadata.html:127
+msgid "Middle Name"
+msgstr "Zweiter Vorname"
+
+#: templates/admin/submission/edit/metadata.html:128
+msgid "Last Name"
+msgstr "Nachname"
+
+# Andrae: Übersetzung unsauber: besser fakultät?
+#: templates/admin/submission/edit/metadata.html:131
+msgid "Departement"
+msgstr "Institut"
+
+#: templates/admin/submission/edit/metadata.html:133
+msgid "Correspondence Author"
+msgstr "Derzeitige Autor_innen"
 
 #: templates/admin/submission/manager/delete_license.html:26
 msgid ""
@@ -634,10 +613,6 @@ msgid ""
 msgstr ""
 
 #: templates/admin/submission/start.html:7
-#: themes/TUW/templates/preprints/authors.html:5
-#: themes/TUW/templates/preprints/review.html:5
-#: themes/TUW/templates/preprints/submit_files.html:5
-#: themes/TUW/templates/preprints/submit_start.html:7
 #: themes/TUWJFM/templates/preprints/authors.html:5
 #: themes/TUWJFM/templates/preprints/review.html:5
 #: themes/TUWJFM/templates/preprints/submit_files.html:5
@@ -661,7 +636,6 @@ msgstr ""
 
 #: templates/admin/submission/start.html:30
 #: themes/OLH/templates/journal/submissions.html:56
-#: themes/TUW/templates/journal/submissions.html:60
 #: themes/TUWJFM/templates/journal/submissions.html:60
 #: themes/default/templates/journal/submissions.html:60
 #: themes/material/templates/journal/submissions.html:71
@@ -675,7 +649,6 @@ msgstr "Der_die Autor_in stimmt zu"
 
 #: templates/admin/submission/start.html:42
 #: themes/OLH/templates/journal/submissions.html:42
-#: themes/TUW/templates/journal/submissions.html:46
 #: themes/TUWJFM/templates/journal/submissions.html:46
 #: themes/default/templates/journal/submissions.html:46
 #: themes/material/templates/journal/submissions.html:48
@@ -691,7 +664,6 @@ msgstr ""
 
 #: templates/admin/submission/start.html:54
 #: themes/OLH/templates/journal/submissions.html:47
-#: themes/TUW/templates/journal/submissions.html:51
 #: themes/TUWJFM/templates/journal/submissions.html:51
 #: themes/default/templates/journal/submissions.html:51
 #: themes/material/templates/journal/submissions.html:60
@@ -710,7 +682,6 @@ msgstr "Kommentare an den_die Editor_in"
 #: templates/admin/submission/start.html:82
 #: themes/OLH/templates/journal/submissions.html:28
 #: themes/OLH/templates/preprints/submit_start.html:97
-#: themes/TUW/templates/journal/submissions.html:27
 #: themes/TUWJFM/templates/journal/submissions.html:27
 #: themes/default/templates/journal/submissions.html:27
 #: themes/material/templates/journal/submissions.html:31
@@ -720,7 +691,6 @@ msgstr "Starte Einreichung"
 #: templates/admin/submission/submit_authors.html:5
 #: templates/admin/submission/timeline.html:20
 #: templates/admin/submission/timeline.html:21
-#: themes/TUW/templates/preprints/authors.html:11
 #: themes/TUWJFM/templates/preprints/authors.html:11
 #: themes/default/templates/preprints/authors.html:11
 msgid "Author Information"
@@ -728,7 +698,6 @@ msgstr "Autor_inneninformation"
 
 #: templates/admin/submission/submit_authors.html:18
 #: themes/OLH/templates/preprints/authors.html:22
-#: themes/TUW/templates/preprints/authors.html:20
 #: themes/TUWJFM/templates/preprints/authors.html:20
 #: themes/default/templates/preprints/authors.html:20
 msgid "Search for Existing Authors"
@@ -736,7 +705,6 @@ msgstr "Suche nach existierenden Autor_innen"
 
 #: templates/admin/submission/submit_authors.html:25
 #: themes/OLH/templates/preprints/authors.html:27
-#: themes/TUW/templates/preprints/authors.html:25
 #: themes/TUWJFM/templates/preprints/authors.html:25
 #: themes/default/templates/preprints/authors.html:25
 msgid ""
@@ -750,7 +718,6 @@ msgstr ""
 
 #: templates/admin/submission/submit_authors.html:31
 #: themes/OLH/templates/preprints/authors.html:33
-#: themes/TUW/templates/preprints/authors.html:31
 #: themes/TUWJFM/templates/preprints/authors.html:31
 #: themes/default/templates/preprints/authors.html:31
 msgid "Search by email address or ORCiD"
@@ -759,9 +726,6 @@ msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 #: templates/admin/submission/submit_authors.html:35
 #: themes/OLH/templates/journal/search.html:8
 #: themes/OLH/templates/preprints/authors.html:37
-#: themes/TUW/templates/journal/search.html:7
-#: themes/TUW/templates/journal/search.html:9
-#: themes/TUW/templates/preprints/authors.html:35
 #: themes/TUWJFM/templates/core/nav.html:240
 #: themes/TUWJFM/templates/core/nav.html:242
 #: themes/TUWJFM/templates/journal/search.html:7
@@ -781,7 +745,6 @@ msgid "Add Authors"
 msgstr "Füge Autor_in hinzu"
 
 #: templates/admin/submission/submit_authors.html:44
-#: themes/TUW/templates/preprints/authors.html:42
 #: themes/TUWJFM/templates/preprints/authors.html:42
 #: themes/default/templates/preprints/authors.html:42
 msgid ""
@@ -793,7 +756,6 @@ msgstr ""
 "nachfolgenden Button hinzufügen."
 
 #: templates/admin/submission/submit_authors.html:46
-#: themes/TUW/templates/preprints/authors.html:44
 #: themes/TUWJFM/templates/preprints/authors.html:44
 #: themes/default/templates/preprints/authors.html:44
 msgid "Add Self as Author"
@@ -801,7 +763,6 @@ msgstr "Mich als Autor_in hinzufügen"
 
 #: templates/admin/submission/submit_authors.html:48
 #: themes/OLH/templates/preprints/authors.html:43
-#: themes/TUW/templates/preprints/authors.html:47
 #: themes/TUWJFM/templates/preprints/authors.html:47
 #: themes/default/templates/preprints/authors.html:47
 msgid ""
@@ -817,7 +778,6 @@ msgstr ""
 #: templates/admin/submission/submit_authors.html:55
 #: templates/admin/submission/submit_authors.html:58
 #: themes/OLH/templates/preprints/authors.html:49
-#: themes/TUW/templates/preprints/authors.html:55
 #: themes/TUWJFM/templates/preprints/authors.html:55
 #: themes/default/templates/preprints/authors.html:55
 msgid "Current Authors"
@@ -825,7 +785,6 @@ msgstr "Derzeitige Autor_innen"
 
 #: templates/admin/submission/submit_authors.html:65
 #: themes/OLH/templates/preprints/authors.html:56
-#: themes/TUW/templates/preprints/authors.html:62
 #: themes/TUWJFM/templates/preprints/authors.html:62
 #: themes/default/templates/preprints/authors.html:62
 msgid "Name"
@@ -833,7 +792,6 @@ msgstr "Name"
 
 #: templates/admin/submission/submit_authors.html:82
 #: themes/OLH/templates/preprints/authors.html:73
-#: themes/TUW/templates/preprints/authors.html:78
 #: themes/TUWJFM/templates/preprints/authors.html:78
 #: themes/default/templates/preprints/authors.html:78
 msgid "No authors yet, add one!"
@@ -857,9 +815,6 @@ msgstr "Hauptautor_in wählen"
 #: templates/admin/submission/submit_info.html:120
 #: themes/OLH/templates/preprints/authors.html:83
 #: themes/OLH/templates/preprints/submit_files.html:105
-#: themes/TUW/templates/preprints/authors.html:89
-#: themes/TUW/templates/preprints/submit_files.html:109
-#: themes/TUW/templates/preprints/submit_start.html:69
 #: themes/TUWJFM/templates/preprints/authors.html:89
 #: themes/TUWJFM/templates/preprints/submit_files.html:109
 #: themes/TUWJFM/templates/preprints/submit_start.html:69
@@ -875,7 +830,6 @@ msgstr "Dateien hochladen"
 
 #: templates/admin/submission/submit_files.html:23
 #: themes/OLH/templates/preprints/submit_files.html:21
-#: themes/TUW/templates/preprints/submit_files.html:23
 #: themes/TUWJFM/templates/preprints/submit_files.html:23
 #: themes/default/templates/preprints/submit_files.html:23
 msgid "Submission guidelines"
@@ -883,7 +837,6 @@ msgstr "Leitfaden für die Einreichung"
 
 #: templates/admin/submission/submit_files.html:23
 #: themes/OLH/templates/preprints/submit_files.html:21
-#: themes/TUW/templates/preprints/submit_files.html:23
 #: themes/TUWJFM/templates/preprints/submit_files.html:23
 #: themes/default/templates/preprints/submit_files.html:23
 msgid ""
@@ -901,7 +854,6 @@ msgstr ""
 
 #: templates/admin/submission/submit_files.html:27
 #: themes/OLH/templates/preprints/submit_files.html:24
-#: themes/TUW/templates/preprints/submit_files.html:26
 #: themes/TUWJFM/templates/preprints/submit_files.html:26
 #: themes/default/templates/preprints/submit_files.html:26
 msgid "Manuscript File"
@@ -911,8 +863,6 @@ msgstr "Manuskript-Datei"
 #: templates/admin/submission/submit_files.html:75
 #: themes/OLH/templates/preprints/submit_files.html:31
 #: themes/OLH/templates/preprints/submit_files.html:68
-#: themes/TUW/templates/preprints/submit_files.html:34
-#: themes/TUW/templates/preprints/submit_files.html:72
 #: themes/TUWJFM/templates/preprints/submit_files.html:34
 #: themes/TUWJFM/templates/preprints/submit_files.html:72
 #: themes/default/templates/preprints/submit_files.html:34
@@ -928,10 +878,6 @@ msgstr "Hochladen"
 #: themes/OLH/templates/preprints/review.html:96
 #: themes/OLH/templates/preprints/submit_files.html:39
 #: themes/OLH/templates/preprints/submit_files.html:75
-#: themes/TUW/templates/preprints/review.html:78
-#: themes/TUW/templates/preprints/review.html:97
-#: themes/TUW/templates/preprints/submit_files.html:42
-#: themes/TUW/templates/preprints/submit_files.html:79
 #: themes/TUWJFM/templates/preprints/review.html:78
 #: themes/TUWJFM/templates/preprints/review.html:97
 #: themes/TUWJFM/templates/preprints/submit_files.html:42
@@ -951,10 +897,6 @@ msgstr "Dateiname"
 #: themes/OLH/templates/preprints/review.html:105
 #: themes/OLH/templates/preprints/submit_files.html:56
 #: themes/OLH/templates/preprints/submit_files.html:91
-#: themes/TUW/templates/preprints/review.html:87
-#: themes/TUW/templates/preprints/review.html:106
-#: themes/TUW/templates/preprints/submit_files.html:59
-#: themes/TUW/templates/preprints/submit_files.html:95
 #: themes/TUWJFM/templates/preprints/review.html:87
 #: themes/TUWJFM/templates/preprints/review.html:106
 #: themes/TUWJFM/templates/preprints/submit_files.html:59
@@ -969,8 +911,6 @@ msgstr "Keine Dateien hochgeladen"
 #: templates/admin/submission/submit_info.html:7
 #: templates/admin/submission/submit_review.html:27
 #: themes/OLH/templates/preprints/review.html:22
-#: themes/TUW/templates/preprints/review.html:23
-#: themes/TUW/templates/preprints/submit_start.html:17
 #: themes/TUWJFM/templates/preprints/review.html:23
 #: themes/TUWJFM/templates/preprints/submit_start.html:17
 #: themes/default/templates/preprints/review.html:23
@@ -980,7 +920,6 @@ msgstr "Artikelinformation"
 
 # Andrae: COAR-Vocabulary
 #: templates/admin/submission/submit_info.html:17
-#: themes/TUW/templates/preprints/submit_start.html:21
 #: themes/TUWJFM/templates/preprints/submit_start.html:21
 #: themes/default/templates/preprints/submit_start.html:21
 msgid "This article is a preprint"
@@ -1000,7 +939,6 @@ msgstr "erlaubt die folgenden Lizenzen für die Einreichung"
 #: templates/admin/submission/timeline.html:35
 #: templates/admin/submission/timeline.html:36
 #: themes/OLH/templates/preprints/review.html:11
-#: themes/TUW/templates/preprints/review.html:11
 #: themes/TUWJFM/templates/preprints/review.html:11
 #: themes/default/templates/preprints/review.html:11
 msgid "Review"
@@ -1008,7 +946,6 @@ msgstr "Begutachtung"
 
 #: templates/admin/submission/submit_review.html:24
 #: themes/OLH/templates/preprints/review.html:18
-#: themes/TUW/templates/preprints/review.html:19
 #: themes/TUWJFM/templates/preprints/review.html:19
 #: themes/default/templates/preprints/review.html:19
 msgid "Comments to Editor"
@@ -1016,7 +953,6 @@ msgstr "Kommentare an den_die Editor_in"
 
 #: templates/admin/submission/submit_review.html:87
 #: themes/OLH/templates/preprints/review.html:41
-#: themes/TUW/templates/preprints/review.html:42
 #: themes/TUWJFM/templates/preprints/review.html:42
 #: themes/default/templates/preprints/review.html:42
 #: themes/material/templates/journal/article.html:272
@@ -1025,7 +961,6 @@ msgstr "Lizenz"
 
 #: templates/admin/submission/submit_review.html:113
 #: themes/OLH/templates/preprints/review.html:51
-#: themes/TUW/templates/preprints/review.html:52
 #: themes/TUWJFM/templates/preprints/review.html:52
 #: themes/default/templates/preprints/review.html:52
 msgid "Author Info"
@@ -1033,7 +968,6 @@ msgstr "Autor_inneninformation"
 
 #: templates/admin/submission/submit_review.html:123
 #: themes/OLH/templates/preprints/review.html:61
-#: themes/TUW/templates/preprints/review.html:62
 #: themes/TUWJFM/templates/preprints/review.html:62
 #: themes/default/templates/preprints/review.html:62
 msgid "No authors yet! Add one."
@@ -1043,7 +977,6 @@ msgstr "Noch keine Autor_innen! Fügen Sie eine_n hinzu."
 #: templates/admin/submission/timeline.html:28
 #: templates/admin/submission/timeline.html:29
 #: themes/OLH/templates/preprints/review.html:70
-#: themes/TUW/templates/preprints/review.html:71
 #: themes/TUWJFM/templates/preprints/review.html:71
 #: themes/default/templates/preprints/review.html:71
 msgid "Article Files"
@@ -1051,7 +984,6 @@ msgstr "Artikel-Dateien"
 
 #: templates/admin/submission/submit_review.html:134
 #: themes/OLH/templates/preprints/review.html:73
-#: themes/TUW/templates/preprints/review.html:74
 #: themes/TUWJFM/templates/preprints/review.html:74
 #: themes/default/templates/preprints/review.html:74
 msgid "Manuscript Files"
@@ -1059,7 +991,6 @@ msgstr "Manuskript-Datei"
 
 #: templates/admin/submission/submit_review.html:154
 #: themes/OLH/templates/preprints/review.html:92
-#: themes/TUW/templates/preprints/review.html:93
 #: themes/TUWJFM/templates/preprints/review.html:93
 #: themes/default/templates/preprints/review.html:93
 msgid "Figure/Data"
@@ -1068,7 +999,6 @@ msgstr "Abbildungen/Daten"
 # Andrae: Übersetzung unsauber
 #: templates/admin/submission/submit_review.html:178
 #: themes/OLH/templates/preprints/review.html:113
-#: themes/TUW/templates/preprints/review.html:115
 #: themes/TUWJFM/templates/preprints/review.html:115
 #: themes/default/templates/preprints/review.html:115
 msgid "Complete"
@@ -1076,7 +1006,6 @@ msgstr "Fertig"
 
 #: templates/admin/submission/submit_review.html:178
 #: themes/OLH/templates/preprints/review.html:113
-#: themes/TUW/templates/preprints/review.html:115
 #: themes/TUWJFM/templates/preprints/review.html:115
 #: themes/default/templates/preprints/review.html:115
 #: themes/material/templates/core/nav.html:84
@@ -1171,7 +1100,6 @@ msgid "Update"
 msgstr "Aktualisieren"
 
 #: themes/OLH/templates/core/accounts/get_reset_token.html:25
-#: themes/TUW/templates/core/accounts/get_reset_token.html:15
 #: themes/TUWJFM/templates/core/accounts/get_reset_token.html:15
 #: themes/default/templates/core/accounts/get_reset_token.html:15
 #: themes/material/templates/core/accounts/get_reset_token.html:14
@@ -1184,7 +1112,6 @@ msgid "somebody"
 msgstr "jemand"
 
 #: themes/OLH/templates/core/accounts/get_reset_token.html:29
-#: themes/TUW/templates/core/accounts/get_reset_token.html:21
 #: themes/TUWJFM/templates/core/accounts/get_reset_token.html:21
 #: themes/default/templates/core/accounts/get_reset_token.html:21
 #: themes/material/templates/core/accounts/get_reset_token.html:21
@@ -1210,9 +1137,6 @@ msgstr ""
 #: themes/OLH/templates/journal/submissions.html:27
 #: themes/OLH/templates/press/core/login.html:5
 #: themes/OLH/templates/press/nav.html:58
-#: themes/TUW/templates/core/login.html:6
-#: themes/TUW/templates/journal/become_reviewer.html:13
-#: themes/TUW/templates/journal/submissions.html:26
 #: themes/TUWJFM/templates/core/login.html:6
 #: themes/TUWJFM/templates/journal/become_reviewer.html:13
 #: themes/TUWJFM/templates/journal/submissions.html:26
@@ -1242,9 +1166,6 @@ msgstr "Passwort vergessen"
 #: themes/OLH/templates/core/nav.html:78
 #: themes/OLH/templates/journal/submissions.html:26
 #: themes/OLH/templates/press/nav.html:59
-#: themes/TUW/templates/core/accounts/register.html:6
-#: themes/TUW/templates/core/accounts/register.html:34
-#: themes/TUW/templates/journal/submissions.html:25
 #: themes/TUWJFM/templates/core/accounts/register.html:6
 #: themes/TUWJFM/templates/core/accounts/register.html:34
 #: themes/TUWJFM/templates/journal/submissions.html:25
@@ -1273,7 +1194,6 @@ msgid "Roles"
 msgstr "Rollen"
 
 #: themes/OLH/templates/core/accounts/public_profile.html:14
-#: themes/TUW/templates/journal/newsletter.html:81
 #: themes/TUWJFM/templates/journal/newsletter.html:64
 msgid "Affiliation"
 msgstr "Affiliation"
@@ -1283,7 +1203,6 @@ msgid "Publications"
 msgstr "Publikationen"
 
 #: themes/OLH/templates/core/accounts/register.html:30
-#: themes/TUW/templates/core/accounts/register.html:22
 #: themes/TUWJFM/templates/core/accounts/register.html:22
 #: themes/default/templates/core/accounts/register.html:22
 #: themes/material/templates/core/accounts/register.html:19
@@ -1311,7 +1230,6 @@ msgstr ""
 
 #: themes/OLH/templates/core/accounts/register.html:79
 #: themes/OLH/templates/core/base.html:151
-#: themes/TUW/templates/core/base.html:119
 #: themes/TUWJFM/templates/core/base.html:99
 #: themes/default/templates/core/base.html:84
 #: themes/material/templates/core/accounts/register.html:30
@@ -1358,9 +1276,6 @@ msgstr ""
 
 #: themes/OLH/templates/core/accounts/reset_password.html:6
 #: themes/OLH/templates/core/accounts/reset_password.html:33
-#: themes/TUW/templates/core/accounts/get_reset_token.html:4
-#: themes/TUW/templates/core/accounts/reset_password.html:5
-#: themes/TUW/templates/core/accounts/reset_password.html:25
 #: themes/TUWJFM/templates/core/accounts/get_reset_token.html:4
 #: themes/TUWJFM/templates/core/accounts/reset_password.html:5
 #: themes/TUWJFM/templates/core/accounts/reset_password.html:25
@@ -1374,7 +1289,6 @@ msgid "Reset Password"
 msgstr "Passwort zurücksetzen"
 
 #: themes/OLH/templates/core/accounts/reset_password.html:26
-#: themes/TUW/templates/core/accounts/reset_password.html:16
 #: themes/TUWJFM/templates/core/accounts/reset_password.html:16
 #: themes/default/templates/core/accounts/reset_password.html:16
 #: themes/material/templates/core/accounts/reset_password.html:16
@@ -1397,7 +1311,6 @@ msgstr ""
 "\">Kennwort-Anleitung.</a>"
 
 #: themes/OLH/templates/core/base.html:152
-#: themes/TUW/templates/core/base.html:120
 #: themes/default/templates/core/base.html:85
 msgid "Sitemap"
 msgstr "Sitemap"
@@ -1407,9 +1320,6 @@ msgstr "Sitemap"
 #: themes/OLH/templates/journal/contact.html:31
 #: themes/OLH/templates/press/journal/contact.html:5
 #: themes/OLH/templates/press/journal/contact.html:18
-#: themes/TUW/templates/core/base.html:121
-#: themes/TUW/templates/journal/contact.html:6
-#: themes/TUW/templates/journal/contact.html:26
 #: themes/TUWJFM/templates/core/base.html:106
 #: themes/TUWJFM/templates/journal/contact.html:6
 #: themes/TUWJFM/templates/journal/contact.html:26
@@ -1424,14 +1334,12 @@ msgstr "Kontakt"
 
 #: themes/OLH/templates/core/login.html:32
 #: themes/OLH/templates/press/core/login.html:25
-#: themes/TUW/templates/core/login.html:19
 #: themes/TUWJFM/templates/core/login.html:19
 #: themes/default/templates/core/login.html:19
 msgid "Log in with your account"
 msgstr "Melden Sie sich mit Ihrem Konto an"
 
 #: themes/OLH/templates/core/login.html:33
-#: themes/TUW/templates/core/login.html:21
 #: themes/TUWJFM/templates/core/login.html:21
 #: themes/default/templates/core/login.html:21
 #: themes/material/templates/core/login.html:37
@@ -1439,21 +1347,18 @@ msgid "Log in with ORCiD"
 msgstr "Einloggen mit ORCiD"
 
 #: themes/OLH/templates/core/login.html:42
-#: themes/TUW/templates/core/login.html:38
 #: themes/TUWJFM/templates/core/login.html:38
 #: themes/default/templates/core/login.html:38
 msgid "Log in"
 msgstr "Einloggen"
 
 #: themes/OLH/templates/core/login.html:43
-#: themes/TUW/templates/core/login.html:42
 #: themes/TUWJFM/templates/core/login.html:42
 #: themes/default/templates/core/login.html:42
 msgid "Forgotten your password?"
 msgstr "Passwort vergessen"
 
 #: themes/OLH/templates/core/login.html:44
-#: themes/TUW/templates/core/login.html:46
 #: themes/TUWJFM/templates/core/login.html:46
 #: themes/default/templates/core/login.html:46
 msgid "Register a new account"
@@ -1468,7 +1373,6 @@ msgstr "Filter-Tag"
 #: themes/OLH/templates/core/news/index.html:30
 #: themes/OLH/templates/journal/homepage_elements/news.html:15
 #: themes/OLH/templates/press/core/news/index.html:30
-#: themes/TUW/templates/journal/homepage_elements/news.html:16
 #: themes/TUWJFM/templates/journal/homepage_elements/news.html:16
 #: themes/default/templates/journal/homepage_elements/news.html:16
 #: themes/material/templates/core/news/index.html:30
@@ -1554,8 +1458,6 @@ msgstr ""
 #: themes/OLH/templates/elements/journal/issue_sidebar.html:6
 #: themes/OLH/templates/journal/article.html:157
 #: themes/OLH/templates/preprints/article.html:115
-#: themes/TUW/templates/journal/issue_display.html:21
-#: themes/TUW/templates/preprints/article.html:112
 #: themes/TUWJFM/templates/journal/issue_display.html:21
 #: themes/TUWJFM/templates/preprints/article.html:112
 #: themes/default/templates/elements/journal/issue_sidebar.html:5
@@ -1572,7 +1474,6 @@ msgid "Download Issue"
 msgstr "Heft herunterladen"
 
 #: themes/OLH/templates/elements/journal/issue_sidebar.html:10
-#: themes/TUW/templates/journal/issue_display.html:24
 #: themes/TUWJFM/templates/journal/issue_display.html:39
 #: themes/default/templates/elements/journal/issue_sidebar.html:9
 #: themes/material/templates/elements/journal/issue_sidebar.html:17
@@ -1580,21 +1481,18 @@ msgid "Issue Archive"
 msgstr "Heftarchiv"
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:8
-#: themes/TUW/templates/elements/submit/preprint_file.html:17
 #: themes/TUWJFM/templates/elements/submit/preprint_file.html:17
 #: themes/default/templates/elements/submit/preprint_file.html:17
 msgid "Please supply any supporting information or data files."
 msgstr "Bitte laden Sie hier Supplemente oder Datenfiles hoch."
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:11
-#: themes/TUW/templates/elements/submit/preprint_file.html:20
 #: themes/TUWJFM/templates/elements/submit/preprint_file.html:20
 #: themes/default/templates/elements/submit/preprint_file.html:20
 msgid "Please upload your manuscript file, it should be in PDF format."
 msgstr "Bitte laden Sie hier Ihr Manuskript als PDF hoch."
 
 #: themes/OLH/templates/elements/submit/preprint_file.html:13
-#: themes/TUW/templates/elements/submit/preprint_file.html:22
 #: themes/TUWJFM/templates/elements/submit/preprint_file.html:22
 #: themes/default/templates/elements/submit/preprint_file.html:22
 msgid ""
@@ -1603,26 +1501,7 @@ msgid ""
 msgstr "Bitte laden Sie hier Ihr Manuskript als PDF, RTF, ODT oder DOC/X hoch."
 
 #: themes/OLH/templates/journal/article.html:39
-#: themes/OLH/templates/journal/article.html:207
 #: themes/OLH/templates/journal/print.html:95
-#: themes/OLH/templates/preprints/article.html:23
-#: themes/TUW/templates/journal/print.html:95
-#: themes/TUW/templates/preprints/article.html:23
-#: themes/TUWJFM/templates/journal/print.html:95
-#: themes/TUWJFM/templates/preprints/article.html:23
-#: themes/default/templates/journal/article.html:35
-#: themes/default/templates/journal/article.html:104
-#: themes/default/templates/journal/print.html:95
-#: themes/default/templates/preprints/article.html:23
-#: themes/material/templates/journal/article.html:179
-#: themes/material/templates/preprints/article.html:28
-msgid "Authors"
-msgstr "Autor_innen"
-
-#: themes/OLH/templates/journal/article.html:39
-#: themes/OLH/templates/journal/print.html:95
-#: themes/TUW/templates/journal/article.html:104
-#: themes/TUW/templates/journal/print.html:95
 #: themes/TUWJFM/templates/journal/article.html:124
 #: themes/TUWJFM/templates/journal/print.html:95
 #: themes/default/templates/journal/article.html:36
@@ -1649,7 +1528,6 @@ msgstr "Ansehen"
 
 #: themes/OLH/templates/journal/article.html:129
 #: themes/OLH/templates/journal/print.html:115
-#: themes/TUW/templates/journal/print.html:115
 #: themes/TUWJFM/templates/journal/print.html:115
 #: themes/default/templates/journal/article.html:78
 #: themes/default/templates/journal/print.html:115
@@ -1666,7 +1544,6 @@ msgstr "Verlagsanmerkungen"
 
 #: themes/OLH/templates/journal/article.html:151
 #: themes/OLH/templates/preprints/article.html:114
-#: themes/TUW/templates/preprints/article.html:111
 #: themes/TUWJFM/templates/preprints/article.html:111
 #: themes/default/templates/journal/article.html:164
 #: themes/default/templates/preprints/article.html:111
@@ -1681,8 +1558,6 @@ msgstr "Zitierung"
 
 #: themes/OLH/templates/journal/article.html:173
 #: themes/OLH/templates/preprints/article.html:105
-#: themes/TUW/templates/journal/article.html:118
-#: themes/TUW/templates/preprints/article.html:102
 #: themes/TUWJFM/templates/journal/article.html:138
 #: themes/TUWJFM/templates/preprints/article.html:102
 #: themes/default/templates/journal/article.html:141
@@ -1692,7 +1567,6 @@ msgid "Published on"
 msgstr "Veröffentlicht am"
 
 #: themes/OLH/templates/journal/article.html:176
-#: themes/TUW/templates/journal/article.html:123
 #: themes/TUWJFM/templates/journal/article.html:143
 #: themes/default/templates/journal/article.html:143
 msgid "Accepted on"
@@ -1710,10 +1584,6 @@ msgstr "Begutachtet"
 #: themes/OLH/templates/preprints/article.html:95
 #: themes/OLH/templates/preprints/article.html:99
 #: themes/OLH/templates/preprints/article.html:138
-#: themes/TUW/templates/journal/article.html:174
-#: themes/TUW/templates/preprints/article.html:92
-#: themes/TUW/templates/preprints/article.html:96
-#: themes/TUW/templates/preprints/article.html:118
 #: themes/TUWJFM/templates/journal/article.html:211
 #: themes/TUWJFM/templates/preprints/article.html:92
 #: themes/TUWJFM/templates/preprints/article.html:96
@@ -1758,8 +1628,6 @@ msgstr "Datei-Prüfsumme (MD5)"
 #: themes/OLH/templates/journal/articles.html:7
 #: themes/OLH/templates/journal/articles.html:23
 #: themes/OLH/templates/journal/search.html:26
-#: themes/TUW/templates/journal/articles.html:5
-#: themes/TUW/templates/journal/articles.html:7
 #: themes/TUWJFM/templates/core/nav.html:140
 #: themes/TUWJFM/templates/journal/articles.html:7
 #: themes/TUWJFM/templates/journal/articles.html:9
@@ -1774,7 +1642,6 @@ msgid "Articles"
 msgstr "Artikel"
 
 #: themes/OLH/templates/journal/articles.html:51
-#: themes/TUW/templates/journal/articles.html:45
 #: themes/TUWJFM/templates/journal/articles.html:52
 #: themes/default/templates/journal/articles.html:45
 #: themes/material/templates/journal/articles.html:82
@@ -1782,7 +1649,6 @@ msgid "Show"
 msgstr "Anzeigen"
 
 #: themes/OLH/templates/journal/articles.html:61
-#: themes/TUW/templates/journal/articles.html:55
 #: themes/TUWJFM/templates/journal/articles.html:62
 #: themes/default/templates/journal/articles.html:55
 #: themes/material/templates/journal/articles.html:85
@@ -1790,7 +1656,6 @@ msgid "Sort"
 msgstr "Sortieren"
 
 #: themes/OLH/templates/journal/articles.html:64
-#: themes/TUW/templates/journal/articles.html:58
 #: themes/TUWJFM/templates/journal/articles.html:65
 #: themes/default/templates/journal/articles.html:58
 #: themes/material/templates/journal/articles.html:88
@@ -1802,9 +1667,6 @@ msgstr "Datum"
 #: themes/OLH/templates/journal/search.html:52
 #: themes/OLH/templates/press/press_journals.html:83
 #: themes/OLH/templates/press/press_journals.html:84
-#: themes/TUW/templates/journal/articles.html:65
-#: themes/TUW/templates/journal/articles.html:74
-#: themes/TUW/templates/journal/search.html:60
 #: themes/TUWJFM/templates/journal/articles.html:72
 #: themes/TUWJFM/templates/journal/articles.html:81
 #: themes/TUWJFM/templates/journal/search.html:60
@@ -1817,7 +1679,6 @@ msgid "Filter"
 msgstr "Filtern"
 
 #: themes/OLH/templates/journal/articles.html:80
-#: themes/TUW/templates/journal/articles.html:77
 #: themes/TUWJFM/templates/journal/articles.html:84
 #: themes/default/templates/journal/articles.html:77
 #: themes/material/templates/journal/articles.html:109
@@ -1827,9 +1688,6 @@ msgstr "Filterung entfernen"
 #: themes/OLH/templates/journal/become_reviewer.html:5
 #: themes/OLH/templates/journal/become_reviewer.html:10
 #: themes/OLH/templates/journal/become_reviewer.html:20
-#: themes/TUW/templates/journal/become_reviewer.html:4
-#: themes/TUW/templates/journal/become_reviewer.html:5
-#: themes/TUW/templates/journal/become_reviewer.html:17
 #: themes/TUWJFM/templates/journal/become_reviewer.html:4
 #: themes/TUWJFM/templates/journal/become_reviewer.html:5
 #: themes/TUWJFM/templates/journal/become_reviewer.html:17
@@ -1850,7 +1708,6 @@ msgstr "Veröffentlicht"
 
 # Andrae: Live-System-Test, Übersetzung inkorrekt
 #: themes/OLH/templates/journal/contact.html:17
-#: themes/TUW/templates/journal/contact.html:15
 #: themes/TUWJFM/templates/journal/contact.html:15
 #: themes/default/templates/journal/contact.html:15
 #: themes/material/templates/journal/contact.html:19
@@ -1866,7 +1723,6 @@ msgid "Press Representatives"
 msgstr "Medienvertreter_innen"
 
 #: themes/OLH/templates/journal/contact.html:26
-#: themes/TUW/templates/journal/contact.html:21
 #: themes/TUWJFM/templates/journal/contact.html:21
 #: themes/default/templates/journal/contact.html:21
 #: themes/material/templates/journal/contact.html:30
@@ -1875,7 +1731,6 @@ msgstr "Kontaktinformation"
 
 #: themes/OLH/templates/journal/contact.html:35
 #: themes/OLH/templates/press/journal/contact.html:22
-#: themes/TUW/templates/journal/contact.html:32
 #: themes/TUWJFM/templates/journal/contact.html:32
 #: themes/default/templates/journal/contact.html:32
 msgid "Who would you like to contact?"
@@ -1883,7 +1738,6 @@ msgstr "Wen möchten Sie kontaktieren?"
 
 #: themes/OLH/templates/journal/contact.html:44
 #: themes/OLH/templates/press/journal/contact.html:30
-#: themes/TUW/templates/journal/contact.html:42
 #: themes/TUWJFM/templates/journal/contact.html:42
 #: themes/default/templates/journal/contact.html:42
 #: themes/material/templates/journal/contact.html:51
@@ -1900,7 +1754,6 @@ msgstr "Redaktionsteam"
 
 #: themes/OLH/templates/journal/homepage_elements/featured.html:6
 #: themes/OLH/templates/journal/homepage_elements/popular.html:9
-#: themes/TUW/templates/journal/homepage_elements/featured.html:6
 #: themes/TUWJFM/templates/journal/homepage_elements/featured.html:6
 #: themes/default/templates/journal/homepage_elements/featured.html:6
 #: themes/default/templates/journal/homepage_elements/popular.html:9
@@ -1922,7 +1775,6 @@ msgid "Unnamed Journal"
 msgstr "Namenlose Zeitschrift"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:9
-#: themes/TUW/templates/journal/homepage_elements/news.html:8
 #: themes/TUWJFM/templates/journal/homepage_elements/news.html:8
 #: themes/default/templates/journal/homepage_elements/news.html:8
 #: themes/material/templates/journal/homepage_elements/news.html:11
@@ -1931,7 +1783,6 @@ msgstr "Aktuelle Nachrichten"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:13
 #: themes/OLH/templates/press/core/news/item.html:33
-#: themes/TUW/templates/journal/homepage_elements/news.html:13
 #: themes/TUWJFM/templates/journal/homepage_elements/news.html:13
 #: themes/default/templates/journal/homepage_elements/news.html:13
 #: themes/material/templates/core/news/index.html:26
@@ -1943,7 +1794,6 @@ msgid "Posted by"
 msgstr "Veröffentlicht von"
 
 #: themes/OLH/templates/journal/homepage_elements/news.html:18
-#: themes/TUW/templates/journal/homepage_elements/news.html:19
 #: themes/TUWJFM/templates/journal/homepage_elements/news.html:19
 #: themes/default/templates/journal/homepage_elements/news.html:19
 msgid "This journal currently has no news items to display"
@@ -1956,7 +1806,6 @@ msgid "Most Popular Articles"
 msgstr "Ausgewählte Artikel"
 
 #: themes/OLH/templates/journal/homepage_elements/preprints.html:6
-#: themes/TUW/templates/journal/homepage_elements/preprints.html:6
 #: themes/TUWJFM/templates/journal/homepage_elements/preprints.html:6
 #: themes/default/templates/journal/homepage_elements/preprints.html:6
 msgid "Featured Preprints"
@@ -1965,8 +1814,6 @@ msgstr "Ausgewählte Preprints"
 #: themes/OLH/templates/journal/issues.html:6
 #: themes/OLH/templates/journal/issues.html:8
 #: themes/OLH/templates/journal/issues.html:15
-#: themes/TUW/templates/journal/issues.html:6
-#: themes/TUW/templates/journal/issues.html:8
 #: themes/TUWJFM/templates/core/nav.html:144
 #: themes/TUWJFM/templates/journal/issues.html:8
 #: themes/TUWJFM/templates/journal/issues.html:17
@@ -1979,7 +1826,6 @@ msgid "Issues"
 msgstr "Hefte"
 
 #: themes/OLH/templates/journal/issues.html:25
-#: themes/TUW/templates/journal/issues.html:29
 #: themes/TUWJFM/templates/journal/issues.html:35
 #: themes/default/templates/journal/issues.html:21
 #: themes/material/templates/journal/issues.html:28
@@ -1992,8 +1838,6 @@ msgstr "In dieser Zeitschrift wurden noch keine Hefte Veröffentlicht."
 
 #: themes/OLH/templates/journal/submissions.html:5
 #: themes/OLH/templates/journal/submissions.html:22
-#: themes/TUW/templates/journal/submissions.html:5
-#: themes/TUW/templates/journal/submissions.html:21
 #: themes/TUWJFM/templates/journal/submissions.html:5
 #: themes/TUWJFM/templates/journal/submissions.html:21
 #: themes/default/templates/journal/submissions.html:5
@@ -2005,7 +1849,6 @@ msgstr "Einreichungen"
 
 #: themes/OLH/templates/journal/submissions.html:32
 #: themes/OLH/templates/preprints/about.html:15
-#: themes/TUW/templates/journal/submissions.html:31
 #: themes/TUWJFM/templates/core/nav.html:115
 #: themes/TUWJFM/templates/journal/submissions.html:31
 #: themes/default/templates/journal/submissions.html:31
@@ -2018,7 +1861,6 @@ msgid "About"
 msgstr "Über diese Zeitschrift"
 
 #: themes/OLH/templates/journal/submissions.html:37
-#: themes/TUW/templates/journal/submissions.html:36
 #: themes/TUWJFM/templates/journal/submissions.html:36
 #: themes/default/templates/journal/submissions.html:36
 #: themes/material/templates/journal/submissions.html:42
@@ -2026,7 +1868,6 @@ msgid "Focus and Scope for"
 msgstr "Ausrichtung von"
 
 #: themes/OLH/templates/journal/submissions.html:51
-#: themes/TUW/templates/journal/submissions.html:55
 #: themes/TUWJFM/templates/journal/submissions.html:55
 #: themes/default/templates/journal/submissions.html:55
 #: themes/material/templates/journal/submissions.html:65
@@ -2034,8 +1875,6 @@ msgid "Licences"
 msgstr "Lizenzen"
 
 #: themes/OLH/templates/journal/submissions.html:52
-#: themes/TUW/templates/journal/submissions.html:56
-#: themes/TUW/templates/preprints/submit_start.html:88
 #: themes/TUWJFM/templates/journal/submissions.html:56
 #: themes/TUWJFM/templates/preprints/submit_start.html:88
 #: themes/default/templates/journal/submissions.html:56
@@ -2045,7 +1884,6 @@ msgid "allows the following licences for submission"
 msgstr "erlaubt folgende Lizenzen für die Einreichung"
 
 #: themes/OLH/templates/journal/submissions.html:61
-#: themes/TUW/templates/journal/submissions.html:41
 #: themes/TUWJFM/templates/journal/submissions.html:41
 #: themes/default/templates/journal/submissions.html:41
 #: themes/material/templates/journal/article.html:282
@@ -2054,7 +1892,6 @@ msgid "Peer Review"
 msgstr "Begutachtung"
 
 #: themes/OLH/templates/journal/submissions.html:66
-#: themes/TUW/templates/journal/submissions.html:65
 #: themes/TUWJFM/templates/journal/submissions.html:65
 #: themes/default/templates/journal/submissions.html:65
 #: themes/material/templates/journal/submissions.html:84
@@ -2062,7 +1899,6 @@ msgid "Publication Cycle"
 msgstr "Publikationszyklus"
 
 #: themes/OLH/templates/journal/submissions.html:70
-#: themes/TUW/templates/journal/submissions.html:69
 #: themes/TUWJFM/templates/journal/submissions.html:69
 #: themes/default/templates/journal/submissions.html:69
 #: themes/material/templates/journal/submissions.html:89
@@ -2109,7 +1945,6 @@ msgstr ""
 
 #: themes/OLH/templates/preprints/article.html:51
 #: themes/OLH/templates/preprints/submit_start.html:72
-#: themes/TUW/templates/preprints/article.html:49
 #: themes/TUWJFM/templates/preprints/article.html:49
 #: themes/default/templates/preprints/article.html:49
 #: themes/material/templates/preprints/article.html:63
@@ -2124,7 +1959,6 @@ msgstr ""
 "nicht sichtbar gestellt."
 
 #: themes/OLH/templates/preprints/article.html:103
-#: themes/TUW/templates/preprints/article.html:100
 #: themes/TUWJFM/templates/preprints/article.html:100
 #: themes/default/templates/preprints/article.html:100
 #: themes/material/templates/preprints/article.html:121
@@ -2132,7 +1966,6 @@ msgid "Metadata"
 msgstr "Metadaten"
 
 #: themes/OLH/templates/preprints/article.html:112
-#: themes/TUW/templates/preprints/article.html:109
 #: themes/TUWJFM/templates/preprints/article.html:109
 #: themes/default/templates/journal/article.html:162
 #: themes/default/templates/preprints/article.html:109
@@ -2141,7 +1974,6 @@ msgid "Metrics"
 msgstr "Metriken"
 
 #: themes/OLH/templates/preprints/article.html:117
-#: themes/TUW/templates/preprints/article.html:124
 #: themes/TUWJFM/templates/preprints/article.html:124
 #: themes/default/templates/journal/article.html:176
 #: themes/default/templates/preprints/article.html:124
@@ -2152,8 +1984,6 @@ msgstr "Zitierung"
 #: themes/OLH/templates/preprints/article.html:130
 #: themes/OLH/templates/preprints/list.html:6
 #: themes/OLH/templates/preprints/list.html:15
-#: themes/TUW/templates/preprints/list.html:6
-#: themes/TUW/templates/preprints/list.html:14
 #: themes/TUWJFM/templates/preprints/list.html:6
 #: themes/TUWJFM/templates/preprints/list.html:14
 #: themes/default/templates/preprints/list.html:6
@@ -2164,7 +1994,6 @@ msgid "All Preprints"
 msgstr "Alle Preprints"
 
 #: themes/OLH/templates/preprints/article.html:134
-#: themes/TUW/templates/preprints/article.html:114
 #: themes/TUWJFM/templates/preprints/article.html:114
 #: themes/default/templates/preprints/article.html:114
 #: themes/material/templates/preprints/article.html:135
@@ -2187,7 +2016,6 @@ msgid "Add authors to"
 msgstr "Autor_innen hinzufügen zu"
 
 #: themes/OLH/templates/preprints/authors.html:80
-#: themes/TUW/templates/preprints/authors.html:86
 #: themes/TUWJFM/templates/preprints/authors.html:86
 #: themes/default/templates/preprints/authors.html:86
 msgid ""
@@ -2268,8 +2096,6 @@ msgstr "Preprint-Einreichung begutachten"
 
 #: themes/OLH/templates/preprints/search.html:6
 #: themes/OLH/templates/preprints/search.html:14
-#: themes/TUW/templates/preprints/search.html:6
-#: themes/TUW/templates/preprints/search.html:14
 #: themes/TUWJFM/templates/preprints/search.html:6
 #: themes/TUWJFM/templates/preprints/search.html:14
 #: themes/default/templates/preprints/search.html:6
@@ -2345,7 +2171,6 @@ msgstr "Zeitschriften"
 msgid "Disciplines"
 msgstr ""
 
-#: themes/TUW/templates/core/accounts/register.html:24
 #: themes/TUWJFM/templates/core/accounts/register.html:24
 #: themes/default/templates/core/accounts/register.html:24
 #, fuzzy
@@ -2370,7 +2195,6 @@ msgstr ""
 "Weitere Informationen finden Sie in der < <a href=\"#\" data-toggle=\"modal"
 "\" data-target=\"#passwordmodal\"> Kennwort-Anleitung.</a>\n"
 
-#: themes/TUW/templates/core/accounts/reset_password.html:17
 #: themes/TUWJFM/templates/core/accounts/reset_password.html:17
 #: themes/default/templates/core/accounts/reset_password.html:17
 msgid ""
@@ -2389,78 +2213,6 @@ msgstr ""
 "                                    <a href=\"#\" data-toggle=\"modal\" data-"
 "target=\"#passwordmodal\">Kennwort-\n"
 "                                       Anleitung</a>."
-
-#: themes/TUW/templates/elements/submit/author.html:67
-#: themes/TUWJFM/templates/elements/submit/author.html:67
-#: themes/default/templates/elements/submit/author.html:67
-msgid "Close"
-msgstr "Schließen"
-
-#: themes/TUW/templates/journal/article.html:95
-#: themes/TUWJFM/templates/journal/article.html:95
-msgid "Journal Article"
-msgstr "Artikel"
-
-#: themes/TUW/templates/journal/article.html:129
-#: themes/TUWJFM/templates/journal/article.html:149
-msgid "Published by"
-msgstr "Veröffentlicht von"
-
-#: themes/TUW/templates/journal/article.html:143
-#: themes/TUWJFM/templates/journal/article.html:170
-msgid "Keywords (English)"
-msgstr "Schlagwörter (Englisch)"
-
-#: themes/TUW/templates/journal/article.html:185
-#: themes/TUWJFM/templates/journal/article.html:222
-msgid "Abstract (English)"
-msgstr "Zusammenfassung (Englisch)"
-
-#: themes/TUW/templates/journal/collections.html:6
-#: themes/TUW/templates/journal/collections.html:7
-#: themes/TUW/templates/journal/issue_display.html:25
-#: themes/TUWJFM/templates/journal/collections.html:6
-#: themes/TUWJFM/templates/journal/collections.html:7
-#: themes/TUWJFM/templates/journal/issue_display.html:40
-msgid "Collections"
-msgstr "Sammlungen"
-
-#: themes/TUW/templates/journal/newsletter.html:7
-#: themes/TUW/templates/journal/newsletter.html:9
-#: themes/TUWJFM/templates/core/nav.html:129
-#: themes/TUWJFM/templates/journal/newsletter.html:7
-#: themes/TUWJFM/templates/journal/newsletter.html:9
-msgid "Newsletter"
-msgstr "Newsletter"
-
-#: themes/TUW/templates/journal/newsletter.html:48
-#: themes/TUWJFM/templates/journal/newsletter.html:27
-msgid "Confirm Email"
-msgstr "Email bestätigen"
-
-#: themes/TUW/templates/journal/newsletter.html:69
-#: themes/TUWJFM/templates/journal/newsletter.html:48
-msgid "Firstname"
-msgstr "Vorname"
-
-#: themes/TUW/templates/journal/newsletter.html:75
-#: themes/TUWJFM/templates/journal/newsletter.html:56
-msgid "Lastname"
-msgstr "Nachname"
-
-#: themes/TUW/templates/journal/newsletter.html:88
-#: themes/material/templates/core/nav.html:117
-#: themes/material/templates/core/nav.html:139
-#: themes/material/templates/press/nav.html:102
-#: themes/material/templates/press/nav.html:111
-msgid "Submit"
-msgstr "Einreichen"
-
-#: themes/TUW/templates/preprints/submit_files.html:12
-#: themes/TUWJFM/templates/preprints/submit_files.html:12
-#: themes/default/templates/preprints/submit_files.html:12
-msgid "Upload Files"
-msgstr "Dateien hochladen"
 
 #: themes/TUWJFM/templates/core/base.html:103
 #: themes/TUWJFM/templates/core/nav.html:121
@@ -2487,6 +2239,12 @@ msgstr "Schließen"
 msgid "Information for authors"
 msgstr "Information für AutorInnen"
 
+#: themes/TUWJFM/templates/core/nav.html:129
+#: themes/TUWJFM/templates/journal/newsletter.html:7
+#: themes/TUWJFM/templates/journal/newsletter.html:9
+msgid "Newsletter"
+msgstr "Newsletter"
+
 #: themes/TUWJFM/templates/core/nav.html:146
 #: themes/TUWJFM/templates/journal/issues.html:10
 #: themes/TUWJFM/templates/journal/issues.html:19
@@ -2498,6 +2256,19 @@ msgstr "Ausgaben"
 msgid "and"
 msgstr "und"
 
+#: themes/TUWJFM/templates/elements/submit/author.html:67
+#: themes/default/templates/elements/submit/author.html:67
+msgid "Close"
+msgstr "Schließen"
+
+#: themes/TUWJFM/templates/journal/article.html:95
+msgid "Journal Article"
+msgstr "Artikel"
+
+#: themes/TUWJFM/templates/journal/article.html:149
+msgid "Published by"
+msgstr "Veröffentlicht von"
+
 #: themes/TUWJFM/templates/journal/article.html:154
 msgid "Published in"
 msgstr "Veröffentlicht in"
@@ -2505,6 +2276,14 @@ msgstr "Veröffentlicht in"
 #: themes/TUWJFM/templates/journal/article.html:156
 msgid "pages"
 msgstr "Seiten"
+
+#: themes/TUWJFM/templates/journal/article.html:170
+msgid "Keywords (English)"
+msgstr "Schlagwörter (Englisch)"
+
+#: themes/TUWJFM/templates/journal/article.html:222
+msgid "Abstract (English)"
+msgstr "Zusammenfassung (Englisch)"
 
 #: themes/TUWJFM/templates/journal/articles.html:30
 msgctxt "fe-pagination"
@@ -2515,6 +2294,12 @@ msgstr "Seite"
 msgctxt "fe-pagination"
 msgid "Go to page"
 msgstr "Gehe zu Seite"
+
+#: themes/TUWJFM/templates/journal/collections.html:6
+#: themes/TUWJFM/templates/journal/collections.html:7
+#: themes/TUWJFM/templates/journal/issue_display.html:40
+msgid "Collections"
+msgstr "Sammlungen"
 
 #: themes/TUWJFM/templates/journal/issue_display.html:26
 msgctxt "fe_oes"
@@ -2533,6 +2318,18 @@ msgstr "Ausgabe herunterladen (ZIP)"
 #: themes/TUWJFM/templates/journal/issue_display.html:36
 msgid "Download Issue (ZIP)"
 msgstr "Heft herunterladen (ZIP)"
+
+#: themes/TUWJFM/templates/journal/newsletter.html:27
+msgid "Confirm Email"
+msgstr "Email bestätigen"
+
+#: themes/TUWJFM/templates/journal/newsletter.html:48
+msgid "Firstname"
+msgstr "Vorname"
+
+#: themes/TUWJFM/templates/journal/newsletter.html:56
+msgid "Lastname"
+msgstr "Nachname"
 
 #: themes/TUWJFM/templates/journal/newsletter.html:76
 msgid ""
@@ -2560,6 +2357,11 @@ msgstr "Suche nach Titel, Subtiteln, Schlagwörtern und Autoren"
 #: themes/TUWJFM/templates/journal/search.html:55
 msgid "Sort articles by"
 msgstr "Artikel sortieren nach"
+
+#: themes/TUWJFM/templates/preprints/submit_files.html:12
+#: themes/default/templates/preprints/submit_files.html:12
+msgid "Upload Files"
+msgstr "Dateien hochladen"
 
 #: themes/default/templates/journal/article.html:92
 msgid "Article"
@@ -2670,6 +2472,13 @@ msgstr "Account"
 #: themes/material/templates/core/nav.html:136
 msgid "Dashboard"
 msgstr "Dashboard"
+
+#: themes/material/templates/core/nav.html:117
+#: themes/material/templates/core/nav.html:139
+#: themes/material/templates/press/nav.html:102
+#: themes/material/templates/press/nav.html:111
+msgid "Submit"
+msgstr "Einreichen"
 
 #: themes/material/templates/core/nav.html:119
 #: themes/material/templates/core/nav.html:137

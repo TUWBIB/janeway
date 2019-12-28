@@ -1130,10 +1130,20 @@ class FrozenAuthor(models.Model):
     def full_name(self):
         if self.is_corporate:
             return self.corporate_name
-        elif self.middle_name:
-            return u"%s %s %s" % (self.first_name, self.middle_name, self.last_name)
         else:
-            return u"%s %s" % (self.first_name, self.last_name)
+            name=''
+            if self.first_name:
+                name += self.first_name
+                name += ' '
+            if self.middle_name:
+                name += self.middle_name
+                name += ' '
+            if self.last_name:
+                name += self.last_name
+                name += ' '
+            name=name.strip()
+
+            return name
 
     @property
     def corporate_name(self):
