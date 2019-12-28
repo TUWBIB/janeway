@@ -8,7 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2019-12-28 01:36+0100\n"
+=======
+"POT-Creation-Date: 2019-12-27 23:41+0100\n"
+>>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -329,7 +333,10 @@ msgid "Abstract"
 msgstr "Zusammenfassung"
 
 #: submission/forms.py:96 submission/models.py:337
+<<<<<<< HEAD
 #: templates/admin/elements/metadata.html:52
+=======
+>>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 #: templates/admin/submission/submit_review.html:61
 #: themes/TUW/templates/journal/article.html:193
 #: themes/TUWJFM/templates/journal/article.html:230
@@ -395,8 +402,12 @@ msgstr "Paralleltitel des Artikels"
 msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitel des Artikels"
 
+<<<<<<< HEAD
 #: submission/models.py:338 templates/admin/elements/metadata.html:64
 #: templates/admin/submission/edit/metadata.html:94
+=======
+#: submission/models.py:338 templates/admin/submission/edit/metadata.html:94
+>>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 #: templates/admin/submission/submit_info.html:95
 #: templates/admin/submission/submit_review.html:77
 #: themes/TUW/templates/journal/article.html:149
@@ -424,6 +435,7 @@ msgstr ""
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 
+<<<<<<< HEAD
 #: templates/admin/elements/metadata.html:58
 #: templates/admin/submission/edit/metadata.html:88
 #: templates/admin/submission/submit_info.html:85
@@ -446,6 +458,8 @@ msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 msgid "Keywords"
 msgstr "Schlagwörter"
 
+=======
+>>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 #: templates/admin/elements/metadata.html:61
 #: templates/admin/elements/metadata.html:67
 #: templates/admin/submission/submit_review.html:73
@@ -565,6 +579,38 @@ msgstr ""
 #: templates/admin/proofing/proofing_article.html:270
 msgid "proofreaders"
 msgstr ""
+
+<<<<<<< HEAD
+#: templates/admin/submission/edit/metadata.html:91
+#: templates/admin/submission/edit/metadata.html:97
+#: templates/admin/submission/submit_info.html:87
+#: templates/admin/submission/submit_info.html:97
+#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
+#: utils/forms.py:37
+msgid "Hit Enter to add a new keyword."
+msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
+=======
+#: templates/admin/submission/edit/metadata.html:88
+#: templates/admin/submission/submit_info.html:85
+#: templates/admin/submission/submit_review.html:70
+#: themes/OLH/templates/journal/article.html:127
+#: themes/OLH/templates/journal/print.html:113
+#: themes/OLH/templates/journal/search.html:56
+#: themes/OLH/templates/preprints/list.html:68
+#: themes/OLH/templates/preprints/search.html:53
+#: themes/TUW/templates/journal/print.html:113
+#: themes/TUW/templates/journal/search.html:46
+#: themes/TUWJFM/templates/journal/print.html:113
+#: themes/TUWJFM/templates/journal/search.html:46
+#: themes/default/templates/journal/article.html:74
+#: themes/default/templates/journal/print.html:113
+#: themes/default/templates/journal/search.html:46
+#: themes/material/templates/journal/article.html:81
+#: themes/material/templates/journal/search.html:50
+#: themes/material/templates/preprints/list.html:79
+msgid "Keywords"
+msgstr "Schlagwörter"
+>>>>>>> 1201d576f95246f375d5e28804ee35077a4bb2d0
 
 #: templates/admin/submission/edit/metadata.html:91
 #: templates/admin/submission/edit/metadata.html:97
