@@ -217,23 +217,14 @@ class ArticleInfo(KeywordModelForm):
             additional_fields = models.Field.objects.filter(journal=request.journal)
 
             for field in additional_fields:
-                print ("field name="+field.name)
                 answer = request.POST.get(field.name, None)
-                print ("answer="+answer)
-                if answer:
+                if answer or (field.kind in ['text','textarea'] and answer == ''):
                     try:
                         field_answer = models.FieldAnswer.objects.get(article=article, field=field)
                         field_answer.answer = answer
                         field_answer.save()
                     except models.FieldAnswer.DoesNotExist:
                         field_answer = models.FieldAnswer.objects.create(article=article, field=field, answer=answer)
-                else:
-                    try:
-                        field_answer = models.FieldAnswer.objects.get(article=article, field=field)
-                        field_answer.delete()
-                    except:
-                        pass
-
 
             request.journal.submissionconfiguration.handle_defaults(article)
 
