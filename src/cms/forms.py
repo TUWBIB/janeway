@@ -5,14 +5,13 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 
 from django import forms
-
+from hvad.forms import TranslatableModelForm
 from django_summernote.widgets import SummernoteWidget
 
 from cms import models
 
 
-class PageForm(forms.ModelForm):
-
+class PageForm(TranslatableModelForm):
     class Meta:
         model = models.Page
         exclude = ('journal', 'is_markdown', 'content_type', 'object_id')
