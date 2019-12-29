@@ -22,17 +22,18 @@ class PageForm(TranslatableModelForm):
         self.fields['content'].widget = SummernoteWidget()
 
 
-class NavForm(forms.ModelForm):
+class NavForm(TranslatableModelForm):
 
     class Meta:
         model = models.NavigationItem
+        fields = ['link_name', 'link', 'is_external', 'sequence', 'page', 'has_sub_nav', 'top_level_nav', 'language']
         exclude = ('page', 'content_type', 'object_id')
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super(NavForm, self).__init__(*args, **kwargs)
 
-        self.fields['top_level_nav'].queryset = models.NavigationItem.objects.filter(
+        self.fields['top_level_nav'].queryset = models.NavigationItem.objects.language().fallbacks('en').filter(
             content_type=request.model_content_type,
             object_id=request.site_type.pk,
             has_sub_nav=True,
