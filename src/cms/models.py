@@ -42,12 +42,11 @@ class Page(TranslatableModel):
 
 
 
-class NavigationItem(models.Model):
+class NavigationItem(TranslatableModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='nav_content', null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
     object = GenericForeignKey('content_type', 'object_id')
 
-    link_name = models.CharField(max_length=100)
     link = models.CharField(max_length=100)
     is_external = models.BooleanField(default=False)
     sequence = models.IntegerField(default=99)
@@ -57,11 +56,16 @@ class NavigationItem(models.Model):
     language = models.CharField(max_length=200, blank=True, null=True, choices=LANGUAGE_CHOICES,
         help_text=_('Language for which this nav item is displayed, leave empty if item is to be shown regardless of language'))
 
+    translations = TranslatedFields(
+        link_name = models.CharField(max_length=100)
+    )
+
+
     def __str__(self):
         return self.link_name
 
     def sub_nav_items(self):
-        return NavigationItem.objects.filter(top_level_nav=self)
+        return NavigationItem.objects.language().fallbacks('en').filter(top_level_nav=self)
 
     @property
     def build_url_for_request(self):
