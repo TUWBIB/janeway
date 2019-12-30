@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '9003_TUW_auto_20191229_1815'),
+        ('cms', '9003_TUW_page_translatable_3'),
 
     ]
 

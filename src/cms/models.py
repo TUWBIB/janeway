@@ -17,6 +17,7 @@ from utils.logic import build_url_for_request
 LANGUAGE_CHOICES = (
     (u'en', _('English')),
     (u'de', _('German')),
+    (u'xxx', _('< Hide >')),
 )
 
 
