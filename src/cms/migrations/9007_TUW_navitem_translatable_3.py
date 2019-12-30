@@ -25,7 +25,7 @@ def untranslate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '9006_auto_20191229_2138'),
+        ('cms', '9006_TUW_navitem_translatable_2'),
     ]
 
     operations = [

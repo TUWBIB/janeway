@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-29 10:33+0100\n"
+"POT-Creation-Date: 2019-12-30 11:04+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,21 +18,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cms/models.py:17 core/janeway_global_settings.py:230
+#: cms/models.py:18 core/janeway_global_settings.py:230
 msgid "English"
 msgstr "Englisch"
 
-#: cms/models.py:18 core/janeway_global_settings.py:232
+#: cms/models.py:19 core/janeway_global_settings.py:232
 msgid "German"
 msgstr "Deutsch"
 
-#: cms/models.py:28
+#: cms/models.py:20
+msgid "< Hide >"
+msgstr "< Element unsichtbar >"
+
+#: cms/models.py:35
 msgid ""
 "Name of the page, max 100 chars, displayed in the nav and on the header of "
 "the page eg. About or Contact"
 msgstr ""
 
-#: cms/models.py:52
+#: cms/models.py:58
 msgid ""
 "Language for which this nav item is displayed, leave empty if item is to be "
 "shown regardless of language"
