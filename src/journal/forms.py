@@ -17,14 +17,14 @@ from core import models as core_models
 from journal import models as journal_models
 
 SEARCH_SORT_OPTIONS = [
-        ('title', 'Titles A-Z'),
-        ('-title', 'Titles Z-A'),
-        ('-date_published', 'Newest'),
-        ('date_published', 'Oldest'),
+        ('title', _('Titles A-Z')),
+        ('-title', _('Titles Z-A')),
+        ('-date_published', _('Newest')),
+        ('date_published', _('Oldest')),
       ]
 TITLE_ADDRESS_OPTIONS = [
-    ('Mr', 'Mr'),
-    ('Ms', 'Ms'),
+    ('Mr', _('Mr')),
+    ('Ms', _('Ms')),
 ]
 
 
