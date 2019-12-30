@@ -8,7 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2019-12-30 11:04+0100\n"
+=======
+"POT-Creation-Date: 2019-12-30 14:04+0100\n"
+>>>>>>> test
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -231,6 +235,30 @@ msgstr ""
 msgid ""
 "MIME type {mimetype} is not valid. Valid types are: {validator.mimetypes}"
 msgstr ""
+
+#: journal/forms.py:20
+msgid "Titles A-Z"
+msgstr "Titel A-Z"
+
+#: journal/forms.py:21
+msgid "Titles Z-A"
+msgstr "Titel Z-A"
+
+#: journal/forms.py:22
+msgid "Newest"
+msgstr "Neueste zuerst"
+
+#: journal/forms.py:23
+msgid "Oldest"
+msgstr "Älteste zuerst"
+
+#: journal/forms.py:26
+msgid "Mr"
+msgstr "Herr"
+
+#: journal/forms.py:27
+msgid "Ms"
+msgstr "Frau"
 
 #: journal/models.py:467
 msgid "Volume"
@@ -556,10 +584,8 @@ msgid "proofreaders"
 msgstr ""
 
 #: templates/admin/submission/edit/metadata.html:23
-#, fuzzy
-#| msgid "Metadata"
 msgid "Edit Metadata"
-msgstr "Metadaten"
+msgstr "Metadaten bearbeiten"
 
 #: templates/admin/submission/edit/metadata.html:92
 #: templates/admin/submission/edit/metadata.html:98
@@ -571,9 +597,9 @@ msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
 
 #: templates/admin/submission/edit/metadata.html:104
-#, fuzzy
-#| msgid "Additional Fields"
-msgctxt "bc"
+#: templates/admin/submission/submit_info.html:108
+#: templates/admin/submission/submit_review.html:99
+#: themes/OLH/templates/preprints/submit_start.html:83
 msgid "Additional Fields"
 msgstr "Zusätzliche Felder"
 
@@ -942,12 +968,6 @@ msgstr "Artikelinformation"
 #: themes/default/templates/preprints/submit_start.html:21
 msgid "This article is a preprint"
 msgstr "Dieser Artikel ist ein Preprint"
-
-#: templates/admin/submission/submit_info.html:108
-#: templates/admin/submission/submit_review.html:99
-#: themes/OLH/templates/preprints/submit_start.html:83
-msgid "Additional Fields"
-msgstr "Zusätzliche Felder"
 
 #: templates/admin/submission/submit_info.html:135
 msgid "allows the following licenses for submission"
