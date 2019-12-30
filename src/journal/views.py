@@ -1570,7 +1570,15 @@ def search(request):
     if search_term:
         # checks titles, keywords and subtitles first,
         # then matches author based on below regex split search term.
+
         search_regex = "^({})$".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
+
+        print (search_regex)
+
+        # problematic for authors with double names wih hyphens, when only part of the name is entered as search term
+        # relax rule, don't enforce match against end
+        search_regex_author = "^({})".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
+        
         identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
@@ -1581,8 +1589,8 @@ def search(request):
                     )
                     |
                     (
-                        Q(frozenauthor__first_name__iregex=search_regex) |
-                        Q(frozenauthor__last_name__iregex=search_regex)
+                        Q(frozenauthor__first_name__iregex=search_regex_author) |
+                        Q(frozenauthor__last_name__iregex=search_regex_author)
                     ),
                     journal=request.journal,
                     stage=submission_models.STAGE_PUBLISHED,
