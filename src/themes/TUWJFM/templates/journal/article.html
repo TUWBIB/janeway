@@ -125,10 +125,9 @@
                         <td>
                             {% for author in article.frozen_authors.all %}
                             {% if not forloop.first and not forloop.last %} ; {% elif forloop.last and not forloop.first %}& {% endif %}
-                            {{ author.last_name }}
-                            {% if author.first_name %}, {{ author.first_name }}{% endif %}
+                            {{ author.last_name }}{% if author.first_name %}, {{ author.first_name }}{% endif %}
                             {% if author.author.orcid %}
-                            <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUW/img/orcid_16x16.png" %}"></a>
+                            <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUWJFM/img/orcid_16x16.png" %}"></a>
                             {% endif %}
                             {% endfor %}
                         </td>
