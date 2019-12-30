@@ -183,12 +183,29 @@ class ArticleInfo(KeywordModelForm):
                     self.fields[element.name].label = element.name
 
                     if article:
-                        default_publisher = setting_handler.get_setting('general', 'default_publisher', journal).processed_value
-                        default_publication_place = setting_handler.get_setting('general', 'default_publication_place', journal).processed_value
+                        default_publisher = None
+                        default_publication_place = None
+                        try:
+                            default_publisher = setting_handler.get_setting('general', 'default_publisher', journal).processed_value
+                            print ("except default publisher")
+                        except:
+                            pass
+
+                        try:
+                            default_publication_place = setting_handler.get_setting('general', 'default_publication_place', journal).processed_value
+                            print (default_publication_place)
+                        except:
+                            print ("except default publication place")
+                            pass
                         
                         try:
                             check_for_answer = models.FieldAnswer.objects.get(field=element, article=article)
-                            self.fields[element.name].initial = check_for_answer.answer
+                            answer = check_for_answer.answer
+                            if answer == '' and self.fields[element.name].label == 'publisher' and default_publisher is not None:
+                                answer = default_publisher
+                            if answer == '' and self.fields[element.name].label == 'publication_place' and default_publication_place is not None:
+                                answer = default_publication_place
+                            self.fields[element.name].initial = answer
                         except models.FieldAnswer.DoesNotExist:
                             if self.fields[element.name].label == 'publisher' and default_publisher is not None:
                                 self.fields[element.name].initial = default_publisher
