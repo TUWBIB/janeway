@@ -91,6 +91,8 @@ INSTALLED_APPS = [
     'materialize',
     'snowpenguin.django.recaptcha2',
     'simplemathcaptcha',
+    'hijack',
+    'compat',
 
     # Forms
     'django.forms',
