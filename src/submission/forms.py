@@ -187,15 +187,12 @@ class ArticleInfo(KeywordModelForm):
                         default_publication_place = None
                         try:
                             default_publisher = setting_handler.get_setting('general', 'default_publisher', journal).processed_value
-                            print ("except default publisher")
                         except:
                             pass
 
                         try:
                             default_publication_place = setting_handler.get_setting('general', 'default_publication_place', journal).processed_value
-                            print (default_publication_place)
                         except:
-                            print ("except default publication place")
                             pass
                         
                         try:
