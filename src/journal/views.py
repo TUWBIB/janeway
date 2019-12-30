@@ -1573,8 +1573,6 @@ def search(request):
 
         search_regex = "^({})$".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
 
-        print (search_regex)
-
         # problematic for authors with double names wih hyphens, when only part of the name is entered as search term
         # relax rule, don't enforce match against end
         search_regex_author = "^({})".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
