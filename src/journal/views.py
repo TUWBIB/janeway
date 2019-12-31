@@ -2319,7 +2319,7 @@ def handleSaveForm(request, article):
             article.primary_issue.articles.add(article)
 
         if article.date_published:
-            article.stage = models.STAGE_READY_FOR_PUBLICATION
+            article.stage = submission_models.STAGE_READY_FOR_PUBLICATION
             article.save()
 
     remote_form = bc_forms.RemoteArticle(request.POST, instance=article)
