@@ -161,6 +161,10 @@ urlpatterns = [
     url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/galley/(?P<galley_id>\d+)/$',
         views.backcontent_preview_xml_galley, name='backcontent_preview_xml_galley'),
 
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/order_authors/$',
+        views.backcontent_order_authors, name='backcontent_order_authors'),
+
+
     # Reviewer
     url(r'^reviewer/$',
         views.become_reviewer, name='become_reviewer'),
