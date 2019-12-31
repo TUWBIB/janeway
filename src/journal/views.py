@@ -2086,6 +2086,25 @@ def backcontent_delete_article(request, article_id):
     return redirect(reverse('backcontent'))
 
 @editor_user_required
+def backcontent_order_authors(request, article_id):
+    article = get_object_or_404(submission_models.Article, pk=article_id)
+    author_pks = [int(pk) for pk in request.POST.getlist('authors[]')]
+    for author in article.authors.all():
+        order = author_pks.index(author.pk)
+        author_order, c = submission_models.ArticleAuthorOrder.objects.get_or_create(
+            article=article,
+            author=author,
+            defaults={'order': order}
+        )
+
+        if not c:
+            author_order.order = order
+            author_order.save()
+
+    return HttpResponse('Complete')
+
+
+@editor_user_required
 def backcontent_delete_author(request, article_id, author_id):
     """Allows submitting author to delete an author object."""
     article = get_object_or_404(
