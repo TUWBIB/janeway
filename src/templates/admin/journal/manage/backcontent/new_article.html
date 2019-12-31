@@ -1,0 +1,110 @@
+{% extends "admin/core/base.html" %}
+{% load foundation %}
+{% load static from staticfiles %}
+{% load securitytags %}
+{% load files %}
+{% load i18n %}
+
+{% block title %}Back Content Submission{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'backcontent' %}">Back Content</a></li>
+{% endblock breadcrumbs %}
+
+{% block body %}
+    <section class="content">
+        <div class="row expanded">
+            <div class="box">
+                <div class="title-area">
+                    <h2>{% trans "New Article"%}</h2>
+                </div>
+                <div class="content">
+                    <p>{% trans "To submit an article, click the start button below" %}.</p>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <button type="submit" class="success button"><i class="fa fa-upload">&nbsp;</i>{% trans "Start Submission" %}</button>
+                    </form>
+                </div>
+                <div class="title-area">
+                    <h2>{% trans "Existing Articles" %}</h2>
+                </div>
+                <div class="content">
+                    <table class="table table-bordered" id="unassigned">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Id" %}</th>
+                            <th>{% trans "Title" %}</th>
+                            <th>{% trans "Submitted" %}</th>
+                            <th>{% trans "Main Author" %}</th>
+                            <th>{% trans "Section" %}</th>
+                            <th>
+                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+                                {% trans "Issue" %}
+                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                                {% trans "Issue" context "oes" %}
+                            {% else %}
+                            {% endif %}
+                            </th>                            
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for article in articles %}
+                            <tr>
+                                <td>{{ article.id }}</td>
+                                <td>{{ article.title }}</td>
+                                <td>{{ article.date_submitted }}</td>
+                                <td>{{ article.correspondence_author.full_name }}</td>
+                                <td>{{ article.section.name }}</td>
+                                {% if article.primary_issue %}
+                                <td>{{ article.primary_issue.tuw_issue_count }}</td>    
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'backcontent_article' article.pk %}" class="btn btn-secondary">{% trans "View" %}</a>
+                                        <a href="{% url 'backcontent_delete_article' article.pk %}" class="btn btn-secondary confirm_delete">{% trans "Delete" %}</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td>{% trans "No articles in this stage" %}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    {% include "elements/datatables.html" with target="#unassigned" %}
+    <script type="text/javascript">
+        $('.confirm_delete').on('click', function () {
+            return confirm('Are you sure?');
+        });
+    </script>    
+{% endblock %}
+
+{% block css %}
+<style rel="stylesheet">
+    .btn-group > a {
+        margin-left: 6px;
+        margin-right: 6px;
+    }
+</style>
+{% endblock %}
+

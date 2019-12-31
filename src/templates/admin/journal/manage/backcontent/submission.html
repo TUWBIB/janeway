@@ -1,0 +1,538 @@
+{% extends "admin/core/base.html" %}
+{% load foundation %}
+{% load static from staticfiles %}
+{% load securitytags %}
+{% load files %}
+{% load i18n %}
+{% load field %}
+
+
+{% block title %}Back Content Submission{% endblock %}
+
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'backcontent' %}">Back Content</a></li>
+    <li>{% if article.title %}{{ article.title }}{% else %}{% trans "New Article" %}{% endif %}</li>
+{% endblock breadcrumbs %}
+
+{% block body %}
+    <section class="content">
+        <div class="row expanded">
+            <div class="large-12 columns box">
+                <form method="POST">
+                    <div class="title-area">
+                        <h2>{% trans "Add A New Article" %}</h2>
+                    </div>
+                    <div class="content">
+                        <div class="large-6 columns">
+                            <label for="id_title">{% trans "Title" %}</label>
+                            {{ article_form.title }}
+                            {{ article_form.title.errors }}
+                        </div>
+                        <div class="large-6 columns">
+                            <label for="id_subtitle">{% trans "Subtitle" %}</label>
+                            {{ article_form.subtitle }}
+                            {{ article_form.subtitle.errors }}
+                        </div>
+                        <div class="large-6 columns">
+                            <label for="id_title_de">{% trans "Parallel title" %}</label>
+                            {{ article_form.title_de }}
+                            {{ article_form.title_de.errors }}
+                        </div>
+                        <div class="large-6 columns">
+                            <label for="id_subtitle_de">{% trans "Subtitle of parallel title" %}</label>
+                            {{ article_form.subtitle_de }}
+                            {{ article_form.subtitle_de.errors }}
+                        </div>
+                        <div class="large-12 columns">
+                            <label for="id_abstract">
+                                {% trans "Abstract" %}{% if form.abstract.field.required %}*{% endif %}</label>
+                            {{ article_form.abstract }}
+                            {{ article_form.abstract.errors }}
+                        </div>
+                        <div class="large-12 columns">
+                            <label for="id_abstract_de">
+                                {% trans "Abstract (German)" %}{% if form.abstract.field.required %}*{% endif %}</label>
+                            {{ article_form.abstract_de }}
+                            {{ article_form.abstract_de.errors }}
+                        </div>
+                        <div class="large-4 columns">
+                            <label for="id_language">{% trans "Language" %}</label>
+                            {{ article_form.language }}
+                            {{ article_form.language.errors }}
+                        </div>
+                        <div class="large-4 columns">
+                            <label for="id_section">{% trans "Section" %}</label>
+                            {{ article_form.section }}
+                            {{ article_form.section.errors }}
+                        </div>
+                        <div class="large-4 columns error">
+                            <label for="id_license">{% if article_form.license.errors %}
+                                <span style="color: red;">{% endif %}{% trans "License" %}
+                                {% if article_form.license.errors %}</span>{% endif %}
+                                {% if article_form.license.field.required %}*{% endif %}</label>
+                            {{ article_form.license }}
+                            {{ article_form.license.errors }}
+                        </div>
+                        <div class="large-12 columns">
+                            <label for="id_keywords">{% trans "Keywords" %}</label>
+                            <input type="text" id="id_keywords" name="keywords" value="
+                                    {% if article_form.cleaned_data.keywords %}{{ article_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                                    {% trans "Hit Enter to add a new keyword." %}
+                        </div>
+                        <div class="large-12 columns">
+                            <label for="id_keywords_de">{% trans "Keywords (German)" %}</label>
+                            <input type="text" id="id_keywords_de" name="keywords_de" value="
+                                    {% if article_form.cleaned_data.keywords_de %}{{ article_form.cleaned_data.keywords_de }}{% else %}{% for keyword_de in article.keywords_de.all %}{{ keyword_de.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                                    {% trans "Hit Enter to add a new keyword." %}
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+                        
+                    {% if additional_fields %}
+                        <div class="title-area">
+                            <h2>{% trans "Additional Fields" %}</h2>
+                        </div>
+                        <div class="content">
+                        {% for additional_field in additional_fields %}
+                            {% get_form_field article_form additional_field.name as field %}
+                            <div class="{{ field.field.widget.attrs.div_class }} columns">
+                                {{ field|foundation }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+
+
+                    <div class="title-area">
+                        <h2>{% trans "Article Authors" %}</h2>
+                    </div>
+                    <div class="content" data-equalizer data-equalize-on="medium">
+                        <div class="large-7 columns" data-equalizer-watch>
+                            <p>{% trans "You can add an author by clicking the button below. This will open a popup modal for you to complete their details." %}</p>
+                            <p>{% trans "If you know of an existing author, complete only the email field and they will be added as an author." %}</p>
+                            <a href="#" id="add_author_dialog" data-open="author" class="small success button">{% trans "Add New Author" %}</a>
+                            <hr/>
+                            <p>{% trans "Search for a user using email address or ORCiD. If a user is matched, they will be automatically added as an author. This search only returns exact matches." %}</p>
+                            <input form="other" id="add_author_searchvalue" class="form-control" name="author_search_text" style="width: 100%;" value=""
+                            placeholder="{% trans "Search by email address or ORCiD" %}.">
+                            <p></p>
+                            <a href="#" id="add_author" class="small success button">{% trans "Add New Author" %}</a>
+                        </div>
+                        <div class="large-5 columns" data-equalizer-watch>
+                            <h4>{% trans "Current Authors" %}</h4>
+                            <div class="row">
+                                <div class="large-12 columns">
+                                    <table id="author_table">
+                                        <tr>
+                                            <th>{% trans "Name" %}</th>
+                                            <th>{% trans "Email" %}</th>
+                                            <th></th>
+                                        </tr>
+                                        {% for author in article.authors.all %}
+                                            <tr>
+                                                <td>{{ author.full_name }}</td>
+                                                <td>{{ author.email }}</td>
+                                                <td><a href="{% url 'backcontent_delete_author' article.pk author.pk %}"><i
+                                                        class="fa fa-trash">
+                                                    &nbsp;</i></a></td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="3">{% trans "No authors yet, add one!" %}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                    <hr/>
+                                    <p>{% trans "You may select a main author, this author will receive the communications regarding your articles process through our systems. This does not have to be you." %}</p>
+                                    <label for="main-author">{% trans "Select main author" %}:</label>
+                                    <select class="form-control" id="main-author" name="main-author">
+                                        <option value="">---------</option>
+                                        {% for author in article.authors.all %}
+                                            <option value="{{ author.pk }}"
+                                                    {% if article.correspondence_author.pk == author.pk %}selected{% endif %}>{{ author.full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>      
+                    <div class="title-area">
+                        <h2>{% trans "Galleys" %}</h2>
+                    </div>
+                    <div class="content">
+                        <table id="upload-table" class="table table-bordered table-condensed small">
+                            <tr style="text-align: left">
+                                <th>{% trans "Label" %}</th>
+                                <th width="25%">{% trans "Filename" %}</th>
+                                <th>{% trans "Type" %}</th>
+                                <th>{% trans "Edit" %}</th>
+                                <th>{% trans "Download" %}</th>
+                                <th>{% trans "Replace" %}</th>
+                                <th>{% trans "History" %}</th>
+                                <th>{% trans "Create PDF" %}</th>
+                                <th>{% trans "Create EPUB" %}</th>
+                            </tr>
+                            {% for galley in galleys %}
+                                {% can_view_file galley.file as can_view_file_flag %}
+                                {% can_edit_file galley.file article as can_edit_file_flag %}
+                                {% can_view_file_history galley.file article as can_view_file_history_flag %}
+                                <tr>
+                                    <td>{{ galley.label }}</td>
+                                    <td>{{ galley.file.original_filename|truncatechars:40 }} {% if galley.label == 'XML' %}
+                                        &nbsp;
+                                        <small><a target="_blank"
+                                                    href="{% url 'backcontent_preview_xml_galley' article.pk galley.pk %}"><i
+                                                class="fa fa-search" aria-hidden="true">&nbsp;</i>Preview</a>
+                                        </small>{% endif %}</td>
+                                    <td>Galley</td>
+                                    <td><a href="{% url 'pm_edit_galley' article.pk galley.pk %}?return={{ request.path|urlencode }}" class="fa fa-edit"></a>
+                                    </td>
+                                    <td>{% if can_view_file_flag %}
+                                        <a href="{% url 'article_file_download' 'id' article.pk galley.file.pk %}"><i
+                                                class="fa fa-download">&nbsp;</i></a>{% endif %}
+                                    </td>
+                                    <td>{% if can_edit_file_flag %}
+                                        <a href="{% url 'article_file_replace' 'id' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
+                                                class="fa fa-cloud-upload">&nbsp;</i></a>{% endif %}
+                                    </td>
+                                    <td>{% if can_view_file_history_flag %}
+                                        <a href="{% url 'file_history' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
+                                                class="fa fa-history">
+                                            &nbsp;</i></a>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
+                                            <a href="{% url 'cassius_generate' galley.pk %}?return={{ request.path|urlencode }}">
+                                                <i class="fa fa-file-text-o">&nbsp;</i>
+                                            </a>
+                                        {% elif not galley.file.mime_type == 'application/xml' %}
+                                            Function for XML only.
+                                        {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
+                                            <p><span data-tooltip aria-haspopup="true" class="has-tip top"
+                                                        data-disable-hover="false"
+                                                        tabindex="2"
+                                                        title="{% has_missing_supplements galley %}">Missing Supplements</span>
+                                            </p>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
+                                            <a href="{% url 'epub_generate' galley.pk %}?return={{ request.path|urlencode }}">
+                                                <i class="fa fa-book">&nbsp;</i>
+                                            </a>
+                                        {% elif not galley.file.mime_type == 'application/xml' %}
+                                            Function for XML only.
+                                        {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
+                                            <p><span data-tooltip aria-haspopup="true" class="has-tip top"
+                                                        data-disable-hover="false"
+                                                        tabindex="2"
+                                                        title="{% has_missing_supplements galley %}">Missing Supplements</span>
+                                            </p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9">{% trans "No galleys have been uploaded." %}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        <a class="button success float-right" data-open="uploadbox"><i class="fa fa-cloud-upload">
+                            &nbsp;</i>{% trans "Upload a new galley" %}</a>
+                    </div>
+                    <div class="title-area">
+                        <h2>{% trans "Publication Info" %}</h2>
+                    </div>
+                    <div class="content">
+                        <div class="large-4 columns">
+                            {{ pub_form.date_published|foundation }}
+                        </div>
+                        <div class="large-4 columns">
+                            {{ pub_form.date_accepted|foundation }}
+                        </div>
+                        <div class="large-4 columns">
+                            {{ pub_form.render_galley|foundation }}
+                        </div>
+                        <div class="large-4 columns">
+                            {{ pub_form.primary_issue|foundation }}
+                        </div>
+                        <div class="large-4 columns">
+                            {{ pub_form.page_numbers|foundation }}
+                        </div>
+                        <div class="large-4 columns">
+                            <br/>
+                            {{ pub_form.peer_reviewed|foundation }}
+                        </div>
+                        <div class="large-12 columns">
+                            {% if article and article.date_published %}
+                            <p>{% trans "More Pub Info is available on the" %} <a href="{% url 'publish_article' article.pk %}">{% trans "Pre Publication Checklist" %}</a>.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="title-area">
+                        <h2>{% trans "Remote" %}</h2>
+                    </div>
+                    <div class="content">
+                        <p>{% trans "If your article is remote, you can fill the required details here. If the remote article has a DOI, you should use it for full resolution." %}</p>
+                        <div class="row expanded">
+                            <div class="large-6 columns">
+                                {{ remote_form.is_remote|foundation }}
+                            </div>
+                            <div class="large-6 columns">
+                                {{ remote_form.remote_url|foundation }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="title-area">
+                        <h2>{% trans "Publish" %}</h2>
+                    </div>
+                    <div class="content">
+                        <p>{% trans "When you are ready to publish your article, press the publish button and it will be published." %}</p>
+                        <div class="large-12 columns">
+                            {% csrf_token %}
+                            <button class="success button pull-right" type="submit" name="publish">
+                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Publish" %}
+                            </button>
+                            <button class="success button pull-right" type="submit" name="draft" formnovalidate>
+                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Save as Draft" %}
+                            </button>
+                            <button class="success button pull-right" type="submit" name="delete" formnovalidate>
+                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Delete" %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    {% include "journal/manage/backcontent/submission_author.html" %}
+    {% include "elements/production/new_galley.html" %}
+{% endblock %}
+
+{% block js %}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static "common/css/toastr-2.1.1.css" %}">    
+    <script type="text/javascript" src="{% static "common/js/jq-ui.min.js" %}"></script>
+    <script src="{% static "common/js/toastr-2.1.1.js" %}"></script>
+    <script src="{% static "common/js/tagit.js" %}"></script>
+
+     <script type="text/javascript">
+        $(document).ready(function () 
+        {
+            $("#id_keywords").tagit(
+                {allowSpaces: true});
+
+            $("#id_keywords_de").tagit(
+            {allowSpaces: true});
+
+            $("#author_table").on("click", "a", function(e){
+                e.preventDefault()
+                
+                var id = this.href.split("/")[8]
+                $.get(this.href, function(data, textStatus, xhr) {
+                    if(xhr.status == 200) {
+                        removeAuthor(id)
+                    }
+                })
+            })
+
+            $("#add_author").on("click", function(e) {
+                e.preventDefault()
+
+                var csrf_token = $("#uploadbox input[name='csrfmiddlewaretoken']").val()
+                var str=$("#add_author_searchvalue").val()
+
+                var formData = new FormData()
+                formData.append('csrfmiddlewaretoken', csrf_token)
+                formData.append('search', str)
+
+
+                $.ajax({              
+                    url: 'add_author/', 
+                    type: 'post',
+                    data: formData,
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var message=response.message;
+                        var status=response.status;
+
+                        if (status == "success")
+                        {
+
+                            context = JSON.parse(response.context)
+                            if(context.author != undefined) 
+                            {
+                                var jsonAuthor = JSON.parse(context.author)[0]
+                                onAddAuthor(jsonAuthor.pk, jsonAuthor.fields, context.url)
+                            }
+                                                   
+                            toastr.success(message)
+                        }
+                        else if (status == "warning")
+                        {
+                            toastr.warning(message);
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(message);
+                        }
+
+                    },
+                    failure: function(response){
+                        toastr.error("reuest failed");                        
+                    },
+                });
+            })
+
+
+
+
+
+            $("#upload-table").on("click", "a", function(e) {
+                if(!confirm("This action will cause loss of all unsaved progress! Are you sure you want to continue?")) {
+                    e.preventDefault()
+                }
+            })
+
+
+            $("#uploadbox").on("click", "button", function(e) {
+                e.preventDefault()
+
+                var csrf_token = $("#uploadbox input[name='csrfmiddlewaretoken']").val()
+                var formData = new FormData()
+                var file;
+
+                formData.append('csrfmiddlewaretoken', csrf_token)
+
+                if ($(this).attr("name") == "xml") {
+                    file = $('input[name="xml-file"]')[0].files[0]; 
+
+                    formData.append('xml-file', file); 
+                    formData.append('xml', 'true')
+                }
+
+                if ($(this).attr("name") == "pdf") {
+                    file = $('input[name="pdf-file"]')[0].files[0]; 
+
+                    formData.append('pdf-file', file); 
+                    formData.append('pdf', 'true')
+                }
+
+                if ($(this).attr("name") == "other") {
+                    file = $('input[name="other-file"]')[0].files[0]; 
+
+                    formData.append('other-file', file); 
+                    formData.append('other', 'true')
+                }
+
+                $.ajax({ 
+                    url: '', 
+                    type: 'post', 
+                    data: formData, 
+                    contentType: false, 
+                    processData: false, 
+                    success: function(response){ 
+                        if(response != 0){ 
+                            context = JSON.parse(response.context)
+                            if(context.galley != undefined) {
+                                var jsonGalley = JSON.parse(context.galley)[0]
+
+                                var filename = file.name.length > 37 ? file.name.substring(0, 37) + "..." : file.name
+                                var editLink = '<a href="/production/' + jsonGalley.fields.article + '/galley/' + jsonGalley.pk + '/?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/" class="fa fa-edit"></a>'
+                                var downloadLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/"><i class="fa fa-download"></i></a>'
+                                var replaceLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/replace?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-cloud-upload"></i></a>'
+                                var historyLink = '<a href="/' + jsonGalley.fields.article + '/files/' + jsonGalley.fields.file + '/history/?return=/plugnis/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-history"></i></a>'
+                                
+                                var files = $("#upload-table > tbody > tr")
+                                var emptyFiles = files.eq(1).children().length === 1;
+
+                                if(emptyFiles) {
+                                    files[1].remove();
+                                }
+
+                                $("#upload-table > tbody").append("<tr><td>" + jsonGalley.fields.label + "</td><td>" 
+                                + filename + "<td>Galley</td><td>" 
+                                + editLink + "</td><td>" 
+                                + downloadLink + "</td><td>" 
+                                + replaceLink + "</td><td>" 
+                                + historyLink + "</td>"
+                                + "<td>Function for XML only</td>"
+                                + "<td>Function for XML only</td></tr>");
+                            }
+                            messages = JSON.parse(response.msg)
+                            if(messages != undefined) {
+                                for (var i = 0; i < messages.length; i++) {
+                                    if(messages[i].tags == "success") {
+                                        toastr.success(messages[i].message);
+                                    } else if(messages[i].tags == "warn") {
+                                        toastr.warn(messages[i].message);
+                                    } else {
+                                        toastr.error(messages[i].message);
+                                    }
+                                }
+                            }
+                        } 
+                        else{ 
+                            alert('file not uploaded'); 
+                        } 
+
+                        $('#uploadbox').foundation('close');
+                    }, 
+                }); 
+            })
+        });
+
+        function onAddAuthor(id, author, link) {
+            var authors = $("#author_table > tbody > tr")
+            var emptyAuthor = authors.eq(1).children().length === 1;
+
+            if(emptyAuthor) {
+                authors[1].remove();
+            }
+            $("#author_table").append($("<tr><td>" + author.first_name + " " + author.last_name + "</td><td>" + author.email + "</td><td><a href='" + link + "'><i class='fa fa-trash'>&nbsp;</i></a></td></tr>"))
+            $("#main-author").append('<option value="' + id + '">' + author.first_name + " " + author.last_name + '</option>')
+        }
+
+        function removeAuthor(id) {
+            var found = false
+            $("#author_table > tbody > tr").each(function(i) {
+                $(this).find("a").each(function(j) {
+                  if($(this).attr("href").indexOf(id) > -1) {
+                      found = true
+                  }
+                })
+                if(found) {
+                    $(this).remove()
+                    return false
+                }
+            })
+
+            $('#main-author > option[value="' + id + '"]').remove()
+
+            var authors = $("#author_table > tbody > tr")
+            var emptyAuthor = authors.eq(1).children().length === 0;
+
+            if(emptyAuthor) {
+                $("#author_table").append($('<tr><td colspan="3">No authors yet, add one!</td></tr>'))
+            }
+        }
+    </script>
+    {% if modal %}
+        {% include "elements/open_modal.html" with target=modal %}
+    {% endif %}
+    {% include "elements/datepicker.html" with target=".datepicker" %}
+{% endblock %}
+
+{% block css %}
+<style rel="stylesheet">
+    .btn-group > button {
+        margin-left: 6px;
+        margin-right: 6px;
+    }
+</style>
+{% endblock %}

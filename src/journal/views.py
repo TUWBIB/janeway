@@ -12,18 +12,21 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.db.models import Q, Count
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.management import call_command
+from django.template import RequestContext, loader
 
 from cms import models as cms_models
 from core import (
@@ -32,7 +35,7 @@ from core import (
     plugin_loader,
     logic as core_logic,
 )
-from journal import logic, models, issue_forms, forms
+from journal import logic, models, issue_forms, forms, bc_forms
 from journal.logic import get_galley_content
 from metrics.logic import store_article_access
 from review import forms as review_forms
@@ -41,10 +44,13 @@ from security.decorators import article_stage_accepted_or_later_required, \
     file_history_user_required, file_edit_user_required, production_user_or_editor_required, \
     editor_user_required
 from submission import models as submission_models
+from submission import forms as submission_forms
 from identifiers import models as identifiers_models
 from utils import models as utils_models, shared
 from utils.logger import get_logger
 from events import logic as event_logic
+from production import logic as prod_logic
+
 
 logger = get_logger(__name__)
 
@@ -1425,7 +1431,6 @@ def publication_schedule(request):
 
     return render(request, template, context)
 
-
 @login_required
 def become_reviewer(request):
     """
@@ -2001,3 +2006,314 @@ def info_for_authors(request):
     template = 'journal/info_for_authors.html'
     context= { }
     return render(request, template, context)
+
+## backcontent
+
+def backcontent(request):
+    if request.POST:
+        article = submission_models.Article.objects.create(journal=request.journal,
+                                                date_accepted=timezone.now(),
+                                                is_import=True)
+        return redirect(reverse('backcontent_article', kwargs={'article_id': article.pk}))
+
+    articles = submission_models.Article.objects.filter(journal=request.journal)
+
+    template = 'journal/manage/backcontent/new_article.html'
+    context = {
+        'articles': articles,
+    }
+
+    return render(request, template, context)
+
+@editor_user_required
+def backcontent_article(request, article_id):
+    article = get_object_or_404(submission_models.Article, pk=article_id, journal=request.journal)
+    additional_fields = submission_models.Field.objects.filter(journal=request.journal)
+
+    if not article.license:
+        default_configuration = request.journal.submissionconfiguration
+        article.license = default_configuration.default_license
+
+    article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields)
+    author_form = bc_forms.BackContentAuthorForm()
+    pub_form = bc_forms.PublicationInfo(instance=article)
+    remote_form = bc_forms.RemoteArticle(instance=article)
+    modal = None
+
+    if request.POST:
+        if 'add_author' in request.POST:
+            return handleAddAuthor(request, article)
+        
+        if 'xml' in request.POST or 'pdf' in request.POST or 'other' in request.POST:
+            return handleFileUpload(request, article)
+
+        if 'publish' in request.POST:
+            handleSaveForm(request, article)
+            if not article.stage == submission_models.STAGE_PUBLISHED:
+#                id_logic.generate_crossref_doi_with_pattern(article)
+                article.stage = submission_models.STAGE_PUBLISHED
+                article.snapshot_authors(article)
+                article.save()
+
+            return redirect(reverse('backcontent'))
+
+        if 'draft' in request.POST:
+            handleSaveForm(request, article)
+            return redirect(reverse('backcontent'))
+
+        if 'delete' in request.POST:
+            return redirect(reverse('backcontent_delete_article', kwargs={'article_id': article_id}))
+
+    template = 'journal/manage/backcontent/submission.html'
+    context = {
+        'article': article,
+        'article_form': article_form,
+        'form': author_form,
+        'pub_form': pub_form,
+        'galleys': prod_logic.get_all_galleys(article),
+        'remote_form': remote_form,
+        'modal': modal,
+        'additional_fields': additional_fields,
+    }
+
+    return render(request, template, context)
+
+@editor_user_required
+def backcontent_delete_article(request, article_id):
+    article = get_object_or_404(submission_models.Article, pk=article_id, journal=request.journal)
+    article.delete()
+    messages.add_message(request, messages.SUCCESS, '%s deleted', article_id)
+    return redirect(reverse('backcontent'))
+
+@editor_user_required
+def backcontent_delete_author(request, article_id, author_id):
+    """Allows submitting author to delete an author object."""
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal
+    )
+    author = get_object_or_404(
+        core_models.Account,
+        pk=author_id
+    )
+
+    article.authors.remove(author)
+
+    if article.correspondence_author == author:
+        article.correspondence_author = None
+        article.save()
+
+    try:
+        ordering = submission_models.ArticleAuthorOrder.objects.get(
+            article=article,
+            author=author,
+        ).delete()
+    except submission_models.ArticleAuthorOrder.DoesNotExist:
+        pass
+
+    return redirect(reverse('backcontent', kwargs={'article_id': article_id}))
+
+@editor_user_required
+def backcontent_add_author(request,article_id):
+    str=request.POST.get("search","")
+    message="unknown"
+    status="info"
+
+    authors=core_models.Account.objects.filter(email=str) | core_models.Account.objects.filter(orcid=str)
+    if authors:
+        if authors.count()>1:
+            message="multiple authors found, something's very fishy"
+            status="error"
+        else:
+            
+            author=authors[0]
+            article=submission_models.Article.objects.filter(id=article_id)[0]
+
+            #check if account already has author role for this journal
+            role=core_models.Role.objects.filter(name='author')[0]
+            accountroles=core_models.AccountRole.objects.filter(user=author,journal=request.journal,role=role)
+            if accountroles:
+                pass
+            else:
+                author.add_account_role(role_slug='author', journal=request.journal)
+
+            #check if author already added to article
+            found=False
+
+            for a in article.authors.all():
+                if a.id==author.id:
+                    found=True
+
+            if not found:
+                article.authors.add(author)
+                setAuthorOrder(article,author)
+                message="author added"
+                status="success"
+                context = { 
+                    'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author.pk }), 
+                    'author': serializers.serialize('json', [author], fields=["first_name", "last_name", "email"]) 
+                }
+            else:
+                message="author already set"
+                status="warning"
+    else:
+        message="no author found for "+str
+        status="warning"
+
+    if status=="success": 
+        response = JsonResponse({'status': status,'message':message,
+                'context': json.dumps(context)})
+    else:
+        response= JsonResponse({'status': status,'message':message})
+
+
+    return response
+
+@editor_user_required
+def backcontent_preview_xml_galley(request, article_id, galley_id):
+    """
+    Allows an editor to preview an article's XML galleys.
+    :param request: HttpRequest
+    :param article_id: Article object ID (INT)
+    :param galley_id: Galley object ID (INT)
+    :return: HttpResponse
+    """
+
+    article = get_object_or_404(submission_models.Article, journal=request.journal, pk=article_id)
+    galley = core_models.Galley.objects.filter(article=article, file__mime_type__contains='/xml', pk=galley_id)
+
+    if not galley:
+        raise Http404
+
+    content = logic.list_galleys(article, galley)
+
+    template = 'journal/article.html'
+    context = {
+        'article': article,
+        'galleys': galley,
+        'article_content': content
+    }
+
+    return render(request, template, context)
+
+
+def handleAddAuthor(request, article):
+    author_form = bc_forms.BackContentAuthorForm(request.POST)
+    modal = 'author'
+    context = { }
+
+
+    author_exists = logic.check_author_exists(request.POST.get('email'))
+    if author_exists:
+        author_on_article = article.authors.filter(id=author_exists.id)
+
+        if not author_on_article:
+            article.authors.add(author_exists)
+            setAuthorOrder(article,author_exists)
+            messages.add_message(request, messages.SUCCESS, '%s added to the article' % author_exists.full_name())
+            context = { 
+                'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author_exists.pk }), 
+                'author': serializers.serialize('json', [author_exists], fields=["first_name", "last_name", "email"]) 
+            }
+        else:
+            messages.add_message(request, messages.ERROR, '%s is already author' % author_exists.full_name())
+    else:
+        if author_form.is_valid():
+            if author_form.cleaned_data["first_name"] and author_form.cleaned_data["last_name"] and author_form.cleaned_data["institution"]:
+                new_author = author_form.save(commit=False)
+                new_author.username = new_author.email
+                new_author.set_password(shared.generate_password())
+                new_author.save()
+                new_author.add_account_role(role_slug='author', journal=request.journal)
+
+                article.authors.add(new_author)
+                setAuthorOrder(article,new_author)
+
+                messages.add_message(request, messages.SUCCESS, '%s added to the article' % new_author.full_name())
+                context = { 
+                    'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': new_author.pk }), 
+            'author': serializers.serialize('json', [new_author], fields=["first_name", "last_name", "email"]) 
+                }
+            else:
+                messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
+
+    data = {
+        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'context': json.dumps(context)
+    }
+    return JsonResponse(data)
+
+def handleFileUpload(request, article):
+    context = { }
+    galley = None
+
+    if 'xml' in request.POST:
+        for uploaded_file in request.FILES.getlist('xml-file'):
+            if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.MIMETYPES_WITH_FIGURES):
+                messages.add_message(request, messages.WARNING, 'File is not XML/HTML!')
+            else:
+                galley = prod_logic.save_galley(article, request, uploaded_file, True, "XML", True)
+                messages.add_message(request, messages.SUCCESS, 'File added!')
+
+    if 'pdf' in request.POST:
+        for uploaded_file in request.FILES.getlist('pdf-file'):
+            if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
+                messages.add_message(request, messages.WARNING, 'File is not PDF!')
+            else:
+                galley = prod_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
+                messages.add_message(request, messages.SUCCESS, 'File added!')
+
+    if 'other' in request.POST:
+        for uploaded_file in request.FILES.getlist('other-file'):
+            galley = prod_logic.save_galley(article, request, uploaded_file, True, "Other", True)
+            messages.add_message(request, messages.SUCCESS, 'File added!')
+
+    if galley != None:
+        context['galley']= serializers.serialize('json', [galley], fields=["article", "file", "label"])
+    
+    data = {
+        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'context': json.dumps(context)
+    }
+    return JsonResponse(data)
+
+def handleSaveForm(request, article):
+
+    article_form = submission_forms.ArticleInfo(request.POST, instance=article)
+
+    if article_form.is_valid():
+        article_form.save(request=request)
+
+    correspondence_author = request.POST.get('main-author', None)
+
+    if correspondence_author:
+        author = core_models.Account.objects.get(pk=correspondence_author)
+        article.correspondence_author = author
+        article.save()
+
+    pub_form = bc_forms.PublicationInfo(request.POST, instance=article)
+
+    if pub_form.is_valid():
+        pub_form.save()
+        if article.primary_issue:
+            article.primary_issue.articles.add(article)
+
+        if article.date_published:
+            article.stage = models.STAGE_READY_FOR_PUBLICATION
+            article.save()
+
+    remote_form = bc_forms.RemoteArticle(request.POST, instance=article)
+
+    if remote_form.is_valid():
+        remote_form.save()
+
+    return True
+
+def setAuthorOrder(article,author):
+    order=article.next_author_sort() 
+    aao=submission_models.ArticleAuthorOrder()
+    aao.article=article
+    aao.author=author
+    aao.order=order
+    aao.save()

@@ -39,7 +39,9 @@
             Articles</a></li>
         <li><a href="{% url 'publication_schedule' %}"><i class="fa fa-calendar">&nbsp;</i>
             Publication Schedule</a></li>
-        {% endif %}
+        <li><a href="{% url 'backcontent' %}"><i class="fa fa-plug">&nbsp;</i>
+            Back Content</a></li>
+            {% endif %}
         {% if request.user.is_staff or editor %}
             <li class="subtitle"><a href="#">Staff</a></li>
             <li><a href="{% url 'core_manager_index' %}"><i class="fa fa-lock">&nbsp;</i>

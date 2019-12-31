@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-30 14:04+0100\n"
+"POT-Creation-Date: 2019-12-31 17:25+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,7 +48,7 @@ msgstr "Beantworten Sie folgende Frage: "
 
 #: core/forms.py:409
 msgid "Anti-spam captcha"
-msgstr ""
+msgstr "Anti-Spam captcha"
 
 #: core/forms.py:442
 msgid "E-mail"
@@ -98,15 +98,17 @@ msgstr "Aktuelle Artikel und Neuigkeiten"
 msgid "Selected Articles and News"
 msgstr "Ausgewählte Artikel und Neuigkeiten"
 
-#: core/janeway_global_settings.py:230
+#: core/janeway_global_settings.py:232
 msgid "English"
 msgstr "Englisch"
 
-#: core/janeway_global_settings.py:232
+#: core/janeway_global_settings.py:234
 msgid "German"
 msgstr "Deutsch"
 
-#: core/models.py:179 templates/admin/submission/edit/metadata.html:129
+#: core/models.py:179
+#: templates/admin/journal/manage/backcontent/submission.html:131
+#: templates/admin/submission/edit/metadata.html:129
 #: templates/admin/submission/submit_authors.html:66
 #: themes/OLH/templates/core/accounts/get_reset_token.html:26
 #: themes/OLH/templates/core/accounts/orcid_registration.html:29
@@ -165,6 +167,7 @@ msgid "Country"
 msgstr "Land"
 
 #: core/models.py:642 core/models.py:799
+#: templates/admin/journal/manage/backcontent/submission.html:168
 #: templates/admin/submission/submit_files.html:42
 #: templates/admin/submission/submit_files.html:81
 #: templates/admin/submission/submit_review.html:137
@@ -247,14 +250,15 @@ msgctxt "fe_oes"
 msgid "Issue"
 msgstr "Ausgabe"
 
-#: journal/models.py:477 journal/models.py:484 themes/OLH/templates/500.html:5
-#: themes/OLH/templates/journal/issue.html:4
+#: journal/models.py:477 journal/models.py:484
+#: templates/admin/journal/manage/backcontent/new_article.html:43
+#: themes/OLH/templates/500.html:5 themes/OLH/templates/journal/issue.html:4
 #: themes/material/templates/elements/journal/issue_sidebar.html:8
 #: themes/material/templates/elements/journal/issue_sidebar.html:12
 msgid "Issue"
 msgstr "Heft"
 
-#: journal/views.py:1440
+#: journal/views.py:1445
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
 "login."
@@ -262,7 +266,7 @@ msgstr ""
 "Sie müssen eingeloggt sein um Gutachter_in zu werden. Klicken Sie auf den "
 "nachfolgenden Button um sich anzumelden."
 
-#: journal/views.py:1445
+#: journal/views.py:1450
 msgid ""
 "You are not yet a reviewer for this journal. Click the button below to "
 "become a reviewer."
@@ -270,15 +274,17 @@ msgstr ""
 "Sie sind noch kein_e Gutachter_in dieser Zeitschrift. Klicken Sie auf den "
 "nachfolgenden Button um Gutachter_in zu werden."
 
-#: journal/views.py:1450
+#: journal/views.py:1455
 msgid "You are already a reviewer."
 msgstr "Sie sind bereits Gutachter_in."
 
-#: journal/views.py:1454
+#: journal/views.py:1459
 msgid "You are now a reviewer"
 msgstr "Sie sind nun Gutachter_in."
 
 #: preprint/forms.py:19 submission/forms.py:76 submission/forms.py:91
+#: templates/admin/journal/manage/backcontent/new_article.html:37
+#: templates/admin/journal/manage/backcontent/submission.html:29
 #: templates/admin/submission/submit_review.html:30
 #: themes/OLH/templates/journal/articles.html:66
 #: themes/OLH/templates/preprints/list.html:67
@@ -294,6 +300,7 @@ msgid "Title"
 msgstr "Titel"
 
 #: preprint/forms.py:20 submission/forms.py:77 submission/forms.py:92
+#: templates/admin/journal/manage/backcontent/submission.html:34
 #: templates/admin/submission/submit_review.html:31
 #: themes/OLH/templates/preprints/review.html:26
 #: themes/TUWJFM/templates/preprints/review.html:27
@@ -306,12 +313,14 @@ msgid "Enter your article's abstract here"
 msgstr "Fügen Sie die Zusammenfassung Ihres Artikels hier ein"
 
 #: submission/forms.py:78 submission/forms.py:93
+#: templates/admin/journal/manage/backcontent/submission.html:39
 #: templates/admin/submission/submit_review.html:40
 #: themes/TUWJFM/templates/journal/article.html:111
 msgid "Parallel title"
 msgstr "Paralleltitel"
 
 #: submission/forms.py:79 submission/forms.py:94
+#: templates/admin/journal/manage/backcontent/submission.html:44
 #: templates/admin/submission/submit_review.html:41
 msgid "Subtitle of parallel title"
 msgstr "Subtitel des Paralleltitels"
@@ -321,6 +330,7 @@ msgid "Enter your article's abstract here (German)"
 msgstr "Fügen Sie die deutschprachige Zusammenfassung ihres Artikels hier ein"
 
 #: submission/forms.py:95 templates/admin/elements/metadata.html:46
+#: templates/admin/journal/manage/backcontent/submission.html:50
 #: templates/admin/submission/submit_review.html:52
 #: themes/OLH/templates/journal/article.html:124
 #: themes/OLH/templates/journal/print.html:110
@@ -340,21 +350,26 @@ msgstr "Zusammenfassung"
 
 #: submission/forms.py:96 submission/models.py:337
 #: templates/admin/elements/metadata.html:52
+#: templates/admin/journal/manage/backcontent/submission.html:56
 #: templates/admin/submission/submit_review.html:61
-#: themes/TUWJFM/templates/journal/article.html:230
+#: themes/TUWJFM/templates/journal/article.html:229
 msgid "Abstract (German)"
 msgstr "Zusammenfassung (Deutsch)"
 
-#: submission/forms.py:97 templates/admin/submission/submit_review.html:85
+#: submission/forms.py:97
+#: templates/admin/journal/manage/backcontent/submission.html:61
+#: templates/admin/submission/submit_review.html:85
 #: themes/OLH/templates/preprints/review.html:39
 #: themes/TUWJFM/templates/preprints/review.html:40
 #: themes/default/templates/preprints/review.html:40
 msgid "Language"
 msgstr "Sprache"
 
-#: submission/forms.py:98 themes/OLH/templates/journal/article.html:184
+#: submission/forms.py:98
+#: templates/admin/journal/manage/backcontent/submission.html:72
+#: themes/OLH/templates/journal/article.html:184
 #: themes/OLH/templates/preprints/article.html:106
-#: themes/TUWJFM/templates/journal/article.html:236
+#: themes/TUWJFM/templates/journal/article.html:235
 #: themes/TUWJFM/templates/preprints/article.html:103
 #: themes/default/templates/journal/article.html:147
 #: themes/default/templates/preprints/article.html:103
@@ -362,7 +377,10 @@ msgstr "Sprache"
 msgid "License"
 msgstr "Lizenz"
 
-#: submission/forms.py:99 templates/admin/submission/submit_review.html:86
+#: submission/forms.py:99
+#: templates/admin/journal/manage/backcontent/new_article.html:40
+#: templates/admin/journal/manage/backcontent/submission.html:66
+#: templates/admin/submission/submit_review.html:86
 #: themes/OLH/templates/preprints/review.html:40
 msgid "Section"
 msgstr "Abschnitt"
@@ -403,10 +421,11 @@ msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitel des Artikels"
 
 #: submission/models.py:338 templates/admin/elements/metadata.html:64
+#: templates/admin/journal/manage/backcontent/submission.html:85
 #: templates/admin/submission/edit/metadata.html:95
 #: templates/admin/submission/submit_info.html:95
 #: templates/admin/submission/submit_review.html:77
-#: themes/TUWJFM/templates/journal/article.html:176
+#: themes/TUWJFM/templates/journal/article.html:175
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
@@ -431,6 +450,7 @@ msgid "The default section of articles when no option is presented"
 msgstr "Der Standard-Abschnitt für Artikel, wenn keine Auswahl gegeben ist."
 
 #: templates/admin/elements/metadata.html:58
+#: templates/admin/journal/manage/backcontent/submission.html:79
 #: templates/admin/submission/edit/metadata.html:89
 #: templates/admin/submission/submit_info.html:85
 #: templates/admin/submission/submit_review.html:70
@@ -474,6 +494,9 @@ msgid "Save Publisher Note"
 msgstr "Speichere Verlagsanmerkung"
 
 #: templates/admin/elements/submit/author.html:8
+#: templates/admin/journal/manage/backcontent/submission.html:116
+#: templates/admin/journal/manage/backcontent/submission.html:122
+#: templates/admin/journal/manage/backcontent/submission_author.html:8
 #: templates/admin/submission/submit_authors.html:49
 #: themes/OLH/templates/elements/submit/author.html:8
 #: themes/OLH/templates/preprints/authors.html:42
@@ -486,6 +509,7 @@ msgid "Add New Author"
 msgstr "Füge neue_n Autor_in hinzu"
 
 #: templates/admin/elements/submit/author.html:64
+#: templates/admin/journal/manage/backcontent/submission_author.html:64
 #: templates/admin/submission/edit/metadata.html:118
 #: themes/OLH/templates/elements/submit/author.html:64
 #: themes/TUWJFM/templates/elements/submit/author.html:65
@@ -553,6 +577,277 @@ msgstr ""
 msgid "Add File"
 msgstr "Füge Datei hinzu"
 
+#: templates/admin/journal/manage/backcontent/new_article.html:20
+#: templates/admin/journal/manage/backcontent/submission.html:16
+msgid "New Article"
+msgstr "Neuer Artikel"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:23
+msgid "To submit an article, click the start button below"
+msgstr "Um einen Artikel einzureichen, drücken Sie Start"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:26
+#: templates/admin/submission/start.html:82
+#: themes/OLH/templates/journal/submissions.html:28
+#: themes/OLH/templates/preprints/submit_start.html:97
+#: themes/TUWJFM/templates/journal/submissions.html:27
+#: themes/default/templates/journal/submissions.html:27
+#: themes/material/templates/journal/submissions.html:31
+msgid "Start Submission"
+msgstr "Starte Einreichung"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:30
+msgid "Existing Articles"
+msgstr "Vorhandene Artikel"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:36
+msgid "Id"
+msgstr "Id"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:38
+#: themes/material/templates/journal/article.html:252
+msgid "Submitted"
+msgstr "Eingereicht"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:39
+msgid "Main Author"
+msgstr "Hauptautor_in"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:45
+msgctxt "oes"
+msgid "Issue"
+msgstr "Ausgabe"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:49
+msgid "Actions"
+msgstr "Aktionen"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:67
+#: themes/OLH/templates/journal/article.html:101
+#: themes/OLH/templates/journal/article.html:102
+#: themes/OLH/templates/journal/article.html:103
+#: themes/default/templates/journal/article.html:123
+#: themes/material/templates/journal/article.html:212
+msgid "View"
+msgstr "Ansehen"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:68
+#: templates/admin/journal/manage/backcontent/submission.html:303
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/admin/journal/manage/backcontent/new_article.html:74
+msgid "No articles in this stage"
+msgstr "Keine Artikel zur Ansicht"
+
+#: templates/admin/journal/manage/backcontent/submission.html:25
+msgid "Add A New Article"
+msgstr "Neuer Artikel"
+
+#: templates/admin/journal/manage/backcontent/submission.html:82
+#: templates/admin/journal/manage/backcontent/submission.html:88
+#: templates/admin/submission/edit/metadata.html:92
+#: templates/admin/submission/edit/metadata.html:98
+#: templates/admin/submission/submit_info.html:87
+#: templates/admin/submission/submit_info.html:97
+#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
+#: utils/forms.py:37
+msgid "Hit Enter to add a new keyword."
+msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:96
+#: templates/admin/submission/edit/metadata.html:104
+#: templates/admin/submission/submit_info.html:108
+#: templates/admin/submission/submit_review.html:99
+#: themes/OLH/templates/preprints/submit_start.html:83
+msgid "Additional Fields"
+msgstr "Zusätzliche Felder"
+
+#: templates/admin/journal/manage/backcontent/submission.html:110
+msgid "Article Authors"
+msgstr "Autor_innen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:114
+msgid ""
+"You can add an author by clicking the button below. This will open a popup "
+"modal for you to complete their details."
+msgstr ""
+"Wenn Sie über die Suche keinen Eintrag finden, und Sie nicht alleinige_r "
+"Autor_in sind, fügen Sie eine weitere Person über den Button unten hinzu. "
+"Dieser öffnet ein Popup-Fenster, wo die notwendigen Informationen eintragen "
+"werden können."
+
+#: templates/admin/journal/manage/backcontent/submission.html:115
+msgid ""
+"If you know of an existing author, complete only the email field and they "
+"will be added as an author."
+msgstr ""
+"Wenn Sie eine Autor_in kennnen, reicht es die email-Adresse einzutragen."
+
+#: templates/admin/journal/manage/backcontent/submission.html:118
+#: templates/admin/submission/submit_authors.html:25
+#: themes/OLH/templates/preprints/authors.html:27
+#: themes/TUWJFM/templates/preprints/authors.html:25
+#: themes/default/templates/preprints/authors.html:25
+msgid ""
+"Search for a user using email address or ORCiD. If a user is matched, they "
+"will be automatically added as an author. This search only returns exact "
+"matches."
+msgstr ""
+"Sie können mittels E-Mail-Adresse oder ORCiD nach einer Person suchen. Wenn "
+"ein Eintrag gefunden wird, wird dieser automatisch als Autor_in hinzugefügt. "
+"Die Suche muss mit dem Treffer exakt übereinstimmen."
+
+#: templates/admin/journal/manage/backcontent/submission.html:120
+#: templates/admin/submission/submit_authors.html:31
+#: themes/OLH/templates/preprints/authors.html:33
+#: themes/TUWJFM/templates/preprints/authors.html:31
+#: themes/default/templates/preprints/authors.html:31
+msgid "Search by email address or ORCiD"
+msgstr "Suche nach E-Mail-Adresse oder ORCiD"
+
+#: templates/admin/journal/manage/backcontent/submission.html:125
+#: templates/admin/submission/submit_authors.html:55
+#: templates/admin/submission/submit_authors.html:58
+#: themes/OLH/templates/preprints/authors.html:49
+#: themes/TUWJFM/templates/preprints/authors.html:55
+#: themes/default/templates/preprints/authors.html:55
+msgid "Current Authors"
+msgstr "Derzeitige Autor_innen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:130
+#: templates/admin/submission/submit_authors.html:65
+#: themes/OLH/templates/preprints/authors.html:56
+#: themes/TUWJFM/templates/preprints/authors.html:62
+#: themes/default/templates/preprints/authors.html:62
+msgid "Name"
+msgstr "Name"
+
+#: templates/admin/journal/manage/backcontent/submission.html:144
+#: templates/admin/submission/submit_authors.html:82
+#: themes/OLH/templates/preprints/authors.html:73
+#: themes/TUWJFM/templates/preprints/authors.html:78
+#: themes/default/templates/preprints/authors.html:78
+msgid "No authors yet, add one!"
+msgstr "Noch keine Autor_innen, fügen Sie eine_n hinzu!"
+
+#: templates/admin/journal/manage/backcontent/submission.html:149
+msgid ""
+"You may select a main author, this author will receive the communications "
+"regarding your articles process through our systems. This does not have to "
+"be you."
+msgstr ""
+"Sie müssen eine_n Hauptautor_in wählen, welche_r über den weiteren Verlauf "
+"des Artikels informiert wird. Diese Person müssen nicht Sie sein."
+
+#: templates/admin/journal/manage/backcontent/submission.html:150
+#: templates/admin/submission/submit_authors.html:90
+msgid "Select main author"
+msgstr "Hauptautor_in wählen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:163
+msgid "Galleys"
+msgstr "Galleys"
+
+#: templates/admin/journal/manage/backcontent/submission.html:169
+msgid "Filename"
+msgstr "Dateiname"
+
+#: templates/admin/journal/manage/backcontent/submission.html:170
+msgid "Type"
+msgstr "Typ"
+
+#: templates/admin/journal/manage/backcontent/submission.html:171
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/admin/journal/manage/backcontent/submission.html:172
+#: themes/OLH/templates/journal/article.html:216
+#: themes/OLH/templates/journal/article.html:220
+#: themes/OLH/templates/preprints/article.html:95
+#: themes/OLH/templates/preprints/article.html:99
+#: themes/OLH/templates/preprints/article.html:138
+#: themes/TUWJFM/templates/journal/article.html:210
+#: themes/TUWJFM/templates/preprints/article.html:92
+#: themes/TUWJFM/templates/preprints/article.html:96
+#: themes/TUWJFM/templates/preprints/article.html:118
+#: themes/default/templates/journal/article.html:115
+#: themes/default/templates/journal/article.html:119
+#: themes/default/templates/preprints/article.html:92
+#: themes/default/templates/preprints/article.html:96
+#: themes/default/templates/preprints/article.html:118
+#: themes/material/templates/journal/article.html:202
+#: themes/material/templates/journal/article.html:208
+#: themes/material/templates/preprints/article.html:113
+#: themes/material/templates/preprints/article.html:117
+#: themes/material/templates/preprints/article.html:139
+msgid "Download"
+msgstr "Herunterladen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:173
+msgid "Replace"
+msgstr "Ersetzen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:174
+msgid "History"
+msgstr "Versionen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:175
+msgid "Create PDF"
+msgstr "PDF erstellen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:176
+msgid "Create EPUB"
+msgstr "EPUB erstellen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:239
+msgid "No galleys have been uploaded."
+msgstr "Keine Galleys hochgeladen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:244
+msgid "Upload a new galley"
+msgstr "Galley hochladen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:247
+msgid "Publication Info"
+msgstr "Veröffentlichungsinfo"
+
+#: templates/admin/journal/manage/backcontent/submission.html:271
+msgid "More Pub Info is available on the"
+msgstr "Weitere Veröffentlichungsinfo ist verfügbar unter der"
+
+#: templates/admin/journal/manage/backcontent/submission.html:271
+msgid "Pre Publication Checklist"
+msgstr "Publikationscheckliste"
+
+#: templates/admin/journal/manage/backcontent/submission.html:276
+msgid "Remote"
+msgstr "Entfernter Artikel"
+
+#: templates/admin/journal/manage/backcontent/submission.html:279
+msgid ""
+"If your article is remote, you can fill the required details here. If the "
+"remote article has a DOI, you should use it for full resolution."
+msgstr ""
+"Wenn es sich um einen entfernten Artikel handelt, können hier die Daten "
+"eingegebn werden. Wenn der Artikel eine DOI hat, sollte sie für die "
+"Auflösung verwendet werden."
+
+#: templates/admin/journal/manage/backcontent/submission.html:290
+#: templates/admin/journal/manage/backcontent/submission.html:297
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+#: templates/admin/journal/manage/backcontent/submission.html:293
+msgid ""
+"When you are ready to publish your article, press the publish button and it "
+"will be published."
+msgstr "Mit Veröffentlichen den Artikel freischalten."
+
+#: templates/admin/journal/manage/backcontent/submission.html:300
+msgid "Save as Draft"
+msgstr "Als Entwurf speichern"
+
 #: templates/admin/proofing/proofing_article.html:270
 msgid "Each proofing round is limited to"
 msgstr ""
@@ -564,22 +859,6 @@ msgstr ""
 #: templates/admin/submission/edit/metadata.html:23
 msgid "Edit Metadata"
 msgstr "Metadaten bearbeiten"
-
-#: templates/admin/submission/edit/metadata.html:92
-#: templates/admin/submission/edit/metadata.html:98
-#: templates/admin/submission/submit_info.html:87
-#: templates/admin/submission/submit_info.html:97
-#: themes/OLH/templates/preprints/submit_start.html:55 utils/forms.py:34
-#: utils/forms.py:37
-msgid "Hit Enter to add a new keyword."
-msgstr "Drücken Sie die Eingabetaste um ein neues Schlagwort hinzuzufügen"
-
-#: templates/admin/submission/edit/metadata.html:104
-#: templates/admin/submission/submit_info.html:108
-#: templates/admin/submission/submit_review.html:99
-#: themes/OLH/templates/preprints/submit_start.html:83
-msgid "Additional Fields"
-msgstr "Zusätzliche Felder"
 
 #: templates/admin/submission/edit/metadata.html:117
 #: themes/OLH/templates/journal/article.html:39
@@ -701,15 +980,6 @@ msgstr "Konkurrierende Interessen"
 msgid "Comments to the Editor"
 msgstr "Kommentare an den_die Editor_in"
 
-#: templates/admin/submission/start.html:82
-#: themes/OLH/templates/journal/submissions.html:28
-#: themes/OLH/templates/preprints/submit_start.html:97
-#: themes/TUWJFM/templates/journal/submissions.html:27
-#: themes/default/templates/journal/submissions.html:27
-#: themes/material/templates/journal/submissions.html:31
-msgid "Start Submission"
-msgstr "Starte Einreichung"
-
 #: templates/admin/submission/submit_authors.html:5
 #: templates/admin/submission/timeline.html:20
 #: templates/admin/submission/timeline.html:21
@@ -724,26 +994,6 @@ msgstr "Autor_inneninformation"
 #: themes/default/templates/preprints/authors.html:20
 msgid "Search for Existing Authors"
 msgstr "Suche nach existierenden Autor_innen"
-
-#: templates/admin/submission/submit_authors.html:25
-#: themes/OLH/templates/preprints/authors.html:27
-#: themes/TUWJFM/templates/preprints/authors.html:25
-#: themes/default/templates/preprints/authors.html:25
-msgid ""
-"Search for a user using email address or ORCiD. If a user is matched, they "
-"will be automatically added as an author. This search only returns exact "
-"matches."
-msgstr ""
-"Sie können mittels E-Mail-Adresse oder ORCiD nach einer Person suchen. Wenn "
-"ein Eintrag gefunden wird, wird dieser automatisch als Autor_in hinzugefügt. "
-"Die Suche muss mit dem Treffer exakt übereinstimmen."
-
-#: templates/admin/submission/submit_authors.html:31
-#: themes/OLH/templates/preprints/authors.html:33
-#: themes/TUWJFM/templates/preprints/authors.html:31
-#: themes/default/templates/preprints/authors.html:31
-msgid "Search by email address or ORCiD"
-msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 
 #: templates/admin/submission/submit_authors.html:35
 #: themes/OLH/templates/journal/search.html:8
@@ -797,28 +1047,6 @@ msgstr ""
 "Dieser öffnet ein Popup-Fenster, wo die notwendigen Informationen eintragen "
 "werden können."
 
-#: templates/admin/submission/submit_authors.html:55
-#: templates/admin/submission/submit_authors.html:58
-#: themes/OLH/templates/preprints/authors.html:49
-#: themes/TUWJFM/templates/preprints/authors.html:55
-#: themes/default/templates/preprints/authors.html:55
-msgid "Current Authors"
-msgstr "Derzeitige Autor_innen"
-
-#: templates/admin/submission/submit_authors.html:65
-#: themes/OLH/templates/preprints/authors.html:56
-#: themes/TUWJFM/templates/preprints/authors.html:62
-#: themes/default/templates/preprints/authors.html:62
-msgid "Name"
-msgstr "Name"
-
-#: templates/admin/submission/submit_authors.html:82
-#: themes/OLH/templates/preprints/authors.html:73
-#: themes/TUWJFM/templates/preprints/authors.html:78
-#: themes/default/templates/preprints/authors.html:78
-msgid "No authors yet, add one!"
-msgstr "Noch keine Autor_innen, fügen Sie eine_n hinzu!"
-
 #: templates/admin/submission/submit_authors.html:89
 msgid ""
 "You are required to select a main author, this author will receive the "
@@ -827,10 +1055,6 @@ msgid ""
 msgstr ""
 "Sie müssen eine_n Hauptautor_in wählen, welche_r über den weiteren Verlauf "
 "des Artikels informiert wird. Diese Person müssen nicht Sie sein."
-
-#: templates/admin/submission/submit_authors.html:90
-msgid "Select main author"
-msgstr "Hauptautor_in wählen"
 
 #: templates/admin/submission/submit_authors.html:100
 #: templates/admin/submission/submit_files.html:113
@@ -1534,14 +1758,6 @@ msgstr "Teilen"
 msgid "Dyslexia"
 msgstr "Dyslexie"
 
-#: themes/OLH/templates/journal/article.html:101
-#: themes/OLH/templates/journal/article.html:102
-#: themes/OLH/templates/journal/article.html:103
-#: themes/default/templates/journal/article.html:123
-#: themes/material/templates/journal/article.html:212
-msgid "View"
-msgstr "Ansehen"
-
 #: themes/OLH/templates/journal/article.html:129
 #: themes/OLH/templates/journal/print.html:115
 #: themes/TUWJFM/templates/journal/print.html:115
@@ -1574,7 +1790,7 @@ msgstr "Zitierung"
 
 #: themes/OLH/templates/journal/article.html:173
 #: themes/OLH/templates/preprints/article.html:105
-#: themes/TUWJFM/templates/journal/article.html:138
+#: themes/TUWJFM/templates/journal/article.html:137
 #: themes/TUWJFM/templates/preprints/article.html:102
 #: themes/default/templates/journal/article.html:141
 #: themes/default/templates/preprints/article.html:102
@@ -1583,7 +1799,7 @@ msgid "Published on"
 msgstr "Veröffentlicht am"
 
 #: themes/OLH/templates/journal/article.html:176
-#: themes/TUWJFM/templates/journal/article.html:143
+#: themes/TUWJFM/templates/journal/article.html:142
 #: themes/default/templates/journal/article.html:143
 msgid "Accepted on"
 msgstr "Akzeptiert am"
@@ -1594,28 +1810,6 @@ msgstr "Akzeptiert am"
 #: themes/material/templates/journal/submissions.html:98
 msgid "Peer Reviewed"
 msgstr "Begutachtet"
-
-#: themes/OLH/templates/journal/article.html:216
-#: themes/OLH/templates/journal/article.html:220
-#: themes/OLH/templates/preprints/article.html:95
-#: themes/OLH/templates/preprints/article.html:99
-#: themes/OLH/templates/preprints/article.html:138
-#: themes/TUWJFM/templates/journal/article.html:211
-#: themes/TUWJFM/templates/preprints/article.html:92
-#: themes/TUWJFM/templates/preprints/article.html:96
-#: themes/TUWJFM/templates/preprints/article.html:118
-#: themes/default/templates/journal/article.html:115
-#: themes/default/templates/journal/article.html:119
-#: themes/default/templates/preprints/article.html:92
-#: themes/default/templates/preprints/article.html:96
-#: themes/default/templates/preprints/article.html:118
-#: themes/material/templates/journal/article.html:202
-#: themes/material/templates/journal/article.html:208
-#: themes/material/templates/preprints/article.html:113
-#: themes/material/templates/preprints/article.html:117
-#: themes/material/templates/preprints/article.html:139
-msgid "Download"
-msgstr "Herunterladen"
 
 #: themes/OLH/templates/journal/article.html:234
 #: themes/default/templates/journal/article.html:130
@@ -2281,23 +2475,23 @@ msgstr "Schließen"
 msgid "Journal Article"
 msgstr "Artikel"
 
-#: themes/TUWJFM/templates/journal/article.html:149
+#: themes/TUWJFM/templates/journal/article.html:148
 msgid "Published by"
 msgstr "Veröffentlicht von"
 
-#: themes/TUWJFM/templates/journal/article.html:154
+#: themes/TUWJFM/templates/journal/article.html:153
 msgid "Published in"
 msgstr "Veröffentlicht in"
 
-#: themes/TUWJFM/templates/journal/article.html:156
+#: themes/TUWJFM/templates/journal/article.html:155
 msgid "pages"
 msgstr "Seiten"
 
-#: themes/TUWJFM/templates/journal/article.html:170
+#: themes/TUWJFM/templates/journal/article.html:169
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
-#: themes/TUWJFM/templates/journal/article.html:222
+#: themes/TUWJFM/templates/journal/article.html:221
 msgid "Abstract (English)"
 msgstr "Zusammenfassung (Englisch)"
 
@@ -2626,10 +2820,6 @@ msgstr "Dieser Artikel hat keine Zusammenfassung"
 #: themes/material/templates/journal/article.html:247
 msgid "Dates"
 msgstr "Daten"
-
-#: themes/material/templates/journal/article.html:252
-msgid "Submitted"
-msgstr "Eingereicht"
 
 #: themes/material/templates/journal/article.html:257
 msgid "Accepted"
