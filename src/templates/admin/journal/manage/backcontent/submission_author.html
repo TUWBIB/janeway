@@ -1,0 +1,164 @@
+{% load foundation %}
+{% load i18n %}
+
+<div class="reveal large" id="author" data-reveal data-animation-in="slide-in-up"
+     data-animation-out="slide-out-down">
+    <div class="card">
+        <div class="card-divider">
+            <h4><i class="fa fa-user">&nbsp;</i>{% trans "Add New Author" %}</h4>
+        </div>
+        <div class="card-section">
+            <button class="close-button" data-close aria-label="Close reveal" type="button">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {% include "admin/elements/forms/errors.html" with form=form %}
+            <form action="javascript:addAuthor()" method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="large-3 columns">
+                        {{ form.salutation|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ form.first_name|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ form.middle_name|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ form.last_name|foundation }}
+                    </div>
+
+                    <div class="large-12 columns">
+                        {{ form.biography|foundation }}
+                    </div>
+
+                    <div class="large-4 columns">
+                        {{ form.institution|foundation }}
+                    </div>
+                    <div class="large-4 columns">
+                        {{ form.department|foundation }}
+                    </div>
+                    <div class="large-4 columns">
+                        {{ form.country|foundation }}
+                    </div>
+
+                    <div class="large-4 columns">
+                        {{ form.twitter|foundation }}
+                    </div>
+                    <div class="large-4 columns">
+                        {{ form.linkedin|foundation }}
+                    </div>
+                    <div class="large-4 columns">
+                        {{ form.website|foundation }}
+                    </div>
+
+                    <div class="large-6 columns">
+                        {{ form.orcid|foundation }}
+                    </div>
+                    <div class="large-6 columns">
+                        {{ form.email|foundation }}
+                    </div>
+                </div>
+
+                <button class="success button pull-right" type="submit" name="add_author"><i class="fa fa-user">
+                    &nbsp;</i>{% trans "Add Author" %}
+                </button>
+            </form>
+            <script>
+                var salutationInput = document.getElementById("id_salutation")
+                var firstNameInput = document.getElementById("id_first_name")
+                var middleNameInput = document.getElementById("id_middle_name")
+                var lastNameInput = document.getElementById("id_last_name")
+                var biographyInput = document.getElementById("id_biography")
+                var departmentInput = document.getElementById("id_department")
+                var countryInput = document.getElementById("id_country")
+                var twitterInput = document.getElementById("id_twitter")
+                var linkedinInput = document.getElementById("id_linkedin")
+                var websiteInput = document.getElementById("id_website")
+                var orcidInput = document.getElementById("id_orcid")
+                var institutionInput = document.getElementById("id_institution")
+                var mailInput = document.getElementById("id_email")
+
+                var required = true
+
+                setElementRequired(firstNameInput, required)
+                setElementRequired(lastNameInput, required)
+                setElementRequired(institutionInput, required)
+
+                mailInput.onkeyup = function(e) {
+                    if(mailInput.value.length > 0 && required == true) {
+                        required = false
+                        setElementRequired(firstNameInput, required)
+                        setElementRequired(lastNameInput, required)
+                        setElementRequired(institutionInput, required)
+                    } else if(mailInput.value.length == 0) {
+                        required = true
+                        setElementRequired(firstNameInput, required)
+                        setElementRequired(lastNameInput, required)
+                        setElementRequired(institutionInput, required)
+                    }
+                }
+
+                function setElementRequired(el, req) {
+                    el.required = req
+
+                    var sibling = el.parentNode.firstElementChild
+                    if(req) {
+                        var node = document.createElement("span")
+                        var textNode = document.createTextNode("*")
+                        node.appendChild(textNode)
+                        node.className = "red"
+                        sibling.appendChild(node)
+                    } else {
+                        if(sibling != undefined) {
+                            sibling.removeChild(sibling.childNodes[1])
+                        }
+                    }
+                }
+
+                function addAuthor() {
+                    var csrf_token = $("[name='csrfmiddlewaretoken']")
+                    
+                    data = {
+                        "csrfmiddlewaretoken": csrf_token.val(),
+                        "salutation": salutationInput.value,
+                        "first_name": firstNameInput.value,
+                        "middle_name": middleNameInput.value,
+                        "last_name": lastNameInput.value,
+                        "biography": biographyInput.value,
+                        "department": departmentInput.value,
+                        "country": countryInput.value,
+                        "twitter": twitterInput.value,
+                        "linkedin": linkedinInput.value,
+                        "website": websiteInput.value,
+                        "orcid": orcidInput.value,
+                        "institution": institutionInput.value,
+                        "email": mailInput.value,
+                        "add_author": true
+                    }
+
+                    $.post("", data, function(response) {
+                        context = JSON.parse(response.context)
+                        if(context.author != undefined) {
+                            var jsonAuthor = JSON.parse(context.author)[0]
+                            onAddAuthor(jsonAuthor.pk, jsonAuthor.fields, context.url)
+                            $('#author').foundation('close');
+                        }
+                        messages = JSON.parse(response.msg)
+                        if(messages != undefined) {
+                            for (var i = 0; i < messages.length; i++) {
+                                if(messages[i].tags == "success") {
+                                    toastr.success(messages[i].message);
+                                } else if(messages[i].tags == "warn") {
+                                    toastr.warn(messages[i].message);
+                                } else {
+                                    toastr.error(messages[i].message);
+                                }
+                            }
+                        }
+                    })
+                }
+            </script>
+        </div>
+    </div>
+</div>

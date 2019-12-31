@@ -142,6 +142,25 @@ urlpatterns = [
     url(r'^manage/articles/schedule/$',
         views.publication_schedule, name='publication_schedule'),
 
+    # back-content plugini
+    url(r'^manage/articles/backcontent/$',
+        views.backcontent, name='backcontent'),
+
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/$',
+        views.backcontent_article, name='backcontent_article'),
+
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/delete/$',
+        views.backcontent_delete_article, name='backcontent_delete_article'),
+
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/authors/(?P<author_id>\d+)/delete/$',
+        views.backcontent_delete_author, name='backcontent_delete_author'),
+
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/add_author/$',
+        views.backcontent_add_author, name='backcontent_add_author'),
+
+    url(r'^manage/articles/backcontent/article/(?P<article_id>\d+)/galley/(?P<galley_id>\d+)/$',
+        views.backcontent_preview_xml_galley, name='backcontent_preview_xml_galley'),
+
     # Reviewer
     url(r'^reviewer/$',
         views.become_reviewer, name='become_reviewer'),
