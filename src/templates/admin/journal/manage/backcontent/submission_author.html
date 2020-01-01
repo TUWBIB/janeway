@@ -137,13 +137,27 @@
                         "add_author": true
                     }
 
-                    $.post("", data, function(response) {
+                    $.post("", data, function(response) 
+                    {
                         context = JSON.parse(response.context)
-                        if(context.author != undefined) {
-                            var jsonAuthor = JSON.parse(context.author)[0]
-                            onAddAuthor(jsonAuthor.pk, jsonAuthor.fields, context.url)
-                            $('#author').foundation('close');
+                        if (context.aao != undefined) 
+                        {
+                            aao=JSON.parse(context.aao)[0]
+                            author=JSON.parse(context.author)[0]
+
+                            aao_pk=aao.pk;
+                            aao_order=aao.fields.order
+                            author_pk=author.pk
+                            author_last_name=author.fields.last_name
+                            author_first_name=author.fields.first_name
+                            author_email=author.fields.email
+
+                            onAddAuthor(aao_pk,aao_order,author_pk,author_last_name,author_first_name,author_email,context.url)
                         }
+
+                        $('#author').foundation('close');
+
+
                         messages = JSON.parse(response.msg)
                         if(messages != undefined) {
                             for (var i = 0; i < messages.length; i++) {

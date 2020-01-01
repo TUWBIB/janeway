@@ -140,7 +140,7 @@
                                             <td><i class="fa fa-sort"></i></td>
                                             <td>{{ order.author.full_name }}</td>
                                             <td>{{ order.author.email }}</td>
-                                            <td><a href="{% url 'delete_author' article.pk order.author.pk %}"><i
+                                            <td><a href="{% url 'backcontent_delete_author' article.pk order.author.pk %}"><i
                                                     class="fa fa-trash">
                                                 &nbsp;</i></a></td>
                                         </tr>
@@ -353,7 +353,7 @@
             $("#author_table").on("click", "a", function(e){
                 e.preventDefault()
                 
-                var id = this.href.split("/")[8]
+                var id = this.href.split("/")[9]
                 $.get(this.href, function(data, textStatus, xhr) {
                     if(xhr.status == 200) {
                         removeAuthor(id)
@@ -385,12 +385,21 @@
 
                         if (status == "success")
                         {
-
-                            context = JSON.parse(response.context)
-                            if(context.author != undefined) 
+                            context = JSON.parse(response.context);
+                            if(context.aao != undefined) 
                             {
-                                var jsonAuthor = JSON.parse(context.author)[0]
-                                onAddAuthor(jsonAuthor.pk, jsonAuthor.fields, context.url)
+
+                                aao=JSON.parse(context.aao)[0]
+                                author=JSON.parse(context.author)[0]
+
+                                aao_pk=aao.pk;
+                                aao_order=aao.fields.order
+                                author_pk=author.pk
+                                author_last_name=author.fields.last_name
+                                author_first_name=author.fields.first_name
+                                author_email=author.fields.email
+
+                                onAddAuthor(aao_pk,aao_order,author_pk,author_last_name,author_first_name,author_email,context.url)
                             }
                                                    
                             toastr.success(message)
@@ -509,15 +518,15 @@
             })
         });
 
-        function onAddAuthor(id, author, link) {
+        function onAddAuthor(aao_id, aao_order, author_id, author_last_name,author_first_name,author_email,link) 
+        {
             var authors = $("#author_table > tbody > tr")
-            var emptyAuthor = authors.eq(1).children().length === 1;
-
+            var emptyAuthor = authors.children().length === 1;
             if(emptyAuthor) {
-                authors[1].remove();
+                authors.children()[0].remove();
             }
-            $("#author_table").append($("<tr><td>" + author.first_name + " " + author.last_name + "</td><td>" + author.email + "</td><td><a href='" + link + "'><i class='fa fa-trash'>&nbsp;</i></a></td></tr>"))
-            $("#main-author").append('<option value="' + id + '">' + author.first_name + " " + author.last_name + '</option>')
+            $("#author_table").append($("<tr id='authors-"+author_id+"'><td><i class='fa fa-sort'></i></td><td>" + author_first_name + " " + author_last_name + "</td><td>" + author_email + "</td><td><a href='" + link + "'><i class='fa fa-trash'>&nbsp;</i></a></td></tr>"))
+            $("#main-author").append('<option value="' + author_id + '">' + author_first_name + " " + author_last_name + '</option>')
         }
 
         function removeAuthor(id) {
@@ -537,7 +546,7 @@
             $('#main-author > option[value="' + id + '"]').remove()
 
             var authors = $("#author_table > tbody > tr")
-            var emptyAuthor = authors.eq(1).children().length === 0;
+            var emptyAuthor = authors.children().length === 0;
 
             if(emptyAuthor) {
                 $("#author_table").append($('<tr><td colspan="3">No authors yet, add one!</td></tr>'))
