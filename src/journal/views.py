@@ -45,6 +45,7 @@ from security.decorators import article_stage_accepted_or_later_required, \
     editor_user_required
 from submission import models as submission_models
 from submission import forms as submission_forms
+from submission import logic as submission_logic
 from identifiers import models as identifiers_models
 from utils import models as utils_models, shared
 from utils.logger import get_logger
@@ -2131,7 +2132,7 @@ def backcontent_delete_author(request, article_id, author_id):
     except submission_models.ArticleAuthorOrder.DoesNotExist:
         pass
 
-    return redirect(reverse('backcontent', kwargs={'article_id': article_id}))
+    return redirect(reverse('backcontent_article', kwargs={'article_id': article_id}))
 
 @editor_user_required
 def backcontent_add_author(request,article_id):
@@ -2166,12 +2167,15 @@ def backcontent_add_author(request,article_id):
 
             if not found:
                 article.authors.add(author)
-                setAuthorOrder(article,author)
+                aao=setAuthorOrder(article,author)
+                submission_models.ArticleAuthorOrder.objects.get_or_create(article=article, author=author)
+
                 message="author added"
                 status="success"
                 context = { 
                     'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author.pk }), 
-                    'author': serializers.serialize('json', [author], fields=["first_name", "last_name", "email"]) 
+                    'aao': serializers.serialize('json', [aao], fields=["pk","order"]),  
+                    'author' : serializers.serialize('json',[aao.author], fields=["pk","last_name","first_name","email"]) 
                 }
             else:
                 message="author already set"
@@ -2223,17 +2227,18 @@ def handleAddAuthor(request, article):
     context = { }
 
 
-    author_exists = logic.check_author_exists(request.POST.get('email'))
+    author_exists = submission_logic.check_author_exists(request.POST.get('email'))
     if author_exists:
         author_on_article = article.authors.filter(id=author_exists.id)
 
         if not author_on_article:
             article.authors.add(author_exists)
-            setAuthorOrder(article,author_exists)
+            aao=setAuthorOrder(article,author_exists)
             messages.add_message(request, messages.SUCCESS, '%s added to the article' % author_exists.full_name())
             context = { 
-                'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author_exists.pk }), 
-                'author': serializers.serialize('json', [author_exists], fields=["first_name", "last_name", "email"]) 
+                    'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author_exists.pk }), 
+                    'aao': serializers.serialize('json', [aao], fields=["pk","order"]),  
+                    'author' : serializers.serialize('json',[author_exists], fields=["pk","last_name","first_name","email"]) 
             }
         else:
             messages.add_message(request, messages.ERROR, '%s is already author' % author_exists.full_name())
@@ -2247,12 +2252,12 @@ def handleAddAuthor(request, article):
                 new_author.add_account_role(role_slug='author', journal=request.journal)
 
                 article.authors.add(new_author)
-                setAuthorOrder(article,new_author)
-
+                aao=setAuthorOrder(article,new_author)
                 messages.add_message(request, messages.SUCCESS, '%s added to the article' % new_author.full_name())
                 context = { 
                     'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': new_author.pk }), 
-            'author': serializers.serialize('json', [new_author], fields=["first_name", "last_name", "email"]) 
+                    'aao': serializers.serialize('json', [aao], fields=["pk","order"]),  
+                    'author' : serializers.serialize('json',[new_author], fields=["pk","last_name","first_name","email"]) 
                 }
             else:
                 messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
@@ -2336,3 +2341,4 @@ def setAuthorOrder(article,author):
     aao.author=author
     aao.order=order
     aao.save()
+    return aao
