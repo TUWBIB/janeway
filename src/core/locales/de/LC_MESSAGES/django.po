@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-31 17:25+0100\n"
+"POT-Creation-Date: 2019-12-30 14:04+0100\n"
 "PO-Revision-Date: 2019-07-18 13:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: cms/models.py:18 core/janeway_global_settings.py:230
+msgid "English"
+msgstr "Englisch"
+
+#: cms/models.py:19 core/janeway_global_settings.py:232
+msgid "German"
+msgstr "Deutsch"
+
+#: cms/models.py:20
+msgid "< Hide >"
+msgstr "< Element unsichtbar >"
+
+#: cms/models.py:35
+msgid ""
+"Name of the page, max 100 chars, displayed in the nav and on the header of "
+"the page eg. About or Contact"
+msgstr ""
+
+#: cms/models.py:58
+msgid ""
+"Language for which this nav item is displayed, leave empty if item is to be "
+"shown regardless of language"
+msgstr ""
+"Sprache, für die das Navigationselement gezeigt wird. Es ist immer sichtbar, "
+"wenn die Sprache nicht gesetzt ist"
 
 #: core/forms.py:87
 msgid "Password 1"
@@ -98,17 +124,7 @@ msgstr "Aktuelle Artikel und Neuigkeiten"
 msgid "Selected Articles and News"
 msgstr "Ausgewählte Artikel und Neuigkeiten"
 
-#: core/janeway_global_settings.py:232
-msgid "English"
-msgstr "Englisch"
-
-#: core/janeway_global_settings.py:234
-msgid "German"
-msgstr "Deutsch"
-
-#: core/models.py:179
-#: templates/admin/journal/manage/backcontent/submission.html:131
-#: templates/admin/submission/edit/metadata.html:129
+#: core/models.py:179 templates/admin/submission/edit/metadata.html:129
 #: templates/admin/submission/submit_authors.html:66
 #: themes/OLH/templates/core/accounts/get_reset_token.html:26
 #: themes/OLH/templates/core/accounts/orcid_registration.html:29
@@ -998,8 +1014,8 @@ msgstr "Suche nach existierenden Autor_innen"
 #: templates/admin/submission/submit_authors.html:35
 #: themes/OLH/templates/journal/search.html:8
 #: themes/OLH/templates/preprints/authors.html:37
-#: themes/TUWJFM/templates/core/nav.html:240
-#: themes/TUWJFM/templates/core/nav.html:242
+#: themes/TUWJFM/templates/core/nav.html:244
+#: themes/TUWJFM/templates/core/nav.html:246
 #: themes/TUWJFM/templates/journal/search.html:7
 #: themes/TUWJFM/templates/journal/search.html:9
 #: themes/TUWJFM/templates/preprints/authors.html:35

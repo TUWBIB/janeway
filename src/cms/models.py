@@ -9,44 +9,64 @@ from django.db.models import Q
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
+from hvad.models import TranslatableModel, TranslatedFields
 
 from utils.logic import build_url_for_request
 
-class Page(models.Model):
+LANGUAGE_CHOICES = (
+    (u'en', _('English')),
+    (u'de', _('German')),
+    (u'xxx', _('< Hide >')),
+)
+
+
+class Page(TranslatableModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='page_content', null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
     object = GenericForeignKey('content_type', 'object_id')
 
     name = models.CharField(max_length=300, help_text="Page name displayed in the URL bar eg. about or contact")
-    display_name = models.CharField(max_length=100, help_text='Name of the page, max 100 chars, displayed '
-                                                              'in the nav and on the header of the page eg. '
-                                                              'About or Contact')
-    content = models.TextField(null=True, blank=True)
     is_markdown = models.BooleanField(default=True)
     edited = models.DateTimeField(auto_now=timezone.now)
+
+
+    translations = TranslatedFields(
+        display_name = models.CharField(max_length=100, help_text=_('Name of the page, max 100 chars, displayed '
+                                                                'in the nav and on the header of the page eg. '
+                                                                'About or Contact')),
+        content = models.TextField(null=True, blank=True)
+    )
 
     def __str__(self):
         return u'{0} - {1}'.format(self.content_type, self.display_name)
 
 
-class NavigationItem(models.Model):
+
+class NavigationItem(TranslatableModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='nav_content', null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
     object = GenericForeignKey('content_type', 'object_id')
 
-    link_name = models.CharField(max_length=100)
     link = models.CharField(max_length=100)
     is_external = models.BooleanField(default=False)
     sequence = models.IntegerField(default=99)
     page = models.ForeignKey(Page, blank=True, null=True)
     has_sub_nav = models.BooleanField(default=False, verbose_name="Has Sub Navigation")
     top_level_nav = models.ForeignKey("self", blank=True, null=True, verbose_name="Top Level Nav Item")
+    language = models.CharField(max_length=200, blank=True, null=True, choices=LANGUAGE_CHOICES,
+        help_text=_('Language for which this nav item is displayed, leave empty if item is to be shown regardless of language'))
+
+    translations = TranslatedFields(
+        link_name = models.CharField(max_length=100)
+    )
+
 
     def __str__(self):
         return self.link_name
 
     def sub_nav_items(self):
-        return NavigationItem.objects.filter(top_level_nav=self)
+        return NavigationItem.objects.language().fallbacks('en').filter(top_level_nav=self)
 
     @property
     def build_url_for_request(self):
