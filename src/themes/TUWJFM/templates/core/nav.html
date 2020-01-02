@@ -170,8 +170,10 @@
     
                 {% if request.journal.nav_sub %}
                     <li class="nav-item"><a href="{% url 'journal_submissions' %}" class="nav-link">Submission</a>
-                    </li>{% endif %}
-                            {% for item in navigation_items %}
+                    </li>
+                {% endif %}
+                
+                {% for item in navigation_items %}
                     {% if item.has_sub_nav %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="" id="{{ item.link_name|slugify }}"
@@ -180,7 +182,9 @@
                             </a>
                             <div class="dropdown-menu" aria-labelledby="{{ item.link_name|slugify }}">
                                 {% for subnav in item.sub_nav_items %}
+                                    {% if not subnav.language or subnav.language == LANGUAGE_CODE %}
                                     <a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a>
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                         </li>
