@@ -20,7 +20,6 @@ LANGUAGE_CHOICES = (
     (u'xxx', _('< Hide >')),
 )
 
-
 class Page(TranslatableModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='page_content', null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
