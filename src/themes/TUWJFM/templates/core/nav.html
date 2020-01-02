@@ -118,7 +118,7 @@
                             <a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a>
                             {% endfor %}
                             {% if request.journal.code == "OES" or request.journal.code == "OEST" %}
-                            {% if LANGUAGE_CODE == "de" and item.link_name == "Über die Zeitschrift" %}
+                            {% if LANGUAGE_CODE == "de" and item.link_name == "Über diese Zeitschrift" %}
                                 <a href="{% url 'newsletter' %}" class="dropdown-item">{% trans "Newsletter" %}</a>
                             {% elif LANGUAGE_CODE == "en" and item.link_name == "About" %}
                                 <a href="{% url 'newsletter' %}" class="dropdown-item">{% trans "Newsletter" %}</a>
