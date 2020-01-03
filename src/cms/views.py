@@ -82,12 +82,9 @@ def view_page(request, page_name):
     :param page_name: a string matching models.Page.page_name
     :return: HttpResponse object
     """
-    
     current_page = get_object_or_404(models.Page, name=page_name,
                                      content_type=request.model_content_type,
                                      object_id=request.site_type.pk)
-
-    
 
     if request.journal:
         template = 'cms/page.html'
