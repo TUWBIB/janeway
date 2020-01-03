@@ -23,8 +23,8 @@ def index(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    pages = models.Page.objects.filter(content_type=request.model_content_type, object_id=request.site_type.pk)
-    top_nav_items = models.NavigationItem.objects.filter(content_type=request.model_content_type,
+    pages = models.Page.objects.language().fallbacks('en').filter(content_type=request.model_content_type, object_id=request.site_type.pk)
+    top_nav_items = models.NavigationItem.objects.language().fallbacks('en').filter(content_type=request.model_content_type,
                                                          object_id=request.site_type.pk,
                                                          top_level_nav__isnull=True)
     collection_nav_items = models.NavigationItem.get_content_nav_for_journal(request.journal)
@@ -156,7 +156,7 @@ def nav(request, nav_id=None):
         nav_to_edit = None
         form = forms.NavForm(request=request)
 
-    top_nav_items = models.NavigationItem.objects.filter(content_type=request.model_content_type,
+    top_nav_items = models.NavigationItem.objects.language().fallbacks('en').filter(content_type=request.model_content_type,
                                                          object_id=request.site_type.pk,
                                                          top_level_nav__isnull=True)
     collection_nav_items = models.NavigationItem.get_content_nav_for_journal(request.journal)

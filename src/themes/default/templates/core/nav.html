@@ -3,6 +3,7 @@
 {% load roles %}
 {% load i18n %}
 {% load hooks %}
+{% load subnav %}
 
 <nav class="navbar navbar-toggleable-md bg-faded navbar-light">
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
@@ -57,7 +58,7 @@
             {% if request.journal.nav_sub %}
                 <li class="nav-item"><a href="{% url 'journal_submissions' %}" class="nav-link">Submission</a>
                 </li>{% endif %}
-                        {% for item in navigation_items %}
+            {% for item in navigation_items %}
                 {% if item.has_sub_nav %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="" id="{{ item.link_name|slugify }}"
@@ -65,7 +66,8 @@
                             {{ item.link_name }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="{{ item.link_name|slugify }}">
-                            {% for subnav in item.sub_nav_items %}
+                            {% tag_get_sub_nav_items item LANGUAGE_CODE as sub_nav_items %}                            
+                            {% for subnav in sub_nav_items %}
                                 <a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a>
                             {% endfor %}
                         </div>
