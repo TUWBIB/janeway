@@ -3,7 +3,7 @@
 {% load roles %}
 {% load i18n %}
 {% load hooks %}
-
+{% load subnav %}
 
 <nav class="header-overrides" role="navigation">
     <div class="nav-wrapper{% if not request.journal.full_width_navbar %} container{% endif %}">
@@ -173,7 +173,8 @@
     {% if item.has_sub_nav %}
         <ul id="{{ item.link_name|slugify }}" class="dropdown-content">
             <li><a href="{{ item.url }}" class="dropdown-item">{{ item.link_name }}</a></li>
-            {% for subnav in item.sub_nav_items %}
+            {% tag_get_sub_nav_items item LANGUAGE_CODE as sub_nav_items %}            
+            {% for subnav in sub_nav_items %}
                 <li><a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a></li>
             {% endfor %}
         </ul>
@@ -184,7 +185,8 @@
     {% if item.has_sub_nav %}
         <ul id="{{ item.link_name|slugify }}-mobile" class="dropdown-content">
             <li><a href="{{ item.url }}" class="dropdown-item">{{ item.link_name }}</a></li>
-            {% for subnav in item.sub_nav_items %}
+            {% tag_get_sub_nav_items item LANGUAGE_CODE as sub_nav_items %}            
+            {% for subnav in sub_nav_items %}
                 <li><a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a></li>
             {% endfor %}
         </ul>

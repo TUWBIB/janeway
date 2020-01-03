@@ -3,6 +3,7 @@ __author__ = "Martin Paul Eve & Andy Byers"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 from journal import models as journal_models
@@ -71,8 +72,8 @@ def navigation(request):
     :param request: the active request
     :return: the active path that corresponds to this request or an empty string if at root
     """
-    top_nav_items = cms_models.NavigationItem.objects.filter(content_type=request.model_content_type,
-                                                             object_id=request.site_type.pk,
-                                                             top_level_nav__isnull=True).order_by('sequence')
+    top_nav_items = cms_models.NavigationItem.objects.language().fallbacks('en') \
+        .filter(content_type=request.model_content_type,object_id=request.site_type.pk,top_level_nav__isnull=True) \
+        .filter(Q(language=None) | Q(language=request.LANGUAGE_CODE)).order_by('sequence')
 
     return {'navigation_items': top_nav_items}
