@@ -90,7 +90,7 @@ class NavigationItem(TranslatableModel):
         }
         content_type = ContentType.objects.get_for_model(issue_type.journal)
 
-        nav, created = cls.objects.get_or_create(
+        nav, created = cls.objects.language().fallbacks('en').get_or_create(
             content_type=content_type,
             object_id=issue_type.pk,
             defaults=defaults,
@@ -107,7 +107,7 @@ class NavigationItem(TranslatableModel):
             try:
                 content_type = ContentType.objects.get_for_model(
                     issue_type.journal)
-                yield issue_type, cls.objects.get(
+                yield issue_type, cls.objects.language().fallbacks('en').get(
                     content_type=content_type,
                     object_id=issue_type.pk,
                 )
