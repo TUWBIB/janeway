@@ -27,7 +27,7 @@ def untranslate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0005_page_translatable'),
+        ('cms', '0005_page_translatable_2'),
     ]
 
     operations = [
