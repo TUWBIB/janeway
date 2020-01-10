@@ -23,7 +23,7 @@ def index(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    pages = models.Page.objects.language().filter(content_type=request.model_content_type, object_id=request.site_type.pk)
+    pages = models.Page.objects.language().fallbacks('en').filter(content_type=request.model_content_type, object_id=request.site_type.pk)
     top_nav_items = models.NavigationItem.objects.language().fallbacks('en').filter(content_type=request.model_content_type,
                                                          object_id=request.site_type.pk,
                                                          top_level_nav__isnull=True)

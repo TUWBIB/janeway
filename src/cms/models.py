@@ -17,7 +17,8 @@ from utils.logic import build_url_for_request
 LANGUAGE_CHOICES = (
     (u'en', _('English')),
     (u'de', _('German')),
-    (u'xxx', _('< Hide >')),
+    (u'fr', _('French')),
+    (u'hide', _('<Hide>')),
 )
 
 class Page(TranslatableModel):
@@ -29,7 +30,6 @@ class Page(TranslatableModel):
     is_markdown = models.BooleanField(default=True)
     edited = models.DateTimeField(auto_now=timezone.now)
 
-
     translations = TranslatedFields(
         display_name = models.CharField(max_length=100, help_text=_('Name of the page, max 100 chars, displayed '
                                                                 'in the nav and on the header of the page eg. '
@@ -39,7 +39,6 @@ class Page(TranslatableModel):
 
     def __str__(self):
         return u'{0} - {1}'.format(self.content_type, self.display_name)
-
 
 
 class NavigationItem(TranslatableModel):
@@ -53,13 +52,13 @@ class NavigationItem(TranslatableModel):
     page = models.ForeignKey(Page, blank=True, null=True)
     has_sub_nav = models.BooleanField(default=False, verbose_name="Has Sub Navigation")
     top_level_nav = models.ForeignKey("self", blank=True, null=True, verbose_name="Top Level Nav Item")
-    language = models.CharField(max_length=200, blank=True, null=True, choices=LANGUAGE_CHOICES,
+    language = models.CharField(max_length=200, blank=True, null=True,
+        choices=LANGUAGE_CHOICES,
         help_text=_('Language for which this nav item is displayed, leave empty if item is to be shown regardless of language'))
 
     translations = TranslatedFields(
         link_name = models.CharField(max_length=100)
     )
-
 
     def __str__(self):
         return self.link_name
@@ -91,7 +90,7 @@ class NavigationItem(TranslatableModel):
         }
         content_type = ContentType.objects.get_for_model(issue_type.journal)
 
-        nav, created = cls.objects.get_or_create(
+        nav, created = cls.objects.language().fallbacks('en').get_or_create(
             content_type=content_type,
             object_id=issue_type.pk,
             defaults=defaults,
@@ -108,7 +107,7 @@ class NavigationItem(TranslatableModel):
             try:
                 content_type = ContentType.objects.get_for_model(
                     issue_type.journal)
-                yield issue_type, cls.objects.get(
+                yield issue_type, cls.objects.language().fallbacks('en').get(
                     content_type=content_type,
                     object_id=issue_type.pk,
                 )

@@ -8,6 +8,8 @@ from django import forms
 from hvad.forms import TranslatableModelForm
 from django_summernote.widgets import SummernoteWidget
 
+from hvad.forms import TranslatableModelForm
+
 from cms import models
 
 

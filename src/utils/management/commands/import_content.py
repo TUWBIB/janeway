@@ -50,7 +50,7 @@ def generate_cms_pages(object, nav_items, content):
 
         if html is not None:
             content_type = ContentType.objects.get_for_model(object)
-            new_cms_page = cms_models.Page.objects.create(
+            new_cms_page = cms_models.Page.objects.language().fallbacks('en').create(
                 content_type=content_type,
                 object_id=object.pk,
                 name=slugify(item.get('text')),
@@ -73,7 +73,7 @@ def generate_cms_pages(object, nav_items, content):
 
             if html is not None:
                 content_type = ContentType.objects.get_for_model(object)
-                child_cms_page = cms_models.Page.objects.create(
+                child_cms_page = cms_models.Page.objects.language().fallbacks('en').create(
                     content_type=content_type,
                     object_id=object.pk,
                     name=name,
@@ -91,7 +91,7 @@ def generate_cms_pages(object, nav_items, content):
 
 def generate_nav_entry(object, cms_page, has_children=False, parent=None, parent_nav_item=None):
 
-    new_nav_item = cms_models.NavigationItem.objects.create(
+    new_nav_item = cms_models.NavigationItem.objects.language().fallbacks('en').create(
         object=object,
         link_name=cms_page.display_name,
         link="site/{0}".format(cms_page.name),

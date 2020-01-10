@@ -1,6 +1,7 @@
 {% load roles %}
 {% load i18n %}
 {% load hooks %}
+{% load subnav %}
 
 <div class="top-bar" id="main-menu" style="display: block;">
     <ul class="menu vertical medium-horizontal" data-responsive-menu="drilldown medium-dropdown">
@@ -12,7 +13,8 @@
                                                        data-options="is_hover:true; hover_timeout:5000">{{ item.link_name }}</a>
             <ul class="menu vertical medium-horizontal">
             <li><a href="{{ item.url }}">{{ item.link_name }}</a></li>
-            {% for subnav in item.sub_nav_items %}
+            {% tag_get_sub_nav_items item LANGUAGE_CODE as sub_nav_items %}
+            {% for subnav in sub_nav_items %}
                 <li><a href="{{ subnav.url }}">{{ subnav.link_name }}</a></li>
             {% endfor %}
             </ul>
