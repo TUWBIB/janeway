@@ -10,7 +10,7 @@ import journal.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('journal', '9000_tuw_add_issue_str_year_vlid'),
+        ('journal', '9001_journal_keywords_de'),
     ]
 
     operations = [

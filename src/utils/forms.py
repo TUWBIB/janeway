@@ -68,7 +68,7 @@ class KeywordModelForm(ModelForm):
 
         if 'keywords_de' in self.cleaned_data:
             posted_keywords_de = self.cleaned_data.get('keywords_de', '').split(',')
-            for keyword_de in posted_keywords:
+            for keyword_de in posted_keywords_de:
                 if keyword_de != '':
                     obj, _ = submission_models.KeywordDe.objects.get_or_create(
                             word=keyword_de)
