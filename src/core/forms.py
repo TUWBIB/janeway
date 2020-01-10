@@ -324,7 +324,6 @@ class JournalAttributeForm(KeywordModelForm):
            'view_pdf_button',
         )
 
-
 class PressJournalAttrForm(KeywordModelForm):
     default_thumbnail = forms.FileField(required=False)
     press_image_override = forms.FileField(required=False)
@@ -337,7 +336,6 @@ class PressJournalAttrForm(KeywordModelForm):
             'remote_view_url', 'remote_submit_url', 'hide_from_press',
             'disable_metrics_display',
         )
-
 
 class NotificationForm(forms.ModelForm):
     class Meta:
