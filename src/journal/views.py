@@ -39,7 +39,7 @@ from review import forms as review_forms
 from security.decorators import article_stage_accepted_or_later_required, \
     article_stage_accepted_or_later_or_staff_required, article_exists, file_user_required, has_request, has_journal, \
     file_history_user_required, file_edit_user_required, production_user_or_editor_required, \
-    editor_user_required
+    editor_user_required, keyword_page_enabled
 from submission import models as submission_models
 from utils import models as utils_models, shared
 from utils.logger import get_logger
@@ -354,6 +354,47 @@ def print_article(request, identifier_type, identifier):
         'identifier_type': identifier_type,
         'identifier': identifier,
         'article_content': content
+    }
+
+    return render(request, template, context)
+
+
+@has_journal
+@keyword_page_enabled
+def keywords(request):
+    """
+    Renders a list of keywords
+    :param request: HttpRequest object
+    :return: a rendered template
+    """
+    keywords = request.journal.article_keywords()
+
+    template = 'journal/keywords.html'
+    context = {
+        'keywords': keywords,
+    }
+
+    return render(request, template, context)
+
+
+@has_journal
+@keyword_page_enabled
+def keyword(request, keyword_id):
+    """
+    Displays a list of articles that use a given keyword.
+    :param request: HttpRequest object
+    :param keyword_id: Keyword object PK
+    :return: a rendered template
+    """
+    keyword = get_object_or_404(submission_models.Keyword, pk=keyword_id)
+    articles =  request.journal.published_articles.filter(
+        keywords__pk=keyword.pk,
+    )
+
+    template = 'journal/keyword.html'
+    context = {
+        'keyword': keyword,
+        'articles': articles,
     }
 
     return render(request, template, context)
@@ -1514,6 +1555,7 @@ def editorial_team(request, group_id=None):
 
     return render(request, template, context)
 
+
 @has_journal
 def author_list(request):
     """
@@ -1528,6 +1570,7 @@ def author_list(request):
         'author_list': author_list,
     }
     return render(request, template, context)
+
 
 def sitemap(request):
     """
@@ -1719,7 +1762,6 @@ def send_user_email(request, user_id, article_id=None):
     }
 
     return render(request, template, context)
-
 
 
 @editor_user_required
