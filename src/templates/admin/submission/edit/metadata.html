@@ -11,7 +11,7 @@
 {% block breadcrumbs %}
     {{ block.super }}
     <li>Edit</li>
-    <li>{{ article.title }}</li>
+    <li>{{ article.title|safe }}</li>
     <li>Metadata</li>
 {% endblock breadcrumbs %}
 
@@ -162,9 +162,8 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                    <button type="submit" name="metadata" class="small success button">Update Metadata</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
     {% include "admin/elements/submission/edit_author.html" %}

@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('journal', '9000_tuw_add_issue_str_year_vlid'),
+        ('submission', '9001_tuw_add_trans_dedicated_fields')
     ]
 
     operations = [

@@ -184,6 +184,11 @@ urlpatterns = [
     # Search
     url(r'^search/$',
         views.search, name='search'),
+    url(r'^keywords/$',
+        views.keywords, name='keywords'),
+
+    url(r'^keywords/(?P<keyword_id>\d+)/$',
+        views.keyword, name='keyword'),
 
     # Submissions
     url(r'^submissions/$',
