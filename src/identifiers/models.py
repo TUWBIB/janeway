@@ -21,7 +21,8 @@ identifier_choices = (
     ('pubid', 'Publisher ID'),
     ('urn', 'URN'),
     ('ac', 'AC'),
-    ('vlid', 'VL ID')
+    ('vlid', 'VL ID'),
+    ('mmsid', 'MMS ID'),
 )
 
 IDENTIFIER_TYPES = {
@@ -40,6 +41,9 @@ DOI_RE = re.compile(DOI_REGEX_PATTERN)
 
 AC_REGEX_PATTERN = 'AC\d{8}'
 AC_RE = re.compile(AC_REGEX_PATTERN)
+
+MMSID_REGEX_PATTERN = '(99000\d{9}3336|99\d{9}3336)'
+MMSID_RE = re.compile(MMSID_REGEX_PATTERN)
 
 URN_REGEX_PATTERN = 'urn:nbn:at:at-ubtuw:\d-\d{4,6}'
 URN_RE = re.compile(URN_REGEX_PATTERN)
