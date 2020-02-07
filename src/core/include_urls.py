@@ -15,6 +15,7 @@ from press import views as press_views
 from cms import views as cms_views
 from submission import views as submission_views
 from journal import views as journal_views
+from sync import urls as sync_urls
 
 urlpatterns = [
     url(r'^submit/', include('submission.urls')),
@@ -40,6 +41,7 @@ urlpatterns = [
     url(r'^repository/', include('preprint.urls')),
     url(r'^utils/', include('utils.urls')),
     url(r'^workflow/', include('workflow.urls')),
+    url(r'^', include(sync_urls)),
 
     # Root Site URLS
     url(r'^$', press_views.index, name='website_index'),

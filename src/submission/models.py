@@ -605,6 +605,9 @@ class Article(models.Model):
     def get_pubid(self):
         return self.get_identifier('pubid')
 
+    def get_mmsid(self):
+        return self.get_identifier('mmsid')
+
     def is_accepted(self):
         # return true for all stages after accepted
         return self.stage == "Published" or self.stage == "Accepted" or self.stage == "Editor Copyediting"\

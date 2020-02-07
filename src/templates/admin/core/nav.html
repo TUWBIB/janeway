@@ -41,6 +41,8 @@
             Publication Schedule</a></li>
         <li><a href="{% url 'backcontent' %}"><i class="fa fa-plug">&nbsp;</i>
             Upload articles</a></li>
+        <li><a href="{% url 'sync' %}"><i class="fa fa-reddit-alien">&nbsp;</i>
+            External sync</a></li>
             {% endif %}
         {% if request.user.is_staff or editor %}
             <li class="subtitle"><a href="#">Staff</a></li>
