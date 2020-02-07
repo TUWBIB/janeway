@@ -1,0 +1,8 @@
+<OPTIONS>
+error_threshold=0
+error_die=1
+timeout=2
+<KEYS>
+production=apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+sandbox=apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+analytics=apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
