@@ -1,0 +1,307 @@
+{% extends "admin/core/base.html" %}
+{% load foundation %}
+{% load static from staticfiles %}
+{% load securitytags %}
+{% load files %}
+{% load i18n %}
+{% block title %}External Sync{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'sync' %}">External Sync</a></li>
+{% endblock breadcrumbs %}
+
+{% block body %}
+    <section class="content">
+        <div class="row expanded">
+            <div class="box">
+                <div class="title-area">
+                    <h2>{% trans "Articles" %}</h2>
+                </div>
+                <div class="content">
+                    <table class="table table-bordered" id="datatable">
+                        <thead>
+                        <tr>
+                            <th rowspan="2">{% trans "Id" %}</th>
+                            <th rowspan="2">{% trans "Title" %}</th>
+                            <th rowspan="2">
+                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+                                {% trans "Issue" %}
+                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                                {% trans "Issue" context "oes" %}
+                            {% else %}
+                            {% endif %}
+                            <th colspan="3">Datacite</th>
+                            <th colspan="3">Alma</th>
+                        </tr>
+                        <tr>
+                            <th>DOI</th>
+                            <th>Sync</th>
+                            <th style="min-width:150px">Actions</th>
+                            <th>MMS Id</th>
+                            <th>Sync</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for article in articles %}
+                            <tr>
+                                <td>{{ article.id }}</td>
+                                <td>{{ article.title }}</td>
+                                {% if article.primary_issue %}
+                                <td>{{ article.primary_issue.tuw_issue_count }}</td>    
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                {% if article.get_doi %}                                
+                                <td>{{ article.get_doi }}</td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}                      
+                                {% if article.datacite_state %}                                
+                                <td>{{ article.datacite_state }}</td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}                      
+                                <td>
+                                    <div id="datacite_{{ article.pk }}" class="btn-group no-wrap">
+                                        {% if article.datacite_metadata_ok %}
+                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid black;" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">DOI / Metadata</button>
+                                        {% else %}
+                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid grey; color: grey;" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">DOI / Metadata</button>
+                                        {% endif %}
+                                        <br>
+                                        {% if article.datacite_url_ok %}
+                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid black;" class="btn_datacite_url" id="btn_datacite_url_{{ article.pk }}">URL</button>
+                                        {% else %}
+                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid grey; color: grey;" class="btn_datacite_url disabled" id="btn_datacite_url_{{ article.pk }}">URL</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                {% if article.get_mmsid %}                                
+                                <td>{{ article.get_mmsid }}</td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}                      
+                                <td></td>
+                                <td>
+                                    <ul id="alma_{{ article.pk }}" class="button-group">
+                                        <
+                                        <button type="submit" class="button disabled btn_alma_down " id="btn_alma_down_{{ article.pk }}">Down <i class="fa fa-chevron-circle-down"></i></button><br>
+                                        <button type="submit" class="button disabled btn_alma_up" id="btn_alma_up_{{ article.pk }}">Up <i class="fa fa-chevron-circle-down"></i></button><br>
+                                    </ul>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td>{% trans "No articles in this stage" %}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static "common/css/toastr-2.1.1.css" %}">    
+    <script src="{% static "common/js/jq-ui.min.js" %}"></script>
+    <script src="{% static "common/js/toastr-2.1.1.js" %}"></script>
+    <script src="{% static "common/js/tagit.js" %}"></script>
+    <script src="{% static "admin/js/csrf.js" %}"></script>
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/foundation.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.reveal.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).foundation();    
+        
+        $(document).ready(function () 
+        {
+            $(".btn_alma_down").on("click", function(e)
+            {
+                e.preventDefault();
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+
+                console.log("alma down pressed "+id);
+
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'alma_down',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var message=htmlDecode(response.message);
+                        var status=response.status;
+
+                        if (status == "success")
+                        {
+/*                            context = JSON.parse(response.context);
+                            if(context.aao != undefined) 
+                            {
+
+                                aao=JSON.parse(context.aao)[0]
+                                author=JSON.parse(context.author)[0]
+
+                                aao_pk=aao.pk;
+                                aao_order=aao.fields.order
+                                author_pk=author.pk
+                                author_last_name=author.fields.last_name
+                                author_first_name=author.fields.first_name
+                                author_email=author.fields.email
+
+                                onAddAuthor(aao_pk,aao_order,author_pk,author_last_name,author_first_name,author_email,context.url)
+                            }*/
+                                                   
+                            toastr.success(message)
+                        }
+                        else if (status == "warning")
+                        {
+                            toastr.warning(message);
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(message);
+                        }
+
+                    },
+                    failure: function(response){
+                        toastr.error("reuest failed");                        
+                    },
+                });
+            })
+
+            $(".btn_alma_up").on("click", function(e)
+            {
+                    e.preventDefault();
+                    var parts = this.id.split(/_/);
+                    var id = parts[parts.length-1]
+
+                    console.log("alma up pressed "+id);
+            })
+
+            $(".btn_datacite_url").on("click", function(e)
+            {
+                    e.preventDefault();
+                    var parts = this.id.split(/_/);
+                    var id = parts[parts.length-1]
+
+                    console.log("datacite metadata pressed "+id);
+            })
+
+            $(".btn_datacite_metadata").on("click", function(e)
+            {
+                e.preventDefault();
+                    var parts = this.id.split(/_/);
+                    var id = parts[parts.length-1]
+
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'datacite_url',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var message=response.message;
+                        var status=response.status;
+
+                        if (status == "success")
+                        {
+                            var modal = '<div class="reveal small" id="confirm_datacite_metadata">'+
+			     		        '<h2>'+'Review metadata'+'</h2>'+
+			   		            '<p class="lead"><pre>'+_.escape(he.decode(message))+'</pre></p>'+
+         			            '<button class="button success ok float-center">Register</button>'+
+			    		        '<button class="button alert float-center" data-close>Cancel</button>'+
+                                '</div>';
+
+                            $('body').append(modal);
+
+                            var confirm_datacite_metadata = new Foundation.Reveal($('#confirm_datacite_metadata'));
+		                    confirm_datacite_metadata.open();
+    
+                            $('#confirm_datacite_metadata').children('.ok').on('click', function() 
+                            {
+                    			// close and REMOVE FROM DOM to avoid multiple binding
+			                    confirm_datacite_metadata.close();
+			                    $('#confirm_datacite_metadata').remove();
+                                // calling the function to process
+                                toastr.warning("confirmed");
+
+                                // do_stuff.call();
+                            });
+                            $(document).on('closed.zf.reveal', '#confirmation', function() 
+                            {
+			                    // remove from dom when closed
+			                    $('#confirm_datacite_metadata').remove();
+		                    });
+                        }
+                                   
+                        else if (status == "warning")
+                        {
+                            toastr.warning(message);
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(message);
+                        }
+
+                    },
+                    failure: function(response){
+                        toastr.error("reuest failed");                        
+                    },
+
+                });
+            })
+
+            $("#datatable").DataTable({
+                "lengthMenu": [[25, 50, 10, -1], [25, 50, 10, "All"]],
+            {% if hide_length %}"bLengthChange": false,{% endif %}
+            {% if hide_page %}"bPaginate": false,{% endif %}
+            {% if sort and order %}"order": [[ {{ sort }}, "{{ order }}" ]],{% endif %}
+            {% if disable_ordering %}"ordering": false,{% endif %}
+            {% if page_length %}"pageLength": {{ page_length }},{% endif %}
+            });
+        })  
+    </script>
+{% endblock %}
+
+{% block css %}
+<style rel="stylesheet">
+    .btn-group > a {
+        margin-left: 6px;
+        margin-right: 6px;
+    }
+</style>
+{% endblock %}
+

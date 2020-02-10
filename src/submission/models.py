@@ -245,6 +245,15 @@ STAGE_CHOICES = [
     (STAGE_PREPRINT_PUBLISHED, 'Preprint Published')
 ]
 
+DATACITE_STATE_NO_SYNC='no sync'
+DATACITE_STATE_DOI='doi fetched'
+DATACITE_STATE_URL='url registered'
+
+DATACITE_STATE_CHOICES = [
+    (DATACITE_STATE_NO_SYNC, _('no sync')),
+    (DATACITE_STATE_DOI, _('doi fetched')),
+    (DATACITE_STATE_URL, _('url registered')),
+]
 
 class ArticleStageLog(models.Model):
     article = models.ForeignKey('Article')
@@ -441,6 +450,11 @@ class Article(models.Model):
     objects = ArticleManager()
     preprints = PreprintManager()
 
+
+    # external_sync
+    datacite_state = models.CharField(max_length=20, blank=True, null=True, choices=DATACITE_STATE_CHOICES)
+    datacite_ts = models.DateTimeField(blank=True, null=True)
+
     class Meta:
         ordering = ('-date_published', 'title')
 
@@ -605,6 +619,9 @@ class Article(models.Model):
     def get_pubid(self):
         return self.get_identifier('pubid')
 
+    def get_mmsid(self):
+        return self.get_identifier('mmsid')
+
     def is_accepted(self):
         # return true for all stages after accepted
         return self.stage == "Published" or self.stage == "Accepted" or self.stage == "Editor Copyediting"\
@@ -613,6 +630,19 @@ class Article(models.Model):
 
     def __str__(self):
         return u'%s - %s' % (self.pk, self.title)
+
+    def datacite_metadata_ok(self):
+        val = True
+        if self.language is None: val = False
+
+        return val
+
+    def datacite_url_ok(self):
+        val = True
+        if self.language is None: val = False
+        if self.datacite_state == "url registered" : val = False
+
+        return val
 
     @staticmethod
     @cache(300)
