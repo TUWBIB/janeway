@@ -12,17 +12,17 @@ from journal import models
 from press import models as press_models
 from utils import setting_handler
 from submission import models as submission_models
+from .marc import MarcRecord,DataField,ControlField,SubField
 
-from utils.alma import MarcRecord,DataField,ControlField,Leader
-
-def toMarc(article):
+def toMarc(article_id):
     record=MarcRecord()
+    record.leader="03012naa a2200373 c 4500"
     article=submission_models.Article.objects.get(pk=article_id)
     #title
-    datafield=DataField("245","1","0")
-    datafield.addSubfield("a",article.title)
+    datafield=DataField.createDataField("245","1","0")
+    datafield.addSubfield(SubField.createSubfield("a",article.title))
     if article.subtitle:
-        datafield.addSubfield("b",article.subtitle)
+        datafield.addSubfield(SubField.createSubfield("b",article.subtitle))
     record.addDataField(datafield)
 
     return record.toXML()

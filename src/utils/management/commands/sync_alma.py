@@ -10,7 +10,7 @@ from django.utils import translation
 from press import models as press_models
 from journal import models as journal_models
 from submission import models as submission_models
-from utils.alma import api as alma_api,marc as alma_marc,alma as alma
+from sync.alma import api as alma_api,marc as alma_marc,alma as alma
 
 
 class Command(BaseCommand):
@@ -40,6 +40,7 @@ class Command(BaseCommand):
         api=alma_api.API()
         api.setAPITarget("sandbox")
         xml=alma.toMarc(article_id)
+        print (xml)
         xml=api.addXmlDeclaration(xml)
         print (xml)
 #        api.createBibRecord(xml)

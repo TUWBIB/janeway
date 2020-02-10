@@ -3,10 +3,14 @@ from lxml import etree
 
 class MarcRecord:
 
+    leader=None
+    controlfields=None
+    datafields=None
+
     def __init__(self):
-        leader=None
-        controlfields=None
-        datafields=None
+        self.leader=None
+        self.controlfields=[]
+        self.datafields=[]
 
     def parse(self,xml):
         root=etree.fromstring(xml)
@@ -30,10 +34,16 @@ class MarcRecord:
             self.datafields.append(dfield)
             nl_subfield=node_dfield.findall('subfield')
             for node_subfield in nl_subfield:
-                subfield=Subfield()
+                subfield=SubField()
                 subfield.value=node_subfield.text
                 subfield.code=node_subfield.attrib['code']
                 dfield.subfields.append(subfield)
+
+    def addDataField(self,df):
+        self.datafields.append(df)
+    
+    def addControlField(seld,cf):
+        self.controlfields.append(cf)
 
     def getControlFieldsForTag(self,tag):
         matchingfields=[]
@@ -147,10 +157,22 @@ class MarcRecord:
             xml+='</datafield>'
         xml+='</record>'
 
+        return xml
+
 class ControlField:
 
     tag=None
     value=None
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def createControlField(cls,tag,value):
+        cf=DataField()
+        cf.tag=tag
+        cf.value=value
+        return cf
 
 class DataField:
 
@@ -159,22 +181,35 @@ class DataField:
     ind2=None
     subfields=[]
 
-    def __init__(self,tag,ind1,ind2):
-        self.tag=tag
-        self.ind1=ind1
-        self.ind2=ind2
+    def __init__(self):
+        pass
+
+    @classmethod
+    def createDataField(cls,tag,ind1,ind2):
+        df=DataField()
+        df.tag=tag
+        df.ind1=ind1
+        df.ind2=ind2
+        return df
+
 
     def addSubfield(self,subfield):
         self.subfields.append(subfield)
 
-class Subfield:
+class SubField:
 
     code=None
     value=None
 
-    def __init__(self,code,value):
-        self.code=code
-        self.value=value
+    def __init__(self):
+        pass
+
+    @classmethod
+    def createSubfield(cls,code,value):
+        sf=SubField()
+        sf.code=code
+        sf.value=value
+        return sf
 
 
 text="""
