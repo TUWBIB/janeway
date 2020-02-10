@@ -439,7 +439,6 @@ class Article(models.Model):
         related_name='projected_issue',
     )
 
-
     # Meta
     meta_image = models.ImageField(blank=True, null=True, upload_to=article_media_upload, storage=fs)
 
