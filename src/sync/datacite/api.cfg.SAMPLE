@@ -1,0 +1,16 @@
+<OPTIONS>
+error_threshold=0
+error_die=1
+timeout=2
+id_offset=9000
+protocol=http://
+<LOGIN>
+endpoint=https://mds.test.datacite.org/
+user=<user>
+password=<password>
+<JOURNAL aaa>
+prefix=10.xxxx
+namespace_separator=abc-devel
+<JOURNAL OES>
+prefix=10.xxx
+namespace_separator=def-devel

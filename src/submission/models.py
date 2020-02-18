@@ -245,14 +245,17 @@ STAGE_CHOICES = [
     (STAGE_PREPRINT_PUBLISHED, 'Preprint Published')
 ]
 
-DATACITE_STATE_NO_SYNC='no sync'
-DATACITE_STATE_DOI='doi fetched'
-DATACITE_STATE_URL='url registered'
+DATACITE_STATE_NONE=''
+DATACITE_STATE_DRAFT='draft'
+DATACITE_STATE_FINDABLE='findable'
+DATACITE_STATE_REGISTERED='registered'
+
 
 DATACITE_STATE_CHOICES = [
-    (DATACITE_STATE_NO_SYNC, _('no sync')),
-    (DATACITE_STATE_DOI, _('doi fetched')),
-    (DATACITE_STATE_URL, _('url registered')),
+    (DATACITE_STATE_NONE, DATACITE_STATE_NONE),
+    (DATACITE_STATE_NONE, DATACITE_STATE_DRAFT),
+    (DATACITE_STATE_FINDABLE, DATACITE_STATE_FINDABLE),
+    (DATACITE_STATE_REGISTERED, DATACITE_STATE_REGISTERED),
 ]
 
 class ArticleStageLog(models.Model):
@@ -615,6 +618,9 @@ class Article(models.Model):
 
     def get_doi(self):
         return self.get_identifier('doi')
+    
+    def get_urn(self):
+        return self.get_identifier('urn')
 
     def get_pubid(self):
         return self.get_identifier('pubid')
@@ -633,7 +639,6 @@ class Article(models.Model):
 
     def datacite_metadata_ok(self):
         val = True
-        if self.language is None: val = False
 
         return val
 

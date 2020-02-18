@@ -46,7 +46,7 @@
                         <tbody>
                         {% for article in articles %}
                             <tr>
-                                <td>{{ article.id }}</td>
+                                <td><a href="{% url 'edit_metadata' article.pk %}">{{ article.id }}</a></td>
                                 <td>{{ article.title }}</td>
                                 {% if article.primary_issue %}
                                 <td>{{ article.primary_issue.tuw_issue_count }}</td>    
@@ -54,9 +54,9 @@
                                 <td></td>
                                 {% endif %}
                                 {% if article.get_doi %}                                
-                                <td>{{ article.get_doi }}</td>
+                                <td id="datacite_doi_val_{{ article.pk }}">{{ article.get_doi }}</td>
                                 {% else %}
-                                <td></td>
+                                <td id="datacite_doi_val_{{ article.pk }}"></td>
                                 {% endif %}                      
                                 {% if article.datacite_state %}                                
                                 <td>{{ article.datacite_state }}</td>
@@ -188,7 +188,8 @@
                         }
 
                     },
-                    failure: function(response){
+                    error: function(response)
+                    {
                         toastr.error("reuest failed");                        
                     },
                 });
@@ -203,16 +204,95 @@
                     console.log("alma up pressed "+id);
             })
 
-            $(".btn_datacite_url").on("click", function(e)
+            $(".btn_datacite_metadata").on("click", function(e)
             {
-                    e.preventDefault();
-                    var parts = this.id.split(/_/);
-                    var id = parts[parts.length-1]
+                e.preventDefault();
 
-                    console.log("datacite metadata pressed "+id);
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'datacite_metadata',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var status=response.status;
+                        var xml=response.xml;
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+
+                        if (status == "success")
+                        {
+                            var modal = '<div class="reveal small" id="confirm_datacite_metadata" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Review metadata'+'</h2>';
+                            if (warnings.length>0)
+                            {
+                                modal+='<h3>Warnings</h3>';
+                                modal+='<p>'
+                                var i;
+                                for (i=0;i<warnings.length;++i)
+                                {
+                                    modal+=warnings[i]+'<br>';
+                                }
+                                modal+='</p>'
+                            }
+                                   
+                            modal+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
+         			            '<button class="button success ok float-center">Register</button>'+
+			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                                '</div>';
+
+                            $('body').append(modal);
+
+
+
+                            var confirm_datacite_metadata = new Foundation.Reveal($('#confirm_datacite_metadata'));
+                            confirm_datacite_metadata.open();
+
+                            $('#confirm_datacite_metadata').children('.ok').on('click', function() 
+                            {
+                                console.log("ok event")
+
+			                    confirm_datacite_metadata.close();
+                                $('#confirm_datacite_metadata').remove();
+                                $('.reveal-overlay').remove();
+                                dataciteMetadataConfirm(id)                                
+                            });
+                            
+                            $('#confirm_datacite_metadata').children('.cancel').on('click', function() 
+                            {
+			                    confirm_datacite_metadata.close();
+			                    $('#confirm_datacite_metadata').remove();
+                                $('.reveal-overlay').remove();
+                            });
+                        }
+                        else if (status == "warning")
+                        {
+                            toastr.warning(arrayToStringWithBr(warnings));
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
             })
 
-            $(".btn_datacite_metadata").on("click", function(e)
+            $(".btn_datacite_url").on("click", function(e)
             {
                 e.preventDefault();
                     var parts = this.id.split(/_/);
@@ -233,56 +313,173 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var message=response.message;
                         var status=response.status;
+                        var url=response.url;
+                        var errors=response.errors;
 
                         if (status == "success")
                         {
-                            var modal = '<div class="reveal small" id="confirm_datacite_metadata">'+
-			     		        '<h2>'+'Review metadata'+'</h2>'+
-			   		            '<p class="lead"><pre>'+_.escape(he.decode(message))+'</pre></p>'+
+                            var modal = '<div class="reveal small" id="confirm_datacite_url" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Confirm URL'+'</h2>';
+                            modal+='<p class="lead"><pre>'+_.escape(he.decode(url))+'</pre></p>'+
          			            '<button class="button success ok float-center">Register</button>'+
-			    		        '<button class="button alert float-center" data-close>Cancel</button>'+
+			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
                                 '</div>';
 
                             $('body').append(modal);
 
-                            var confirm_datacite_metadata = new Foundation.Reveal($('#confirm_datacite_metadata'));
-		                    confirm_datacite_metadata.open();
-    
-                            $('#confirm_datacite_metadata').children('.ok').on('click', function() 
-                            {
-                    			// close and REMOVE FROM DOM to avoid multiple binding
-			                    confirm_datacite_metadata.close();
-			                    $('#confirm_datacite_metadata').remove();
-                                // calling the function to process
-                                toastr.warning("confirmed");
+                            var confirm_datacite_url = new Foundation.Reveal($('#confirm_datacite_url'));
+                            confirm_datacite_url.open();
 
-                                // do_stuff.call();
-                            });
-                            $(document).on('closed.zf.reveal', '#confirmation', function() 
+                            $('#confirm_datacite_url').children('.ok').on('click', function() 
                             {
-			                    // remove from dom when closed
-			                    $('#confirm_datacite_metadata').remove();
-		                    });
-                        }
-                                   
-                        else if (status == "warning")
-                        {
-                            toastr.warning(message);
+                                console.log("ok event")
+
+			                    confirm_datacite_url.close();
+                                $('#confirm_datacite_url').remove();
+                                $('.reveal-overlay').remove();
+                                dataciteURLConfirm(id)                                
+                            });
+                            
+                            $('#confirm_datacite_url').children('.cancel').on('click', function() 
+                            {
+			                    confirm_datacite_url.close();
+			                    $('#confirm_datacite_url').remove();
+                                $('.reveal-overlay').remove();
+                            });
                         }
                         else if (status == "error")
                         {
-                            toastr.error(message);
+                            toastr.error(arrayToStringWithBr(errors))
                         }
 
                     },
-                    failure: function(response){
-                        toastr.error("reuest failed");                        
-                    },
-
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
                 });
             })
+
+
+
+            function dataciteMetadataConfirm(article_id)
+            {
+                console.log("dataciteMetadataConfirm "+article_id)
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': article_id,
+                    'operation': 'datacite_metadata_confirm',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var status=response.status;
+                        var errors=response.errors;
+                        var doi=response.doi;
+                        
+                        if (status == "success")
+                        {
+                            old_val=$("#datacite_doi_val_"+article_id).html()
+                            $("#datacite_doi_val_"+article_id).html(doi)
+                            if (! old_val)
+                            {
+                                toastr.success("doi registered");
+                            }
+                            else
+                            {
+                                toastr.success("metadata updated");
+                            }
+
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(arrayToStringWithBr(errors))
+                        }
+
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                })
+            }
+
+            function dataciteURLConfirm(article_id)
+            {
+                console.log("dataciteURLConfirm "+article_id)
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': article_id,
+                    'operation': 'datacite_url_confirm',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var status=response.status;
+                        var errors=response.errors;
+
+                        if (status == "success")
+                        {
+                            $("#datacite_state_"+article_id).html('findable')
+                        }
+                        else if (status == "error")
+                        {
+                            toastr.error(arrayToStringWithBr(errors))
+                        }
+
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                })
+            }
+
+            function ajaxError()
+            {
+                errors=[];
+                errors.push("request failed");
+                errors.push("connection to server broken ?");
+                toastr.error(arrayToStringWithBr(errors));
+            }
+
+            function arrayToStringWithBr(msg)
+            {
+                var str="";
+                if (Array.isArray(msg))
+                {
+                    var i;
+                    for (i=0;i<msg.length;++i)
+                    {
+                        str+=msg[i];
+                        if (i<(msg.length-1))
+                        {
+                            str+="<br>";
+                        }
+                    }
+                }
+                else
+                {
+                    str=msg;
+                }
+                return str;
+            }
+
 
             $("#datatable").DataTable({
                 "lengthMenu": [[25, 50, 10, -1], [25, 50, 10, "All"]],

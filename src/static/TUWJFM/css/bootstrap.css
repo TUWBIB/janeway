@@ -796,11 +796,7 @@ pre code {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .container {
         padding-right: 15px;
         padding-left: 15px;
@@ -828,11 +824,7 @@ pre code {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .container {
         width: 1140px;
         max-width: 100%;
@@ -868,11 +860,7 @@ pre code {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .container-fluid {
         padding-right: 15px;
         padding-left: 15px;
@@ -4518,11 +4506,7 @@ tbody.collapse.show {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .navbar-toggleable-lg {
         -webkit-box-orient: horizontal;
         -webkit-box-direction: normal;
@@ -6692,11 +6676,7 @@ a.bg-inverse:focus, a.bg-inverse:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .d-xl-none {
         display: none !important;
     }
@@ -7602,11 +7582,7 @@ a.bg-inverse:focus, a.bg-inverse:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .flex-xl-first {
         -webkit-box-ordinal-group: 0;
         -webkit-order: -1;
@@ -7877,11 +7853,7 @@ a.bg-inverse:focus, a.bg-inverse:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .float-xl-left {
         float: left !important;
     }
@@ -9544,11 +9516,7 @@ a.bg-inverse:focus, a.bg-inverse:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .m-xl-0 {
         margin: 0 0 !important;
     }
@@ -10008,11 +9976,7 @@ a.bg-inverse:focus, a.bg-inverse:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .text-xl-left {
         text-align: left !important;
     }
@@ -10168,11 +10132,7 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
     }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1200px) {
-=======
-@media (min-width: 1400px) {
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
     .hidden-xl-up {
         display: none !important;
     }
@@ -10237,14 +10197,8 @@ body {
     bottom: 0;
     width: 100%;
     /* Set the fixed height of the footer here */
-<<<<<<< HEAD
     height: 60px;
     line-height: 60px; /* Vertically center the text there */
-=======
-    /*height: 60px;
-    line-height: 60px; */
-    #/* Vertically center the text there */
->>>>>>> e125e959c6ee100e9b516fec5cf7b4e5b4ba8fb4
 }
 
 .footer svg {

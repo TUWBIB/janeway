@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         articles = submission_models.Article.objects.all()
         for article in articles:
             if article.get_doi() is not None:
-                article.datacite_state=submission_models.DATACITE_STATE_URL
+                article.datacite_state=submission_models.DATACITE_STATE_FINDABLE
                 article.datacite_ts=datetime(2020,1,1)
                 article.save()
 
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='datacite_state',
-            field=models.CharField(blank=True, choices=[('no sync', 'no sync'), ('doi fetched', 'doi fetched'), ('url registered', 'url registered')], max_length=20, null=True),
+            field=models.CharField(blank=True, choices=[('none', ''), ('draft', 'draft'), ('findable', 'findable'), ('registered', 'registered')], max_length=20, null=True),
         ),
         migrations.AddField(
             model_name='article',
