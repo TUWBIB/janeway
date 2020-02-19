@@ -61,75 +61,113 @@ def sync(request):
         article_id = data['article_id']
         article = submission_models.Article.objects.filter(journal=request.journal,pk=article_id)[0]
         operation = data["operation"]
+        errors = []
+        warnings = []
 
         if operation == "alma_down":
             pass
         elif operation == "alma_up":
             pass
+        elif operation == "datacite_check_metadata":
+            (xml,errors,warnings) = logic.getCurrentDataCiteXML(article_id)
+            if errors:
+                status = "error"
+
+            return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
         elif operation == "datacite_metadata":
             (xml,errors,warnings) = logic.article_to_DataCiteXML(article_id)
             if errors:
                 status = "error"
 
-            response = JsonResponse({'status': status, 'xml': xml, 'errors': errors, 'warnings': warnings })
-            return response
+            return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
+
         elif operation == "datacite_metadata_confirm":
             (xml,errors,_) = logic.article_to_DataCiteXML(article_id)
             if errors:
                 status = "error"
-                response = JsonResponse({'status': status, 'xml': xml, 'errors': errors, 'warnings': [] })
-                return response
+                return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                    'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
             
             api = datacite_api.API.getInstance()
             match = re.search(r'<identifier\sidentifierType="DOI">(.+)</identifier>',xml)
             if match is None:
                 status = "error"
                 errors = ['cant extract DOI from xml']
-                response = JsonResponse({'status': status, 'xml': xml, 'errors': errors, 'doi': '' })
+                return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                    'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
             else:
                 doi = match.group(1)
                 (status,content)=api.updateMetadata(doi,xml)
                 if status == "success":
                     status,errors = logic.metadataUpdated(article_id,doi)
-                    response = JsonResponse({'status': status, 'xml': xml, 'errors': errors, 'doi': doi })
+                    return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                        'datacite' : { 'xml' : xml, 'doi' : doi, 'url' : None, 'state' : None }})
                 else:
                     errors=[]
                     errors.append(content)
-                    response = JsonResponse({'status': status, 'xml': xml, 'errors': errors, 'doi': doi })
-            return response
+                    return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                        'datacite' : { 'xml' : xml, 'doi' : doi, 'url' : None, 'state' : None }})
+
         elif operation == "datacite_url":
-            status = "success"
-            api = datacite_api.API.getInstance()
-            url = api.options['protocol']
-            url += request.META['HTTP_HOST']
-            url += reverse('article_view',args=['id',article_id])
-            response = JsonResponse({'status': status, 'url': url, 'errors': [], 'warnings': [] })
-            return response
-        elif operation == "datacite_url_confirm":
-            status = "success"
             api = datacite_api.API.getInstance()
             url = api.options['protocol']
             url += request.META['HTTP_HOST']
             url += reverse('article_view',args=['id',article_id])
             doi = article.get_doi()
+            if doi is None:
+                errors.append("no doi registered yet")
+                status = "error"
+            else:
+                if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+                    errors.append("existing DOI doesn't conform to current configuration")
+                    status = "error"
+            if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
+                errors.append("URL already registered")
+                status = "error"
+
+            return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
+
+        elif operation == "datacite_url_confirm":
+            api = datacite_api.API.getInstance()
+            url = api.options['protocol']
+            url += request.META['HTTP_HOST']
+            url += reverse('article_view',args=['id',article_id])
+            doi = article.get_doi()
+            if doi is None:
+                errors.append("no doi registered yet")
+                status = "error"
+            else:
+                if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+                    errors.append("existing DOI doesn't conform to current configuration")
+                    status = "error"
+
+            if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
+                errors.append("URL already registered")
+                status = "error"
+
+            if status != "success":
+                return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                    'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
+
 
             (status,content)=api.registerURL(doi,url)
             if status == "success":
-                # TODO, send response, update status
-                response = JsonResponse({'status': status, 'url': url, 'errors': [] })
+                status,errors = logic.urlSet(article_id,doi)
+                return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                    'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : submission_models.DATACITE_STATE_FINDABLE }})
             else:
                 errors=[]
                 errors.append(content)
-                response = JsonResponse({'status': status, 'url': url, 'errors': errors })
-            return response
-
-
-
-            response = JsonResponse({'status': status, 'url': url, 'errors': [], 'warnings': [] })
-            return response
-
-
-            pass
+                return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                    'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
+        else:
+            errors.append("invalid operation")
+            status = "error"
+            return JsonResponse({'status': status, 'errors': errors, 'warnings': warnings,
+                'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
 
     template = 'journal/manage/sync/sync_articles.html'
     context = {

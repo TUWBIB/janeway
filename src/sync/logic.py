@@ -188,6 +188,31 @@ def article_to_DataCiteXML(article_id):
 
     return (xml, errors, warnings)
 
+def getCurrentDataCiteXML(article_id):
+    article = submission_models.Article.objects.get(pk=article_id)
+    api = datacite_api.API.getInstance()
+
+    warnings = []
+    errors = []
+    xml = ''
+    status = ''
+
+    doi = article.get_doi()
+    if doi is None:
+        errors.append("No DOI registered")
+    else:
+        if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            errors.append("existing DOI doesn't conform to current configuration")
+
+    status,content=api.getMetadata(doi)
+    if status != 'success':
+        errors.append(content)
+    else:
+        xml=content
+        
+    return (xml, errors, warnings)
+
+
 def metadataUpdated(article_id,doi):
     status = "success"
     errors = []
@@ -213,7 +238,7 @@ def urlSet(article_id,doi):
     errors = []
     try:
         article = submission_models.Article.objects.get(pk=article_id)
-        if not article.datacite_state or article.datacite_state==submission_models.DATACITE_STATE_FINDABLE:
+        if not article.datacite_state or article.datacite_state!=submission_models.DATACITE_STATE_FINDABLE:
             article.datacite_state = submission_models.DATACITE_STATE_FINDABLE
         article.datacite_ts = datetime.datetime.now(get_current_timezone())
         article.save()

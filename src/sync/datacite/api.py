@@ -110,24 +110,6 @@ class API:
         else:
             return True
 
-#    def getMetadata(self,doi):
-#        url = self.login['endpoint']
-#        url += 'metadata/'
-#        url += doi
-#
-#        print (url)
-#
-#        status = 'ok'
-#
-#        response = requests.get(url,
-#                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-#                        )
-#        
-#        if response.status_code != 201:
-#            print (str(response.status_code))
-#            status = "err"
-#        content=response.text;
-#        print (content)
 
 #    def deleteMetadata(self,doi):
 #        url = self.login['endpoint']
@@ -148,6 +130,20 @@ class API:
 #        content=response.text;
 #        print (content)
 
+    def getMetadata(self,doi):
+        url = self.login['endpoint']
+        url += 'metadata/'
+        url += doi
+
+        status = 'success'
+        response = requests.get(url,
+                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                        )
+        
+        if response.status_code != 200:
+            status = "error"
+        content=response.text;
+        return (status,content)
 
     def updateMetadata(self,doi,xml):
         url = self.login['endpoint']
@@ -173,18 +169,6 @@ class API:
         
         return (status,content)
 
-#    def listDOIs(self):
-#        req_url = self.login['endpoint']+'doi'
-#        print (req_url)
-#        response = requests.get(req_url,
-#                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-#                        )
-#        if response.status_code != 201: 
-#            print (str(response.status_code))
-#        content=response.text
-#        print (content)
-
-
     def registerURL(self,doi,article_url):
         url = self.login['endpoint']
         url += 'doi/'
@@ -203,3 +187,15 @@ class API:
             content=''
         
         return (status,content)
+
+#    def listDOIs(self):
+#        req_url = self.login['endpoint']+'doi'
+#        print (req_url)
+#        response = requests.get(req_url,
+#                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+#                        )
+#        if response.status_code != 201: 
+#            print (str(response.status_code))
+#        content=response.text
+#        print (content)
+

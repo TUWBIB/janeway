@@ -31,16 +31,15 @@
                                 {% trans "Issue" context "oes" %}
                             {% else %}
                             {% endif %}
-                            <th colspan="3">Datacite</th>
-                            <th colspan="3">Alma</th>
-                        </tr>
+                            <th colspan="2">Datacite</th>
+                            <th colspan="2">Alma</th>
+                            <th rowspan="2">Actions</th>
+                            </tr>
                         <tr>
                             <th>DOI</th>
-                            <th>Sync</th>
-                            <th style="min-width:150px">Actions</th>
+                            <th>State</th>
                             <th>MMS Id</th>
                             <th>Sync</th>
-                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -59,25 +58,10 @@
                                 <td id="datacite_doi_val_{{ article.pk }}"></td>
                                 {% endif %}                      
                                 {% if article.datacite_state %}                                
-                                <td>{{ article.datacite_state }}</td>
+                                <td id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
                                 {% else %}
-                                <td></td>
+                                <td id="datacite_state_{{ article.pk }}"></td>
                                 {% endif %}                      
-                                <td>
-                                    <div id="datacite_{{ article.pk }}" class="btn-group no-wrap">
-                                        {% if article.datacite_metadata_ok %}
-                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid black;" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">DOI / Metadata</button>
-                                        {% else %}
-                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid grey; color: grey;" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">DOI / Metadata</button>
-                                        {% endif %}
-                                        <br>
-                                        {% if article.datacite_url_ok %}
-                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid black;" class="btn_datacite_url" id="btn_datacite_url_{{ article.pk }}">URL</button>
-                                        {% else %}
-                                        <button type="submit" style="margin: 1px; padding: 10px 10px; border: 2px solid grey; color: grey;" class="btn_datacite_url disabled" id="btn_datacite_url_{{ article.pk }}">URL</button>
-                                        {% endif %}
-                                    </div>
-                                </td>
                                 {% if article.get_mmsid %}                                
                                 <td>{{ article.get_mmsid }}</td>
                                 {% else %}
@@ -85,10 +69,31 @@
                                 {% endif %}                      
                                 <td></td>
                                 <td>
-                                    <ul id="alma_{{ article.pk }}" class="button-group">
-                                        <
-                                        <button type="submit" class="button disabled btn_alma_down " id="btn_alma_down_{{ article.pk }}">Down <i class="fa fa-chevron-circle-down"></i></button><br>
-                                        <button type="submit" class="button disabled btn_alma_up" id="btn_alma_up_{{ article.pk }}">Up <i class="fa fa-chevron-circle-down"></i></button><br>
+                                    <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
+                                        <li>
+                                           <a href="#">Datacite</a>
+                                            <ul class="vertical menu nested">
+                                            <li>
+                                                <a href="#" class="btn_datacite_check_metadata" id="btn_datacite_check_metadata_{{ article.pk }}">Check Metadata</a>
+                                            </li>
+                                            <li>
+                                                <a href="#" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">Register DOI / Update Metadata</a>
+                                            </li>
+                                            <li>
+                                                <a href="#" class="btn_datacite_url" id="btn_datacite_url_{{ article.pk }}">Register URL</a>
+                                            </li>
+                                          </ul>
+                                        </li>
+                                        <li><a href="#">Alma</a>
+                                            <ul class="vertical menu nested">
+                                            <li>
+                                                <a href="#" class="btn_alma_up" id="btn_alma_upload_{{ article.pk }}">Sync To Alma</a>
+                                            </li>
+                                            <li>
+                                                <a href="#" class="btn_alma_down" id="btn_alma_down_{{ article.pk }}">Synd From Alma</a>
+                                            </li>
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </td>
                             </tr>
@@ -122,27 +127,36 @@
     <script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/foundation.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.reveal.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdown.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdownMenu.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
 
     <script type="text/javascript">
+        $(document).foundation();   
 
-        $(document).foundation();    
-        
         $(document).ready(function () 
         {
             $(".btn_alma_down").on("click", function(e)
             {
+                toastr.error("not implemented");                        
+            })
+
+            $(".btn_alma_up").on("click", function(e)
+            {
+                toastr.error("not implemented");                        
+            })
+
+            $(".btn_datacite_check_metadata").on("click", function(e)
+            {
                 e.preventDefault();
+
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
-
-                console.log("alma down pressed "+id);
-
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
                     'article_id': id,
-                    'operation': 'alma_down',
+                    'operation': 'datacite_check_metadata',
                 };
 
                 $.ajax({              
@@ -154,55 +168,54 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var message=htmlDecode(response.message);
                         var status=response.status;
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
 
                         if (status == "success")
                         {
-/*                            context = JSON.parse(response.context);
-                            if(context.aao != undefined) 
+                            var modal = '<div class="reveal small" id="check_metadata" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Current remote metadata'+'</h2>';
+                            modal+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
+         			            '<button class="button success ok float-center">Close</button>'+
+                                '</div>';
+
+                            $('body').append(modal);
+
+                            var check_metadata = new Foundation.Reveal($('#check_metadata'));
+                            check_metadata.open();
+
+                            $('#check_metadata').children('.ok').on('click', function() 
                             {
+                                console.log("ok event")
 
-                                aao=JSON.parse(context.aao)[0]
-                                author=JSON.parse(context.author)[0]
-
-                                aao_pk=aao.pk;
-                                aao_order=aao.fields.order
-                                author_pk=author.pk
-                                author_last_name=author.fields.last_name
-                                author_first_name=author.fields.first_name
-                                author_email=author.fields.email
-
-                                onAddAuthor(aao_pk,aao_order,author_pk,author_last_name,author_first_name,author_email,context.url)
-                            }*/
-                                                   
-                            toastr.success(message)
+			                    check_metadata.close();
+                                $('#check_metadata').remove();
+                                $('.reveal-overlay').remove();
+                            });
                         }
                         else if (status == "warning")
                         {
-                            toastr.warning(message);
+                            toastr.warning(arrayToStringWithBr(warnings));
                         }
                         else if (status == "error")
                         {
-                            toastr.error(message);
+                            toastr.error(arrayToStringWithBr(errors));
                         }
 
                     },
                     error: function(response)
                     {
-                        toastr.error("reuest failed");                        
-                    },
+                        ajaxError()
+                    }
                 });
             })
 
-            $(".btn_alma_up").on("click", function(e)
-            {
-                    e.preventDefault();
-                    var parts = this.id.split(/_/);
-                    var id = parts[parts.length-1]
-
-                    console.log("alma up pressed "+id);
-            })
 
             $(".btn_datacite_metadata").on("click", function(e)
             {
@@ -226,9 +239,13 @@
                     success: function(response)
                     {
                         var status=response.status;
-                        var xml=response.xml;
                         var errors=response.errors;
                         var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
 
                         if (status == "success")
                         {
@@ -253,15 +270,11 @@
 
                             $('body').append(modal);
 
-
-
                             var confirm_datacite_metadata = new Foundation.Reveal($('#confirm_datacite_metadata'));
                             confirm_datacite_metadata.open();
 
                             $('#confirm_datacite_metadata').children('.ok').on('click', function() 
                             {
-                                console.log("ok event")
-
 			                    confirm_datacite_metadata.close();
                                 $('#confirm_datacite_metadata').remove();
                                 $('.reveal-overlay').remove();
@@ -314,8 +327,13 @@
                     success: function(response)
                     {
                         var status=response.status;
-                        var url=response.url;
                         var errors=response.errors;
+                        var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
 
                         if (status == "success")
                         {
@@ -333,8 +351,6 @@
 
                             $('#confirm_datacite_url').children('.ok').on('click', function() 
                             {
-                                console.log("ok event")
-
 			                    confirm_datacite_url.close();
                                 $('#confirm_datacite_url').remove();
                                 $('.reveal-overlay').remove();
@@ -383,7 +399,12 @@
                     {
                         var status=response.status;
                         var errors=response.errors;
-                        var doi=response.doi;
+                        var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
                         
                         if (status == "success")
                         {
@@ -432,10 +453,19 @@
                     {
                         var status=response.status;
                         var errors=response.errors;
+                        var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
+
+                        console.log("cp1")
+                        console.log(state)
 
                         if (status == "success")
                         {
-                            $("#datacite_state_"+article_id).html('findable')
+                            $("#datacite_state_"+article_id).html(state)
                         }
                         else if (status == "error")
                         {
