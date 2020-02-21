@@ -53,9 +53,9 @@
                                 <td></td>
                                 {% endif %}
                                 {% if article.get_doi %}                                
-                                <td id="datacite_doi_val_{{ article.pk }}">{{ article.get_doi }}</td>
+                                <td id="datacite_doi_{{ article.pk }}">{{ article.get_doi }}</td>
                                 {% else %}
-                                <td id="datacite_doi_val_{{ article.pk }}"></td>
+                                <td id="datacite_doi_{{ article.pk }}"></td>
                                 {% endif %}                      
                                 {% if article.datacite_state %}                                
                                 <td id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
@@ -168,7 +168,6 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var status=response.status;
                         var errors=response.errors;
                         var warnings=response.warnings;
                         var datacite=response.datacite;
@@ -177,8 +176,17 @@
                         var doi=datacite.doi;
                         var state=datacite.state;
 
-                        if (status == "success")
+                        if (errors && errors.length>0)
                         {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
                             var modal = '<div class="reveal small" id="check_metadata" data-close-on-click="false" data-close-on-esc="false"'+
                                  '<h2>'+'Current remote metadata'+'</h2>';
                             modal+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
@@ -192,22 +200,11 @@
 
                             $('#check_metadata').children('.ok').on('click', function() 
                             {
-                                console.log("ok event")
-
 			                    check_metadata.close();
                                 $('#check_metadata').remove();
                                 $('.reveal-overlay').remove();
                             });
                         }
-                        else if (status == "warning")
-                        {
-                            toastr.warning(arrayToStringWithBr(warnings));
-                        }
-                        else if (status == "error")
-                        {
-                            toastr.error(arrayToStringWithBr(errors));
-                        }
-
                     },
                     error: function(response)
                     {
@@ -238,7 +235,6 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var status=response.status;
                         var errors=response.errors;
                         var warnings=response.warnings;
                         var datacite=response.datacite;
@@ -247,8 +243,17 @@
                         var doi=datacite.doi;
                         var state=datacite.state;
 
-                        if (status == "success")
+                        if (errors && errors.length>0)
                         {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
                             var modal = '<div class="reveal small" id="confirm_datacite_metadata" data-close-on-click="false" data-close-on-esc="false"'+
                                  '<h2>'+'Review metadata'+'</h2>';
                             if (warnings.length>0)
@@ -288,15 +293,6 @@
                                 $('.reveal-overlay').remove();
                             });
                         }
-                        else if (status == "warning")
-                        {
-                            toastr.warning(arrayToStringWithBr(warnings));
-                        }
-                        else if (status == "error")
-                        {
-                            toastr.error(arrayToStringWithBr(errors));
-                        }
-
                     },
                     error: function(response)
                     {
@@ -326,7 +322,6 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var status=response.status;
                         var errors=response.errors;
                         var warnings=response.warnings;
                         var datacite=response.datacite;
@@ -335,7 +330,11 @@
                         var doi=datacite.doi;
                         var state=datacite.state;
 
-                        if (status == "success")
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
                         {
                             var modal = '<div class="reveal small" id="confirm_datacite_url" data-close-on-click="false" data-close-on-esc="false"'+
                                  '<h2>'+'Confirm URL'+'</h2>';
@@ -364,11 +363,6 @@
                                 $('.reveal-overlay').remove();
                             });
                         }
-                        else if (status == "error")
-                        {
-                            toastr.error(arrayToStringWithBr(errors))
-                        }
-
                     },
                     error: function(response)
                     {
@@ -377,11 +371,8 @@
                 });
             })
 
-
-
             function dataciteMetadataConfirm(article_id)
             {
-                console.log("dataciteMetadataConfirm "+article_id)
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
                     'article_id': article_id,
@@ -397,7 +388,6 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var status=response.status;
                         var errors=response.errors;
                         var warnings=response.warnings;
                         var datacite=response.datacite;
@@ -406,10 +396,16 @@
                         var doi=datacite.doi;
                         var state=datacite.state;
                         
-                        if (status == "success")
+                        if (errors && errors.length>0)
                         {
-                            old_val=$("#datacite_doi_val_"+article_id).html()
-                            $("#datacite_doi_val_"+article_id).html(doi)
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            $("#datacite_state_"+article_id).html(state);
+
+                            old_val=$("#datacite_doi_"+article_id).html()
+                            $("#datacite_doi_"+article_id).html(doi)
                             if (! old_val)
                             {
                                 toastr.success("doi registered");
@@ -420,11 +416,6 @@
                             }
 
                         }
-                        else if (status == "error")
-                        {
-                            toastr.error(arrayToStringWithBr(errors))
-                        }
-
                     },
                     error: function(response)
                     {
@@ -435,7 +426,6 @@
 
             function dataciteURLConfirm(article_id)
             {
-                console.log("dataciteURLConfirm "+article_id)
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
                     'article_id': article_id,
@@ -451,7 +441,6 @@
                     processData: false,                     
                     success: function(response)
                     {
-                        var status=response.status;
                         var errors=response.errors;
                         var warnings=response.warnings;
                         var datacite=response.datacite;
@@ -460,18 +449,14 @@
                         var doi=datacite.doi;
                         var state=datacite.state;
 
-                        console.log("cp1")
-                        console.log(state)
-
-                        if (status == "success")
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
                         {
                             $("#datacite_state_"+article_id).html(state)
                         }
-                        else if (status == "error")
-                        {
-                            toastr.error(arrayToStringWithBr(errors))
-                        }
-
                     },
                     error: function(response)
                     {

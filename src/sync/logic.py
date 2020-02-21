@@ -20,34 +20,42 @@ def create_article_doi(article):
     return doi
 
 
-def article_to_DataCiteXML(article_id):
+def checkArticleMandatoryFields(article):
+    errors = []
+
+    if article.primary_issue is None:
+        errors.append("primary issue not set")
+
+    if len(article.frozen_authors())==0:
+        errors.append("no authors for article")
+    
+    return errors
+
+def articleToDataCiteXML(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
     api = datacite_api.API.getInstance()
 
+    errors = checkArticleMandatoryFields(article)
+
     warnings = []
-    errors = []
     xml = ''
     l = []
 
-    try:
-        l.append('<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://datacite.org/schema/kernel-4" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">')
+    if not errors:
+        try:
+            l.append('<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://datacite.org/schema/kernel-4" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">')
+        
+            doi = article.get_doi()
+            if doi is None:
+                doi = create_article_doi(article)
+            else:
+                if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+                    errors.append("existing DOI doesn't conform to current configuration")
 
-        if article.primary_issue is None:
-            raise ValueError("primary issue not set")
+            l.append('<identifier identifierType="DOI">')
+            l.append(doi)
+            l.append('</identifier>')
 
-        doi = article.get_doi()
-        if doi is None:
-            doi = create_article_doi(article)
-        else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
-                errors.append("existing DOI doesn't conform to current configuration")
-
-
-        l.append('<identifier identifierType="DOI">')
-        l.append(doi)
-        l.append('</identifier>')
-
-        if len(article.frozen_authors())>0:
             l.append('<creators>')
             for author in article.frozen_authors():
                 l.append('<creator>')
@@ -62,129 +70,127 @@ def article_to_DataCiteXML(article_id):
                 l.append('</familyName>')
                 l.append('</creator>')
             l.append('</creators>')
-        else:
-            warnings.append("no authors for article")
 
-        l.append('<titles>')
-        if article.language is not None:
-            l.append('<title')
-            l.append(' xml:lang="')
-            l.append(article.language[0:2])
-            l.append('">')
-            l.append(article.title)
-            l.append('</title>')
-        else:
-            l.append('<title>')
-            l.append(article.title)
-            l.append('</title>')
-            warnings.append("article language not set")
-
-        if article.subtitle:
+            l.append('<titles>')
             if article.language is not None:
-                l.append('<title titleType="Subtitle"')
+                l.append('<title')
                 l.append(' xml:lang="')
                 l.append(article.language[0:2])
                 l.append('">')
-                l.append(article.subtitle)
+                l.append(article.title)
                 l.append('</title>')
             else:
                 l.append('<title>')
-                l.append(article.subtitle)
+                l.append(article.title)
+                l.append('</title>')
+                warnings.append("article language not set")
+
+            if article.subtitle:
+                if article.language is not None:
+                    l.append('<title titleType="Subtitle"')
+                    l.append(' xml:lang="')
+                    l.append(article.language[0:2])
+                    l.append('">')
+                    l.append(article.subtitle)
+                    l.append('</title>')
+                else:
+                    l.append('<title>')
+                    l.append(article.subtitle)
+                    l.append('</title>')
+
+            if article.title_de:
+                l.append('<title titleType="AlternativeTitle">')
+                l.append(article.title_de)
                 l.append('</title>')
 
-        if article.title_de:
-            l.append('<title titleType="AlternativeTitle">')
-            l.append(article.title_de)
-            l.append('</title>')
+            if article.subtitle_de:
+                l.append('<title titleType="Other">')
+                l.append(article.subtitle_de)
+                l.append('</title>')
 
-        if article.subtitle_de:
-            l.append('<title titleType="Other">')
-            l.append(article.subtitle_de)
-            l.append('</title>')
-
-        l.append('</titles>')
+            l.append('</titles>')
 
 
-        l.append('<publisher>')
-        if article.journal.code == 'JFM':
-            l.append('Journal für Facility Management')
-        elif article.journal.code == 'OES':
-            l.append('Der Öffentliche Sektor - The Public Sector')
-        l.append('</publisher>')
+            l.append('<publisher>')
+            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+                l.append('Journal für Facility Management')
+            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+                l.append('Der Öffentliche Sektor - The Public Sector')
+            l.append('</publisher>')
 
-        l.append('<publicationYear>')
-        l.append(str(article.primary_issue.tuw_year))
-        l.append('</publicationYear>')
+            l.append('<publicationYear>')
+            l.append(str(article.primary_issue.tuw_year))
+            l.append('</publicationYear>')
 
-        l.append('<dates>')
-        l.append('<date dateType="Issued">')
-        l.append(str(article.primary_issue.tuw_year))
-        l.append('</date>')
-        l.append('</dates>')
+            l.append('<dates>')
+            l.append('<date dateType="Issued">')
+            l.append(str(article.primary_issue.tuw_year))
+            l.append('</date>')
+            l.append('</dates>')
 
-        if article.get_urn() is not None:
-            l.append('<alternateIdentifiers>')
-            l.append('<alternateIdentifier alternateIdentifierType="URN">')
-            l.append(article.get_urn())
-            l.append('</alternateIdentifier>')
-            l.append('</alternateIdentifiers>')
+            if article.get_urn() is not None:
+                l.append('<alternateIdentifiers>')
+                l.append('<alternateIdentifier alternateIdentifierType="URN">')
+                l.append(article.get_urn())
+                l.append('</alternateIdentifier>')
+                l.append('</alternateIdentifiers>')
 
 
-        if article.license is not None and article.license.short_name != 'Copyright':
-            l.append('<rightsList>')
-            l.append('<rights rightsURI="')
-            l.append(article.license.url)
-            l.append('" xml:lang="en-US">')
-            l.append(article.license.name)
-            l.append('</rights>')
-            l.append('</rightsList>')
+            if article.license is not None and article.license.short_name != 'Copyright':
+                l.append('<rightsList>')
+                l.append('<rights rightsURI="')
+                l.append(article.license.url)
+                l.append('" xml:lang="en-US">')
+                l.append(article.license.name)
+                l.append('</rights>')
+                l.append('</rightsList>')
 
-        l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
+            l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
 
-        if article.journal.code == 'JFM':
-            pass
-        elif article.journal.code == 'OES':
-            l.append('<relatedIdentifiers>')
-            l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">2412-3862</relatedIdentifier>')
-            l.append('</relatedIdentifiers>')
+            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+                pass
+            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+                l.append('<relatedIdentifiers>')
+                l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">2412-3862</relatedIdentifier>')
+                l.append('</relatedIdentifiers>')
 
-        l.append('<descriptions>')
-        if article.abstract or article.abstract_de:
-            if article.abstract:
-                l.append('<description xml:lang="')
-                l.append('en" descriptionType="Abstract">')
-                l.append(article.abstract)
+            l.append('<descriptions>')
+            if article.abstract or article.abstract_de:
+                if article.abstract:
+                    l.append('<description xml:lang="')
+                    l.append('en" descriptionType="Abstract">')
+                    l.append(article.abstract)
+                    l.append('</description>')
+                if article.abstract_de:
+                    l.append('<description xml:lang="')
+                    l.append('de" descriptionType="Abstract">')
+                    l.append(article.abstract_de)
+                    l.append('</description>')
+            else:
+                warnings.append("neither english nor german abstract")
+
+            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+                pass
+            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+                l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
+                l.append(str(article.primary_issue.volume))
+                l.append('(')
+                l.append(article.primary_issue.tuw_issue_str)
+                l.append('): ')
+                l.append(str(article.page_numbers))
                 l.append('</description>')
-            if article.abstract_de:
-                l.append('<description xml:lang="')
-                l.append('de" descriptionType="Abstract">')
-                l.append(article.abstract_de)
-                l.append('</description>')
-        else:
-            warnings.append("neither english nor german abstract")
+            l.append('</descriptions>')
+            l.append('</resource>')
 
-        if article.journal.code == 'JFM':
-            pass
-        elif article.journal.code == 'OES':
-            l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
-            l.append(str(article.primary_issue.volume))
-            l.append('(')
-            l.append(article.primary_issue.tuw_issue_str)
-            l.append('): ')
-            l.append(str(article.page_numbers))
-            l.append('</description>')
-        l.append('</descriptions>')
-        l.append('</resource>')
+            xml = ''.join(l)
 
-        xml = ''.join(l)
+            x = etree.fromstring(xml)
+            xml = etree.tostring(x, pretty_print=True).decode("utf-8")
+            xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
 
-        x = etree.fromstring(xml)
-        xml = etree.tostring(x, pretty_print=True).decode("utf-8")
-        xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
-
-    except Exception as e:
-        print (traceback.format_exc())
-        errors.append(''.join(['error creating xml: ',str(e)]))
+        except Exception as e:
+            print (traceback.format_exc())
+            errors.append(''.join(['error creating xml: ',str(e)]))
 
     return (xml, errors, warnings)
 
@@ -195,7 +201,6 @@ def getCurrentDataCiteXML(article_id):
     warnings = []
     errors = []
     xml = ''
-    status = ''
 
     doi = article.get_doi()
     if doi is None:
@@ -204,12 +209,13 @@ def getCurrentDataCiteXML(article_id):
         if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
             errors.append("existing DOI doesn't conform to current configuration")
 
-    status,content=api.getMetadata(doi)
-    if status != 'success':
-        errors.append(content)
-    else:
-        xml=content
-        
+    if not errors:
+        status,content=api.getMetadata(doi)
+        if status != 'success':
+            errors.append(content)
+        else:
+            xml=content
+
     return (xml, errors, warnings)
 
 

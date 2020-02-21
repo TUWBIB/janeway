@@ -64,7 +64,6 @@ class API:
                     options_section=0
                     journal_section=1
                     journal_code=match[1]
-                    print (journal_code)
                     self.journals[journal_code]={}
                     continue
 
@@ -88,22 +87,21 @@ class API:
                     self.journals[journal_code][key]=val
                     
 
-        for k,v in self.options.items():
-	        print (k+': '+v)
-
-        for k,v in self.login.items():
-            print (k+': '+v)
-
-        for k,v in self.journals.items():
-            print (k)
-            for k1,v1 in self.journals[k].items():
-                print ("   "+k1+': '+v1)
+#        for k,v in self.options.items():
+#	        print (k+': '+v)
+#
+#        for k,v in self.login.items():
+#            print (k+': '+v)
+#
+#        for k,v in self.journals.items():
+#            print (k)
+#            for k1,v1 in self.journals[k].items():
+#                print ("   "+k1+': '+v1)
 
     def doiConformsToCurrentConfiguration(self,journal_code,doi):
         prefix = self.journals[journal_code]['prefix']
         namespace_separator = self.journals[journal_code]['namespace_separator']
         pattern = prefix+'/'+namespace_separator+r'\.'+r'\d{4}'+r'\.'+r'\d{4}'
-        print (pattern)
         match = re.match(pattern,doi)
         if not match:
             return False
