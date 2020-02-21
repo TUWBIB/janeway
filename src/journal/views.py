@@ -2100,8 +2100,8 @@ def backcontent_article(request, article_id):
             if not article.stage == submission_models.STAGE_PUBLISHED:
 #                id_logic.generate_crossref_doi_with_pattern(article)
                 article.stage = submission_models.STAGE_PUBLISHED
-                article.snapshot_authors(article)
                 article.save()
+            article.snapshot_authors(article)
 
             return redirect(reverse('backcontent'))
 
