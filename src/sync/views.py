@@ -53,9 +53,6 @@ def sync(request):
         elif operation == "alma_up":
             pass
 
-        elif operation == "datacite_check_metadata":
-            response = getCurrentDataCiteXML(article_id)
-
         elif operation == "datacite_metadata":
             response = articleToDataCiteXML(article_id)
 
@@ -67,6 +64,12 @@ def sync(request):
 
         elif operation == "datacite_url_confirm":
             response = dataciteURLConfirm(article,request.META['HTTP_HOST'])
+
+        elif operation == "datacite_check_metadata":
+            response = getCurrentDataCiteXML(article_id)
+
+        elif operation == "datacite_delete_doi":
+            response = deleteDOI(article)
 
         else:
             errors = []
@@ -170,4 +173,31 @@ def dataciteURLConfirm(article,host):
         errors.append(content)
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
+
+def deleteDOI(article):
+    errors = []
+    api = datacite_api.API.getInstance()
+    doi = article.get_doi()
+    state = article.datacite_state
+    if state is None or state != submission_models.DATACITE_STATE_DRAFT:
+        errors.append("Unexpected state, needs to be 'Draft'")
+    if doi is None:
+        errors.append("No DOI registered")
+    else:
+        if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            errors.append("existing DOI doesn't conform to current configuration")
+    if errors:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'datacite' : { 'xml' : None, 'doi' : None, 'url' : None, 'state' : None }})
+    
+    (status,content)=api.deleteDOI(doi)
+    if status == "success":
+        status,errors = logic.doiDeleted(article.pk,doi)
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'datacite' : { 'xml' : None, 'doi' : '', 'url' : None, 'state' : submission_models.DATACITE_STATE_NONE }})
+    else:
+        errors=[]
+        errors.append(content)
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'datacite' : { 'xml' : None, 'doi' : None, 'url' : None, 'state' : None }})
 

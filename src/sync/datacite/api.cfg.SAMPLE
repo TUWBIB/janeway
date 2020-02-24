@@ -1,7 +1,8 @@
 <OPTIONS>
 error_threshold=0
 error_die=1
-timeout=2
+conn_timeout=2
+read_timeout=5
 id_offset=9000
 protocol=http://
 <LOGIN>

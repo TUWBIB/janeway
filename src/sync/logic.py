@@ -254,6 +254,21 @@ def urlSet(article_id,doi):
 
     return (status,errors)
 
+def doiDeleted(article_id,doi):
+    status = "success"
+    errors = []
+    try:
+        article = submission_models.Article.objects.get(pk=article_id)
+        article.datacite_state = submission_models.DATACITE_STATE_NONE
+        article.datacite_ts = datetime.datetime.now(get_current_timezone())
+        article.save()
+        identifier_models.Identifier.objects.filter(article=article,id_type='doi',identifier=doi).delete()
+    except Exception as e:
+        print (traceback.format_exc())
+        errors.append(''.join(['error writing db: ',str(e)]))
+        status = "error"
+
+    return (status,errors)
 
 
 #def get_next_doi(journal_code,year):

@@ -4,6 +4,7 @@ import requests
 import re
 import traceback
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import ConnectTimeout,ReadTimeout
 from pathlib import Path
 import base64
 
@@ -19,7 +20,6 @@ class API:
 
 
     def __init__(self):
-        print ("__init__")
         self.login={}
         self.options={}
         self.journals={}
@@ -30,7 +30,6 @@ class API:
 
         file_cfg=Path(os.path.join(os.path.dirname(__file__),'api.cfg'))        
         if ((not file_cfg.exists()) or (not file_cfg.is_file())):
-            print ("err")
             raise Exception("DataciteApi config file doesn't exist: "+str(file_cfg))
 
         options_section=0
@@ -72,7 +71,7 @@ class API:
                     raise Exception("DataciteApi config file contains invalid line: "+line)
                 (key,val)=line.split('=')
                 if options_section:
-                    if key not in ('error_threshold','error_die','timeout','id_offset','protocol'):
+                    if key not in ('error_threshold','error_die','conn_timeout','read_timeout','id_offset','protocol'):
                         raise Exception('DataciteAPI config file, invalid option: '+key)
                     self.options[key]=val
 
@@ -108,25 +107,6 @@ class API:
         else:
             return True
 
-
-#    def deleteMetadata(self,doi):
-#        url = self.login['endpoint']
-#        url += 'metadata/'
-#        url += doi
-#
-#        print (url)
-#
-#        status = 'ok'
-#
-#        response = requests.delete(url,
-#                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-#                        )
-#        
-#        if response.status_code != 201:
-#            print (str(response.status_code))
-#            status = "err"
-#        content=response.text;
-#        print (content)
 
     def getMetadata(self,doi):
         url = self.login['endpoint']
@@ -165,6 +145,44 @@ class API:
             else:
                 content = match.group(1)
         
+        return (status,content)
+
+    def deleteDOI(self,doi):
+        print ("delete DOI")
+        url = self.login['endpoint']
+        url += 'doi/'
+        url += doi
+
+        status = "success"
+        try:
+            response = requests.delete(url,
+                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                        headers={'Content-Type': 'text/plain;charset=UTF-8'},
+                        timeout=(int(self.options['conn_timeout']),int(self.options['read_timeout'])),                        
+                        )
+        
+            if response.status_code != 204:
+                status = "error"
+                content = response.text;
+                content = str(response.status_code) + "-" + response.text
+            else:
+                content = ''
+        except ConnectTimeout as e:
+            status = "error"
+            content = (''.join(['connect timeout: ',str(e)]))
+#        except ReadTimeout as e:
+#            status = "error"
+#            content = (''.join(['read timeout: ',str(e)]))
+
+# no response from Datacite API when deletions are successful
+# assume everything's ok
+        except ReadTimeout as e:
+            status = "success"
+            content = ''
+        except Exception as e:
+            status = "error"
+            content = (''.join(['general exception: ',str(e)]))
+
         return (status,content)
 
     def registerURL(self,doi,article_url):
