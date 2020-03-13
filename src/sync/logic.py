@@ -9,6 +9,8 @@ from django.utils.timezone import get_current_timezone
 from submission import models as submission_models
 from identifiers import models as identifier_models
 from sync.datacite import api as datacite_api
+from sync.alma import api as alma_api
+from sync.alma import marc
 
 def create_article_doi(article):
     api = datacite_api.API.getInstance()
@@ -269,6 +271,73 @@ def doiDeleted(article_id,doi):
         status = "error"
 
     return (status,errors)
+
+
+def checkArticleMarcMandatoryFields(article):
+    errors = []
+
+    if article.get_doi() is None:
+        errors.append("doi not set")
+    
+    return errors
+
+
+def articleToMarc(article):
+    errors = checkArticleMarcMandatoryFields(article)
+    warnings = []
+    xml = ''
+    l = []
+
+    if not errors:
+        try:
+            mr=marc.MarcRecord()
+            mr.leader="03012naa a2200373 c 4500"
+            mr.addControlField(marc.ControlField.createControlField("007","cr#|||||||||||"))
+
+            # doi, urn
+            datafield=marc.DataField.createDataField("024","7","_")
+            datafield.addSubfield(marc.SubField.createSubfield("a",article.get_doi()))
+            datafield.addSubfield(marc.SubField.createSubfield("2","doi"))
+            mr.addDataField(datafield)
+            datafield=marc.DataField.createDataField("024","7","_")
+            datafield.addSubfield(marc.SubField.createSubfield("a",article.get_urn()))
+            datafield.addSubfield(marc.SubField.createSubfield("2","urn"))
+            mr.addDataField(datafield)
+
+            # title
+            datafield=marc.DataField.createDataField("245","1","0")
+            datafield.addSubfield(marc.SubField.createSubfield("a",article.title))
+            mr.addDataField(datafield)
+            if article.subtitle:
+                datafield.addSubfield(marc.SubField.createSubfield("b",article.subtitle))
+                mr.addDataField(datafield)
+
+            # 336-338
+            datafield=marc.DataField.createDataField("336","_","_")
+            datafield.addSubfield(marc.SubField.createSubfield("b","txt"))
+            mr.addDataField(datafield)
+
+            datafield=marc.DataField.createDataField("337","_","_")
+            datafield.addSubfield(marc.SubField.createSubfield("b","c"))
+            mr.addDataField(datafield)
+
+            datafield=marc.DataField.createDataField("338","_","_")
+            datafield.addSubfield(marc.SubField.createSubfield("b","cr"))
+            mr.addDataField(datafield)
+
+            xml = mr.toXML()
+
+            print (xml)
+
+            x = etree.fromstring(xml)
+            xml = etree.tostring(x, pretty_print=True).decode("utf-8")
+            xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
+
+        except Exception as e:
+            print (traceback.format_exc())
+            errors.append(''.join(['error creating xml: ',str(e)]))
+
+    return (xml, errors, warnings)
 
 
 #def get_next_doi(journal_code,year):

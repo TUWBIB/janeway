@@ -2,11 +2,6 @@ import lxml
 from lxml import etree
 
 class MarcRecord:
-
-    leader=None
-    controlfields=None
-    datafields=None
-
     def __init__(self):
         self.leader=None
         self.controlfields=[]
@@ -42,7 +37,7 @@ class MarcRecord:
     def addDataField(self,df):
         self.datafields.append(df)
     
-    def addControlField(seld,cf):
+    def addControlField(self,cf):
         self.controlfields.append(cf)
 
     def getControlFieldsForTag(self,tag):
@@ -146,7 +141,7 @@ class MarcRecord:
         xml+='<leader>'+self.leader+'</leader>'    
         for datafield in self.datafields:
             xml+='<datafield '
-            xml+='tag="'+datafield.tag+""' '
+            xml+='tag="'+datafield.tag+'" '
             xml+='ind1="'+datafield.ind1+'" '
             xml+='ind2="'+datafield.ind2+'">'
             for subfield in datafield.subfields:
@@ -160,12 +155,9 @@ class MarcRecord:
         return xml
 
 class ControlField:
-
-    tag=None
-    value=None
-
     def __init__(self):
-        pass
+        self.tag=None
+        self.value=None
 
     @classmethod
     def createControlField(cls,tag,value):
@@ -175,14 +167,11 @@ class ControlField:
         return cf
 
 class DataField:
-
-    tag=None
-    ind1=None
-    ind2=None
-    subfields=[]
-
     def __init__(self):
-        pass
+        self.tag=None
+        self.ind1=None
+        self.ind2=None
+        self.subfields=[]
 
     @classmethod
     def createDataField(cls,tag,ind1,ind2):
@@ -192,17 +181,13 @@ class DataField:
         df.ind2=ind2
         return df
 
-
     def addSubfield(self,subfield):
         self.subfields.append(subfield)
 
 class SubField:
-
-    code=None
-    value=None
-
     def __init__(self):
-        pass
+        self.code=None
+        self.value=None
 
     @classmethod
     def createSubfield(cls,code,value):
@@ -210,26 +195,3 @@ class SubField:
         sf.code=code
         sf.value=value
         return sf
-
-
-text="""
-<record>
-    <leader>01876nas#a2200529#c#4500</leader>
-    <controlfield tag="001">990006498190203336</controlfield>
-    <controlfield tag="005">20170724210100.0</controlfield>
-    <controlfield tag="007">cr#|||||||||||</controlfield>
-    <controlfield tag="008">000707|19949999xxk#|#p#######|####|eng#u</controlfield>
-    <controlfield tag="009"></controlfield>
-    <datafield ind1="7" tag="016" ind2=" ">
-        <subfield code="a">020567944</subfield>
-        <subfield code="2">DE-101b</subfield>
-    </datafield>
-    <datafield ind2=" " tag="016" ind1="7">
-        <subfield code="a">2018371-9</subfield>
-        <subfield code="2">DE-600</subfield>
-    </datafield>
-</record>
-"""
-mr=MarcRecord()
-mr.parse(text)
-mr.debug()

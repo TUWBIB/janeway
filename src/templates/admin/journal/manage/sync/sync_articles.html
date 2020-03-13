@@ -91,7 +91,7 @@
                                         <li><a href="#">Alma</a>
                                             <ul class="vertical menu nested">
                                             <li>
-                                                <a href="#" class="btn_alma_up" id="btn_alma_upload_{{ article.pk }}">Sync To Alma</a>
+                                                <a href="#" class="btn_alma_up" id="btn_alma_up_{{ article.pk }}">Sync To Alma</a>
                                             </li>
                                             <li>
                                                 <a href="#" class="btn_alma_down" id="btn_alma_down_{{ article.pk }}">Synd From Alma</a>
@@ -141,15 +141,97 @@
 
         $(document).ready(function () 
         {
+            $(".btn_alma_up").on("click", function(e)
+            {
+                e.preventDefault();
+
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'alma_up',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var alma=response.alma;
+                        var xml=alma.xml;
+                        var mmsid=alma.mmsid;
+                        var ac=alma.ac;
+
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
+                            var modal = '<div class="reveal small" id="confirm_alma_up" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Review metadata'+'</h2>';
+                            if (warnings.length>0)
+                            {
+                                modal+='<h3>Warnings</h3>';
+                                modal+='<p>'
+                                var i;
+                                for (i=0;i<warnings.length;++i)
+                                {
+                                    modal+=warnings[i]+'<br>';
+                                }
+                                modal+='</p>'
+                            }
+                                   
+                            modal+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
+         			            '<button class="button success ok float-center">Upload to Alma</button>'+
+			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                                '</div>';
+
+                            $('body').append(modal);
+
+                            var confirm_alma_up = new Foundation.Reveal($('#confirm_alma_up'));
+                            confirm_alma_up.open();
+
+                            $('#confirm_alma_up').children('.ok').on('click', function() 
+                            {
+			                    confirm_alma_up.close();
+                                $('#confirm_alma_up').remove();
+                                $('.reveal-overlay').remove();
+                                almaUpConfirm(id)                                
+                            });
+                            
+                            $('#confirm_alma_up').children('.cancel').on('click', function() 
+                            {
+			                    confirm_alma_up.close();
+			                    $('#confirm_alma_up').remove();
+                                $('.reveal-overlay').remove();
+                            });
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
+            })
+
             $(".btn_alma_down").on("click", function(e)
             {
                 toastr.error("not implemented");                        
             })
 
-            $(".btn_alma_up").on("click", function(e)
-            {
-                toastr.error("not implemented");                        
-            })
 
             $(".btn_datacite_check_metadata").on("click", function(e)
             {
@@ -515,6 +597,46 @@
                         else
                         {
                             $("#datacite_state_"+article_id).html(state)
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                })
+            }
+
+            function almaUpConfirm(article_id)
+            {
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': article_id,
+                    'operation': 'alma_up_confirm',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var alma=response.alma;
+                        var xml=alma.xml;
+                        var mmsid=alma.mmsid;
+                        var ac=alma.ac;
+                        
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            toastr.error("not yet implemented");
                         }
                     },
                     error: function(response)

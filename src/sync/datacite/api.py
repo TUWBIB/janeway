@@ -114,13 +114,25 @@ class API:
         url += doi
 
         status = 'success'
-        response = requests.get(url,
-                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-                        )
-        
-        if response.status_code != 200:
+        try:
+            response = requests.get(url,
+                            auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                            )
+            
+            if response.status_code != 200:
+                status = "error"
+            content=response.text
+
+        except ConnectTimeout as e:
             status = "error"
-        content=response.text;
+            content = (''.join(['connect timeout: ',str(e)]))
+        except ReadTimeout as e:
+            status = "error"
+            content = (''.join(['read timeout: ',str(e)]))
+        except Exception as e:
+            status = "error"
+            content = (''.join(['general exception: ',str(e)]))
+
         return (status,content)
 
     def updateMetadata(self,doi,xml):
@@ -129,26 +141,36 @@ class API:
         url += doi
 
         status = 'success'
-        response = requests.put(url,
-                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-                        headers={'Content-Type': 'application/xml;charset=UTF-8'},
-                        data=xml.encode('utf-8'))
-        
-        if response.status_code != 201:
-            status = "error"
-            content=response.text;    
-        else:
-            match = re.search('OK \((.+)\)',response.text)
-            if match is None:
+        try:
+            response = requests.put(url,
+                            auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                            headers={'Content-Type': 'application/xml;charset=UTF-8'},
+                            data=xml.encode('utf-8'))
+            
+            if response.status_code != 201:
                 status = "error"
-                content = "can't decode doi from response"
+                content=response.text;    
             else:
-                content = match.group(1)
-        
+                match = re.search('OK \((.+)\)',response.text)
+                if match is None:
+                    status = "error"
+                    content = "can't decode doi from response"
+                else:
+                    content = match.group(1)
+
+        except ConnectTimeout as e:
+            status = "error"
+            content = (''.join(['connect timeout: ',str(e)]))
+        except ReadTimeout as e:
+            status = "error"
+            content = (''.join(['read timeout: ',str(e)]))
+        except Exception as e:
+            status = "error"
+            content = (''.join(['general exception: ',str(e)]))
+
         return (status,content)
 
     def deleteDOI(self,doi):
-        print ("delete DOI")
         url = self.login['endpoint']
         url += 'doi/'
         url += doi
@@ -191,16 +213,27 @@ class API:
         url += doi
         data='doi='+doi+'\n'+'url='+article_url
         status = 'success'
-        response = requests.put(url,
-                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-                        headers={'Content-Type': 'text/plain;charset=UTF-8'},
-                        data=data)
+        try:
+            response = requests.put(url,
+                            auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                            headers={'Content-Type': 'text/plain;charset=UTF-8'},
+                            data=data)
 
-        if response.status_code != 201:
+            if response.status_code != 201:
+                status = "error"
+                content=response.text;    
+            else:
+                content=''
+
+        except ConnectTimeout as e:
             status = "error"
-            content=response.text;    
-        else:
-            content=''
+            content = (''.join(['connect timeout: ',str(e)]))
+        except ReadTimeout as e:
+            status = "error"
+            content = (''.join(['read timeout: ',str(e)]))
+        except Exception as e:
+            status = "error"
+            content = (''.join(['general exception: ',str(e)]))
         
         return (status,content)
 

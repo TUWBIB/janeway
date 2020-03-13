@@ -47,11 +47,15 @@ def sync(request):
         operation = data["operation"]
         response = None
 
-        if operation == "alma_down":
+        if operation == "alma_up":
+            response = articleToMarc(article)
+
+        elif operation == "alma_up_confirm":
             pass
 
-        elif operation == "alma_up":
+        elif operation == "alma_down":
             pass
+
 
         elif operation == "datacite_metadata":
             response = articleToDataCiteXML(article_id)
@@ -200,4 +204,18 @@ def deleteDOI(article):
         errors.append(content)
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : None, 'state' : None }})
+
+
+def articleToMarc(article):
+    (xml,errors,warnings) = logic.articleToMarc(article)
+
+    return JsonResponse({ 'errors': errors, 'warnings': warnings,
+        'alma' : { 'xml' : xml, 'mmsid' : None, 'ac' : None }})
+
+
+def articleToMarcConfirm(article):
+    (xml,errors,warnings) = logic.articleToMarcConfirm(article)
+
+    return JsonResponse({ 'errors': errors, 'warnings': warnings,
+        'alma' : { 'xml' : xml, 'mmsid' : None, 'ac' : None }})
 
