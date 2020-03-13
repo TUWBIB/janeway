@@ -47,6 +47,13 @@
                         <button name="large" type="submit" class="success button">Upload</button>
                     </form>
                 </div>
+                <div class="content">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="file" name="galley_file" hidden>
+                        <button name="galley" type="submit" class="success button">From Galley</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

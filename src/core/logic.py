@@ -10,7 +10,9 @@ from importlib import import_module
 from datetime import timedelta
 import operator
 import re
+import tempfile
 from functools import reduce
+from pdf2image import convert_from_path,convert_from_bytes
 
 from django.conf import settings
 from django.utils.translation import get_language
@@ -385,7 +387,6 @@ def handle_article_thumb_image_file(uploaded_file, article, request):
         article.thumbnail_image_file = new_file
         article.save()
 
-
 def handle_email_change(request, email_address):
     request.user.email = email_address
     request.user.is_active = False
@@ -672,3 +673,32 @@ def get_homepage_elements(request):
     homepage_element_names = [el.name for el in homepage_elements]
 
     return homepage_elements, homepage_element_names
+
+def create_article_file_from_galley(article, request):
+    article=submission_models.Article.objects.get(pk=article.pk)
+    galley=models.Galley.objects.get(article=article,label='PDF',type='pdf')
+    pdf_file=galley.file.get_file_path(article)
+    head,_=os.path.split(pdf_file)
+    jpg_filename=str(uuid.uuid4())+'.jpg'
+    jpg_file=os.path.join(head,jpg_filename)
+
+    print (pdf_file)
+    print (jpg_file)
+
+    with tempfile.TemporaryDirectory() as path:    
+       images=convert_from_path(pdf_file,dpi=300,first_page=1,last_page=1,output_folder=path)
+       for image in images:
+           image.save(jpg_file)
+
+    file=models.File()
+    file.mime_type='image/jpeg'
+    file.uuid_filename=jpg_filename
+    file.is_galley=False
+    file.article_id=article.id
+    file.label="Banner Image"
+    file.description="Banner Image"
+    file.privacy="public"
+    file.save()
+ 
+    article.large_image_file=file
+    article.save()

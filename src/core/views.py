@@ -1204,6 +1204,9 @@ def article_image_edit(request, article_pk):
         uploaded_file = request.FILES.get('image_file')
         logic.handle_article_large_image_file(uploaded_file, article, request)
 
+    elif request.POST and 'galley' in request.POST:
+         logic.create_article_file_from_galley(article, request)
+
     elif request.POST and request.FILES and 'thumb' in request.POST:
         uploaded_file = request.FILES.get('image_file')
         logic.handle_article_thumb_image_file(uploaded_file, article, request)
