@@ -2,6 +2,7 @@ import traceback
 import re
 import lxml.etree as etree
 import datetime
+from xml.sax.saxutils import escape, unescape
 
 from django.db.models import Max
 from django.utils.timezone import get_current_timezone
@@ -79,11 +80,11 @@ def articleToDataCiteXML(article_id):
                 l.append(' xml:lang="')
                 l.append(article.language[0:2])
                 l.append('">')
-                l.append(article.title)
+                l.append(escape(article.title))
                 l.append('</title>')
             else:
                 l.append('<title>')
-                l.append(article.title)
+                l.append(escape(article.title))
                 l.append('</title>')
                 warnings.append("article language not set")
 
@@ -93,21 +94,21 @@ def articleToDataCiteXML(article_id):
                     l.append(' xml:lang="')
                     l.append(article.language[0:2])
                     l.append('">')
-                    l.append(article.subtitle)
+                    l.append(escape(article.subtitle))
                     l.append('</title>')
                 else:
                     l.append('<title>')
-                    l.append(article.subtitle)
+                    l.append(escape(article.subtitle))
                     l.append('</title>')
 
             if article.title_de:
                 l.append('<title titleType="AlternativeTitle">')
-                l.append(article.title_de)
+                l.append(escape(article.title_de))
                 l.append('</title>')
 
             if article.subtitle_de:
                 l.append('<title titleType="Other">')
-                l.append(article.subtitle_de)
+                l.append(escape(article.subtitle_de))
                 l.append('</title>')
 
             l.append('</titles>')
@@ -161,12 +162,12 @@ def articleToDataCiteXML(article_id):
                 if article.abstract:
                     l.append('<description xml:lang="')
                     l.append('en" descriptionType="Abstract">')
-                    l.append(article.abstract)
+                    l.append(escape(article.abstract))
                     l.append('</description>')
                 if article.abstract_de:
                     l.append('<description xml:lang="')
                     l.append('de" descriptionType="Abstract">')
-                    l.append(article.abstract_de)
+                    l.append(escape(article.abstract_de))
                     l.append('</description>')
             else:
                 warnings.append("neither english nor german abstract")
@@ -177,7 +178,10 @@ def articleToDataCiteXML(article_id):
                 l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
                 l.append(str(article.primary_issue.volume))
                 l.append('(')
-                l.append(article.primary_issue.tuw_issue_str)
+                if article.primary_issue.tuw_issue_str is not None:
+                    l.append(article.primary_issue.tuw_issue_str)
+                else:
+                    l.append(str(article.primary_issue.issue))
                 l.append('): ')
                 l.append(str(article.page_numbers))
                 l.append('</description>')
