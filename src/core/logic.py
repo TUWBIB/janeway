@@ -31,6 +31,9 @@ from utils import render_template, notify_helpers, setting_handler
 from submission import models as submission_models
 from comms import models as comms_models
 from utils import shared
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def send_reset_token(request, reset_token):
@@ -674,31 +677,46 @@ def get_homepage_elements(request):
 
     return homepage_elements, homepage_element_names
 
+
+# TUW
+# utility function to create an article's large image file
+# based on the first page of the pdf galley
 def create_article_file_from_galley(article, request):
     article=submission_models.Article.objects.get(pk=article.pk)
     galley=models.Galley.objects.get(article=article,label='PDF',type='pdf')
-    pdf_file=galley.file.get_file_path(article)
-    head,_=os.path.split(pdf_file)
-    jpg_filename=str(uuid.uuid4())+'.jpg'
-    jpg_file=os.path.join(head,jpg_filename)
+    # no galley, do nothing
+    if galley is not None:
+        pdf_file=galley.file.get_file_path(article)
+        logger.info("galley file: "+pdf_file)
+        head,_=os.path.split(pdf_file)
 
-    print (pdf_file)
-    print (jpg_file)
+        # delete old large image file (if present)
+        file=article.large_image_file
+        if file is not None:
+            jpg_file=os.path.join(head,file.uuid_filename)
+            logger.info("old large image file: "+jpg_file)
+            os.unlink(jpg_file)
+            file.delete()
 
-    with tempfile.TemporaryDirectory() as path:    
-       images=convert_from_path(pdf_file,dpi=300,first_page=1,last_page=1,output_folder=path)
-       for image in images:
-           image.save(jpg_file)
+        jpg_filename=str(uuid.uuid4())+'.jpg'
+        jpg_file=os.path.join(head,jpg_filename)
 
-    file=models.File()
-    file.mime_type='image/jpeg'
-    file.uuid_filename=jpg_filename
-    file.is_galley=False
-    file.article_id=article.id
-    file.label="Banner Image"
-    file.description="Banner Image"
-    file.privacy="public"
-    file.save()
- 
-    article.large_image_file=file
-    article.save()
+        logger.info("new large image file: "+jpg_file)
+
+        with tempfile.TemporaryDirectory() as path:    
+            images=convert_from_path(pdf_file,dpi=300,first_page=1,last_page=1,output_folder=path)
+            for image in images:
+                image.save(jpg_file)
+
+        file=models.File()
+        file.mime_type='image/jpeg'
+        file.uuid_filename=jpg_filename
+        file.is_galley=False
+        file.article_id=article.id
+        file.label="Banner Image"
+        file.description="Banner Image"
+        file.privacy="public"
+        file.save()
+    
+        article.large_image_file=file
+        article.save()
