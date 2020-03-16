@@ -1017,8 +1017,11 @@ def manage_issues(request, issue_id=None, event=None):
             save_issue = form.save(commit=False)
             save_issue.journal = request.journal
             save_issue.save()
-            if request.FILES and save_issue.large_image:
-                resize_and_crop(save_issue.large_image.path, [750, 324])
+# TUW
+# no cropping of large image files
+#
+#            if request.FILES and save_issue.large_image:
+#                resize_and_crop(save_issue.large_image.path, [750, 324])
             if issue:
                 return redirect(reverse('manage_issues_id', kwargs={'issue_id': issue.pk}))
             else:
