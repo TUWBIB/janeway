@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='datacite_state',
-            field=models.CharField(blank=True, choices=[('none', ''), ('draft', 'draft'), ('findable', 'findable'), ('registered', 'registered')], max_length=20, null=True),
+            field=models.CharField(blank=True, choices=[('', ''), ('draft', 'draft'), ('findable', 'findable'), ('registered', 'registered')], max_length=20, null=True),
         ),
         migrations.AddField(
             model_name='article',
