@@ -120,6 +120,7 @@
                         {% endif %}
                     {% endif %}
     
+                    {% if article.frozen_authors %}
                     <tr>
                         <th>{% trans "Author" %}</th>
                         <td>
@@ -132,6 +133,8 @@
                             {% endfor %}
                         </td>
                     </tr>
+                    {% endif %}
+
                     {% if article.is_published %}
                     <tr>
                             <th>{% trans "Published on" %}</th>
