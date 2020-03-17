@@ -100,7 +100,7 @@ class API:
     def doiConformsToCurrentConfiguration(self,journal_code,doi):
         prefix = self.journals[journal_code]['prefix']
         namespace_separator = self.journals[journal_code]['namespace_separator']
-        pattern = prefix+'/'+namespace_separator+r'\.'+r'\d{4}'+r'\.'+r'\d{4}'
+        pattern = prefix+'/'+namespace_separator+r'\.'+r'\d{4}'+r'\.'+r'\d{3,4}'
         match = re.match(pattern,doi)
         if not match:
             return False
