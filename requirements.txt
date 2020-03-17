@@ -48,4 +48,4 @@ user-agents==1.0.1
 -e git+https://github.com/BirkbeckCTP/django-materialize.git@bcfbfd9150887328dddce965674c84b2b6e6b785#egg=django_materialize
 django-hijack
 geoip2==2.9.0
-pdf2image
+pdf2image==1.11.0
