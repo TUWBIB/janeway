@@ -183,7 +183,7 @@ class API:
                         timeout=(int(self.options['conn_timeout']),int(self.options['read_timeout'])),                        
                         )
         
-            if response.status_code != 204:
+            if response.status_code != 200:
                 status = "error"
                 content = response.text;
                 content = str(response.status_code) + "-" + response.text
@@ -192,15 +192,9 @@ class API:
         except ConnectTimeout as e:
             status = "error"
             content = (''.join(['connect timeout: ',str(e)]))
-#        except ReadTimeout as e:
-#            status = "error"
-#            content = (''.join(['read timeout: ',str(e)]))
-
-# no response from Datacite API when deletions are successful
-# assume everything's ok
         except ReadTimeout as e:
-            status = "success"
-            content = ''
+            status = "error"
+            content = (''.join(['read timeout: ',str(e)]))
         except Exception as e:
             status = "error"
             content = (''.join(['general exception: ',str(e)]))
