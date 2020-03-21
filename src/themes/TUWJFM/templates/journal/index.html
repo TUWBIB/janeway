@@ -1,11 +1,124 @@
 {% extends "core/base.html" %}
 {% load truncate %}
+{% load static from staticfiles %}
+{% load i18n %}
 
 {% block body %}
 
+{% if journal.code == "OES" %}
+<div class="row" style="margin-top: 15px;">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-9">
+        <div class="card" style="border:2px outset rgba(0, 0, 0, 0.125)">
+        <div class="card-block mb-2"">
+            {% if LANGUAGE_CODE == 'en' %}
+            <h3 class="card-title mb-2">About this journal</h3>
+            <br>
+            <p class="card-text">
+                The journal “The Public Sector” is a major forum for debate on <strong>the role and challenges of public intervention</strong>, 
+                with a particular focus on the relationship between economic and social change, policy design and policy impact on 
+                different spatial levels. The journal is <strong>multidisciplinary</strong> and brings together contributions from public economics, 
+                urban and regional planning, infrastructure policy, fiscal policy, environmental economics, land use policy and planning, 
+                planning law, real estate management and housing economics, political science, urban sociology and related fields.
+            <br>
+            <br>
+            <a href="{% url 'mission_statement' %}" class="card-link">More...</a>            
+            {% else %}
+            <h3 class="card-title mb-2">Über diese Zeitschrift</h3>
+            <br>
+            <p class="card-text">
+                Die Zeitschrift „Der Öffentliche Sektor“ bietet eine Plattform zur Debatte über die 
+                <strong>Bedeutung und Herausforderungen staatlicher Aufgabenerfüllung</strong>, mit besonderem Augenmerk auf die 
+                Wechselwirkung zwischen gesellschaftlichem und wirtschaftlichem Wandel, politischer Steuerung und räumlicher Entwicklung auf 
+                unterschiedlichen Ebenen (z.B. Stadtteil, Gemeinde, Region, Nationalstaat, intra- und internationale Ebene). Die Zeitschrift 
+                verfolgt einen <strong>multidisziplinären Ansatz</strong> und publiziert Beiträge aus Finanzwissenschaft und 
+                Fiskalpolitik, Raumplanung, Infrastrukturplanung und -politik, Bodenmanagement und -politik, 
+                Ressourcenökonomie, Planungsrecht, Immobilienwirtschaft und Wohnungswesen, Politikwissenschaft, 
+                Volkswirtschaftslehre, Stadtsoziologie sowie anderen verwandten Gebieten.
+            <br>
+            <br>
+            <a href="{% url 'mission_statement' %}" class="card-link">Mehr...</a>            
+            {% endif %}
+          </div>    
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row" style="margin-top: 15px;">
+        <aside class="col-md-3" data-sticky-container>
+            <div class="sticky" data-sticky data-margin-top="0" data-sticky data-anchor="issue_top">
+                <div class="section">
+                    <h3>{% if not collection %}{% trans "Issue Archive" %}{% else %}
+                        {% with col=journal_settings.general.collection_name_plural %}{% if col %}{{ col }}{% else %}{% trans "Collections" %}{% endif %}{% endwith %}{% endif %}</h3>
+                    <ul>
+                        {% for issue in issues %}
+                        {% if issue.issue_type.code == 'issue' %}
+                            <li><a href="{% url 'journal_issue' issue.id %}">{{ issue.tuw_display_title }} </a></li>
+                        {% else %}
+                            <li><a href="{% url 'journal_collection' issue.id %}">{{ issue.issue_title }} </a></li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </aside>
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 style="line-height: :">{{ issue.tuw_display_title }}</h3>
+                    {% if issue.issue_title %}
+                    <br>{{ issue.issue_title }}
+                    {% endif %}
+                    <br>{{ issue.date|date:"d.M.Y" }}
+                    <br>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 15px;"">
+            <div class="col-md-6">
+        
+            {% regroup articles by section as grouped_articles %}
+            {% for section, section_articles in grouped_articles %}
+                {% if section.visible %}
+                <h3 class="em">{{ section.name }}</h3>
+                {% else %}
+                {% if not forloop.first %}<hr/>{% endif %}
+                {% endif %}
+                {% for article in section_articles %}
+                    {% include "elements/article_listing.html" with article=article indent=section.visible suppress_issue_data=True %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% if issue.galley %}
+        <div class="col-md-3">
+            <a target="_blank" href="{% url 'journal_view_galley' issue.id issue.galley.id %}">
+            {% if issue.large_image %}
+                <div class="card">
+                    <img class="card-img img-fluid article-img" src="{{ issue.large_image.url }}" alt="Card image">
+                </div>
+            {% else %}
+                <h2 class="em">{{ issue.tuw_display_title }}</h2>
+                <p>{{ issue.issue_description|safe }}</p>
+            {% endif %}
+            </a>
+        </div>
+        {% endif %}
+        </div>
+
+    </div>
+    
+
+
+</div>
+{% else %}
     {% for element in homepage_elements %}
-        {% include element.template_path %}
-        <hr>
+    {% include element.template_path %}
+    <hr>
     {% endfor %}
+{% endif %}
+    
 
 {% endblock body %}
