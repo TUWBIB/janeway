@@ -234,7 +234,7 @@ def metadataUpdated(article_id,doi):
     errors = []
     try:
         article = submission_models.Article.objects.get(pk=article_id)
-        if not article.datacite_state or article.datacite_state==submission_models.DATACITE_STATE_DRAFT:
+        if not article.datacite_state or article.datacite_state==submission_models.DATACITE_STATE_NONE:
             article.datacite_state = submission_models.DATACITE_STATE_DRAFT
         article.datacite_ts = datetime.datetime.now(get_current_timezone())
         article.save()
@@ -247,7 +247,7 @@ def metadataUpdated(article_id,doi):
         errors.append(''.join(['error writing db: ',str(e)]))
         status = "error"
 
-    return (status,errors)
+    return (status,errors,article.datacite_state)
 
 def urlSet(article_id,doi):
     status = "success"

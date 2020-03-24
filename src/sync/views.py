@@ -119,9 +119,9 @@ def articleMetadataConfirm(article_id):
         doi = match.group(1)
         (status,content)=api.updateMetadata(doi,xml)
         if status == "success":
-            status,errors = logic.metadataUpdated(article_id,doi)
+            status,errors,state = logic.metadataUpdated(article_id,doi)
             return JsonResponse({ 'errors': errors, 'warnings': None,
-                'datacite' : { 'xml' : xml, 'doi' : doi, 'url' : None, 'state' : submission_models.DATACITE_STATE_DRAFT }})
+                'datacite' : { 'xml' : xml, 'doi' : doi, 'url' : None, 'state' : state }})
         else:
             errors=[]
             errors.append(content)
