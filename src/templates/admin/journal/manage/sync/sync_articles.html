@@ -120,15 +120,13 @@
 {% endblock %}
 
 {% block js %}
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.css">
+    {% include "elements/datatables.html" with target="#datatable" page_length=50 sort=0 order='desc' %}
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="{% static "common/css/toastr-2.1.1.css" %}">    
     <script src="{% static "common/js/jq-ui.min.js" %}"></script>
     <script src="{% static "common/js/toastr-2.1.1.js" %}"></script>
     <script src="{% static "common/js/tagit.js" %}"></script>
     <script src="{% static "admin/js/csrf.js" %}"></script>
-    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/foundation.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.reveal.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdown.min.js"></script>
@@ -137,10 +135,19 @@
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
 
     <script type="text/javascript">
+
+
         $(document).foundation();   
 
         $(document).ready(function () 
         {
+            var table = $('#datatable').DataTable();
+ 
+            table
+                .order( [[ 0, 'desc' ]] )
+                .draw();
+
+
             $(".btn_alma_up").on("click", function(e)
             {
                 e.preventDefault();
@@ -675,16 +682,6 @@
                 }
                 return str;
             }
-
-
-            $("#datatable").DataTable({
-                "lengthMenu": [[25, 50, 10, -1], [25, 50, 10, "All"]],
-            {% if hide_length %}"bLengthChange": false,{% endif %}
-            {% if hide_page %}"bPaginate": false,{% endif %}
-            {% if sort and order %}"order": [[ {{ sort }}, "{{ order }}" ]],{% endif %}
-            {% if disable_ordering %}"ordering": false,{% endif %}
-            {% if page_length %}"pageLength": {{ page_length }},{% endif %}
-            });
         })  
     </script>
 {% endblock %}
