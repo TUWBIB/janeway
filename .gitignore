@@ -123,3 +123,5 @@ src/.DS_Store
 .DS_Store
 src/\.vscode/
 src/vl2janeway
+api.cfg
+api.json

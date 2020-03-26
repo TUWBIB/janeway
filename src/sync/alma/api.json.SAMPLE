@@ -1,0 +1,16 @@
+{ 
+    "options" : 
+    { 
+        "error_threshold" : 0,
+        "timeout" : 2,
+        "target" : "sandbox"
+    },
+    "keys" :
+    {
+        "production" : "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "sandbox" : "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "analytics" : "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+}
+    
+
