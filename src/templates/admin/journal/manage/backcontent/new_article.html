@@ -93,6 +93,15 @@
 {% block js %}
     {% include "elements/datatables.html" with target="#unassigned" %}
     <script type="text/javascript">
+        $(document).ready(function () 
+        {
+            var table = $('#unassigned').DataTable();
+
+            table
+                .order( [[ 0, 'desc' ]] )
+                .draw();
+        })
+
         $('.confirm_delete').on('click', function () {
             return confirm('Are you sure?');
         });
