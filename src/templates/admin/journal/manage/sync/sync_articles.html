@@ -38,7 +38,7 @@
                         <tr>
                             <th>DOI</th>
                             <th>State</th>
-                            <th>MMS Id</th>
+                            <th>MMS Id / AC</th>
                             <th>Sync</th>
                         </tr>
                         </thead>
@@ -62,11 +62,10 @@
                                 {% else %}
                                 <td id="datacite_state_{{ article.pk }}"></td>
                                 {% endif %}                      
-                                {% if article.get_mmsid %}                                
-                                <td>{{ article.get_mmsid }}</td>
-                                {% else %}
-                                <td></td>
-                                {% endif %}                      
+                                <td id="alma_mmsid_ac_{{ article.pk }}">
+                                {% if article.get_mmsid %} {{ article.get_mmsid }} {% endif %}
+                                {% if article.get_ac %} {% if article.get_mmsid %} <br> {% endif %} {{ article.get_ac }} {% endif %}
+                                </td>
                                 <td></td>
                                 <td>
                                     <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
@@ -94,7 +93,11 @@
                                                 <a href="#" class="btn_alma_up" id="btn_alma_up_{{ article.pk }}">Sync To Alma</a>
                                             </li>
                                             <li>
-                                                <a href="#" class="btn_alma_down" id="btn_alma_down_{{ article.pk }}">Synd From Alma</a>
+                                                <a href="#" class="btn_alma_down" id="btn_alma_down_{{ article.pk }}">Sync From Alma</a>
+                                            </li>
+                                            <hr>
+                                            <li>
+                                                <a href="#" class="btn_alma_view_current_marc" id="btn_alma_view_current_marc_{{ article.pk }}">View current marc record</a>
                                             </li>
                                             </ul>
                                         </li>
@@ -120,13 +123,15 @@
 {% endblock %}
 
 {% block js %}
-    {% include "elements/datatables.html" with target="#datatable" page_length=50 sort=0 order='desc' %}
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="{% static "common/css/toastr-2.1.1.css" %}">    
     <script src="{% static "common/js/jq-ui.min.js" %}"></script>
     <script src="{% static "common/js/toastr-2.1.1.js" %}"></script>
     <script src="{% static "common/js/tagit.js" %}"></script>
     <script src="{% static "admin/js/csrf.js" %}"></script>
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/505bef35b56/integration/foundation/dataTables.foundation.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/foundation.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.reveal.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdown.min.js"></script>
@@ -141,13 +146,6 @@
 
         $(document).ready(function () 
         {
-            var table = $('#datatable').DataTable();
- 
-            table
-                .order( [[ 0, 'desc' ]] )
-                .draw();
-
-
             $(".btn_alma_up").on("click", function(e)
             {
                 e.preventDefault();
@@ -187,42 +185,42 @@
                                 toastr.warning(arrayToStringWithBr(warnings));
                             }
 
-                            var modal = '<div class="reveal small" id="confirm_alma_up" data-close-on-click="false" data-close-on-esc="false"'+
+                            var content = '<div class="reveal small" id="modal" data-close-on-click="false" data-close-on-esc="false"'+
                                  '<h2>'+'Review metadata'+'</h2>';
                             if (warnings.length>0)
                             {
-                                modal+='<h3>Warnings</h3>';
-                                modal+='<p>'
+                                content+='<h3>Warnings</h3>';
+                                contentl+='<p>'
                                 var i;
                                 for (i=0;i<warnings.length;++i)
                                 {
-                                    modal+=warnings[i]+'<br>';
+                                    content+=warnings[i]+'<br>';
                                 }
-                                modal+='</p>'
+                                content+='</p>'
                             }
                                    
-                            modal+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
+                            content+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
          			            '<button class="button success ok float-center">Upload to Alma</button>'+
 			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
                                 '</div>';
 
-                            $('body').append(modal);
+                            $('body').append(content);
 
-                            var confirm_alma_up = new Foundation.Reveal($('#confirm_alma_up'));
-                            confirm_alma_up.open();
+                            var modal = new Foundation.Reveal($('#modal'));
+                            modal.open();
 
-                            $('#confirm_alma_up').children('.ok').on('click', function() 
+                            $('#modal').children('.ok').on('click', function() 
                             {
-			                    confirm_alma_up.close();
-                                $('#confirm_alma_up').remove();
+			                    modal.close();
+                                $('#modal').remove();
                                 $('.reveal-overlay').remove();
                                 almaUpConfirm(id)                                
                             });
                             
-                            $('#confirm_alma_up').children('.cancel').on('click', function() 
+                            $('#modal').children('.cancel').on('click', function() 
                             {
-			                    confirm_alma_up.close();
-			                    $('#confirm_alma_up').remove();
+			                    modal.close();
+			                    $('#modal').remove();
                                 $('.reveal-overlay').remove();
                             });
                         }
@@ -236,7 +234,75 @@
 
             $(".btn_alma_down").on("click", function(e)
             {
+                e.preventDefault();
+
                 toastr.error("not implemented");                        
+            })
+
+
+            $(".btn_alma_view_current_marc").on("click", function(e)
+            {
+                e.preventDefault();
+
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'alma_view_current_marc',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var alma=response.alma;
+                        var xml=alma.xml;
+                        var mmsid=alma.mmsid;
+                        var ac=alma.ac;
+
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
+                            var content = '<div class="reveal small" id="modal" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Current remote metadata'+'</h2>';
+                            content+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
+         			            '<button class="button success ok float-center">Close</button>'+
+                                '</div>';
+
+                            $('body').append(content);
+
+                            var modal = new Foundation.Reveal($('#modal'));
+                            modal.open();
+
+                            $('#modal').children('.ok').on('click', function() 
+                            {
+			                    modal.close();
+                                $('#modal').remove();
+                                $('.reveal-overlay').remove();
+                            });
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
             })
 
 
@@ -517,172 +583,182 @@
                         ajaxError()
                     }
                 });
+
             })
 
-            function dataciteMetadataConfirm(article_id)
-            {
-                var data = {
-                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': article_id,
-                    'operation': 'datacite_metadata_confirm',
-                };
+            var table = $('#datatable').DataTable();
+ 
+             table
+                 .order( [[ 0, 'desc' ]] )
+                .draw();
+        })
+        
+        function dataciteMetadataConfirm(article_id)
+        {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_id': article_id,
+                'operation': 'datacite_metadata_confirm',
+            };
 
-                $.ajax({              
-                    url: '{{ request.path }}', 
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    dataType: 'json',
-                    contentType: false, 
-                    processData: false,                     
-                    success: function(response)
-                    {
-                        var errors=response.errors;
-                        var warnings=response.warnings;
-                        var datacite=response.datacite;
-                        var xml=datacite.xml;
-                        var url=datacite.url;
-                        var doi=datacite.doi;
-                        var state=datacite.state;
-                        
-                        if (errors && errors.length>0)
-                        {
-                            toastr.error(arrayToStringWithBr(errors));
-                        }
-                        else
-                        {
-                            $("#datacite_state_"+article_id).html(state);
-
-                            old_val=$("#datacite_doi_"+article_id).html()
-                            $("#datacite_doi_"+article_id).html(doi)
-                            if (! old_val)
-                            {
-                                toastr.success("doi registered");
-                            }
-                            else
-                            {
-                                toastr.success("metadata updated");
-                            }
-
-                        }
-                    },
-                    error: function(response)
-                    {
-                        ajaxError()
-                    }
-                })
-            }
-
-            function dataciteURLConfirm(article_id)
-            {
-                var data = {
-                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': article_id,
-                    'operation': 'datacite_url_confirm',
-                };
-
-                $.ajax({              
-                    url: '{{ request.path }}', 
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    dataType: 'json',
-                    contentType: false, 
-                    processData: false,                     
-                    success: function(response)
-                    {
-                        var errors=response.errors;
-                        var warnings=response.warnings;
-                        var datacite=response.datacite;
-                        var xml=datacite.xml;
-                        var url=datacite.url;
-                        var doi=datacite.doi;
-                        var state=datacite.state;
-
-                        if (errors && errors.length>0)
-                        {
-                            toastr.error(arrayToStringWithBr(errors));
-                        }
-                        else
-                        {
-                            $("#datacite_state_"+article_id).html(state)
-                        }
-                    },
-                    error: function(response)
-                    {
-                        ajaxError()
-                    }
-                })
-            }
-
-            function almaUpConfirm(article_id)
-            {
-                var data = {
-                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': article_id,
-                    'operation': 'alma_up_confirm',
-                };
-
-                $.ajax({              
-                    url: '{{ request.path }}', 
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    dataType: 'json',
-                    contentType: false, 
-                    processData: false,                     
-                    success: function(response)
-                    {
-                        var errors=response.errors;
-                        var warnings=response.warnings;
-                        var alma=response.alma;
-                        var xml=alma.xml;
-                        var mmsid=alma.mmsid;
-                        var ac=alma.ac;
-                        
-                        if (errors && errors.length>0)
-                        {
-                            toastr.error(arrayToStringWithBr(errors));
-                        }
-                        else
-                        {
-                            toastr.error("not yet implemented");
-                        }
-                    },
-                    error: function(response)
-                    {
-                        ajaxError()
-                    }
-                })
-            }
-
-            function ajaxError()
-            {
-                errors=[];
-                errors.push("request failed");
-                errors.push("connection to server broken ?");
-                toastr.error(arrayToStringWithBr(errors));
-            }
-
-            function arrayToStringWithBr(msg)
-            {
-                var str="";
-                if (Array.isArray(msg))
+            $.ajax({              
+                url: '{{ request.path }}', 
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false, 
+                processData: false,                     
+                success: function(response)
                 {
-                    var i;
-                    for (i=0;i<msg.length;++i)
+                    var errors=response.errors;
+                    var warnings=response.warnings;
+                    var datacite=response.datacite;
+                    var xml=datacite.xml;
+                    var url=datacite.url;
+                    var doi=datacite.doi;
+                    var state=datacite.state;
+                    
+                    if (errors && errors.length>0)
                     {
-                        str+=msg[i];
-                        if (i<(msg.length-1))
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        $("#datacite_state_"+article_id).html(state);
+
+                        old_val=$("#datacite_doi_"+article_id).html()
+                        $("#datacite_doi_"+article_id).html(doi)
+                        if (! old_val)
                         {
-                            str+="<br>";
+                            toastr.success("doi registered");
                         }
+                        else
+                        {
+                            toastr.success("metadata updated");
+                        }
+
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function dataciteURLConfirm(article_id)
+        {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_id': article_id,
+                'operation': 'datacite_url_confirm',
+            };
+
+            $.ajax({              
+                url: '{{ request.path }}', 
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false, 
+                processData: false,                     
+                success: function(response)
+                {
+                    var errors=response.errors;
+                    var warnings=response.warnings;
+                    var datacite=response.datacite;
+                    var xml=datacite.xml;
+                    var url=datacite.url;
+                    var doi=datacite.doi;
+                    var state=datacite.state;
+
+                    if (errors && errors.length>0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        $("#datacite_state_"+article_id).html(state)
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function almaUpConfirm(article_id)
+        {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_id': article_id,
+                'operation': 'alma_up_confirm',
+            };
+
+            $.ajax({              
+                url: '{{ request.path }}', 
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false, 
+                processData: false,                     
+                success: function(response)
+                {
+                    var errors=response.errors;
+                    var warnings=response.warnings;
+                    var alma=response.alma;
+                    var xml=alma.xml;
+                    var mmsid=alma.mmsid;
+                    var ac=alma.ac;
+                    
+                    if (errors && errors.length>0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        str="";
+                        if (mmsid) { str+=mmsid; }
+                        if (ac) { if (mmsid) { str+="<br>";} str += ac; } 
+                        $("#alma_mmsid_ac__"+article_id).html(str)
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function ajaxError()
+        {
+            errors=[];
+            errors.push("request failed");
+            errors.push("connection to server broken ?");
+            toastr.error(arrayToStringWithBr(errors));
+        }
+
+        function arrayToStringWithBr(msg)
+        {
+            var str="";
+            if (Array.isArray(msg))
+            {
+                var i;
+                for (i=0;i<msg.length;++i)
+                {
+                    str+=msg[i];
+                    if (i<(msg.length-1))
+                    {
+                        str+="<br>";
                     }
                 }
-                else
-                {
-                    str=msg;
-                }
-                return str;
             }
-        })  
+            else
+            {
+                str=msg;
+            }
+            return str;
+        }
     </script>
 {% endblock %}
 

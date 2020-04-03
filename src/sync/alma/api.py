@@ -31,6 +31,7 @@ class API:
             self.last_status=None
             self.last_response=None
             self.last_timeout=None
+            self.last_err=None
 
             file_cfg = Path(os.path.join(os.path.dirname(__file__),'api.json'))
             if ((not file_cfg.exists()) or (not file_cfg.is_file())):
@@ -65,8 +66,9 @@ class API:
             target = self.options['target']
             if target not in self.api_keys.keys():
                 raise Exception("AlmaApi config file error: no api key for 'target' " + target + "set")
-
         
+            self.setAPITarget(target)
+
         def setAPITarget(self,key):
             if key in self.api_keys:
                 self.api_key=self.api_keys[key]
@@ -74,47 +76,97 @@ class API:
                 raise Exception('AlmaApi, invalid api target: '+key)
 
 
+#        def sendAPIRequest(self,url,type='GET',xml=None,json=None):
+#
+#            headers={'Authorization' : self.api_key,
+#                    'Accept' : self.RESPONSE_FORMAT,
+#                    }
+#
+#            cnt_errors=0
+#            while cnt_errors<=int(self.options['error_threshold']):
+#                self.last_err=None
+#                timeout=False
+#
+#                try:
+#                    if type=='GET' or type=='DELETE':
+#                        r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']))
+#                    elif type=='PUT' or type=='POST':
+#                        if xml is not None:
+#                            headers['Content-Type']='application/xml; charset=utf-8'
+#                            r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),data=xml.encode('utf-8'))
+#                        elif json is not None:
+#                            r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),json=json)                            
+#                        else:
+#                            raise ValueError("Request type {}, but neither xml nor json data set".format(type))    
+#                    else:
+#                        raise NameError("Invalid request type {}".format(type))
+#
+#                except TimeoutError:
+#                    self.last_timeout=True
+#                else:
+#                    self.last_timeout=False
+#                    self.last_headers=r.headers
+#                    self.last_status=r.status_code
+#                    self.last_response=r.text
+#                    self.last_err=re.match('errorsExist',r.text)
+#                if not r or self.last_err is not None or self.last_timeout:
+#                    cnt_errors+=1
+#                else:
+#                    break
+#            if cnt_errors>int(self.options['error_threshold']):
+#                l=[]
+#                if self.last_err:
+#                    l.append(self.last_err)
+#                if self.last_timeout:
+#                    l.append(str(self.last_timeout))
+#                l.append(str(self.last_status))
+#                l.append(self.last_response)
+#                msg = ''.join(l)
+#
+#                raise Exception(msg)
+#            return self.last_response
+
 
         def sendAPIRequest(self,url,type='GET',xml=None,json=None):
+            errs = []
+            r = None
+            data = None
 
-            headers={'Authorization' : self.api_key,
-                    'Accept' : self.RESPONSE_FORMAT,
-                    }
+            headers = {'Authorization' : self.api_key,
+                        'Accept' : self.RESPONSE_FORMAT,
+                      }
 
-            cnt_errors=0
-            while cnt_errors<=int(self.options['error_threshold']):
-                err=None
-                timeout=False
-
-                try:
-                    if type=='GET' or type=='DELETE':
-                        r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']))
-                    elif type=='PUT' or type=='POST':
-                        if xml is not None:
-                            headers['Content-Type']='application/xml; charset=utf-8'
-                            r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),data=xml.encode('utf-8'))
-                        elif json is not None:
-                            r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),json=json)                            
-                        else:
-                            raise ValueError("Request type {}, but neither xml nor json data set".format(type))    
+            try:
+                if type=='GET' or type=='DELETE':
+                    r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']))
+                elif type=='PUT' or type=='POST':
+                    if xml is not None:
+                        headers['Content-Type']='application/xml; charset=utf-8'
+                        r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),data=xml.encode('utf-8'))
+                    elif json is not None:
+                        r=requests.request(type,url,headers=headers,timeout=int(self.options['timeout']),json=json)                            
                     else:
-                        raise NameError("Invalid request type {}".format(type))
+                        raise ValueError("Request type {}, but neither xml nor json data set".format(type))    
+                else:
+                    raise NameError("Invalid request type {}".format(type))
 
-                except TimeoutError:
-                    self.last_timeout=True
-                else:
-                    self.last_timeout=False
-                    self.last_headers=r.headers
-                    self.last_status=r.status_code
-                    self.last_response=r.text
-                    err=re.match('errorsExist',r.text)
-                if not r or err is not None or self.last_timeout:
-                    cnt_errors+=1
-                else:
-                    break
-            if cnt_errors>int(self.options['error_threshold']):
-                raise Exception('fatal api error')
-            return self.last_response
+            except Exception as e:
+                 errs.append('Alma API error')
+                 errs.append(str(e))
+                 if r:
+                    errs.append(str(r.status_code))
+                    errs.append(r.text)
+
+            if not errs:
+                match = re.search('errorsExist',r.text)
+                if match:
+                     errs.append('Alma API error')
+                     errs.append(r.text)
+
+            if r:
+                data = r.text
+
+            return (data,errs)
 
         def fetchSetMembers(self,set_id,offset,limit,max_records):
             url=API.ALMA_API_BASE+API.API_CONF+'sets/'+str(set_id)+'/members?limit=0&offset=0'
@@ -147,10 +199,8 @@ class API:
             
                 url=API.ALMA_API_BASE+API.API_CONF+'sets/'+str(set_id)+'/members?limit='+str(limit)+'&offset='+str(offset)
     #          print (url)
-                try:            
-                    response=self.sendAPIRequest(url);
-                except Exception as e:
-                    print (traceback.format_exc())
+                (response,errs)=self.sendAPIRequest(url)
+                if (errs):
                     ok=False
                 else:
                     SetMember.addMembersFromXml(setmembers,response)
@@ -162,11 +212,18 @@ class API:
 
         def createBibRecord(self,xml):
             url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'
-            self.sendAPIRequest(url,type='POST',xml=xml)
+            return self.sendAPIRequest(url,type='POST',xml=xml)
+
+        def updateBibRecord(self,xml,mmsid):
+            url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'+str(mmsid)
+            return self.sendAPIRequest(url,type='PUT',xml=xml)
 
 
-        @staticmethod
-        def stripXmlDeclaration(xml):
+        def getBibRecord(self,mmsid):
+            url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'+str(mmsid)
+            return self.sendAPIRequest(url)
+
+        def stripXmlDeclaration(self,xml):
             # strip encoding declaration
             # etree complains otherwise
             match=re.match(r'<\?xml version="1.0" encoding="UTF-8" standalone="yes"\?>(.+)',xml)
@@ -175,8 +232,7 @@ class API:
             else:
                 return xml
 
-        @staticmethod
-        def addXmlDeclaration(xml):
+        def addXmlDeclaration(self,xml):
             match=re.match(r'^<\?xml version="1.0" encoding="UTF-8" standalone="yes"\?>',xml)
             if match:
                 return xml
@@ -212,6 +268,10 @@ if __name__ == '__main__':
         print (traceback.format_exc())
 
     url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/997630548203336'
-    response=api.sendAPIRequest(url)
-    print (response)
+    (response,errs)=api.sendAPIRequest(url,type='other')
+    if errs:
+        msg = ','.join(errs)    
+        print (msg)
+    else:
+        print (response)
 

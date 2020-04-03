@@ -9,16 +9,17 @@ class MarcRecord:
 
     def parse(self,xml):
         root=etree.fromstring(xml)
+        record=root.findall('record')[0]
         self.controlfields=[]
         self.datafields=[]
-        self.leader=root.findall('leader')[0].text
-        nl_cfield=root.findall('controlfield')
+        self.leader=record.findall('leader')[0].text
+        nl_cfield=record.findall('controlfield')
         for node_cfield in nl_cfield:
             cfield=ControlField()
             cfield.value=node_cfield.text
             cfield.tag=node_cfield.attrib['tag']
             self.controlfields.append(cfield)
-        nl_dfield=root.findall('datafield')
+        nl_dfield=record.findall('datafield')
         for node_dfield in nl_dfield:
             dfield=DataField()
             dfield.value=node_dfield.text
@@ -137,20 +138,34 @@ class MarcRecord:
 
     def toXML(self):
         xml=''
+        xml+='<bib>'
         xml+='<record>'
-        xml+='<leader>'+self.leader+'</leader>'    
-        for datafield in self.datafields:
-            xml+='<datafield '
-            xml+='tag="'+datafield.tag+'" '
-            xml+='ind1="'+datafield.ind1+'" '
-            xml+='ind2="'+datafield.ind2+'">'
-            for subfield in datafield.subfields:
-                xml+='<subfield code="'
-                xml+=subfield.code+'">'
-                xml+=subfield.value
-                xml+='</subfield>'
-            xml+='</datafield>'
+        xml+='<leader>'+self.leader+'</leader>'  
+        for controlfield in self.controlfields:
+            xml+='<controlfield '
+            xml+='tag="'+controlfield.tag+'">'
+            xml+=controlfield.value
+            xml+='</controlfield>'
+          
+        try:
+            for datafield in self.datafields:
+                xml+='<datafield '
+                xml+='tag="'+datafield.tag+'" '
+                xml+='ind1="'+datafield.ind1+'" '
+                xml+='ind2="'+datafield.ind2+'">'
+                for subfield in datafield.subfields:
+                    xml+='<subfield code="'
+                    xml+=subfield.code+'">'
+                    xml+=subfield.value
+                    xml+='</subfield>'
+                xml+='</datafield>'
+        except Exception as e:
+            print (datafield.tag)
+            print (datafield.ind1)
+            print (datafield.ind2)
+            raise Exception(str(e))
         xml+='</record>'
+        xml+='</bib>'
 
         return xml
 

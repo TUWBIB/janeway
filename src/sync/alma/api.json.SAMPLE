@@ -2,7 +2,7 @@
     "options" : 
     { 
         "error_threshold" : 0,
-        "timeout" : 2,
+        "timeout" : 5,
         "target" : "sandbox"
     },
     "keys" :
