@@ -90,14 +90,17 @@
                                         <li><a href="#">Alma</a>
                                             <ul class="vertical menu nested">
                                             <li>
-                                                <a href="#" class="btn_alma_up" id="btn_alma_up_{{ article.pk }}">Sync To Alma</a>
+                                                <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
                                             </li>
                                             <li>
-                                                <a href="#" class="btn_alma_down" id="btn_alma_down_{{ article.pk }}">Sync From Alma</a>
+                                                <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
+                                            </li>
+                                            <li>
+                                                <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
                                             </li>
                                             <hr>
                                             <li>
-                                                <a href="#" class="btn_alma_view_current_marc" id="btn_alma_view_current_marc_{{ article.pk }}">View current marc record</a>
+                                                <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
                                             </li>
                                             </ul>
                                         </li>
@@ -146,7 +149,7 @@
 
         $(document).ready(function () 
         {
-            $(".btn_alma_up").on("click", function(e)
+            $(".btn_alma_create_update").on("click", function(e)
             {
                 e.preventDefault();
 
@@ -155,7 +158,7 @@
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
                     'article_id': id,
-                    'operation': 'alma_up',
+                    'operation': 'alma_create_update',
                 };
 
                 $.ajax({              
@@ -214,7 +217,7 @@
 			                    modal.close();
                                 $('#modal').remove();
                                 $('.reveal-overlay').remove();
-                                almaUpConfirm(id)                                
+                                almaCreateUpdateConfirm(id)                                
                             });
                             
                             $('#modal').children('.cancel').on('click', function() 
@@ -232,15 +235,7 @@
                 });
             })
 
-            $(".btn_alma_down").on("click", function(e)
-            {
-                e.preventDefault();
-
-                toastr.error("not implemented");                        
-            })
-
-
-            $(".btn_alma_view_current_marc").on("click", function(e)
+            $(".btn_alma_push_nz").on("click", function(e)
             {
                 e.preventDefault();
 
@@ -249,7 +244,133 @@
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
                     'article_id': id,
-                    'operation': 'alma_view_current_marc',
+                    'operation': 'alma_push_nz',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var alma=response.alma;
+                        var xml=alma.xml;
+                        var mmsid=alma.mmsid;
+                        var ac=alma.ac;
+
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
+                            var content = '<div class="reveal small" id="modal" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Push To Network Zone'+'</h2>';
+                            content+='<h3>Warnings</h3>';
+                            content+="<p>Further updates to the record won't be possible. Are you sure?</p>"
+                            content+='<button class="button success ok float-center">Push To Network Zone</button>'+
+			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                                '</div>';
+
+                            $('body').append(content);
+
+                            var modal = new Foundation.Reveal($('#modal'));
+                            modal.open();
+
+                            $('#modal').children('.ok').on('click', function() 
+                            {
+			                    modal.close();
+                                $('#modal').remove();
+                                $('.reveal-overlay').remove();
+                                almaPushNZConfirm(id)                                
+                            });
+                            
+                            $('#modal').children('.cancel').on('click', function() 
+                            {
+			                    modal.close();
+			                    $('#modal').remove();
+                                $('.reveal-overlay').remove();
+                            });
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
+            })
+
+            $(".btn_alma_fetch_ac").on("click", function(e)
+            {
+                e.preventDefault();
+
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'alma_fetch_ac',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var alma=response.alma;
+                        var xml=alma.xml;
+                        var mmsid=alma.mmsid;
+                        var ac=alma.ac;
+
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            str="";
+                            if (mmsid) { str+=mmsid; }
+                            if (ac) { if (mmsid) { str+="<br>";} str += ac; } 
+
+                            console.log(str)
+
+                            $("#alma_mmsid_ac_"+id).html(str)
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
+            })
+
+
+            $(".btn_alma_view_current").on("click", function(e)
+            {
+                e.preventDefault();
+
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'alma_view_current',
                 };
 
                 $.ajax({              
@@ -687,12 +808,12 @@
             })
         }
 
-        function almaUpConfirm(article_id)
+        function almaCreateUpdateConfirm(article_id)
         {
             var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }} ',
                 'article_id': article_id,
-                'operation': 'alma_up_confirm',
+                'operation': 'alma_create_update_confirm',
             };
 
             $.ajax({              
@@ -720,7 +841,7 @@
                         str="";
                         if (mmsid) { str+=mmsid; }
                         if (ac) { if (mmsid) { str+="<br>";} str += ac; } 
-                        $("#alma_mmsid_ac__"+article_id).html(str)
+                        $("#alma_mmsid_ac_"+article_id).html(str)
                     }
                 },
                 error: function(response)
@@ -729,6 +850,47 @@
                 }
             })
         }
+
+        function almaPushNZConfirm(article_id)
+        {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_id': article_id,
+                'operation': 'alma_push_nz_confirm',
+            };
+
+            $.ajax({              
+                url: '{{ request.path }}', 
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false, 
+                processData: false,                     
+                success: function(response)
+                {
+                    var errors=response.errors;
+                    var warnings=response.warnings;
+                    var alma=response.alma;
+                    var xml=alma.xml;
+                    var mmsid=alma.mmsid;
+                    var ac=alma.ac;
+                    
+                    if (errors && errors.length>0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        toastr.info("Record successfully pushed to NZ.<br>Give it a while, then fetch AC.")
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
 
         function ajaxError()
         {

@@ -22,7 +22,6 @@ def create_article_doi(article):
 
     return doi
 
-
 def checkArticleMandatoryFields(article):
     errors = []
 
@@ -473,12 +472,12 @@ def articleToMarc(article):
             datafield.addSubfield(marc.SubField.createSubfield("d",str(article.primary_issue.tuw_year)))
             if article.journal.code == 'OES' or article.journal.code == 'OEST':
                 s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+str(article.primary_issue.tuw_year)+'), '
-                s += 'Heft '+str(article.primary_issue.tuw_issue_str)+', '
+                s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubfield(marc.SubField.createSubfield("g",s))
             elif article.journal.code == 'JFM' or article.journal.code == 'JFM':
                 s = 'Jahrgang ('+str(article.primary_issue.tuw_year)+'), '
-                s += 'Heft '+str(article.primary_issue.tuw_issue_str)+', '
+                s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubfield(marc.SubField.createSubfield("g",s))
             else:
@@ -535,7 +534,6 @@ def articleToMarc(article):
             datafield.addSubfield(marc.SubField.createSubfield("9",'LOCAL'))
             mr.addDataField(datafield)
 
-
             xml = mr.toXML()
 
             x = etree.fromstring(xml)
@@ -560,6 +558,17 @@ def setMMSId(article,mmsid):
 
     return errs
 
+def setAC(article,ac):
+    errs = []
+    try:
+        identifier_models.Identifier.objects.filter(article=article,id_type='ac').delete()
+        identifier_models.Identifier.objects.create(article=article,id_type='ac',identifier=ac)
+    except Exception as e:
+        print (traceback.format_exc())
+        errs.append(''.join(['error writing db: ',str(e)]))
+
+    return errs
+
 
 #def get_next_doi(journal_code,year):
 #    api = datacite_api.API.getInstance()
@@ -577,33 +586,3 @@ def setMMSId(article,mmsid):
 #    doi = searchstr+str(year)+'.'+str(next_suffix)
 #
 #    return doi
-
-#LDR	02066naa a2200397 c 4500
-#	001	990131381750203331
-#	005	20200211162934.0
-#	007	cr#|||||||||||
-#	008	150523|2005 ||| oa ||| 0 eng c
-#	009	AC11360420
-#	024	7_ |a 10.34749/oes.2005.1045 |2 doi
-#	024	7_ |a urn:nbn:at:at-ubtuw:4-1045 |2 urn
-#	035	__ |a (AT-OBV)AC11360420
-#	035	__ |a AC11360420
-#	035	__ |a (Aleph)013138175ACC01
-#	035	__ |a (VLID)455368
-#	035	__ |a (DE-599)OBVAC11360420
-#	040	__ |a TUW |b ger |c VL-NEW |d AT-UBTUW |e rda
-#	044	__ |c XA-AT
-#	090	__ |h g
-#	100	1_ |a Getzner, Michael |4 aut
-#	245	10 |a Regional Sustainability and Governance: The potentials of regional state aid
-#	264	_1 |a Wien |b Technische Universität Wien |c 2005
-#	336	__ |b txt
-#	337	__ |b c
-#	338	__ |b cr
-#	520	__ |a eng: The presentation of the conceptual level of regional economic policy making as well as the empirical examination of policy practice has shown that there is still a significant lack of integration of environmental and sustainability issues into other policy fields. Even for the federal province of Salzburg which has signed and drafted a number of environment and sustainability-related policy guidelines, many concrete policy instruments and programs do not account for integrative approaches. As a recommendation for regional policy makers, the cornerstones of a sustainability-compliant state aid program are drafted.
-#	773	18 |t Der öffentliche Sektor |d 2005 |g Jahrgang 31 (2005), Heft 1/2, Seiten 3-7 |w (AT-OBV)AC10863779
-#	856	40 |q text/html |u https://doi.org/10.34749/oes.2005.1045 |x TUW |3 Volltext
-#	856	40 |m V:AT-OBV;B:AT-TUW |q text/html |u https://resolver.obvsg.at/urn:nbn:at:at-ubtuw:4-1045 |x TUW |3 Volltext |o OBV-EDOC-VL
-#	970	2_ |a TUW |d OA-ARTICLE
-#	970	9_ |m V:AT-OBV;B:AT-TUW |q application/pdf |u http://media.obvsg.at/AC11360420-2001 |x TUW |3 Volltext
-#	971	9_ |a regional economic policy / state aid / sustainable development criteria

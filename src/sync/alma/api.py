@@ -223,6 +223,89 @@ class API:
             url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'+str(mmsid)
             return self.sendAPIRequest(url)
 
+        def createItemizedBibRecordSet(self,setname='JW created set'):
+            url = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/sets/'
+            xml = ''
+            xml += '<set>'
+            xml += '<name>'+setname+'</name>'
+            xml += '<type>ITEMIZED</type>'
+            xml += '<content>BIB_MMS</content>'
+            xml += '</set>'
+
+            setid = None
+            (response,errs)=self.sendAPIRequest(url,type='POST',xml=xml)
+            if not errs:
+                match=re.search('<id>(\d+)</id>',response)
+                if match:
+                    setid = match[1]
+
+            return setid,errs
+
+        def deleteSet(self,setid):
+            url = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/sets/'+setid
+            return self.sendAPIRequest(url,type='DELETE')
+
+        def addIdToSet(self,setid,recid):
+            url = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/sets/'+setid+'?op=add_members'
+            xml = ''
+            xml += '<set>'
+            xml += '<members>'
+            xml += '<member>'
+            xml += '<id>'+str(recid)+'</id>'
+            xml += '</member>'
+            xml += '</members>'
+            xml += '</set>'
+            print (xml)
+
+            return self.sendAPIRequest(url,type='POST',xml=xml)
+
+        def runLinkJob(self,setid):
+            url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/jobs/M85?op=run'
+            xml="""
+            <job>
+                <parameters>
+                    <parameter>
+                        <name>contribute_nz</name>
+                        <value>true</value>
+                    </parameter>
+                    <parameter>
+                        <name>non_serial_match_profile</name>
+                        <value>com.exlibris.repository.mms.match.OtherSystemOrStandardNumberMatchProfile</value>
+                    </parameter>
+                    <parameter>
+                        <name>non_serial_match_prefix</name>
+                        <value/>
+                    </parameter>
+                    <parameter>
+                        <name>serial_match_profile</name>
+                        <value>com.exlibris.repository.mms.match.OtherSystemOrStandardNumberSerialMatchProfile</value>
+                    </parameter>
+                    <parameter>
+                        <name>serial_match_prefix</name>
+                        <value/>
+                    </parameter>
+                    <parameter>
+                        <name>ignoreResourceType</name>
+                        <value>false</value>
+                    </parameter>
+                    <parameter>
+                        <name>set_id</name>
+            """
+            xml+='<value>'+str(setid)+'</value>'
+            xml+="""
+                    </parameter>
+                    <parameter>
+                        <name>job_name</name>
+                        <value>Link a set of records to the Network Zone</value>
+                    </parameter>
+                </parameters>
+            </job>
+            """
+
+            print (xml)
+
+            return self.sendAPIRequest(url,type='POST',xml=xml)
+
         def stripXmlDeclaration(self,xml):
             # strip encoding declaration
             # etree complains otherwise
@@ -266,12 +349,4 @@ if __name__ == '__main__':
         api.setAPITarget('sandbox')
     except Exception as e:
         print (traceback.format_exc())
-
-    url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/997630548203336'
-    (response,errs)=api.sendAPIRequest(url,type='other')
-    if errs:
-        msg = ','.join(errs)    
-        print (msg)
-    else:
-        print (response)
 

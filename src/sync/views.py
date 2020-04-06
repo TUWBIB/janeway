@@ -2,6 +2,7 @@ import json
 import traceback
 import re
 import lxml.etree as etree
+import time
 
 from django.shortcuts import render
 from django.conf import settings
@@ -48,17 +49,23 @@ def sync(request):
         operation = data["operation"]
         response = None
 
-        if operation == "alma_up":
-            response = almaUp(article)
+        if operation == "alma_create_update":
+            response = almaCreateUpdate(article)
 
-        elif operation == "alma_up_confirm":
-            response = almaUpConfirm(article)
+        elif operation == "alma_create_update_confirm":
+            response = almaCreateUpdateConfirm(article)
 
-        elif operation == "alma_down":
-            pass
+        elif operation == "alma_push_nz":
+            response = almaPushNZ(article)
 
-        elif operation == "alma_view_current_marc":
-            response = almaViewCurrentMarc(article)
+        elif operation == "alma_push_nz_confirm":
+            response = almaPushNZConfirm(article)
+
+        elif operation == "alma_fetch_ac":
+            response = almaFetchAC(article)
+
+        elif operation == "alma_view_current":
+            response = almaViewCurrent(article)
 
         elif operation == "datacite_metadata":
             response = articleToDataCiteXML(article_id)
@@ -209,7 +216,7 @@ def deleteDOI(article):
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : None, 'state' : None }})
 
 
-def almaViewCurrentMarc(article):
+def almaViewCurrent(article):
     errors = []
     mmsid = article.get_mmsid()
     ac = article.get_ac()
@@ -242,14 +249,14 @@ def almaViewCurrentMarc(article):
         'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
 
 
-def almaUp(article):
+def almaCreateUpdate(article):
     (xml,errors,warnings) = logic.articleToMarc(article)
 
     return JsonResponse({ 'errors': errors, 'warnings': warnings,
         'alma' : { 'xml' : xml, 'mmsid' : None, 'ac' : None }})
 
 
-def almaUpConfirm(article):
+def almaCreateUpdateConfirm(article):
     errors = []
 
     mmsid = article.get_mmsid()
@@ -268,7 +275,6 @@ def almaUpConfirm(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
     
-
     if mmsid:
         (xml,errors) = api.getBibRecord(mmsid)
         if errors:
@@ -285,12 +291,10 @@ def almaUpConfirm(article):
         (xml,errors) = api.updateBibRecord(xml,mmsid)
     else:
         (xml,errors) = api.createBibRecord(xml)
-
     
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': warnings,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
-
 
     try:
         xml = api.stripXmlDeclaration(xml)
@@ -305,5 +309,157 @@ def almaUpConfirm(article):
 
     errors = logic.setMMSId(article,mmsid)
 
-    return JsonResponse({ 'errors': errors, 'warnings': warnings,
+    return JsonResponse({ 'errors': errors, 'warnings': None,
         'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
+
+
+def almaPushNZ(article):
+    errors = []
+
+    mmsid = article.get_mmsid()
+    ac = article.get_ac()
+
+    if not mmsid:
+        errors.append("record has no (local) mmsid, can't push to NZ")
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+    
+    try:
+        api = alma_api.API()
+    except Exception as e:
+        errors.append('error getting Alma API instance')
+        errors.append(str(e))
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+    (xml,errors) = api.getBibRecord(mmsid)
+    if errors:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    if match:
+        mmsid_nz=match[1]
+        errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+    
+    return JsonResponse({ 'errors': None, 'warnings': None,
+        'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+
+
+
+def almaPushNZConfirm(article):
+    errors = []
+
+    mmsid = article.get_mmsid()
+    ac = article.get_ac()
+
+    if not mmsid:
+        errors.append("record has no (local) mmsid, can't push to NZ")
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+    
+    try:
+        api = alma_api.API()
+    except Exception as e:
+        errors.append('error getting Alma API instance')
+        errors.append(str(e))
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+    (xml,errors) = api.getBibRecord(mmsid)
+    if errors:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    if match:
+        mmsid_nz=match[1]
+        errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+
+    # from here on out actual network zone push
+    # 1. create set
+    # 2. add bib record to set
+    # 3. call job
+    # 4. delete set XXX not possible until job has run
+
+    (setid,errors) = api.createItemizedBibRecordSet(setname='JW set - '+mmsid)
+    if errors:
+        errors.insert(0,'error creating set')
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
+
+    (xml,errors) = api.addIdToSet(setid,mmsid)
+    if errors:
+        errors.insert(0,'error adding record to set')
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
+   
+    (xml,errors) = api.runLinkJob(setid)
+    if errors:
+        msg = ','.join(errors)    
+        print (msg)        
+        errors.insert(0,'error running linking job')
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
+
+#    (xml,errors) = api.deleteSet(setid)
+#    if errors:
+#        errors.insert(0,'error deleting set')
+#        return JsonResponse({ 'errors': errors, 'warnings': None,
+#            'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
+#
+  
+    return JsonResponse({ 'errors': None, 'warnings': None,
+        'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+def almaFetchAC(article):
+    errors = []
+    mmsid = article.get_mmsid()
+    ac = article.get_ac()
+
+    if not mmsid:
+        errors.append("record has no local mmsid, create record!")
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+    
+    try:
+        api = alma_api.API()
+    except Exception as e:
+        errors.append('error getting Alma API instance')
+        errors.append(str(e))
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+    (xml,errors) = api.getBibRecord(mmsid)
+    if errors:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    if not match:
+        errors.append("record has no NZ mmsid, push to NZ!: ")
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+    
+    try:
+        xml = api.stripXmlDeclaration(xml)
+        mr = marc.MarcRecord()
+        mr.parse(xml)
+        ac = mr.getAC()
+    except Exception as e:
+        errors.append('error parsing API response')
+        errors.append(str(e))
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
+    errors = logic.setAC(article,ac)
+
+    return JsonResponse({ 'errors': errors, 'warnings': None,
+        'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+
