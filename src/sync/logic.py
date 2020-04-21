@@ -310,14 +310,14 @@ def articleToMarc(article):
             s += now.strftime('%y%m%d')
             s += '|'
             s += str(article.primary_issue.tuw_year)
-            s += '####|||#####o#####|||#0#'
+            s += '    |||     o     ||| 0 '
 
             if lang:
                 s += lang    
             else:
-                s += '###'
+                s += '   '
 
-            s += '#c'
+            s += ' c'
             mr.addControlField(marc.ControlField.createControlField("008",s))
 
 
@@ -365,13 +365,19 @@ def articleToMarc(article):
                 mr.addDataField(datafield)
 
             # 245 10 title statement
-            datafield=marc.DataField.createDataField("245","1","0")
+            author=article.frozen_authors()[0]  
+            if author:
+                datafield=marc.DataField.createDataField("245","1","0")
+            else:
+                datafield=marc.DataField.createDataField("245","0","0")
             datafield.addSubfield(marc.SubField.createSubfield("a",escape(article.title)))
             sf_b = ''
             if article.subtitle:
                 sf_b += article.subtitle
             if article.title_de:
-                sf_b += '= '+article.title_de
+                sf_b += ' = '+article.title_de
+            if article.subtitle_de:
+                sf_b += ' : '+article.subtitle_de
             if sf_b:
                 datafield.addSubfield(marc.SubField.createSubfield("b",escape(sf_b)))
 
@@ -401,8 +407,22 @@ def articleToMarc(article):
             datafield.addSubfield(marc.SubField.createSubfield("b","Technische Universität Wien"))
             datafield.addSubfield(marc.SubField.createSubfield("c",str(article.primary_issue.tuw_year)))
             mr.addDataField(datafield)
-           
 
+            # 300 __ physical description
+            datafield=marc.DataField.createDataField("300"," "," ")
+            match=re.match('(\d+)-(\d+)',article.page_numbers)
+            no_pages=None
+            if match:
+                first_page=int(match[1])
+                last_page=int(match[2])
+                no_pages=last_page-first_page+1
+            sf_a="Online-Ressource"
+            if no_pages:
+                sf_a+=" ("+str(no_pages)+" Seiten)"
+            datafield.addSubfield(marc.SubField.createSubfield("a",sf_a))
+            datafield.addSubfield(marc.SubField.createSubfield("b","Illustrationen, Diagramme"))
+            mr.addDataField(datafield)
+           
             # 336-338
             datafield=marc.DataField.createDataField("336"," "," ")
             datafield.addSubfield(marc.SubField.createSubfield("b","txt"))
