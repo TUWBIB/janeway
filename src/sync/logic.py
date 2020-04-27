@@ -2,6 +2,7 @@ import traceback
 import re
 import lxml.etree as etree
 import datetime
+import locale
 from xml.sax.saxutils import escape, unescape
 
 from django.db.models import Max
@@ -402,11 +403,15 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 264 _1 publication
+            old_locale=locale.getlocale(locale.LC_TIME)
+            locale.setlocale(locale.LC_TIME, "de_AT")
             datafield=marc.DataField.createDataField("264"," ","1")
             datafield.addSubfield(marc.SubField.createSubfield("a","Wien"))
             datafield.addSubfield(marc.SubField.createSubfield("b","Technische Universität Wien"))
-            datafield.addSubfield(marc.SubField.createSubfield("c",str(article.primary_issue.tuw_year)))
+            datafield.addSubfield(marc.SubField.createSubfield("c",article.date_published.strftime("%B %Y")))
             mr.addDataField(datafield)
+            locale.setlocale(locale.LC_TIME, old_locale)
+
 
             # 300 __ physical description
             datafield=marc.DataField.createDataField("300"," "," ")
@@ -418,7 +423,10 @@ def articleToMarc(article):
                 no_pages=last_page-first_page+1
             sf_a="Online-Ressource"
             if no_pages:
-                sf_a+=" ("+str(no_pages)+" Seiten)"
+                if no_pages == 1:
+                    sf_a+=" ("+str(no_pages)+" Seite)"
+                else:
+                    sf_a+=" ("+str(no_pages)+" Seiten)"
             datafield.addSubfield(marc.SubField.createSubfield("a",sf_a))
             datafield.addSubfield(marc.SubField.createSubfield("b","Illustrationen, Diagramme"))
             mr.addDataField(datafield)
