@@ -310,7 +310,7 @@ def articleToMarc(article):
             s = ''
             s += now.strftime('%y%m%d')
             s += '|'
-            s += str(article.primary_issue.tuw_year)
+            s += str(article.date_published.strftime("%Y"))
             s += '    |||     o     ||| 0 '
 
             if lang:
@@ -408,7 +408,7 @@ def articleToMarc(article):
             datafield=marc.DataField.createDataField("264"," ","1")
             datafield.addSubfield(marc.SubField.createSubfield("a","Wien"))
             datafield.addSubfield(marc.SubField.createSubfield("b","Technische Universität Wien"))
-            datafield.addSubfield(marc.SubField.createSubfield("c",article.date_published.strftime("%B %Y")))
+            datafield.addSubfield(marc.SubField.createSubfield("c",article.date_published.strftime("%d %B %Y")))
             mr.addDataField(datafield)
             locale.setlocale(locale.LC_TIME, old_locale)
 
