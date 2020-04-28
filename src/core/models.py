@@ -843,9 +843,23 @@ class Galley(models.Model):
         return "{0} ({1})".format(self.id, self.label)
 
     def render(self):
-        return files.render_xml(self.file, self.article, xsl_file=self.xsl_file)
+        return files.render_xml(
+                self.file, self.article,
+                xsl_path=self.xsl_file.file.path
+        )
+
+    def render_crossref(self):
+        xsl_path = os.path.join(
+                settings.BASE_DIR, 'transform', 'xsl',  files.CROSSREF_XSL)
+        return files.render_xml(
+                self.file, self.article,
+                xsl_path=xsl_path
+        )
 
     def has_missing_image_files(self, show_all=False):
+        if not self.file.mime_type in files.MIMETYPES_WITH_FIGURES:
+            return []
+
         xml_file_contents = self.file.get_file(self.article)
 
         souped_xml = BeautifulSoup(xml_file_contents, 'lxml')
@@ -901,8 +915,12 @@ class Galley(models.Model):
         return files.MIMETYPES_WITH_FIGURES
 
     def save(self, *args, **kwargs):
-        if not self.xsl_file:
-            self.xsl_file = self.article.journal.xsl
+        if self.type == 'xml' and not self.xsl_file:
+            if self.article.journal:
+                self.xsl_file = self.article.journal.xsl
+            else:
+                # Articles might not be part of any journals (e.g.: preprints)
+                self.xsl_file = default_xsl()
         super().save(*args, **kwargs)
 
 
@@ -921,6 +939,11 @@ class XSLFile(models.Model):
     def __str__(self):
         return "%s(%s@%s)" % (
             self.__class__.__name__, self.label, self.file.path)
+
+
+def default_xsl():
+    return XSLFile.objects.get(
+            label=settings.DEFAULT_XSL_FILE_LABEL).pk
 
 
 class SupplementaryFile(models.Model):
@@ -1095,12 +1118,12 @@ class DomainAlias(AbstractSiteModel):
 
 BASE_ELEMENTS = [
     {'name': 'review',
-     'handshake_url': 'review_unassigned_article',
+     'handshake_url': 'review_home',
      'jump_url': 'review_in_review',
      'stage': submission_models.STAGE_UNASSIGNED,
      'article_url': True},
     {'name': 'copyediting',
-     'handshake_url': 'article_copyediting',
+     'handshake_url': 'copyediting',
      'jump_url': 'article_copyediting',
      'stage': submission_models.STAGE_EDITOR_COPYEDITING,
      'article_url': True},
@@ -1115,7 +1138,7 @@ BASE_ELEMENTS = [
      'stage': submission_models.STAGE_PROOFING,
      'article_url': False},
     {'name': 'prepublication',
-     'handshake_url': 'publish_article',
+     'handshake_url': 'publish',
      'jump_url': 'publish_article',
      'stage': submission_models.STAGE_READY_FOR_PUBLICATION,
      'article_url': True}
@@ -1132,12 +1155,35 @@ class WorkflowElement(models.Model):
     element_name = models.CharField(max_length=255)
     handshake_url = models.CharField(max_length=255)
     jump_url = models.CharField(max_length=255)
-    stage = models.CharField(max_length=255, default=submission_models.STAGE_UNASSIGNED)
+    stage = models.CharField(
+        max_length=255,
+        default=submission_models.STAGE_UNASSIGNED,
+    )
     article_url = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=20)
 
     class Meta:
         ordering = ('order', 'element_name')
+
+    @property
+    def stages(self):
+        from core import workflow
+        try:
+            return workflow.ELEMENT_STAGES[self.element_name]
+        except KeyError:
+            return [self.stage]
+
+    @property
+    def articles(self):
+        return submission_models.Article.objects.filter(
+            stage__in=self.stages,
+            journal=self.journal,
+        )
+
+    @property
+    def settings(self):
+        from core import workflow
+        return workflow.workflow_plugin_settings(self)
 
     def __str__(self):
         return self.element_name

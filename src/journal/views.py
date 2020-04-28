@@ -132,9 +132,11 @@ def articles(request):
     pinned_articles = [pin.article for pin in models.PinnedArticle.objects.filter(
         journal=request.journal)]
     pinned_article_pks = [article.pk for article in pinned_articles]
-    article_objects = submission_models.Article.objects.filter(journal=request.journal,
-                                                               date_published__lte=timezone.now(),
-                                                               section__pk__in=filters).prefetch_related(
+    article_objects = submission_models.Article.objects.filter(
+        journal=request.journal,
+        stage=submission_models.STAGE_PUBLISHED,
+        date_published__lte=timezone.now(),
+        section__pk__in=filters).prefetch_related(
         'frozenauthor_set').order_by(sort).exclude(
         pk__in=pinned_article_pks)
 
@@ -427,8 +429,9 @@ def download_galley(request, article_id, galley_id):
     """
     article = get_object_or_404(submission_models.Article.allarticles,
                                 pk=article_id,
+                                journal=request.journal,
                                 date_published__lte=timezone.now(),
-                                stage=submission_models.STAGE_PUBLISHED)
+                                stage__in=submission_models.PUBLISHED_STAGES)
     galley = get_object_or_404(core_models.Galley, pk=galley_id)
 
     embed = request.GET.get('embed', False)
@@ -455,8 +458,9 @@ def view_galley(request, article_id, galley_id):
     article_to_serve = get_object_or_404(
         submission_models.Article.allarticles,
         pk=article_id,
+        journal=request.journal,
         date_published__lte=timezone.now(),
-        stage=submission_models.STAGE_PUBLISHED
+        stage__in=submission_models.PUBLISHED_STAGES
     )
     galley = get_object_or_404(
         core_models.Galley,
@@ -886,7 +890,7 @@ def publish_article(request, article_id):
             shared.clear_cache()
 
             if request.journal.element_in_workflow(element_name='prepublication'):
-                workflow_kwargs = {'handshake_url': 'publish_article',
+                workflow_kwargs = {'handshake_url': 'publish',
                                    'request': request,
                                    'article': article,
                                    'switch_stage': True}
@@ -1017,6 +1021,7 @@ def manage_issues(request, issue_id=None, event=None):
         'form': form,
         'modal': modal,
         'galley_form': galley_form,
+        'articles': issue.get_sorted_articles(published_only=False) if issue else None,
     }
 
     return render(request, template, context)
@@ -1954,3 +1959,33 @@ def doi_redirect(request, identifier_type, identifier):
         raise Http404()
 
     return redirect(article_object.local_url)
+
+
+def serve_article_xml(request, identifier_type, identifier):
+    article_object = submission_models.Article.get_article(
+        request.journal,
+        identifier_type,
+        identifier,
+    )
+
+    if not article_object:
+        raise Http404
+
+    xml_galleys = article_object.galley_set.filter(
+        file__mime_type__in=files.XML_MIMETYPES,
+    )
+
+    if xml_galleys.exists():
+
+        if xml_galleys.count() > 1:
+            logger.error("Found multiple XML galleys for article {id}, "
+                         "returning first match".format(id=article_object.pk))
+
+        xml_galley = xml_galleys[0]
+    else:
+        raise Http404
+
+    return HttpResponse(
+        xml_galley.file.get_file(article_object),
+        content_type=xml_galley.file.mime_type,
+    )
