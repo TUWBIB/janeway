@@ -450,6 +450,12 @@ def articleToMarc(article):
             datafield.addSubfield(marc.SubField.createSubfield("b","PDF"))
             mr.addDataField(datafield)
 
+            # 500 __ peer reviewed
+            if article.peer_reviewed:
+                datafield=marc.DataField.createDataField("500"," "," ")
+                datafield.addSubfield(marc.SubField.createSubfield("a","Refereed/Peer-reviewed"))
+                mr.addDataField(datafield)
+
             # 506 0_, open access, fixed
             datafield=marc.DataField.createDataField("506","0"," ")
             datafield.addSubfield(marc.SubField.createSubfield("a","Open Access"))
