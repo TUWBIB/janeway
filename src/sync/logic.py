@@ -15,7 +15,7 @@ from sync.alma import api as alma_api
 from sync.alma import marc
 
 def create_article_doi(article):
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
     journal_code = article.journal.code
     prefix = api.journals[journal_code]['prefix']
     namespace_separator = api.journals[journal_code]['namespace_separator']
@@ -36,7 +36,7 @@ def checkArticleMandatoryFields(article):
 
 def articleToDataCiteXML(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
 
     errors = checkArticleMandatoryFields(article)
 
@@ -206,7 +206,7 @@ def articleToDataCiteXML(article_id):
 
 def getCurrentDataCiteXML(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
 
     warnings = []
     errors = []
@@ -602,7 +602,7 @@ def setAC(article,ac):
 
 
 #def get_next_doi(journal_code,year):
-#    api = datacite_api.API.getInstance()
+#    api = datacite_api.API()
 #    prefix = api.journals[journal_code]['prefix']
 #    namespace_separator = api.journals[journal_code]['namespace_separator']
 #    searchstr = prefix+'/'+namespace_separator

@@ -119,7 +119,7 @@ def articleMetadataConfirm(article_id):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
     
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
     match = re.search(r'<identifier\sidentifierType="DOI">(.+)</identifier>',xml)
     if match is None:
         errors = ['cant extract DOI from xml']
@@ -140,7 +140,7 @@ def articleMetadataConfirm(article_id):
 
 def dataciteURL(article,host):
     errors = []
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
     url = api.options['protocol']
     url += host
     url += reverse('article_view',args=['id',article.pk])
@@ -158,7 +158,7 @@ def dataciteURL(article,host):
 
 def dataciteURLConfirm(article,host):
     errors = []
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
     url = api.options['protocol']
     url += host
     url += reverse('article_view',args=['id',article.pk])
@@ -190,7 +190,7 @@ def dataciteURLConfirm(article,host):
 
 def deleteDOI(article):
     errors = []
-    api = datacite_api.API.getInstance()
+    api = datacite_api.API()
     doi = article.get_doi()
     state = article.datacite_state
     if state is None or state != submission_models.DATACITE_STATE_DRAFT:

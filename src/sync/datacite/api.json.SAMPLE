@@ -1,0 +1,23 @@
+{ 
+    "options" : 
+    { 
+        "conn_timeout" : 2,
+        "read_timeout" : 5,
+        "id_offset" : 4000,
+        "protocol" : "http://"
+    },
+    "login" :
+    {
+        "endpoint" : "https://mds.test.datacite.org/",
+        "user" : "user",
+        "password" : "password"
+    },
+    "journals" :
+    {
+        "journnal_code" :
+        {
+            "prefix" : "10.12345",
+            "namespace_separator" : "devel"
+        },
+    }
+}
