@@ -83,6 +83,9 @@
                                                 <a href="#" class="btn_datacite_check_metadata" id="btn_datacite_check_metadata_{{ article.pk }}">Check Metadata</a>
                                             </li>
                                             <li>
+                                                <a href="#" class="btn_datacite_check_url" id="btn_datacite_check_url_{{ article.pk }}">Check URL</a>
+                                            </li>
+                                            <li>
                                                 <a href="#" class="btn_datacite_delete_doi" id="btn_datacite_delete_doi_{{ article.pk }}">Delete DOI</a>
                                             </li>
                                           </ul>
@@ -492,6 +495,74 @@
                     }
                 });
             })
+
+            $(".btn_datacite_check_url").on("click", function(e)
+            {
+                e.preventDefault();
+
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                var data = {
+                    'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                    'article_id': id,
+                    'operation': 'datacite_check_url',
+                };
+
+                $.ajax({              
+                    url: '{{ request.path }}', 
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: false, 
+                    processData: false,                     
+                    success: function(response)
+                    {
+                        var errors=response.errors;
+                        var warnings=response.warnings;
+                        var datacite=response.datacite;
+                        var xml=datacite.xml;
+                        var url=datacite.url;
+                        var doi=datacite.doi;
+                        var state=datacite.state;
+
+                        if (errors && errors.length>0)
+                        {
+                            toastr.error(arrayToStringWithBr(errors));
+                        }
+                        else
+                        {
+                            if (warnings && warnings.length>0)
+                            {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+
+                            var content = '<div class="reveal small" id="modal" data-close-on-click="false" data-close-on-esc="false"'+
+                                 '<h2>'+'Current URL'+'</h2>';
+                            content+='<p class="lead"><pre>'+_.escape(url)+'</pre></p>'+
+                            '<button class="button success ok float-center">Close</button>'+
+                                '</div>';
+
+                            $('body').append(content);
+
+                            var modal = new Foundation.Reveal($('#modal'));
+                            modal.open();
+
+                            $('#modal').children('.ok').on('click', function() 
+                            {
+			                    modal.close();
+			                    $('#modal').remove();
+                                $('.reveal-overlay').remove();
+                            });
+                        }
+                    },
+                    error: function(response)
+                    {
+                        ajaxError()
+                    }
+                });
+            })
+
+
 
             $(".btn_datacite_delete_doi").on("click", function(e)
             {

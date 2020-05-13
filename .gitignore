@@ -122,6 +122,11 @@ venv/**
 src/.DS_Store
 .DS_Store
 src/\.vscode/
+
+# TUW stuff
 src/vl2janeway
 api.cfg
 api.json
+api.json.devel
+api.json.test
+api.json.prod

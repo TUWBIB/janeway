@@ -14,10 +14,10 @@
     },
     "journals" :
     {
-        "journnal_code" :
+        "journal_code" :
         {
             "prefix" : "10.12345",
             "namespace_separator" : "devel"
-        },
+        }
     }
 }

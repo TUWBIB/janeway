@@ -74,21 +74,22 @@ class API:
             self.options = data['options']
             self.login = data['login']
             self.journals = data['journals']
-            for k,v in self.options.items():
-    	        print (str(k)+': '+str(v))
-    
-            for k,v in self.login.items():
-    	        print (str(k)+': '+str(v))
-    
-            for k,v in self.journals.items():
-                print (k)
-                for k1,v1 in self.journals[k].items():
-    	            print ('   '+str(k1)+': '+str(v1))
+#            for k,v in self.options.items():
+#    	        print (str(k)+': '+str(v))
+#    
+#            for k,v in self.login.items():
+#    	        print (str(k)+': '+str(v))
+#    
+#            for k,v in self.journals.items():
+#                print (k)
+#                for k1,v1 in self.journals[k].items():
+#    	            print ('   '+str(k1)+': '+str(v1))
 
         def doiConformsToCurrentConfiguration(self,journal_code,doi):
             prefix = self.journals[journal_code]['prefix']
             namespace_separator = self.journals[journal_code]['namespace_separator']
             pattern = prefix+'/'+namespace_separator+r'\.'+r'\d{4}'+r'\.'+r'\d{3,4}'
+
             match = re.match(pattern,doi)
             if not match:
                 return False
@@ -165,7 +166,7 @@ class API:
 
             status = "success"
             try:
-                response = requests.delete(url,
+                response = requests.get(url,
                             auth=HTTPBasicAuth(self.login['user'],self.login['password']),
                             headers={'Content-Type': 'text/plain;charset=UTF-8'},
                             timeout=(int(self.options['conn_timeout']),int(self.options['read_timeout'])),                        
@@ -188,6 +189,37 @@ class API:
                 content = (''.join(['general exception: ',str(e)]))
 
             return (status,content)
+
+
+        def getURL(self,doi):
+            url = self.login['endpoint']
+            url += 'doi/'
+            url += doi
+            
+            status = 'success'
+            try:
+                response = requests.get(url,
+                                auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                                )
+
+                content=response.text
+                if response.status_code != 200:
+                    status = "error"
+                    if response.status_code == 400:
+                        content = "Not found"
+
+            except ConnectTimeout as e:
+                status = "error"
+                content = (''.join(['connect timeout: ',str(e)]))
+            except ReadTimeout as e:
+                status = "error"
+                content = (''.join(['read timeout: ',str(e)]))
+            except Exception as e:
+                status = "error"
+                content = (''.join(['general exception: ',str(e)]))
+
+            return (status,content)
+
 
         def registerURL(self,doi,article_url):
             url = self.login['endpoint']

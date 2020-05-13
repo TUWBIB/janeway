@@ -228,6 +228,30 @@ def getCurrentDataCiteXML(article_id):
 
     return (xml, errors, warnings)
 
+def getCurrentDataCiteURL(article_id):
+    article = submission_models.Article.objects.get(pk=article_id)
+    api = datacite_api.API()
+
+    warnings = []
+    errors = []
+    url = ''
+
+    doi = article.get_doi()
+    if doi is None:
+        errors.append("No DOI registered")
+    else:
+        if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            errors.append("existing DOI doesn't conform to current configuration")
+
+    if not errors:
+        status,content=api.getURL(doi)
+        if status != 'success':
+            errors.append(content)
+        else:
+            url=content
+
+    return (url, errors, warnings)
+
 
 def metadataUpdated(article_id,doi):
     status = "success"

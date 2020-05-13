@@ -82,6 +82,9 @@ def sync(request):
         elif operation == "datacite_check_metadata":
             response = getCurrentDataCiteXML(article_id)
 
+        elif operation == "datacite_check_url":
+            response = getCurrentDataCiteURL(article_id)
+
         elif operation == "datacite_delete_doi":
             response = deleteDOI(article)
 
@@ -105,6 +108,13 @@ def getCurrentDataCiteXML(article_id):
 
     return JsonResponse({ 'errors': errors, 'warnings': warnings,
         'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
+
+def getCurrentDataCiteURL(article_id):
+    (url,errors,warnings) = logic.getCurrentDataCiteURL(article_id)
+
+    return JsonResponse({ 'errors': errors, 'warnings': warnings,
+        'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
+
 
 def articleToDataCiteXML(article_id):
     (xml,errors,warnings) = logic.articleToDataCiteXML(article_id)
