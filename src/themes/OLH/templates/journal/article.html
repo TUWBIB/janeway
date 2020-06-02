@@ -5,7 +5,7 @@
 
 {% block page_title %}{% if article.preprint %}Preprint {% endif %}Article{% endblock %}
 
-{% block title %}{{ article.authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
+{% block title %}{{ article.frozen_authors.0.last_name | striptags }} | {{ article.title | striptags }} |
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
 
 {% block head %}
@@ -124,8 +124,8 @@
                                 <h2>{% trans "Abstract" %}</h2>
                                 <p>{{ article.abstract | safe }}</p>
                             {% endif %}
-                            {% if article.keywords.all %}<p><strong>{% trans "Keywords" %}:</strong> {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
-                            {% if article.is_published %}
+                            {% if article.keywords.count > 0 %}<p><strong>{% trans "Keywords" %}:</strong> {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                            {% if article.is_published and not journal_settings.article.suppress_how_to_cite %}
                             <p><strong>{% trans "How to Cite" %}:</strong>
                             {% include "elements/journal/how_to_cite.html" with article=article %}
                             {% endif %}
@@ -135,6 +135,17 @@
                                     <ul>
                                         {% for note in article.publisher_notes.all %}
                                             <li>{{ note.text }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            {% if article.funders.all %}
+                                <div class="callout primary">
+                                    <h2>{% trans "Funding" %}</h2>
+                                    <ul>
+                                        {% for funder in article.funders.all %}
+                                            <li>{% if funder.fundref_id %}<a href="{% url "funder_articles" funder.fundref_id %}">{% endif %}{{ funder.name }}{% if funder.fundref_id %}</a>{% endif %}{% if funder.funding_id %} (grant {{ funder.funding_id }}){% endif %}</li>
                                         {% endfor %}
                                     </ul>
                                 </div>
@@ -207,7 +218,7 @@
                                     <h4>{% trans "Authors" %}</h4>
                                     <ul>
                                         {% for author in article.frozen_authors.all %}
-                                            <li>{{ author.full_name }}</li>
+                                            <li>{{ author.full_name }} ({{ author.affiliation }})</li>
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
@@ -254,12 +265,14 @@
                             </div>
                         {% endif %}
 
+                        {% if article_content %}
                         <div class="section hide-for-small-only">
                             <h3>{% trans "Jump to" %}</h3>
                             <ul id="toc">
 
                             </ul>
                         </div>
+                        {% endif %}
 
                         {% for field in article.custom_fields %}
                         <div class="section hide-for-small-only">

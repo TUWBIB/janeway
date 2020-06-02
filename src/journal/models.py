@@ -115,6 +115,7 @@ class Journal(AbstractSiteModel):
     xsl = models.ForeignKey('core.XSLFile',
         default=default_xsl,
         on_delete=models.SET_DEFAULT,
+        related_name="default_xsl",
     )
 
     # Boolean to determine if this journal should be hidden from the press
@@ -251,7 +252,12 @@ class Journal(AbstractSiteModel):
         return core_models.Account.objects.filter(pk__in=pks)
 
     def users_with_role(self, role):
-        pks = [role.user.pk for role in core_models.AccountRole.objects.filter(role__slug=role, journal=self)]
+        pks = [
+            role.user.pk for role in core_models.AccountRole.objects.filter(
+                role__slug=role,
+                journal=self,
+            ).prefetch_related('user')
+        ]
         return core_models.Account.objects.filter(pk__in=pks)
 
     def editor_pks(self):
@@ -331,7 +337,7 @@ class Journal(AbstractSiteModel):
 
         elif self.carousel.mode == "mixed-selected":
             # news items and latest articles
-            news_objects = core_logic.news_items(self.carousel, 'journal')
+            news_objects = self.carousel.news_articles.all()
             article_objects = core_logic.selected_articles(self.carousel)
 
         # run the exclusion routine

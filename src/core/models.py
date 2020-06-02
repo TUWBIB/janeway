@@ -17,7 +17,7 @@ from hvad.models import TranslatableModel, TranslatedFields
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -146,16 +146,23 @@ class Country(models.Model):
         return self.name
 
 
+class AccountQuerySet(models.query.QuerySet):
+    def create(self, **kwargs):
+            obj = self.model(**kwargs)
+            obj.clean()
+            self._for_write = True
+            obj.save(force_insert=True, using=self.db)
+            return obj
+
+
 class AccountManager(BaseUserManager):
     def create_user(self, email, password=None, **kwargs):
         if not email:
             raise ValueError('Users must have a valid email address.')
 
-        if not kwargs.get('username', None):
-            raise ValueError('Users must have a valid username.')
-
         account = self.model(
-            email=self.normalize_email(email), username=kwargs.get('username')
+            email=self.normalize_email(email),
+            username=email.lower(),
         )
 
         account.set_password(password)
@@ -173,6 +180,9 @@ class AccountManager(BaseUserManager):
         account.save()
 
         return account
+
+    def get_queryset(self):
+        return AccountQuerySet(self.model)
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
@@ -223,11 +233,22 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ('first_name', 'last_name', 'username')
+        unique_together = ('email', 'username')
 
-    def save(self, *args, **kwargs):
+
+    def clean(self, *args, **kwargs):
+        """ Normalizes the email address
+
+        The username is lowercased instead, to cope with a bug present for
+        accounts imported/registered prior to v.1.3.8
+        https://github.com/BirkbeckCTP/janeway/issues/1497
+        The username being unique and lowercase at clean time avoids
+        the creation of duplicate email addresses where the casing might
+        be different.
+        """
+        self.email = self.__class__.objects.normalize_email(self.email)
         self.username = self.email.lower()
-        self.email = self.email.lower()
-        super(Account, self).save(*args, **kwargs)
+        super().clean(*args, **kwargs)
 
     def __str__(self):
         return self.full_name()
@@ -290,7 +311,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return self.institution
 
     def active_reviews(self):
-        return review_models.ReviewAssignment.objects.filter(reviewer=self, is_complete=False)
+        return review_models.ReviewAssignment.objects.filter(
+            reviewer=self,
+            is_complete=False,
+        )
 
     def active_copyedits(self):
         return copyediting_models.CopyeditAssignment.objects.filter(copyeditor=self, copyedit_acknowledged=False)
@@ -724,12 +748,6 @@ class File(models.Model):
         return os.path.getsize(os.path.join(settings.BASE_DIR, 'files', 'articles', str(article.id),
                                             str(self.uuid_filename)))
 
-    def get_tree(self):
-        return files.file_parents(self)
-
-    def get_children(self):
-        return files.file_children(self)
-
     def next_history_seq(self):
         try:
             last_history_item = self.history.all().reverse()[0]
@@ -819,6 +837,7 @@ def galley_type_choices():
         ('odt', 'OpenDocument Text Document'),
         ('tex', 'LaTeX'),
         ('rtf', 'RTF'),
+        ('other', 'Other'),
     )
 
 
@@ -924,14 +943,26 @@ class Galley(models.Model):
         super().save(*args, **kwargs)
 
 
+def upload_to_journal(instance, filename):
+    instance.original_filename = filename
+    if instance.journal:
+        return "journals/%d/%s" % (instance.journal.pk, filename)
+    else:
+        return filename
+
 class XSLFile(models.Model):
-    file = models.FileField(storage=JanewayFileSystemStorage('transform/xsl'))
+    file = models.FileField(
+        upload_to=upload_to_journal,
+        storage=JanewayFileSystemStorage('files/xsl'))
+    journal = models.ForeignKey("journal.Journal", on_delete=models.CASCADE,
+                                blank=True, null=True)
     date_uploaded = models.DateTimeField(default=timezone.now)
     label = models.CharField(max_length=255,
         help_text="A label to help recognise this stylesheet",
         unique=True,
     )
     comments = models.TextField(blank=True, null=True)
+    original_filename = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

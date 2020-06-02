@@ -997,7 +997,7 @@ def add_review_assignment(request, article_id):
     article = get_object_or_404(submission_models.Article, pk=article_id)
     form = forms.ReviewAssignmentForm(journal=request.journal)
     new_reviewer_form = core_forms.QuickUserForm()
-    reviewers = logic.get_reviewers(article, request)
+    reviewers = logic.get_reviewer_candidates(article, request.user)
     suggested_reviewers = logic.get_suggested_reviewers(article, reviewers)
     user_list = logic.get_enrollable_users(request)
 
@@ -1928,7 +1928,9 @@ def reviewer_article_file(request, assignment_id, file_id):
 def review_download_all_files(request, assignment_id):
     review_assignment = models.ReviewAssignment.objects.get(pk=assignment_id)
 
-    zip_file, file_name = files.zip_files(review_assignment.review_round.review_files.all())
+    zip_file, file_name = files.zip_article_files(
+        review_assignment.review_round.review_files.all(),
+    )
 
     return files.serve_temp_file(zip_file, file_name)
 

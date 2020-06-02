@@ -324,17 +324,19 @@ def render_xml(file_to_render, article, xsl_path=None):
         )
         return ""
 
-    with open(path, "rb") as xml_file_contents:
-        xml = BeautifulSoup(xml_file_contents, "lxml-xml")
+    return transform_with_xsl(path, xsl_path)
 
-        transform = etree.XSLT(etree.parse(xsl_path))
+def transform_with_xsl(xml_path, xsl_path):
+    xml_dom = etree.parse(xml_path)
+    xsl_transform = etree.XSLT(etree.parse(xsl_path))
+    try:
+        transformed_dom = xsl_transform(xml_dom)
+    except Exception as err:
+        for xsl_error in xsl_transform.error_log:
+            logger.error(xsl_error)
+        raise
 
-        # remove the <?xml version="1.0" encoding="utf-8"?> line (or similar) if it exists
-        regex = re.compile(r'<\?xml version="1.0" encoding=".+"\?>')
-        xml_string = str(xml)
-        xml_string = re.sub(regex, '', xml_string, count=1)
-
-        return transform(etree.XML(xml_string))
+    return transformed_dom
 
 
 def serve_any_file(request, file_to_serve, public=False, hide_name=False,
@@ -743,7 +745,14 @@ def file_children(file):
     return children
 
 
-def zip_files(files, article_specific=False):
+def zip_article_files(files, article_folders=False):
+    """
+    Zips up files that are related to an article.
+    :param files: A list or queryset of File objects that have article_ids
+    :param article_folders: Boolean, if true splits files into folders with
+    article name.
+    :return: strings path of the zip file, zip file name
+    """
     file_name = '{0}.zip'.format(uuid4())
 
     # Copy files into a temp dir
@@ -751,15 +760,15 @@ def zip_files(files, article_specific=False):
     os.makedirs(_dir, 0o775)
 
     for file in files:
-
-        if article_specific and file.article_id:
-            folder_name = '{id} - {title}'.format(id=file.article_id, title=strip_tags(file.article.title))
-            article_dir = os.path.join(_dir, folder_name)
-            if not os.path.exists(article_dir):
-                os.makedirs(article_dir, 0o775)
-            shutil.copy(file.self_article_path(), article_dir)
-        else:
-            shutil.copy(file.self_article_path(), _dir)
+        if file.article_id:
+            if article_folders:
+                folder_name = '{id} - {title}'.format(id=file.article_id, title=strip_tags(file.article.title))
+                article_dir = os.path.join(_dir, folder_name)
+                if not os.path.exists(article_dir):
+                    os.makedirs(article_dir, 0o775)
+                shutil.copy(file.self_article_path(), article_dir)
+            else:
+                shutil.copy(file.self_article_path(), _dir)
 
     zip_path = '{dir}.zip'.format(dir=_dir)
 
