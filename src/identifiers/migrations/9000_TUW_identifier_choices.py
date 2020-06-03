@@ -4,11 +4,10 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('identifiers', '0005_changes_identifier_choices'),
+        ('identifiers', '0006_crossrefdeposit'),
     ]
 
     operations = [

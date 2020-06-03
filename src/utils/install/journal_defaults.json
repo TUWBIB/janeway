@@ -191,7 +191,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "Dear {{ article.correspondence_author.full_name }},<br><br>We are requesting that you make some changes to your paper. Details of the changes required are below:<br><br>{{ revision.editor_note }}<br><br>You can access you revision here: <a href=\"{% journal_url 'do_revisions' article.pk revision.pk  %}\">{% journal_url 'do_revisions' article.pk revision.pk  %}</a><br><br>Your revisions are due on {{ revision.date_due }}.<br><br>Regards, <br>{{ request.user.signature|safe }}"
+            "default": "Dear {{ article.correspondence_author.full_name }},<br><br>We are requesting that you make some changes to your paper. Details of the changes required are below:<br><br>{{ revision.editor_note }}<br><br>You can access your revision here: <a href=\"{% journal_url 'do_revisions' article.pk revision.pk  %}\">{% journal_url 'do_revisions' article.pk revision.pk  %}</a><br><br>Your revisions are due on {{ revision.date_due }}.<br><br>Regards, <br>{{ request.user.signature|safe }}"
         }
     },
     {
@@ -401,7 +401,7 @@
             "type": "text"
         },
         "value": {
-            "default": "{{ request.journal_settings.general.main_contact }}\n{{ request.journal.name }}"
+            "default": "{{ request.journal_settings.general.main_contact }}\r\n{{ request.journal.name }}"
         }
     },
     {
@@ -416,7 +416,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "{{ request.journal_settings.general.main_contact }}\n{{ request.journal.name }}"
+            "default": "{{ request.journal_settings.general.main_contact }}\r\n{{ request.journal.name }}"
         }
     },
     {
@@ -626,7 +626,7 @@
             "type": "char"
         },
         "value": {
-            "default": "Janeway JS"
+            "default": "Der \u00f6ffentliche Sektor"
         }
     },
     {
@@ -656,7 +656,7 @@
             "type": "select"
         },
         "value": {
-            "default": "OLH"
+            "default": "TUWJFM"
         }
     },
     {
@@ -1091,7 +1091,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "<ol><li>Select˙proofreaders˙for˙this proofing˙round.</li><li>Once˙proofing˙is˙completed˙decide:<ul><li>Request changes (sends the article back to the typesetter)</li><li>Acknowledge the task</li></ul></li><li>(optional) If changes have been completed, you may want to start a new round of Proofing and move to 1.</li><li>Finally, click \"Complete proofing\"</li></ol>"
+            "default": "<ol><li>Select\u02d9proofreaders\u02d9for\u02d9this proofing\u02d9round.</li><li>Once\u02d9proofing\u02d9is\u02d9completed\u02d9decide:<ul><li>Request changes (sends the article back to the typesetter)</li><li>Acknowledge the task</li></ul></li><li>(optional) If changes have been completed, you may want to start a new round of Proofing and move to 1.</li><li>Finally, click \"Complete proofing\"</li></ol>"
         }
     },
     {
@@ -1571,7 +1571,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "A journal."
+            "default": "Description of the public sector.<br>"
         }
     },
     {
@@ -1691,7 +1691,7 @@
             "type": "boolean"
         },
         "value": {
-            "default": ""
+            "default": "on"
         }
     },
     {
@@ -1785,7 +1785,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Review Complete"},
+        "value": {
+            "default": "Copyediting Review Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Author Copyediting Complete",
@@ -1798,7 +1800,9 @@
         }
     },
     {
-        "value": {"default": "Article Publication"},
+        "value": {
+            "default": "Article Publication"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Article Publication",
@@ -1811,7 +1815,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Task Acknowledgement"},
+        "value": {
+            "default": "Copyediting Task Acknowledgement"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyedit Acknowledge",
@@ -1824,7 +1830,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Task"},
+        "value": {
+            "default": "Copyediting Task"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyedit Notify Copyeditor",
@@ -1837,7 +1845,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Review"},
+        "value": {
+            "default": "Copyediting Review"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyedit Notify Author",
@@ -1850,7 +1860,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Complete"},
+        "value": {
+            "default": "Copyediting Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyedit Notify Editor",
@@ -1863,7 +1875,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Task Reopened"},
+        "value": {
+            "default": "Copyediting Task Reopened"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyedit Reopen Task",
@@ -1876,7 +1890,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Task Deleted"},
+        "value": {
+            "default": "Copyediting Task Deleted"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyediting Request Deleted",
@@ -1889,7 +1905,9 @@
         }
     },
     {
-        "value": {"default": "Copyediting Task Updated"},
+        "value": {
+            "default": "Copyediting Task Updated"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Copyediting Request Updated",
@@ -1902,7 +1920,9 @@
         }
     },
     {
-        "value": {"default": "Section Editor Draft Decision"},
+        "value": {
+            "default": "Section Editor Draft Decision"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Draft Decisions Editor Message",
@@ -1915,7 +1935,9 @@
         }
     },
     {
-        "value": {"default": "Draft Decision"},
+        "value": {
+            "default": "Draft Decision"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Draft Decisions Message",
@@ -1928,7 +1950,9 @@
         }
     },
     {
-        "value": {"default": "Article Assignment"},
+        "value": {
+            "default": "Article Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Editor Assignment",
@@ -1941,7 +1965,9 @@
         }
     },
     {
-        "value": {"default": "Journal Digest"},
+        "value": {
+            "default": "Journal Digest"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Editor Digest",
@@ -1954,7 +1980,9 @@
         }
     },
     {
-        "value": {"default": "New Article Submitted"},
+        "value": {
+            "default": "New Article Submitted"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "New Submission for Editor",
@@ -1967,7 +1995,9 @@
         }
     },
     {
-        "value": {"default": "New Registration"},
+        "value": {
+            "default": "New Registration"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "New User Registration",
@@ -1980,7 +2010,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Acceptance Notification",
@@ -1993,7 +2025,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Submission Notification",
@@ -2006,7 +2040,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Complete"},
+        "value": {
+            "default": "Proofreading Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Editor that Proofreading is Complete",
@@ -2019,7 +2055,9 @@
         }
     },
     {
-        "value": {"default": "Proofing Manager Assignment"},
+        "value": {
+            "default": "Proofing Manager Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Proofing Manager",
@@ -2032,7 +2070,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Assignment"},
+        "value": {
+            "default": "Proofreading Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Proofreader of Assignment",
@@ -2045,7 +2085,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Assignment Cancelled"},
+        "value": {
+            "default": "Proofreading Assignment Cancelled"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Proofreader of Cancellation",
@@ -2058,7 +2100,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Assignment Complete"},
+        "value": {
+            "default": "Proofreading Assignment Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Proofreader Complete",
@@ -2071,7 +2115,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Assignment Edited"},
+        "value": {
+            "default": "Proofreading Assignment Edited"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Proofing Task Edited",
@@ -2084,7 +2130,9 @@
         }
     },
     {
-        "value": {"default": "Proofreading Corrections"},
+        "value": {
+            "default": "Proofreading Corrections"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Notify Typesetter of Proofreading Feedback",
@@ -2097,7 +2145,9 @@
         }
     },
     {
-        "value": {"default": "Password Reset"},
+        "value": {
+            "default": "Password Reset"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Password Reset",
@@ -2110,7 +2160,9 @@
         }
     },
     {
-        "value": {"default": "Article You Reviewed"},
+        "value": {
+            "default": "Article You Reviewed"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Peer Reviewer Publication Notification",
@@ -2123,7 +2175,9 @@
         }
     },
     {
-        "value": {"default": "Production Assignment"},
+        "value": {
+            "default": "Production Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Production Assign Article",
@@ -2136,7 +2190,9 @@
         }
     },
     {
-        "value": {"default": "Production Complete"},
+        "value": {
+            "default": "Production Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Production Complete",
@@ -2149,7 +2205,9 @@
         }
     },
     {
-        "value": {"default": "Production Manager Assignment"},
+        "value": {
+            "default": "Production Manager Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Production Manager Assignment Notification",
@@ -2162,7 +2220,9 @@
         }
     },
     {
-        "value": {"default": "Article Requires Revisions"},
+        "value": {
+            "default": "Article Requires Revisions"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Request Revisions",
@@ -2175,7 +2235,9 @@
         }
     },
     {
-        "value": {"default": "Reviewer Digest"},
+        "value": {
+            "default": "Reviewer Digest"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Digest",
@@ -2188,7 +2250,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Acknowledgement"},
+        "value": {
+            "default": "Review Assignment Acknowledgement"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Assignment Accepted",
@@ -2201,7 +2265,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Updated"},
+        "value": {
+            "default": "Review Assignment Updated"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Acknowledgement",
@@ -2214,7 +2280,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Request"},
+        "value": {
+            "default": "Review Assignment Request"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Assignment",
@@ -2227,7 +2295,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Complete"},
+        "value": {
+            "default": "Review Assignment Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Complete Update",
@@ -2240,7 +2310,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Complete"},
+        "value": {
+            "default": "Review Assignment Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Complete Acknowledgement",
@@ -2253,7 +2325,9 @@
         }
     },
     {
-        "value": {"default": "Article Accepted"},
+        "value": {
+            "default": "Article Accepted"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Article Review Accept",
@@ -2266,7 +2340,9 @@
         }
     },
     {
-        "value": {"default": "Article Declined"},
+        "value": {
+            "default": "Article Declined"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Article Decline",
@@ -2279,7 +2355,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Declined"},
+        "value": {
+            "default": "Review Assignment Declined"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Declination Acknowledgement",
@@ -2292,7 +2370,9 @@
         }
     },
     {
-        "value": {"default": "Review Request"},
+        "value": {
+            "default": "Review Request"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Complete Update",
@@ -2305,7 +2385,9 @@
         }
     },
     {
-        "value": {"default": "Review Assignment Withdrawn"},
+        "value": {
+            "default": "Review Assignment Withdrawn"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Review Withdrawl",
@@ -2318,7 +2400,9 @@
         }
     },
     {
-        "value": {"default": "Revision Digest"},
+        "value": {
+            "default": "Revision Digest"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Revision Digest",
@@ -2331,7 +2415,9 @@
         }
     },
     {
-        "value": {"default": "Article You Edited"},
+        "value": {
+            "default": "Article You Edited"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Section Editor Publication Notification",
@@ -2344,7 +2430,9 @@
         }
     },
     {
-        "value": {"default": "Article Submission"},
+        "value": {
+            "default": "Article Submission"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Submission Acknowledgement",
@@ -2357,7 +2445,9 @@
         }
     },
     {
-        "value": {"default": "Task Acknowledgement"},
+        "value": {
+            "default": "Task Acknowledgement"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Thank Proofreaders and Typesetters",
@@ -2370,7 +2460,9 @@
         }
     },
     {
-        "value": {"default": "Typesetting Assignment Complete"},
+        "value": {
+            "default": "Typesetting Assignment Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Typesetter Complete Notification",
@@ -2383,7 +2475,9 @@
         }
     },
     {
-        "value": {"default": "Corrections Complete"},
+        "value": {
+            "default": "Corrections Complete"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Corrections Complete",
@@ -2396,7 +2490,9 @@
         }
     },
     {
-        "value": {"default": "Typesetting Assignment"},
+        "value": {
+            "default": "Typesetting Assignment"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Typesetter Assignment Notification",
@@ -2409,7 +2505,9 @@
         }
     },
     {
-        "value": {"default": "Typesetting Task Acknowledgement"},
+        "value": {
+            "default": "Typesetting Task Acknowledgement"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Typesetter Acknowledgement",
@@ -2422,7 +2520,9 @@
         }
     },
     {
-        "value": {"default": "Typesetting Task Deleted"},
+        "value": {
+            "default": "Typesetting Task Deleted"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Typesetting Request Deleted",
@@ -2435,7 +2535,9 @@
         }
     },
     {
-        "value": {"default": "Typesetting Task Reopened"},
+        "value": {
+            "default": "Typesetting Task Reopened"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Typeset Task Reopened",
@@ -2448,7 +2550,9 @@
         }
     },
     {
-        "value": {"default": "Email Change Notification"},
+        "value": {
+            "default": "Email Change Notification"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "User Email Change",
@@ -2461,7 +2565,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "boolean",
             "pretty_name": "Disable Submission",
@@ -2474,7 +2580,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "boolean",
             "pretty_name": "User Automatically an Author",
@@ -2487,7 +2595,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "boolean",
             "pretty_name": "Accepts Preprint Submissions",
@@ -2515,7 +2625,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Matomo Tracking Code",
@@ -2528,7 +2640,9 @@
         }
     },
     {
-        "value": {"default": "<p>This page is designed to help you ensure your submission is ready for and fits the scope of the journal.</p><p>Before submitting you should read over the guidelines here, then register an account (or login if you have an existing account)</p>"},
+        "value": {
+            "default": "<p>This page is designed to help you ensure your submission is ready for and fits the scope of the journal.</p><p>Before submitting you should read over the guidelines here, then register an account (or login if you have an existing account)</p>"
+        },
         "setting": {
             "type": "rich-text",
             "pretty_name": "Submission Page Text",
@@ -2541,7 +2655,9 @@
         }
     },
     {
-        "value": {"default": ""},
+        "value": {
+            "default": ""
+        },
         "setting": {
             "type": "boolean",
             "pretty_name": "Abstracts Are Required",
@@ -2554,7 +2670,9 @@
         }
     },
     {
-        "value": {"default": "Correction Task Cancelled"},
+        "value": {
+            "default": "Correction Task Cancelled"
+        },
         "setting": {
             "type": "text",
             "pretty_name": "Correction Task Cancelled",
@@ -2582,7 +2700,9 @@
         }
     },
     {
-        "value": {"default": "<p>If you are undertaking a blind or double-blind review you must ensure that the file has any identifying text removed. Consider:</p> <ol> <li>If the paper has a title page removing the authors name and contact information.</li> <li>Check the bibliography and the text for self-citation</li> <li>Also check for mentions not made explicitly. The following phrases might give away an author&rsquo;s identity and should be edited:</li> <ul> <li>&lsquo;As I previously discussed&hellip;.&rsquo;</li> <li>&lsquo;As I have showed&hellip;&rsquo;</li> <li>&lsquo;My previous work&hellip;.&rsquo;</li> </ul> <li>Remove any identifying metadata from the file.</li> </ol>"},
+        "value": {
+            "default": "<p>If you are undertaking a blind or double-blind review you must ensure that the file has any identifying text removed. Consider:</p> <ol> <li>If the paper has a title page removing the authors name and contact information.</li> <li>Check the bibliography and the text for self-citation</li> <li>Also check for mentions not made explicitly. The following phrases might give away an author&rsquo;s identity and should be edited:</li> <ul> <li>&lsquo;As I previously discussed&hellip;.&rsquo;</li> <li>&lsquo;As I have showed&hellip;&rsquo;</li> <li>&lsquo;My previous work&hellip;.&rsquo;</li> </ul> <li>Remove any identifying metadata from the file.</li> </ol>"
+        },
         "setting": {
             "type": "rich-text",
             "pretty_name": "Review File Help",
@@ -2633,6 +2753,21 @@
             "is_translatable": false,
             "name": "keyword_list_page",
             "pretty_name": "Enable the Keyword list page",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "article"
+        },
+        "setting": {
+            "description": "If enabled this will suppress the how to cite block on the article page.",
+            "is_translatable": false,
+            "name": "suppress_how_to_cite",
+            "pretty_name": "Suppress How to Cite",
             "type": "boolean"
         },
         "value": {

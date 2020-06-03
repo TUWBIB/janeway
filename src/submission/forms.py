@@ -70,8 +70,8 @@ class ArticleInfo(KeywordModelForm):
         model = models.Article
         fields = ('title', 'title_de', 'subtitle', 'subtitle_de', 'abstract', 'abstract_de', 'non_specialist_summary',
                   'language', 'section', 'license', 'primary_issue',
-                  'page_numbers', 'is_remote', 'remote_url', 'peer_reviewed')
-
+                  'page_numbers', 'is_remote', 'remote_url', 'peer_reviewed',
+                  'custom_how_to_cite',)
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
@@ -113,7 +113,7 @@ class ArticleInfo(KeywordModelForm):
             )
             self.fields['section'].required = True
             self.fields['license'].required = True
-            self.fields['primary_issue'].queryset = article.journal.issues()
+            self.fields['primary_issue'].queryset = article.issues.all()
 
             abstracts_required = article.journal.get_setting(
                 'general',
