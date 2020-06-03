@@ -12,6 +12,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='submissionconfiguration',
+            name='funding',
+            field=models.BooleanField(default=False),
+        ),
         migrations.AlterModelOptions(
             name='frozenauthor',
             options={'ordering': ('order', 'pk')},
