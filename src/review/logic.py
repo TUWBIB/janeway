@@ -9,7 +9,15 @@ import os
 
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Avg, Prefetch
+from django.db.models import (
+    Avg,
+    Count,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Subquery,
+)
+
 from django.urls import reverse
 from django.utils import timezone
 from docx import Document
@@ -36,16 +44,33 @@ def get_reviewer_candidates(article, user=None):
             article__journal=article.journal
         ).order_by("-date_complete")
     )
+    # TODO swap the below subqueries with filtered annotations on Django 2.0+
+    active_reviews_count = models.ReviewAssignment.objects.filter(
+        is_complete=False,
+        reviewer=OuterRef("id"),
+    ).annotate(
+        rev_count=Count("pk"),
+    ).values("rev_count")
+
+    rating_average = models.ReviewerRating.objects.filter(
+        assignment__article__journal=article.journal,
+        assignment__reviewer=OuterRef("id"),
+    ).annotate(
+        rating_average=Avg("rating"),
+    ).values("rating_average")
 
     reviewers = article.journal.users_with_role('reviewer').exclude(
         pk__in=reviewers,
     ).prefetch_related(
         prefetch_review_assignment,
         'interest',
-    ).filter(
-        reviewer__reviewerrating__assignment__article__journal=article.journal,
     ).annotate(
-        rating_average=Avg('reviewer__reviewerrating__rating'),
+        active_reviews_count=Subquery(
+            active_reviews_count,
+            output_field=IntegerField(),
+        )
+    ).annotate(
+        rating_average=Subquery(rating_average, output_field=IntegerField()),
     )
 
     return reviewers
