@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('utils', '0014_upgrade_1_3_7'),
+        ('core', '0040_auto_20200529_1415'),
     ]
 
     operations = [
