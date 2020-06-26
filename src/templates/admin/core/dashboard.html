@@ -8,8 +8,10 @@
 
 {% block body %}
     <section>
+       {% include "admin/elements/no_stage.html" %}
+
         <div class="row expanded" data-equalizer data-equalize-on="medium">
-            {% include "elements/core/editor_dashboard.html" %}
+            {% include "admin/elements/core/editor_dashboard.html" %}
         </div>
         {% if is_reviewer %}
             <div class="large-4 columns end" data-equalizer-watch>
@@ -199,9 +201,8 @@
 
 
         {% if is_author %}
-            {% include "elements/core/author_dashboard.html" %}
+            {% include "admin/elements/core/author_dashboard.html" %}
         {% endif %}
-
 
     </section>
 {% endblock body %}

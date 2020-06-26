@@ -545,6 +545,7 @@ def dashboard(request):
             owner=request.user,
             stage=submission_models.STAGE_UNSUBMITTED).order_by('-date_started'),
         'workflow_elements': workflow.element_names(request.journal.workflow().elements.all()),
+        'workflow_element_url': request.GET.get('workflow_element_url', False)
     }
 
     return render(request, template, context)
@@ -561,6 +562,7 @@ def active_submissions(request):
             stage=submission_models.STAGE_UNSUBMITTED).filter(journal=request.journal).order_by('pk', 'title'),
         'sections': submission_models.Section.objects.filter(is_filterable=True,
                                                              journal=request.journal),
+        'workflow_element_url': request.GET.get('workflow_element_url', False)
     }
 
     return render(request, template, context)
@@ -1449,7 +1451,7 @@ def add_member_to_group(request, group_id, user_id=None):
     return render(request, template, context)
 
 
-@staff_member_required
+@editor_user_required
 def plugin_list(request):
     """
     Fetches a list of plugins and fetching their manager urls.

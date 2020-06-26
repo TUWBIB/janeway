@@ -22,11 +22,15 @@ from django.dispatch import receiver
 from django.core import exceptions
 
 from core.file_system import JanewayFileSystemStorage
+from core import workflow
 from identifiers import logic as id_logic
 from metrics.logic import ArticleMetrics
 from preprint import models as preprint_models
 from review import models as review_models
 from utils.function_cache import cache
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 fs = JanewayFileSystemStorage()
 
@@ -1103,17 +1107,6 @@ class Article(models.Model):
         return author_copyedits
 
     @property
-    def current_workflow_element_url(self):
-
-        kwargs = {'article_id': self.pk}
-
-        # STAGE_UNASSIGNED isn't a workflow element so is hardcoded here.
-        if self.stage == STAGE_UNASSIGNED:
-            return reverse('review_unassigned_article', kwargs=kwargs)
-        else:
-            return reverse(self.current_workflow_element.jump_url, kwargs=kwargs)
-
-    @property
     def custom_fields(self):
         """ Returns all the FieldAnswers configured for rendering"""
         return self.fieldanswer_set.filter(
@@ -1210,11 +1203,45 @@ class Article(models.Model):
     @property
     def current_workflow_element(self):
         from core import models as core_models
-        logs = core_models.WorkflowLog.objects.filter(
-            article=self,
-        )
-        element = logs.reverse().first().element
-        return element
+        try:
+            workflow_element_name = workflow.STAGES_ELEMENTS.get(
+                self.stage,
+            )
+            return core_models.WorkflowElement.objects.get(
+                journal=self.journal,
+                element_name=workflow_element_name,
+            )
+        except (KeyError, core_models.WorkflowElement.DoesNotExist):
+            return None
+
+    @property
+    def current_workflow_element_url(self):
+        kwargs = {'article_id': self.pk}
+        # STAGE_UNASSIGNED and STAGE_PUBLISHED arent elements so are hardcoded.
+        if self.stage == STAGE_UNASSIGNED:
+            return reverse('review_unassigned_article', kwargs=kwargs)
+        elif self.stage == STAGE_PUBLISHED:
+            return reverse('manage_archive_article', kwargs=kwargs)
+        elif not self.stage:
+            logger.error(
+                'Article #{} has no Stage.'.format(
+                    self.pk,
+                )
+            )
+            return '?workflow_element_url=no_stage'
+        else:
+            element = self.current_workflow_element
+            if element:
+                return reverse(element.jump_url, kwargs=kwargs)
+            else:
+                # In order to ensure the Dashboard renders we purposefully do
+                # not raise an error message here.
+                logger.error(
+                    'There is no workflow element for stage {}.'.format(
+                        self.stage,
+                    )
+                )
+                return '?workflow_element_url=no_element'
 
     @cache(600)
     def render_sample_doi(self):
