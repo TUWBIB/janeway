@@ -126,6 +126,10 @@ src/static/superhero/
 src/themes/clean
 src/themes/superhero
 
+# Lando
+dockerfiles/lando_local.env
+.lando.local.yml
+
 # TUW stuff
 src/vl2janeway
 api.cfg

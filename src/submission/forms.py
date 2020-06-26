@@ -4,6 +4,7 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from submission import models
@@ -12,7 +13,6 @@ from identifiers import models as ident_models
 from review.forms import render_choices
 from utils.forms import KeywordModelForm
 from utils import setting_handler
-
 
 
 class PublisherNoteForm(forms.ModelForm):
@@ -82,9 +82,20 @@ class ArticleInfo(KeywordModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialises the ArticleInfo form.
+        :param kwargs:  elements: queryest of Field objects.
+                        submission_sumary: boolean, detmines if this field
+                        is on or off.
+                        journal: Journal object.
+                        pop_disabled_fields: boolean, if False we do not pop
+                        fields that are disabled by SubmissionConfiguration
+                        or overwrite their saving.
+        """
         elements = kwargs.pop('additional_fields', None)
         submission_summary = kwargs.pop('submission_summary', None)
         journal = kwargs.pop('journal', None)
+        self.pop_disabled_fields = kwargs.pop('pop_disabled_fields', True)
 
         super(ArticleInfo, self).__init__(*args, **kwargs)
 
@@ -127,7 +138,7 @@ class ArticleInfo(KeywordModelForm):
                 self.fields['non_specialist_summary'].required = True
 
             # Pop fields based on journal.submissionconfiguration
-            if journal:
+            if journal and self.pop_disabled_fields:
                 if not journal.submissionconfiguration.subtitle:
                     self.fields.pop('subtitle')
 
@@ -240,7 +251,8 @@ class ArticleInfo(KeywordModelForm):
                     except models.FieldAnswer.DoesNotExist:
                         field_answer = models.FieldAnswer.objects.create(article=article, field=field, answer=answer)
 
-            request.journal.submissionconfiguration.handle_defaults(article)
+            if self.pop_disabled_fields:
+                request.journal.submissionconfiguration.handle_defaults(article)
 
         if commit:
             article.save()
@@ -367,8 +379,9 @@ class ConfiguratorForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ConfiguratorForm, self).__init__(*args, **kwargs)
-        self.fields[
-            'default_section'].queryset = models.Section.objects.filter(
+        self.fields['default_section'].queryset = models.Section.objects.language().fallbacks(
+            settings.LANGUAGE_CODE,
+        ).filter(
             journal=self.instance.journal,
         )
         self.fields[

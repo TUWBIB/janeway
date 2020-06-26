@@ -1503,6 +1503,13 @@ def author_view_reviews(request, article_id):
             'No reviews have been made available by the Editor.',
         )
 
+    if request.GET.get('file_id', None):
+        viewable_files = logic.group_files(article, reviews)
+        file_id = request.GET.get('file_id')
+        file = get_object_or_404(core_models.File, pk=file_id)
+        if file in viewable_files:
+            return files.serve_file(request, file, article)
+
     template = 'review/author_view_reviews.html'
     context = {
         'article': article,
@@ -1799,11 +1806,12 @@ def upload_new_file(request, article_id, revision_id):
                                          date_completed__isnull=True)
     article = revision_request.article
 
-    if request.POST:
+    if request.POST and request.FILES:
         file_type = request.POST.get('file_type')
         uploaded_file = request.FILES.get('file')
         label = request.POST.get('label')
-        new_file = files.save_file_to_article(uploaded_file, article, request.user, label=label)
+        new_file = files.save_file_to_article(
+            uploaded_file, article, request.user, label=label)
 
         if file_type == 'manuscript':
             article.manuscript_files.add(new_file)
@@ -1811,10 +1819,15 @@ def upload_new_file(request, article_id, revision_id):
         if file_type == 'data':
             article.data_figure_files.add(new_file)
 
-        logic.log_revision_event('New file {0} ({1}) uploaded'.format(new_file.label, new_file.original_filename),
-                                 request.user, revision_request)
+        logic.log_revision_event(
+            'New file {0} ({1}) uploaded'.format(
+                new_file.label, new_file.original_filename),
+            request.user, revision_request)
 
-        return redirect(reverse('do_revisions', kwargs={'article_id': article_id, 'revision_id': revision_id}))
+        return redirect(reverse(
+            'do_revisions',
+            kwargs={'article_id': article_id, 'revision_id': revision_id})
+        )
 
     template = 'review/revision/upload_file.html'
     context = {
