@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('journal', '0038_auto_20200428_0803'),
+        ('journal', '0039_journal_disable_front_end'),
     ]
 
     operations = [

@@ -30,6 +30,11 @@ class FrozenAuthorSerializer(serializers.HyperlinkedModelSerializer):
         model = submission_models.FrozenAuthor
         fields = ('first_name', 'middle_name', 'last_name', 'institution', 'department', 'country')
 
+    country = serializers.ReadOnlyField(
+        read_only=True,
+        source="country.name",
+    )
+
 
 class GalleySerializer(serializers.HyperlinkedModelSerializer):
 
@@ -74,6 +79,11 @@ class IssueSerializer(serializers.HyperlinkedModelSerializer):
         model = journal_models.Issue
         fields = ('pk', 'volume', 'issue', 'issue_title', 'date', 'issue_type', 'issue_description',
                   'cover_image', 'large_image', 'articles')
+
+    issue_type = serializers.ReadOnlyField(
+        read_only=True,
+        source="issue_type.code",
+    )
 
 
 class JournalSerializer(serializers.HyperlinkedModelSerializer):

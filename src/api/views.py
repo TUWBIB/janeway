@@ -111,6 +111,8 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
 def oai(request):
     articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PUBLISHED)
+    if request.journal:
+        articles = articles.filter(journal=request.journal)
 
     template = 'apis/OAI.xml'
     context = {
