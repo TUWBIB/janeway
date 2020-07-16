@@ -400,7 +400,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def snapshot_self(self, article):
         try:
-            order = submission_models.ArticleAuthorOrder.objects.get(article=article, author=self).order
+            order = submission_models.ArticleAuthorOrder.objects.get(
+                article=article,
+                author=self,
+            ).order
         except submission_models.ArticleAuthorOrder.DoesNotExist:
             order = 1
 
@@ -418,15 +421,22 @@ class Account(AbstractBaseUser, PermissionsMixin):
         frozen_author = self.frozen_author(article)
 
         if frozen_author:
+            # We prioritize the frozen_author.order because after a submission
+            # is complete backend reordering tools use FrozenAuthor.order over
+            # ArticleAuthorOrder.
+            frozen_dict['order'] = frozen_author.order
             for k, v in frozen_dict.items():
                 setattr(frozen_author, k, v)
-                frozen_author.save()
+            frozen_author.save()
         else:
             submission_models.FrozenAuthor.objects.get_or_create(**frozen_dict)
 
     def frozen_author(self, article):
         try:
-            return submission_models.FrozenAuthor.objects.get(article=article, author=self)
+            return submission_models.FrozenAuthor.objects.get(
+                article=article,
+                author=self,
+            )
         except submission_models.FrozenAuthor.DoesNotExist:
             return None
 
