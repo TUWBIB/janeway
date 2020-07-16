@@ -166,7 +166,7 @@ class API:
 
             status = "success"
             try:
-                response = requests.get(url,
+                response = requests.delete(url,
                             auth=HTTPBasicAuth(self.login['user'],self.login['password']),
                             headers={'Content-Type': 'text/plain;charset=UTF-8'},
                             timeout=(int(self.options['conn_timeout']),int(self.options['read_timeout'])),                        
