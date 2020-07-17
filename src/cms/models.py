@@ -99,17 +99,27 @@ class NavigationItem(TranslatableModel):
         if not created:
             nav.delete()
 
+# returning None implicitly disables collections on a whole
+# problem is that nav items created for journal B (id=2) are
+# read as collection for journal A (id=1)
+# live with this even if object_ids in cms_navigationitem are not as intended
+
+
     @classmethod
     def get_content_nav_for_journal(cls, journal):
-        for issue_type in journal.issuetype_set.filter(
-            ~Q(code="issue") # Issues have their own navigation
-        ):
-            try:
-                content_type = ContentType.objects.get_for_model(
-                    issue_type.journal)
-                yield issue_type, cls.objects.language().fallbacks('en').get(
-                    content_type=content_type,
-                    object_id=issue_type.pk,
-                )
-            except cls.DoesNotExist:
-                yield issue_type, None
+        return None
+
+#        for issue_type in journal.issuetype_set.filter(
+#            ~Q(code="issue") # Issues have their own navigation
+#        ):
+#            try:
+#                content_type = ContentType.objects.get_for_model(
+#                    issue_type.journal)
+#
+#                yield issue_type, cls.objects.language().fallbacks('en').get(
+#                    content_type=content_type,
+#                    object_id=issue_type.pk,
+#                )
+#            except cls.DoesNotExist:
+#                yield issue_type, None
+#
