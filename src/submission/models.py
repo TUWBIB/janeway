@@ -20,6 +20,7 @@ from hvad.models import TranslatableModel, TranslatedFields
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.core import exceptions
+from django.utils.html import mark_safe
 
 from core.file_system import JanewayFileSystemStorage
 from core import workflow
@@ -375,9 +376,9 @@ class Article(models.Model):
     journal = models.ForeignKey('journal.Journal', blank=True, null=True)
     # Metadata
     owner = models.ForeignKey('core.Account', null=True, on_delete=models.SET_NULL)
-    title = models.CharField(max_length=300, help_text=_('Your article title'))
-    subtitle = models.CharField(max_length=300, blank=True, null=True,
-                                help_text=_('Subtitle of the article'))
+    title = models.CharField(max_length=999, help_text=_('Your article title'))
+    subtitle = models.CharField(max_length=999, blank=True, null=True,
+                                help_text=_('Subtitle of the article display format; Title: Subtitle'))
     abstract = models.TextField(
         blank=True,
         null=True,
@@ -545,9 +546,9 @@ class Article(models.Model):
             year_str = "({:%Y})".format(self.date_published)
         journal_str = "<i>%s</i>" % self.journal.name
         issue_str = ""
-        issue = self.primary_issue
-        if self.primary_issue:
-            issue_str = "%s(%s)" % (issue.issue, issue.volume)
+        issue = self.issue
+        if self.issue:
+            issue_str = "%s(%s)" % (issue.volume, issue.issue)
         doi_str = ""
         doi = self.get_doi()
         if doi:
@@ -557,7 +558,7 @@ class Article(models.Model):
         context = {
             "author_str": author_str,
             "year_str": year_str,
-            "title": self.title,
+            "title": mark_safe(self.title),
             "journal_str": journal_str,
             "issue_str": issue_str,
             "doi_str": doi_str,
@@ -1627,6 +1628,13 @@ class SubmissionConfiguration(models.Model):
         blank=True,
         help_text=_('The default section of '
                     'articles when no option is presented'),
+    )
+    submission_file_text = models.CharField(
+        max_length=255,
+        default='Manuscript File',
+        help_text='During submission the author will be asked to upload a file'
+                  'that is considered the main text of the article. You can use'
+                  'this field to change the label for that file in submission.',
     )
 
     def __str__(self):

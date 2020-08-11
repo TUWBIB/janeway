@@ -27,12 +27,8 @@ def reverse_code(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-#    dependencies = [
-#        ('core', '0034_fix_wrong_signature_review_ack'),
-#    ]
-
     dependencies = [
-        ('core', '0034_update_handshake_urls'),
+        ('core', '0034_fix_wrong_signature_review_ack'),
     ]
 
     operations = [

@@ -4,6 +4,7 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import datetime
+from mock import patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -66,6 +67,31 @@ class CoreTests(TestCase):
         except models.Account.DoesNotExist:
             self.fail('User account has not been saved.')
 
+    def test_email_subjects(self):
+        email_settings= models.Setting.objects.filter(
+            group__name="email",
+        ).values_list("name", flat=True)
+        subject_settings = models.Setting.objects.filter(
+            group__name="email_subject",
+        ).values_list("name", flat=True)
+        missing = (
+            set(email_settings)
+            - {s[len("subject_"):] for s in subject_settings}
+        )
+        self.assertFalse(
+            missing,
+            msg="Found emails that don't have a subject setting")
+
+    @patch.object(models.Setting, 'validate')
+    def test_setting_validation(self, mock_method):
+        from utils import setting_handler
+        setting_handler.save_setting(
+            'email', 'editor_assignment', self.journal_one, 'test'
+        )
+        mock_method.assert_called()
+
+
+
     def setUp(self):
         self.press = helpers.create_press()
         self.press.save()
@@ -89,3 +115,4 @@ class CoreTests(TestCase):
         self.journal_one.name = 'Journal One'
         self.journal_two.name = 'Journal Two'
         call_command('install_plugins')
+        call_command('load_default_settings')
