@@ -697,11 +697,14 @@ def edit_setting(request, setting_group, setting_name):
         if request.FILES:
             value = logic.handle_file(request, setting_value, request.FILES['value'])
 
-        setting_value = setting_handler.save_setting(
-            setting_group, setting_name, request.journal, value)
-        cache.clear()
-
-        return redirect(reverse('core_settings_index'))
+        try:
+            setting_value = setting_handler.save_setting(
+                setting_group, setting_name, request.journal, value)
+        except ValidationError as error:
+            messages.add_message( request, messages.ERROR, error)
+        else:
+            cache.clear()
+            return redirect(reverse('core_settings_index'))
 
     template = 'core/manager/settings/edit_setting.html'
     context = {
@@ -764,8 +767,12 @@ def edit_settings_group(request, group):
         else:
             attr_form = forms.JournalAttributeForm(request.POST, request.FILES, instance=journal)
 
-        if edit_form.is_valid() and attr_form.is_valid():
+        if edit_form.is_valid():
             edit_form.save(group=setting_group, journal=journal)
+
+        if group == 'journal' and attr_form.is_valid():
+            # Evaluate this form for this group only, otherwise booleans
+            # will all get set to False
             attr_form.save()
             logic.handle_default_thumbnail(request, journal, attr_form)
             logic.handle_press_override_image(request, journal, attr_form)
@@ -1683,12 +1690,14 @@ def edit_email_template(request, template_code, subject=False):
 
     if request.POST:
         value = request.POST.get('value')
-        template_value.value = value
-        template_value.save()
-
-        cache.clear()
-
-        return redirect(reverse('core_email_templates'))
+        try:
+            template_value.value = value
+            template_value.save()
+        except ValidationError as error:
+            messages.add_message( request, messages.ERROR, error)
+        else:
+            cache.clear()
+            return redirect(reverse('core_email_templates'))
 
     template = 'core/manager/email/edit_email_template.html'
     context = {
