@@ -26,7 +26,6 @@
 .tuw-navbottom a {
     margin-right: 30px;
     color: #ffffff;
-/*    font-weight: bold;*/
     font-size: small;
 
 }
@@ -39,13 +38,6 @@
 
 h1, h2, h3 {
     color: #274E90;
-}
-
-h1 {
-    font-size: 120%;
-    max-width: 55em;
-    font-weight: bold;
-    margin-bottom: 1em;
 }
 
 .image_section img{
@@ -209,3 +201,18 @@ body > .fluid-container {
     .journal_imprint_text {
         grid-area: g;
     }
+
+
+#content ul.jfmlist { 
+    padding: 0px;
+    margin-left: 20px;
+    display: inline-block;
+    text-align: left;
+}
+
+#content ol.jfmlist { 
+    padding: 0px;
+    margin-left: 20px;
+    display: inline-block;
+    text-align: left;
+}
