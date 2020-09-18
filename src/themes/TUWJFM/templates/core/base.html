@@ -101,9 +101,17 @@
             {% trans "Privacy Policy" %}
             </a>
             </li>            
+
             <li class="nav-item">      
-                <a class="nav-link" href="{% url 'imprint' %}">{% trans "Imprint" %}</a>
+                <a class="nav-link" href="{{ request.scheme }}://{{ request.get_host }}/site/imprint">{% trans "Imprint" %}</a>
             </li>        
+
+{% comment %}
+            <li class="nav-item">      
+                <a class="nav-link" href="{% url 'site/imprint' %}">{% trans "Imprint" %}</a>
+            </li>        
+            {% endcomment %}
+
             <li>      
                 <a class="nav-link" href="{% url 'contact' %}">{% trans "Contact" %}</a>
             </li> 

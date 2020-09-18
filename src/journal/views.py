@@ -2025,42 +2025,7 @@ def newsletter(request):
 
     return render(request, template, context)
 
-# added TUW
-def imprint(request):
-    template = 'journal/imprint.html'
-    context= { }
-    return render(request, template, context)
-
-def contact_static(request):
-    template = 'journal/contact_static.html'
-    context= { }
-    return render(request, template, context)
-
-def mission_statement(request):
-    template = 'journal/mission_statement.html'
-    context= { }
-    return render(request, template, context)
-
-def scientific_committee(request):
-    template = 'journal/scientific_committee.html'
-    context= { }
-    return render(request, template, context)
-
-def call_for_papers(request):
-    template = 'journal/call_for_papers.html'
-    context= { }
-    return render(request, template, context)
-
-def ethics(request):
-    template = 'journal/ethics.html'
-    context= { }
-    return render(request, template, context)
-
-def info_for_authors(request):
-    template = 'journal/info_for_authors.html'
-    context= { }
-    return render(request, template, context)
-
+## added TUW
 ## backcontent
 
 def backcontent(request):
