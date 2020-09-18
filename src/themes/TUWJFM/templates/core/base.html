@@ -93,7 +93,7 @@
             </li>            
             <li class="nav-item">    
               
-                {% if LANGUAGE_CODE == 'de' %}
+             {% if LANGUAGE_CODE == 'de' %}
              <a class="nav-link" href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Dokumente/Datenschutzerkl%C3%A4rungen%20Sonstige/Datenschutzerkl%C3%A4rung_Websites.pdf">
             {% else %}
                 <a class="nav-link" href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Documents/Data%20Protection%20Declaration%20Other/Data%20Protection%20Declaration%20Websites.pdf">
@@ -101,17 +101,9 @@
             {% trans "Privacy Policy" %}
             </a>
             </li>            
-
             <li class="nav-item">      
                 <a class="nav-link" href="{{ request.scheme }}://{{ request.get_host }}/site/imprint">{% trans "Imprint" %}</a>
             </li>        
-
-{% comment %}
-            <li class="nav-item">      
-                <a class="nav-link" href="{% url 'site/imprint' %}">{% trans "Imprint" %}</a>
-            </li>        
-            {% endcomment %}
-
             <li>      
                 <a class="nav-link" href="{% url 'contact' %}">{% trans "Contact" %}</a>
             </li> 
