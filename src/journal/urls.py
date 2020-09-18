@@ -217,10 +217,6 @@ urlpatterns = [
         views.doi_redirect,
         name='doi_redirect'),
 
-    # Newsletter
-    url(r'^newsletter/',
-        views.newsletter,
-        name='newsletter'),
 
     url(r'^email/user/(?P<user_id>\d+)/$',
         views.send_user_email, name='send_user_email'),
@@ -228,27 +224,8 @@ urlpatterns = [
         views.send_user_email, name='send_user_email_article'),
 
 
-    # added TUW
-    # Imprint
-    url(r'^imprint/$',
-        views.imprint, name='imprint'),
-    # Contact (static, no form)
-    url(r'^contact_static/$',
-        views.contact_static, name='contact_static'),
-    # Mission statement
-    url(r'^mission_statement/$',
-        views.mission_statement, name='mission_statement'),
-    # Scientific committee
-    url(r'^scientific_committee/$',
-        views.scientific_committee, name='scientific_committee'),
-    # Call for papers
-    url(r'^call_for_papers/$',
-        views.call_for_papers, name='call_for_papers'),
-    # Ethics
-    url(r'^ethics/$',
-        views.ethics, name='ethics'),
-    # Information_for_authors
-    url(r'^info_for_authors/$',
-        views.info_for_authors, name='info_for_authors'),
-
+    # Newsletter
+    url(r'^newsletter/',
+        views.newsletter,
+        name='newsletter'),
 ]

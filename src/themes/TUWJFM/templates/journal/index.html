@@ -61,7 +61,7 @@
                 different spatial levels. The journal is <strong>multidisciplinary</strong> and brings together contributions from public economics, 
                 urban and regional planning, infrastructure policy, fiscal policy, environmental economics, land use policy and planning, 
                 planning law, real estate management and housing economics, political science, urban sociology and related fields.
-            <strong><i><a href="{% url 'mission_statement' %}" class="card-link">More...</a></i></strong>   
+            <strong><i><a href="{{ request.scheme }}://{{ request.get_host }}/site/mission_statement" class="card-link">More...</a></i></strong>   
             {% else %}
             <h3 class="card-title mb-2">Über diese Zeitschrift</h3>
             <br>
@@ -74,7 +74,7 @@
                 Fiskalpolitik, Raumplanung, Infrastrukturplanung und -politik, Bodenmanagement und -politik, 
                 Ressourcenökonomie, Planungsrecht, Immobilienwirtschaft und Wohnungswesen, Politikwissenschaft, 
                 Volkswirtschaftslehre, Stadtsoziologie sowie anderen verwandten Gebieten. 
-               <strong><i><a href="{% url 'mission_statement' %}" class="card-link">Mehr...</a></i></strong>           
+               <strong><i><a href="{{ request.scheme }}://{{ request.get_host }}/site/mission_statement" class="card-link">Mehr...</a></i></strong>           
             {% endif %}
           </div>    
         </div>
