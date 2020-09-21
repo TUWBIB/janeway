@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import viewsets, generics
 from rest_framework.decorators import api_view, permission_classes
@@ -109,12 +110,58 @@ class ArticleViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+@csrf_exempt
 def oai(request):
-    articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PUBLISHED)
+    if request.method == 'GET' or request.method == 'POST':
 
-    template = 'apis/OAI.xml'
-    context = {
-        'articles': articles,
-    }
+        verb = None
+        if request.method == 'GET' and 'verb' in request.GET.keys():
+            verb = request.GET['verb'].lower()
 
-    return render(request, template, context, content_type="application/xml")
+        if request.method == 'POST':
+            verb = request.POST.get('verb').lower()
+
+        if not verb or verb == 'listrecords':
+            articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PUBLISHED)
+            template = 'apis/OAI_ListRecords.xml'
+            context = {
+                'articles': articles,
+            }
+            return render(request, template, context, content_type="application/xml")
+
+        if not verb or verb == 'listidentifiers':
+            articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PUBLISHED)
+            template = 'apis/OAI_ListIdentifiers.xml'
+            context = {
+                'articles': articles,
+            }
+            return render(request, template, context, content_type="application/xml")
+
+
+        elif verb == 'listmetadataformats':
+            template = 'apis/OAI_ListMetadataFormats.xml'
+            context = {
+                'rv_value': 'rv_value_dummy',
+                'rv_identifier': 'rv_identifier_dummy',
+            }
+            return render(request, template, context, content_type="application/xml")
+
+        elif verb == 'getrecord':
+            template = 'apis/OAI_GetRecord.xml'
+            context = {
+                'rv_value': 'rv_value_dummy',
+                'rv_identifier': 'rv_identifier_dummy',
+            }
+            return render(request, template, context, content_type="application/xml")
+
+
+        elif verb == 'identify':
+            template = 'apis/OAI_Identify.xml'
+            context = {
+                'rv_value': request.scheme+'://'+request.META['HTTP_HOST']+request.path,
+                'repositoryName': request.journal.description,
+                'baseURL': request.scheme+'://'+request.META['HTTP_HOST']+request.path,
+                'adminEmail': 'repositum@tuwien.ac.at',
+                'deletedRecord': 'transient',
+            }
+            return render(request, template, context, content_type="application/xml")
