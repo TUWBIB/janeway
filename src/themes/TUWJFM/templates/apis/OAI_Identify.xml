@@ -1,17 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-        http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-    <responseDate>{% now "Y-m-d\TH:i:s\Z" %}</responseDate>
-    <request verb="Identify">{{ rv_value }} </request>
-    <Identify>       
-            <repositoryName>{{ repositoryName }}</repositoryName>
-            <baseURL>{{ baseURL }}</baseURL>
-            <protocolVersion>2.0</protocolVersion>
-            <adminEmail>{{ adminEmail }}</adminEmail>
-            <earliestDatestamp>2005-01-01T00:00:00.001Z</earliestDatestamp>
-            <deletedRecord>persistent</deletedRecord>
-            <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
-    </Identify>
-</OAI-PMH>
+{% extends "apis/OAI_base.xml" %}
+{% block content %}
+<Identify>       
+        <repositoryName>{{ repositoryName }}</repositoryName>
+        <baseURL>{{ baseURL }}</baseURL>
+        <protocolVersion>2.0</protocolVersion>
+        <adminEmail>{{ adminEmail }}</adminEmail>
+        <earliestDatestamp>2005-01-01T00:00:00.001Z</earliestDatestamp>
+        <deletedRecord>no</deletedRecord>
+        <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
+</Identify>
+{% endblock %}

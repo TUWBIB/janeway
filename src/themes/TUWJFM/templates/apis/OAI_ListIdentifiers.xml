@@ -1,20 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
- <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-        http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
- <responseDate>{% now "Y-m-d\TH:i:s\Z" %}</responseDate>
-    <request verb="ListIdentifiers" id="{{ journal_settings.general.publisher_name }}" metadataPrefix="oai_dc">{% if request.is_secure %}https://{% else %}http://{% endif %}{{ journal_settings.general.base_url }}/oai</request>
-    <ListRecords>       
-
-                {% for article in articles %}
-        <record>
-            <header>
-                <identifier>oai:{{ journal_settings.general.base_url }}:article/{{article.id}}</identifier>
-                <datestamp>{{article.date_published}}</datestamp>
-                <setSpec>up</setSpec>
-            </header>
-        </record>
-        {% endfor %}
-    </ListRecords>
-</OAI-PMH>
+{% extends "apis/OAI_base.xml" %}
+{% load oai %} 
+{% block content %}
+<ListIdentifiers>       
+{% for article in articles %}
+<record>
+    <header>
+        <identifier>oai:{{ journal.domain }}:{{ article.get_doi }}</identifier>
+        <datestamp>{{ article.date_published|oai_datestamp }}</datestamp>
+    </header>
+</record>
+{% endfor %}
+</ListIdentifiers>
+{% endblock %}
