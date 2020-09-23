@@ -1,6 +1,7 @@
 import json
 import datetime
 import pytz
+import re
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -116,7 +117,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
 def oai(request):
     context = {}
     context['journal'] = request.journal
-    context['responseDate'] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+    context['responseDate'] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()+'Z'
     context['rv_value'] = request.scheme+'://'+request.META['HTTP_HOST']+request.path
 
     params = {}
@@ -126,47 +127,28 @@ def oai(request):
             for k,v in request.GET.items(): params[k] = v
         if request.method == 'POST': 
             for k,v in request.POST.items(): params[k] = v
-        
+
         l = []
         for k,v in params.items():
             l.append(k + '="' + v + '"')
         context['rv_attribs'] = " ".join(l)
-    
 
+        print ("params----")
+        for k,v in params.items():
+            print (k,v)
+           
         verb = None
         if 'verb' in params.keys():
             verb = params['verb']
 
-
         if verb is None or verb not in ('Identify', 'ListRecords', 'GetRecord', 'ListIdentifiers', 'ListMetadataFormats', 'ListSets'):
-            template = 'apis/OAI_Error.xml'
-            context['err_code'] = 'badVerb'
-            context['err_val'] = context['err_code']
+            return error(request,context,'badVerb')            
 
-        elif verb == 'ListSets':
-            template = 'apis/OAI_Error.xml'
-            context['err_code'] = 'noSetHierarchy'
-            context['err_val'] = context['err_code']
-
-
+        elif verb == 'ListSets': return error(request,context,'noSetHierarchy')
         elif verb == 'ListRecords':
-            articles = submission_models.Article.objects.filter(
-                    journal=request.journal,
-                    stage=submission_models.STAGE_PUBLISHED,
-                    identifier__id_type="doi",
-                )
-            template = 'apis/OAI_ListRecords.xml'
-            context['articles'] =  articles
-
-        elif verb == 'ListIdentifiers':
             a = set(params.keys())
             b = set(['verb', 'from', 'until', 'metadataPrefix', 'set', 'resumptionToken'])
-            
-            if not a.issubset(b):
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'badArgument'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            if not a.issubset(b): return error(request,context,'badArgument')
 
             from_date = params['from'] if 'from' in params else None
             until_date = params['until'] if 'until' in params else None
@@ -174,109 +156,99 @@ def oai(request):
             set_name = params['set'] if 'set' in params else None
             resumption = params['resumptionToken'] if 'resumptionToken' in params else None
 
-            if set_name or set_name == '':
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'noSetHierarchy'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
+            if set_name or set_name == '': return error(request,context,'noSetHierarchy')
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+            if from_date:
+                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',from_date)
+                if not match: return error(request,context,'badArgument',err_val='invalid from date')
+                from_date = datetime.datetime.strptime(from_date,'%Y-%m-%dT%H:%M:%SZ').replace(microsecond=0)
+                print (from_date)
+            if until_date:
+                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',until_date)
+                if not match: return error(request,context,'badArgument',err_val='invalid until date')
+                until_date = datetime.datetime.strptime(until_date,'%Y-%m-%dT%H:%M:%SZ').replace(microsecond=0)
+                print (until_date)
 
-            if resumption or resumption == '':
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'badResumptionToken'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
 
-            articles = submission_models.Article.objects.filter(
-                    journal=request.journal,
-                    stage=submission_models.STAGE_PUBLISHED,
-                    identifier__id_type="doi",
-                )
+            if len(articles) == 0: return error(request,context,'noRecordsMatch')
+
+            template = 'apis/OAI_ListRecords.xml'
+            context['articles'] =  articles
+
+        elif verb == 'ListIdentifiers':
+            a = set(params.keys())
+            b = set(['verb', 'from', 'until', 'metadataPrefix', 'set', 'resumptionToken'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            from_date = params['from'] if 'from' in params else None
+            until_date = params['until'] if 'until' in params else None
+            metadataprefix = params['metadataPrefix'] if 'metadataPrefix' in params else None
+            set_name = params['set'] if 'set' in params else None
+            resumption = params['resumptionToken'] if 'resumptionToken' in params else None
+
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
+            if set_name or set_name == '': return error(request,context,'noSetHierarchy')
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+            if from_date:
+                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',from_date)
+                if not match: return error(request,context,'badArgument',err_val='invalid from date')
+                from_date = datetime.datetime.strptime(from_date,'%Y-%m-%dT%H:%M:%SZ')
+            if until_date:
+                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',until_date)
+                if not match: return error(request,context,'badArgument',err_val='invalid until date')
+                until_date = datetime.datetime.strptime(until_date,'%Y-%m-%dT%H:%M:%SZ')
+
+            articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
+
+            if len(articles) == 0: return error(request,context,'noRecordsMatch')
+
             template = 'apis/OAI_ListIdentifiers.xml'
             context['articles'] =  articles
 
         elif verb == 'ListMetadataFormats':
             a = set(params.keys())
             b = set(['verb', 'identifier'])
-            
-            if not a.issubset(b):
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'badArgument'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            if not a.issubset(b): return error(request,context,'badArgument')
 
             identifier = params['identifier'] if 'identifier' in params else None
             parts = identifier.split(':')
             if len(parts) != 3 or parts[0] != 'oai' or parts[1] != request.journal.domain:
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'idDoesNotExist'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+                return error(request,context,'idDoesNotExist')
 
             doi = parts[3]
             try:
-                article = submission_models.Article.objects.get(
-                        journal=request.journal,
-                        stage=submission_models.STAGE_PUBLISHED,
-                        identifier__id_type="doi",
-                        identifier__identifier=doi,
-                    )
+                articles = getArticles(journal=request.journal)
+                article = articles[0]
             except:
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'idDoesNotExist'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
-            
+                return error(request,context,'idDoesNotExist')
+           
             template = 'apis/OAI_ListMetadataFormats.xml'
-     
+    
         elif verb == 'GetRecord':
             a = set(params.keys())
             b = set(['verb', 'identifier', 'metadataPrefix'])
-            
-            if not a.issubset(b):
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'badArgument'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            if not a.issubset(b): return error(request,context,'badArgument')
 
             identifier = params['identifier'] if 'identifier' in params else None
             metadataprefix = params['metadataPrefix'] if 'metadataPrefix' in params else None
 
-            if metadataprefix is None or identifier is None:
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'badArgument'
-                context['err_val'] = 'missing arguments, identifier and metadataPrefix required'
-                return render(request, template, context, content_type="text/xml")
-            
-            if metadataprefix != 'oai_dc':
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'cannotDisseminateFormat'
-                context['err_val'] = 'metadataPrefix must be oai_dc'
-                return render(request, template, context, content_type="text/xml")                
-
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
 
             parts = identifier.split(':')
-            print (parts)
-            if len(parts) != 3 or parts[0] != 'oai' or parts[2] != request.journal.domain:
-                print ("cp1")
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'idDoesNotExist'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+            if len(parts) != 3 or parts[0] != 'oai' or parts[1] != request.journal.domain:
+                return error(request,context,'idDoesNotExist')
 
             doi = parts[2]
             try:
-                article = submission_models.Article.objects.get(
-                        journal=request.journal,
-                        stage=submission_models.STAGE_PUBLISHED,
-                        identifier__id_type="doi",
-                        identifier__identifier=doi,
-                    )
-            except Exception as e:
-                print (e)
-                template = 'apis/OAI_Error.xml'
-                context['err_code'] = 'idDoesNotExist'
-                context['err_val'] = context['err_code']
-                return render(request, template, context, content_type="text/xml")
+                articles = getArticles(journal=request.journal,identifier=doi)
+                article = articles[0]
+            except:
+                return error(request,context,'idDoesNotExist')
             
             template = 'apis/OAI_GetRecord.xml'
             context['article'] = article            
@@ -289,3 +261,30 @@ def oai(request):
             context['deletedRecord'] = 'no'
 
         return render(request, template, context, content_type="text/xml")
+
+def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_date=None):
+        articles = submission_models.Article.objects.filter(
+                journal=journal,
+                stage=submission_models.STAGE_PUBLISHED,
+                identifier__id_type=id_type,
+            )
+        
+        if identifier is not None:
+            articles = articles.filter(identifier__identifier=identifier)
+
+        if from_date is not None:
+            articles = articles.filter(date_published__gte=from_date)
+
+        if until_date is not None:
+            articles = articles.filter(date_published__lte=until_date)
+
+        return articles
+
+
+def error(request,context,err_code,err_val=None):
+    if err_val is None: err_val = err_code
+    template = 'apis/OAI_Error.xml'
+    context['err_code'] = err_code
+    context['err_val'] = err_val
+    return render(request, template, context, content_type="text/xml")
+
