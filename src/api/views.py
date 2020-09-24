@@ -161,15 +161,11 @@ def oai(request):
             if set_name or set_name == '': return error(request,context,'noSetHierarchy')
             if resumption or resumption == '': return error(request,context,'badResumptionToken')
             if from_date:
-                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',from_date)
-                if not match: return error(request,context,'badArgument',err_val='invalid from date')
-                from_date = datetime.datetime.strptime(from_date,'%Y-%m-%dT%H:%M:%SZ').replace(microsecond=0)
-                print (from_date)
+                from_date=match_date(from_date,'down')
+                if from_date is None: return error(request,context,'badArgument',err_val='invalid from date')
             if until_date:
-                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',until_date)
-                if not match: return error(request,context,'badArgument',err_val='invalid until date')
-                until_date = datetime.datetime.strptime(until_date,'%Y-%m-%dT%H:%M:%SZ').replace(microsecond=0)
-                print (until_date)
+                until_date=match_date(until_date,'up')
+                if until_date is None: return error(request,context,'badArgument',err_val='invalid until date')
 
             articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
 
@@ -194,13 +190,11 @@ def oai(request):
             if set_name or set_name == '': return error(request,context,'noSetHierarchy')
             if resumption or resumption == '': return error(request,context,'badResumptionToken')
             if from_date:
-                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',from_date)
-                if not match: return error(request,context,'badArgument',err_val='invalid from date')
-                from_date = datetime.datetime.strptime(from_date,'%Y-%m-%dT%H:%M:%SZ')
+                from_date=match_date(from_date,'down')
+                if from_date is None: return error(request,context,'badArgument',err_val='invalid from date')
             if until_date:
-                match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',until_date)
-                if not match: return error(request,context,'badArgument',err_val='invalid until date')
-                until_date = datetime.datetime.strptime(until_date,'%Y-%m-%dT%H:%M:%SZ')
+                until_date=match_date(until_date,'up')
+                if until_date is None: return error(request,context,'badArgument',err_val='invalid until date')
 
             articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
 
@@ -268,7 +262,7 @@ def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_
                 stage=submission_models.STAGE_PUBLISHED,
                 identifier__id_type=id_type,
             )
-        
+
         if identifier is not None:
             articles = articles.filter(identifier__identifier=identifier)
 
@@ -288,3 +282,23 @@ def error(request,context,err_code,err_val=None):
     context['err_val'] = err_val
     return render(request, template, context, content_type="text/xml")
 
+def match_date(date_str,round):
+    date = None
+    match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',date_str)
+    if match:
+        date = datetime.datetime.strptime(date_str,'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
+    else:
+        match = re.match('\d{4}-\d{2}-\d{2}T?',date_str)
+        if match:
+            if date_str[-1] == 'T':
+                date = datetime.datetime.strptime(date_str,'%Y-%m-%dT')
+            else:
+                date = datetime.datetime.strptime(date_str,'%Y-%m-%d')
+
+            if round == 'down':
+                date = date.replace(hour=0,minute=0,second=0,tzinfo=pytz.UTC)
+            if round == 'up':
+                date = date.replace(hour=23,minute=59,second=59,tzinfo=pytz.UTC)
+        
+
+    return date
