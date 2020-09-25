@@ -54,7 +54,7 @@
                 {% endif %}
             {% endif %}
 
-            {% if article.language == 'end' %}
+            {% if article.language == 'eng' %}
                 {% if article.abstract %}
                     <dc:description>{{ article.abstract }}</dc:description>
                 {% else %}
