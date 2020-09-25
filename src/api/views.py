@@ -270,7 +270,7 @@ def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_
                 journal=journal,
                 stage=submission_models.STAGE_PUBLISHED,
                 identifier__id_type=id_type,
-            )
+            ).order_by('pk')
 
         if identifier is not None:
             articles = articles.filter(identifier__identifier=identifier)
