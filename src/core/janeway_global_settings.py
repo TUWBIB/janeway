@@ -102,7 +102,7 @@ INSTALLED_APPS = [
 INSTALLED_APPS += plugin_installed_apps.load_plugin_apps(BASE_DIR)
 INSTALLED_APPS += plugin_installed_apps.load_homepage_element_apps(BASE_DIR)
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -121,7 +121,16 @@ MIDDLEWARE_CLASSES = (
     'core.middleware.PressMiddleware',
     'core.middleware.GlobalRequestMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-)
+]
+
+# DEBUG = True
+try:
+    if DEBUG:
+        INTERNAL_IPS = ('127.0.0.1',)
+        MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+        INSTALLED_APPS.append('debug_toolbar.apps.DebugToolbarConfig')
+except ImportError:
+    pass
 
 ROOT_URLCONF = 'core.urls'
 
