@@ -5,10 +5,12 @@
 {% for article in articles %}
 <record>
     <header>
-        <identifier>oai:{{ journal.domain }}:{{ article.get_doi }}</identifier>
+        <identifier>oai:{{ http_host }}:{{ article.get_doi }}</identifier>
         <datestamp>{{ article.date_published|oai_datestamp }}</datestamp>
+        <setSpec>openaire</setSpec>
     </header>
 </record>
 {% endfor %}
+<resumptionToken completeListSize="{{ articles|length }}" cursor="0"/>    
 </ListIdentifiers>
 {% endblock %}

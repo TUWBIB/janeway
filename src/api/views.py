@@ -15,6 +15,7 @@ from rest_framework import permissions
 from api import serializers, permissions as api_permissions
 from core import models as core_models
 from submission import models as submission_models
+from core import logic
 
 
 @api_view(['GET'])
@@ -119,6 +120,7 @@ def oai(request):
     context['journal'] = request.journal
     context['responseDate'] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()+'Z'
     context['rv_value'] = request.scheme+'://'+request.META['HTTP_HOST']+request.path
+    context['http_host'] = request.META['HTTP_HOST']
 
     params = {}
 
@@ -133,10 +135,6 @@ def oai(request):
             l.append(k + '="' + v + '"')
         context['rv_attribs'] = " ".join(l)
 
-        print ("params----")
-        for k,v in params.items():
-            print (k,v)
-           
         verb = None
         if 'verb' in params.keys():
             verb = params['verb']
@@ -144,7 +142,16 @@ def oai(request):
         if verb is None or verb not in ('Identify', 'ListRecords', 'GetRecord', 'ListIdentifiers', 'ListMetadataFormats', 'ListSets'):
             return error(request,context,'badVerb')            
 
-        elif verb == 'ListSets': return error(request,context,'noSetHierarchy')
+        elif verb == 'ListSets':
+            a = set(params.keys())
+            b = set(['verb', 'resumptionToken'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            resumption = params['resumptionToken'] if 'resumptionToken' in params else None
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+
+            template = 'apis/OAI_ListSets.xml'
+            
         elif verb == 'ListRecords':
             a = set(params.keys())
             b = set(['verb', 'from', 'until', 'metadataPrefix', 'set', 'resumptionToken'])
@@ -158,7 +165,8 @@ def oai(request):
 
             if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
             if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
-            if set_name or set_name == '': return error(request,context,'noSetHierarchy')
+            if set_name == '': return error(request,context,'badArgument',err_val='invalid set name')
+            if set_name and set_name != 'openaire': return error(request,context,'badArgument',err_val='invalid set name')
             if resumption or resumption == '': return error(request,context,'badResumptionToken')
             if from_date:
                 from_date=match_date(from_date,'down')
@@ -187,7 +195,8 @@ def oai(request):
 
             if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
             if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
-            if set_name or set_name == '': return error(request,context,'noSetHierarchy')
+            if set_name == '': return error(request,context,'badArgument',err_val='invalid set name')
+            if set_name and set_name != 'openaire': return error(request,context,'badArgument',err_val='invalid set name')
             if resumption or resumption == '': return error(request,context,'badResumptionToken')
             if from_date:
                 from_date=match_date(from_date,'down')
@@ -273,7 +282,6 @@ def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_
             articles = articles.filter(date_published__lte=until_date)
 
         return articles
-
 
 def error(request,context,err_code,err_val=None):
     if err_val is None: err_val = err_code

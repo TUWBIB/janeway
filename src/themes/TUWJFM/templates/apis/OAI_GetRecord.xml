@@ -1,11 +1,11 @@
 {% extends "apis/OAI_base.xml" %}
+{% load oai %} 
 {% block content %}
-<request verb="GetRecord" id="{{ journal_settings.general.publisher_name }}" metadataPrefix="oai_dc">{% if request.is_secure %}https://{% else %}http://{% endif %}{{ journal_settings.general.base_url }}/oai</request>
 <record>
     <header>
-        <identifier>oai:{{ journal_settings.general.base_url }}:article/{{article.id}}</identifier>
-        <datestamp>{{article.date_published}}</datestamp>
-        <setSpec>up</setSpec>
+        <identifier>oai:{{ http_host }}:{{ article.get_doi }}</identifier>
+        <datestamp>{{ article.date_published|oai_datestamp }}</datestamp>
+        <setSpec>openaire</setSpec>
     </header>
     <metadata>
         <oai_dc:dc
@@ -14,18 +14,46 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
             http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-            <dc:title xml:lang="en-US">{{article.title}}</dc:title>
+
+            <dc:title>{{ article.title}}</dc:title>
             {% for author in article.authors.all %}
-            <dc:creator>{{author.last_name}}, {{author.first_name}}</dc:creator>
+                <dc:creator>{{author.last_name}}, {{author.first_name}}</dc:creator>
             {% endfor %}
-            <dc:subject xml:lang="en-US"></dc:subject>
-            <dc:description xml:lang="en-US">{{article.abstract}}</dc:description>
-            <dc:publisher xml:lang="en-US">{{ request.journal.publisher }}</dc:publisher>
-            <dc:date>{{article.date_published}}</dc:date>
-            <dc:type xml:lang="en-US">Article</dc:type>
-            <dc:type xml:lang="en-US"></dc:type>
-            <dc:identifier>{{article.identifier}}</dc:identifier>
-            <dc:coverage xml:lang="en-US"></dc:coverage>
+            {% for x in article.keywords.all %}
+                <dc:subject xml:lang="en-US">{{ x }}</dc:subject>
+            {% endfor %}
+
+            {% for x in article.keywords_de.all %}
+                <dc:subject xml:lang="de-AT">{{ x }}</dc:subject>
+            {% endfor %}
+
+            {% if article.abstract %}
+                <dc:description xml:lang="en-US">{{ article.abstract }}</dc:description>
+            {% endif %}
+            {% if article.abstract_de %}
+                <dc:description xml:lang="de-AT">{{ article.abstract_de }}</dc:description>
+            {% endif %}
+                        
+            {% if journal.code == 'JFM' %}
+                <dc:publisher>IFM - Real Estate and Facility Management, Institute of Management Science, Vienna University of Technology</dc:publisher>
+            {% endif %}
+            {% if journal.code == 'OES' %}
+                <dc:publisher>Centre of Public Finance and Infrastructure Policy, Institute of Spatial Planning, TU Wien</dc:publisher>
+            {% endif %}
+
+            <dc:language>{{ article.language }}</dc:language>
+            <dc:date>{{ article.date_published|date:"Y" }}</dc:date>
+            <dc:type>info:eu-repo/semantics/article</dc:type>
+            <dc:format>application/pdf</dc:format>
+            <dc:rights>info:eu-repo/semantics/openAccess</dc:rights>
+            <dc:rights>{{ article.license.url }}</dc:rights>
+            <dc:identifier>https://{{ http_host }}/article/id/{{ article.id }}/</dc:identifier>
+            {% if article.get_doi %}
+            <dc:identifier>{{ article.get_doi }}</dc:identifier>
+            {% endif %}
+            {% if article.get_urn %}
+            <dc:identifier>{{ article.get_urn }}</dc:identifier>
+            {% endif %}
         </oai_dc:dc>
     </metadata>
 </record>

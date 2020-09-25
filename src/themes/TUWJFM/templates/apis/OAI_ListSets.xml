@@ -1,0 +1,11 @@
+{% extends "apis/OAI_base.xml" %}
+{% load oai %} 
+{% block content %}
+<ListSets>
+<set>
+    <setSpec>openaire</setSpec>
+    <setName>OpenAIRE</setName>
+</set>
+<resumptionToken completeListSize="1" cursor="0"/>    
+</ListSets>
+{% endblock %}
