@@ -6,6 +6,6 @@
     <setSpec>openaire</setSpec>
     <setName>OpenAIRE</setName>
 </set>
-<resumptionToken completeListSize="1" cursor="0"/>    
+<resumptionToken completeListSize="1" cursor="0">not_applicable</resumptionToken>
 </ListSets>
 {% endblock %}

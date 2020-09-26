@@ -7,6 +7,6 @@
 {% include "apis/OAI_record.xml" %}
 {% endblock %}
 {% endfor %}
-<resumptionToken completeListSize="{{ articles|length }}" cursor="0"/>    
+<resumptionToken completeListSize="{{ articles|length }}" cursor="0">not_applicable</resumptionToken>     
 </ListRecords>
 {% endblock %}
