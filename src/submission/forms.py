@@ -106,7 +106,7 @@ class ArticleInfo(KeywordModelForm):
             self.fields['section'].queryset = models.Section.objects.language().fallbacks('en').filter(
                 journal=article.journal,
                 public_submissions=True,
-            )
+            ).order_by('name')
             self.fields['license'].queryset = models.Licence.objects.filter(
                 journal=article.journal,
                 available_for_submission=True,
