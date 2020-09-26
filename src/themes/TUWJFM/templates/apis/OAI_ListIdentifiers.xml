@@ -11,6 +11,5 @@
     </header>
 </record>
 {% endfor %}
-<resumptionToken completeListSize="{{ articles|length }}" cursor="0">not_applicable</resumptionToken>    
 </ListIdentifiers>
 {% endblock %}
