@@ -2281,7 +2281,7 @@ def handleAddAuthor(request, article):
                 messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
 
     data = {
-        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'msg': loader.render_to_string('common/elements/messages.html', { 'messages': get_messages(request) }, None),
         'context': json.dumps(context)
     }
     return JsonResponse(data)
@@ -2315,7 +2315,7 @@ def handleFileUpload(request, article):
         context['galley']= serializers.serialize('json', [galley], fields=["article", "file", "label"])
     
     data = {
-        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'msg': loader.render_to_string('common/elements/messages.html', { 'messages': get_messages(request) }, None),
         'context': json.dumps(context)
     }
     return JsonResponse(data)
