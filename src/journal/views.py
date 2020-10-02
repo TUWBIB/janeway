@@ -474,6 +474,7 @@ def view_galley(request, article_id, galley_id):
         date_published__lte=timezone.now(),
         stage=submission_models.STAGE_PUBLISHED
     )
+
     galley = get_object_or_404(
         core_models.Galley,
         pk=galley_id,
@@ -2299,11 +2300,14 @@ def handleFileUpload(request, article):
                 messages.add_message(request, messages.SUCCESS, 'File added!')
 
     if 'pdf' in request.POST:
+        create_title_page = request.POST.get('create_title_page', False)
         for uploaded_file in request.FILES.getlist('pdf-file'):
             if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
                 messages.add_message(request, messages.WARNING, 'File is not PDF!')
             else:
                 galley = prod_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
+                if create_title_page:
+                    core_logic.create_article_file_from_galley(article, request, galley)
                 messages.add_message(request, messages.SUCCESS, 'File added!')
 
     if 'other' in request.POST:
