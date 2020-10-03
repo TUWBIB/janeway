@@ -1401,6 +1401,7 @@ def manage_archive_article(request, article_id):
     from production import logic as production_logic
     from identifiers import models as identifier_models
     from submission import forms as submission_forms
+    from core import logic as core_logic
 
     article = get_object_or_404(submission_models.Article, pk=article_id)
     galleys = production_logic.get_all_galleys(article)
@@ -1418,8 +1419,11 @@ def manage_archive_article(request, article_id):
                         "Uploaded file is not UTF-8 encoded")
 
         if 'pdf' in request.POST:
+            create_title_page = request.POST.get('create_title_page', False)
             for uploaded_file in request.FILES.getlist('pdf-file'):
-                production_logic.save_galley(article, request, uploaded_file, True, "PDF")
+                galley = production_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
+                if create_title_page:
+                    core_logic.create_article_file_from_galley(article, request, galley)
 
         if 'delete_note' in request.POST:
             note_id = int(request.POST['delete_note'])
