@@ -541,6 +541,7 @@ def view_galley(request, article_id, galley_id):
         date_published__lte=timezone.now(),
         stage__in=submission_models.PUBLISHED_STAGES
     )
+
     galley = get_object_or_404(
         core_models.Galley,
         pk=galley_id,
@@ -1541,6 +1542,7 @@ def manage_archive_article(request, article_id):
     from production import logic as production_logic
     from identifiers import models as identifier_models
     from submission import forms as submission_forms
+    from core import logic as core_logic
 
     article = get_object_or_404(submission_models.Article, pk=article_id)
     galleys = production_logic.get_all_galleys(article)
@@ -1565,6 +1567,13 @@ def manage_archive_article(request, article_id):
                         messages.ERROR,
                         "Uploaded file is not UTF-8 encoded",
                     )
+
+        if 'pdf' in request.POST:
+            create_title_page = request.POST.get('create_title_page', False)
+            for uploaded_file in request.FILES.getlist('pdf-file'):
+                galley = production_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
+                if create_title_page:
+                    core_logic.create_article_file_from_galley(article, request, galley)
 
         if 'delete_note' in request.POST:
             note_id = int(request.POST['delete_note'])
@@ -2470,7 +2479,7 @@ def handleAddAuthor(request, article):
                 messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
 
     data = {
-        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'msg': loader.render_to_string('common/elements/messages.html', { 'messages': get_messages(request) }, None),
         'context': json.dumps(context)
     }
     return JsonResponse(data)
@@ -2488,11 +2497,14 @@ def handleFileUpload(request, article):
                 messages.add_message(request, messages.SUCCESS, 'File added!')
 
     if 'pdf' in request.POST:
+        create_title_page = request.POST.get('create_title_page', False)
         for uploaded_file in request.FILES.getlist('pdf-file'):
             if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
                 messages.add_message(request, messages.WARNING, 'File is not PDF!')
             else:
                 galley = prod_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
+                if create_title_page:
+                    core_logic.create_article_file_from_galley(article, request, galley)
                 messages.add_message(request, messages.SUCCESS, 'File added!')
 
     if 'other' in request.POST:
@@ -2504,7 +2516,7 @@ def handleFileUpload(request, article):
         context['galley']= serializers.serialize('json', [galley], fields=["article", "file", "label"])
     
     data = {
-        'msg': loader.render_to_string('core/messages.html', { 'messages': get_messages(request) }, None),
+        'msg': loader.render_to_string('common/elements/messages.html', { 'messages': get_messages(request) }, None),
         'context': json.dumps(context)
     }
     return JsonResponse(data)

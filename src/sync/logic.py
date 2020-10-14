@@ -71,7 +71,7 @@ def articleToDataCiteXML(article_id):
                 l.append('<familyName>')
                 l.append(author.last_name)
                 l.append('</familyName>')
-                if author.author.orcid:
+                if author.author and author.author.orcid:
                     l.append('<nameIdentifier nameIdentifierScheme="ORCID" schemeURI="https://orcid.org">')
                     l.append(author.author.orcid)
                     l.append('</nameIdentifier>')

@@ -1,0 +1,11 @@
+{% extends "apis/OAI_base.xml" %}
+{% load oai %} 
+{% block content %}
+<ListRecords>       
+{% for article in articles %}
+{% block record %}
+{% include "apis/OAI_record.xml" %}
+{% endblock %}
+{% endfor %}
+</ListRecords>
+{% endblock %}

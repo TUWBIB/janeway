@@ -710,9 +710,10 @@ def get_homepage_elements(request):
 # TUW
 # utility function to create an article's large image file
 # based on the first page of the pdf galley
-def create_article_file_from_galley(article, request):
+def create_article_file_from_galley(article, request, galley=None):
     article=submission_models.Article.objects.get(pk=article.pk)
-    galley=models.Galley.objects.get(article=article,label='PDF',type='pdf')
+    if galley is None:
+        galley=models.Galley.objects.get(article=article,label='PDF',type='pdf')
     # no galley, do nothing
     if galley is not None:
         pdf_file=galley.file.get_file_path(article)

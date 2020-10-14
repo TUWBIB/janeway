@@ -452,6 +452,7 @@
 
                     formData.append('pdf-file', file); 
                     formData.append('pdf', 'true')
+                    formData.append('create_title_page',$('input[name="create_title_page"]')[0].checked)
                 }
 
                 if ($(this).attr("name") == "other") {

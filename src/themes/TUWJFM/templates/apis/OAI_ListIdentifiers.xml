@@ -1,0 +1,15 @@
+{% extends "apis/OAI_base.xml" %}
+{% load oai %} 
+{% block content %}
+<ListIdentifiers>       
+{% for article in articles %}
+<record>
+    <header>
+        <identifier>oai:{{ http_host }}:{{ article.get_doi }}</identifier>
+        <datestamp>{{ article.date_published|oai_datestamp }}</datestamp>
+        <setSpec>openaire</setSpec>
+    </header>
+</record>
+{% endfor %}
+</ListIdentifiers>
+{% endblock %}

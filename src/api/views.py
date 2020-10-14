@@ -1,8 +1,12 @@
 import json
+import datetime
+import pytz
+import re
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import viewsets, generics
 from rest_framework.decorators import api_view, permission_classes
@@ -11,6 +15,7 @@ from rest_framework import permissions
 from api import serializers, permissions as api_permissions
 from core import models as core_models
 from submission import models as submission_models
+from core import logic
 
 
 @api_view(['GET'])
@@ -109,14 +114,199 @@ class ArticleViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+@csrf_exempt
 def oai(request):
-    articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PUBLISHED)
-    if request.journal:
-        articles = articles.filter(journal=request.journal)
+    context = {}
+    context['journal'] = request.journal
+    context['responseDate'] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()+'Z'
+    context['rv_value'] = request.scheme+'://'+request.META['HTTP_HOST']+request.path
+    context['http_host'] = request.META['HTTP_HOST']
 
-    template = 'apis/OAI.xml'
-    context = {
-        'articles': articles,
-    }
+    params = {}
 
-    return render(request, template, context, content_type="application/xml")
+    if request.method == 'GET' or request.method == 'POST':
+        if request.method == 'GET': 
+            for k,v in request.GET.items(): params[k] = v
+        if request.method == 'POST': 
+            for k,v in request.POST.items(): params[k] = v
+
+        l = []
+        for k,v in params.items():
+            l.append(k + '="' + v + '"')
+        context['rv_attribs'] = " ".join(l)
+
+        verb = None
+        if 'verb' in params.keys():
+            verb = params['verb']
+
+        if verb is None or verb not in ('Identify', 'ListRecords', 'GetRecord', 'ListIdentifiers', 'ListMetadataFormats', 'ListSets'):
+            return error(request,context,'badVerb')            
+
+        elif verb == 'ListSets':
+            a = set(params.keys())
+            b = set(['verb', 'resumptionToken'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            resumption = params['resumptionToken'] if 'resumptionToken' in params else None
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+
+            template = 'apis/OAI_ListSets.xml'
+            
+        elif verb == 'ListRecords':
+            a = set(params.keys())
+            b = set(['verb', 'from', 'until', 'metadataPrefix', 'set', 'resumptionToken'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            from_date = params['from'] if 'from' in params else None
+            until_date = params['until'] if 'until' in params else None
+            metadataprefix = params['metadataPrefix'] if 'metadataPrefix' in params else None
+            set_name = params['set'] if 'set' in params else None
+            resumption = params['resumptionToken'] if 'resumptionToken' in params else None
+
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
+            if set_name == '': return error(request,context,'badArgument',err_val='invalid set name')
+            if set_name and set_name != 'openaire': return error(request,context,'badArgument',err_val='invalid set name')
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+            if from_date:
+                from_date=match_date(from_date,'down')
+                if from_date is None: return error(request,context,'badArgument',err_val='invalid from date')
+            if until_date:
+                until_date=match_date(until_date,'up')
+                if until_date is None: return error(request,context,'badArgument',err_val='invalid until date')
+
+            articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
+
+            if len(articles) == 0: return error(request,context,'noRecordsMatch')
+
+            template = 'apis/OAI_ListRecords.xml'
+            context['articles'] =  articles
+
+        elif verb == 'ListIdentifiers':
+            a = set(params.keys())
+            b = set(['verb', 'from', 'until', 'metadataPrefix', 'set', 'resumptionToken'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            from_date = params['from'] if 'from' in params else None
+            until_date = params['until'] if 'until' in params else None
+            metadataprefix = params['metadataPrefix'] if 'metadataPrefix' in params else None
+            set_name = params['set'] if 'set' in params else None
+            resumption = params['resumptionToken'] if 'resumptionToken' in params else None
+
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
+            if set_name == '': return error(request,context,'badArgument',err_val='invalid set name')
+            if set_name and set_name != 'openaire': return error(request,context,'badArgument',err_val='invalid set name')
+            if resumption or resumption == '': return error(request,context,'badResumptionToken')
+            if from_date:
+                from_date=match_date(from_date,'down')
+                if from_date is None: return error(request,context,'badArgument',err_val='invalid from date')
+            if until_date:
+                until_date=match_date(until_date,'up')
+                if until_date is None: return error(request,context,'badArgument',err_val='invalid until date')
+
+            articles = getArticles(journal=request.journal,from_date=from_date,until_date=until_date)
+
+            if len(articles) == 0: return error(request,context,'noRecordsMatch')
+
+            template = 'apis/OAI_ListIdentifiers.xml'
+            context['articles'] =  articles
+
+        elif verb == 'ListMetadataFormats':
+            a = set(params.keys())
+            b = set(['verb', 'identifier'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            identifier = params['identifier'] if 'identifier' in params else None
+            parts = identifier.split(':')
+            if len(parts) != 3 or parts[0] != 'oai' or parts[1] != request.journal.domain:
+                return error(request,context,'idDoesNotExist')
+
+            doi = parts[3]
+            try:
+                articles = getArticles(journal=request.journal)
+                article = articles[0]
+            except:
+                return error(request,context,'idDoesNotExist')
+           
+            template = 'apis/OAI_ListMetadataFormats.xml'
+    
+        elif verb == 'GetRecord':
+            a = set(params.keys())
+            b = set(['verb', 'identifier', 'metadataPrefix'])
+            if not a.issubset(b): return error(request,context,'badArgument')
+
+            identifier = params['identifier'] if 'identifier' in params else None
+            metadataprefix = params['metadataPrefix'] if 'metadataPrefix' in params else None
+
+            if not metadataprefix or metadataprefix == '': return error(request,context,'badArgument')
+            if metadataprefix != 'oai_dc': return error(request,context,'cannotDisseminateFormat',err_val='metadataPrefix must be oai_dc')
+
+            parts = identifier.split(':')
+            if len(parts) != 3 or parts[0] != 'oai' or parts[1] != request.journal.domain:
+                return error(request,context,'idDoesNotExist')
+
+            doi = parts[2]
+            try:
+                articles = getArticles(journal=request.journal,identifier=doi)
+                article = articles[0]
+            except:
+                return error(request,context,'idDoesNotExist')
+            
+            template = 'apis/OAI_GetRecord.xml'
+            context['article'] = article            
+
+        elif verb == 'Identify':
+            template = 'apis/OAI_Identify.xml'
+            context['repositoryName'] = request.journal.description
+            context['baseURL'] = request.scheme+'://'+request.META['HTTP_HOST']+request.path
+            context['adminEmail'] = 'repositum@tuwien.ac.at'
+            context['deletedRecord'] = 'no'
+
+        return render(request, template, context, content_type="text/xml")
+
+def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_date=None):
+        articles = submission_models.Article.objects.filter(
+                journal=journal,
+                stage=submission_models.STAGE_PUBLISHED,
+                identifier__id_type=id_type,
+            ).order_by('pk')
+
+        if identifier is not None:
+            articles = articles.filter(identifier__identifier=identifier)
+
+        if from_date is not None:
+            articles = articles.filter(date_published__gte=from_date)
+
+        if until_date is not None:
+            articles = articles.filter(date_published__lte=until_date)
+
+        return articles
+
+def error(request,context,err_code,err_val=None):
+    if err_val is None: err_val = err_code
+    template = 'apis/OAI_Error.xml'
+    context['err_code'] = err_code
+    context['err_val'] = err_val
+    return render(request, template, context, content_type="text/xml")
+
+def match_date(date_str,round):
+    date = None
+    match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',date_str)
+    if match:
+        date = datetime.datetime.strptime(date_str,'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
+    else:
+        match = re.match('\d{4}-\d{2}-\d{2}T?',date_str)
+        if match:
+            if date_str[-1] == 'T':
+                date = datetime.datetime.strptime(date_str,'%Y-%m-%dT')
+            else:
+                date = datetime.datetime.strptime(date_str,'%Y-%m-%d')
+
+            if round == 'down':
+                date = date.replace(hour=0,minute=0,second=0,tzinfo=pytz.UTC)
+            if round == 'up':
+                date = date.replace(hour=23,minute=59,second=59,tzinfo=pytz.UTC)
+        
+
+    return date

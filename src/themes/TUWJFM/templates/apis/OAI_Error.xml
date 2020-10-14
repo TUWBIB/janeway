@@ -1,0 +1,4 @@
+{% extends "apis/OAI_base.xml" %}
+{% block content %}
+<error code="{{ err_code }}">{{ err_val}}</error>
+{% endblock %}

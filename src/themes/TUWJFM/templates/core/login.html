@@ -41,10 +41,11 @@
                         <p class="text-center"><a
                                 href="{% url 'core_get_reset_token' %}">{% trans "Forgotten your password?" %}</a>
                         </p>
-
+                        {% comment %}
                         <p class="text-center">
                             <a href="{% url 'core_register' %}">{% trans "Register a new account" %}</a>
                         </p>
+                        {% endcomment %}
                     </div>
                 </div>
             </div>
