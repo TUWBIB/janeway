@@ -14,9 +14,9 @@ from django.db.models import Q
 from django.utils import timezone
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from django.http import HttpResponse
 
 from core import models as core_models, files, forms as core_forms
 from events import logic as event_logic
@@ -29,7 +29,7 @@ from security.decorators import (
     section_editor_draft_decisions, article_stage_review_required
 )
 from submission import models as submission_models, forms as submission_forms
-from utils import models as util_models, ithenticate
+from utils import models as util_models, ithenticate, shared, setting_handler
 
 
 @senior_editor_user_required
@@ -1414,7 +1414,7 @@ def review_decision(request, article_id, decision):
 
         if decision == 'accept':
             article.accept_article(stage=submission_models.STAGE_EDITOR_COPYEDITING)
-            article.snapshot_authors(article)
+            article.snapshot_authors(article, force_update=False)
             event_logic.Events.raise_event(event_logic.Events.ON_ARTICLE_ACCEPTED, task_object=article, **kwargs)
 
             workflow_kwargs = {'handshake_url': 'review_home',
@@ -2053,24 +2053,55 @@ def review_forms(request):
     :param request: HttpRequest object
     :return: HttpResponse or HttpRedirect
     """
-    form_list = models.ReviewForm.objects.filter(journal=request.journal)
+    form_list = models.ReviewForm.objects.filter(
+        journal=request.journal,
+        deleted=False,
+    )
 
     form = forms.NewForm()
+    default_form = setting_handler.get_setting(
+        'general', 'default_review_form', request.journal,
+    ).processed_value
+    if default_form.isdigit():
+        default_form = int(default_form)
 
     if request.POST:
-        form = forms.NewForm(request.POST)
+        if 'delete' in request.POST:
+            form_id = request.POST["delete"]
+            if form_id.isdigit():
+                form_id = int(form_id)
+            if default_form == form_id:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "This form is selected as the defaul form and thus"
+                    " can't be deleted",
+                )
+                return redirect(reverse('review_review_forms'))
 
-        if form.is_valid():
-            new_form = form.save(commit=False)
-            new_form.journal = request.journal
-            new_form.save()
-
+            form_obj = get_object_or_404(
+                models.ReviewForm, id=form_id,
+                journal=request.journal,
+            )
+            form_obj.deleted = True
+            form_obj.save()
+            messages.add_message(request, messages.SUCCESS, 'Form Deleted')
             return redirect(reverse('review_review_forms'))
+        else:
+            form = forms.NewForm(request.POST)
+
+            if form.is_valid():
+                new_form = form.save(commit=False)
+                new_form.journal = request.journal
+                new_form.save()
+
+                return redirect(reverse('review_review_forms'))
 
     template = 'review/manager/review_forms.html'
     context = {
         'form_list': form_list,
         'form': form,
+        'default_form': default_form,
     }
 
     return render(request, template, context)
@@ -2151,6 +2182,30 @@ def preview_form(request, form_id):
     }
 
     return render(request, template, context)
+
+
+@require_POST
+@senior_editor_user_required
+def order_review_elements(request, form_id):
+    """
+    Reorders Review Form elements.
+    :param request: HttpRequest object
+    :param form_id: ReviewForm PK
+    """
+    form = get_object_or_404(
+        models.ReviewForm,
+        pk=form_id,
+        journal=request.journal,
+    )
+
+    shared.set_order(
+        form.elements.all(),
+        'order',
+        request.POST.getlist('element[]'),
+    )
+
+    return HttpResponse('Ok')
+
 
 
 @reviewer_user_for_assignment_required
