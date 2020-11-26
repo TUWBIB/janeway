@@ -101,8 +101,6 @@ class Command(BaseCommand):
 
             if warnings:
                 print ('\n'.join(warnings))
-                sys.exit(0)
-
 
             (status,content)=self.api.updateMetadata(doi,xml)
             if status == "success":
