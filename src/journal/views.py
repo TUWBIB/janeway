@@ -321,6 +321,9 @@ def article(request, identifier_type, identifier):
     if article_object.is_published:
         store_article_access(request, article_object, 'view')
 
+    kw = article_object.keywords.all().order_by('submission_article_keywords.id')
+    kw_de = article_object.keywords_de.all().order_by('submission_article_keywords_de.id')
+
     template = 'journal/article.html'
     context = {
         'article': article_object,
@@ -328,6 +331,8 @@ def article(request, identifier_type, identifier):
         'identifier_type': identifier_type,
         'identifier': identifier,
         'article_content': content,
+        'kw': kw,
+        'kw_de': kw_de,
     }
 
     return render(request, template, context)
