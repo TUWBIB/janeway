@@ -117,6 +117,17 @@ def articleToDataCiteXML(article_id):
 
             l.append('</titles>')
 
+            if article.keywords or article.keywords_de:
+                l.append('<subjects>')
+                for kw in article.keywords.all():
+                    l.append('<subject xml:lang="en">')
+                    l.append(escape(kw.word))
+                    l.append('</subject>')
+                for kw in article.keywords_de.all():
+                    l.append('<subject xml:lang="de">')
+                    l.append(escape(kw.word))
+                    l.append('</subject>')
+                l.append('</subjects>')
 
             l.append('<publisher>')
             if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
