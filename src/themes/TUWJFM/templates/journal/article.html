@@ -167,16 +167,17 @@
                     </tr>
                     {% endif %}
 -->
-                    {% if article.keywords.all %}
+                    {% if kw.all %}
                     <tr>
                         <th>{% trans "Keywords (English)" %}</th>
-                        <td>{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                        <td>{% for keyword in kw.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                     </tr>
                     {% endif %}
-                    {% if article.keywords_de.all %}
+
+                    {% if kw_de.all %}
                     <tr>
                         <th>{% trans "Keywords (German)" %}</th>
-                        <td>{% for keyword in article.keywords_de.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                        <td>{% for keyword in kw_de.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                     </tr>
                     {% endif %}
                     {% for x in article.get_identifiers %}
