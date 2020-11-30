@@ -2164,52 +2164,70 @@ def backcontent_delete_author(request, article_id, author_id):
 
 @editor_user_required
 def backcontent_add_author(request,article_id):
-    str=request.POST.get("search","")
+    s=request.POST.get("search","")
     message="unknown"
     status="info"
+    author = None
 
-    authors=core_models.Account.objects.filter(email=str) | core_models.Account.objects.filter(orcid=str)
+    # check email or orcid
+    authors=core_models.Account.objects.filter(email=s) | core_models.Account.objects.filter(orcid=s)
     if authors:
         if authors.count()>1:
             message="multiple authors found, something's very fishy"
             status="error"
         else:
-            
             author=authors[0]
-            article=submission_models.Article.objects.filter(id=article_id)[0]
-
-            #check if account already has author role for this journal
-            role=core_models.Role.objects.filter(name='author')[0]
-            accountroles=core_models.AccountRole.objects.filter(user=author,journal=request.journal,role=role)
-            if accountroles:
-                pass
-            else:
-                author.add_account_role(role_slug='author', journal=request.journal)
-
-            #check if author already added to article
-            found=False
-
-            for a in article.authors.all():
-                if a.id==author.id:
-                    found=True
-
-            if not found:
-                article.authors.add(author)
-                aao=setAuthorOrder(article,author)
-                submission_models.ArticleAuthorOrder.objects.get_or_create(article=article, author=author)
-
-                message="author added"
-                status="success"
-                context = { 
-                    'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author.pk }), 
-                    'aao': serializers.serialize('json', [aao], fields=["pk","order"]),  
-                    'author' : serializers.serialize('json',[aao.author], fields=["pk","last_name","first_name","email"]) 
-                }
-            else:
-                message="author already set"
-                status="warning"
     else:
-        message="no author found for "+str
+        l = s.split(' ')
+        if len(l)==1:
+            print (l[0].lower())
+            authors = core_models.Account.objects.filter(last_name__istartswith=l[0].lower())
+        else:
+            authors = core_models.Account.objects.filter(last_name__istartswith=l[0].lower()) & core_models.Account.objects.filter(first_name__istartswith=l[1].lower())
+
+        if authors:
+            if authors.count()>1:
+                message="sorry, multiple authors found"
+                status="error"
+            else:
+                author = authors[0]
+         
+
+    if author:
+        article=submission_models.Article.objects.filter(id=article_id)[0]
+
+        #check if account already has author role for this journal
+        role=core_models.Role.objects.filter(name='author')[0]
+        accountroles=core_models.AccountRole.objects.filter(user=author,journal=request.journal,role=role)
+        if accountroles:
+            pass
+        else:
+            author.add_account_role(role_slug='author', journal=request.journal)
+
+        #check if author already added to article
+        found=False
+
+        for a in article.authors.all():
+            if a.id==author.id:
+                found=True
+
+        if not found:
+            article.authors.add(author)
+            aao=setAuthorOrder(article,author)
+            submission_models.ArticleAuthorOrder.objects.get_or_create(article=article, author=author)
+
+            message="author added"
+            status="success"
+            context = { 
+                'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author.pk }), 
+                'aao': serializers.serialize('json', [aao], fields=["pk","order"]),  
+                'author' : serializers.serialize('json',[aao.author], fields=["pk","last_name","first_name","email"]) 
+            }
+        else:
+            message="author already set"
+            status="warning"
+    else:
+        message="no author found for "+s
         status="warning"
 
     if status=="success": 
