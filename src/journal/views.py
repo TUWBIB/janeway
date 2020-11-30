@@ -4,6 +4,7 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import json
+import re
 
 from django.conf import settings
 from django.contrib import messages
@@ -248,6 +249,15 @@ def issues(request):
 @decorators.frontend_enabled
 def current_issue(request, show_sidebar=True):
     """ Renders the current journal issue"""
+    issue_id = request.journal.current_issue_id
+    if not issue_id:
+        latest_issue = models.Issue.objects.filter(
+            date=timezone.now(),
+        ).order_by("-date").values("id").first()
+        if latest_issue:
+            issue_id = latest_issue.id
+    if not issue_id:
+        return redirect(reverse('journal_issues'))
     return issue(request, request.journal.current_issue_id, show_sidebar=show_sidebar)
 
 
@@ -1767,7 +1777,12 @@ def search(request):
     if search_term:
         # checks titles, keywords and subtitles first,
         # then matches author based on below regex split search term.
-        search_regex = "^({})$".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
+        escaped = re.escape(search_term)
+        search_regex = "^({})$".format(
+            "|".join({name for name in set(
+                chain(escaped.split(" "),(escaped,))
+            )})
+        )
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |

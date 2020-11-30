@@ -178,6 +178,13 @@ def get_settings_to_edit(group, journal):
                  journal,
              )
              },
+            {'name': 'display_about_on_submissions',
+             'object': setting_handler.get_setting(
+                 'general',
+                 'display_about_on_submissions',
+                 journal
+             )
+             },
             {'name': 'submission_intro_text',
              'object': setting_handler.get_setting(
                  'general',
@@ -251,6 +258,14 @@ def get_settings_to_edit(group, journal):
                 'object': setting_handler.get_setting('general', 'default_review_days', journal),
             },
             {
+                'name': 'enable_save_review_progress',
+                'object': setting_handler.get_setting('general', 'enable_save_review_progress', journal),
+            },
+            {
+                'name': 'default_review_days',
+                'object': setting_handler.get_setting('general', 'default_review_days', journal),
+            },
+            {
                 'name': 'enable_one_click_access',
                 'object': setting_handler.get_setting('general', 'enable_one_click_access', journal),
             },
@@ -270,7 +285,11 @@ def get_settings_to_edit(group, journal):
             {
                 'name': 'reviewer_form_download',
                 'object': setting_handler.get_setting('general', 'reviewer_form_download', journal),
-            }
+            },
+            {
+                'name': 'peer_review_upload_text',
+                'object': setting_handler.get_setting('general', 'peer_review_upload_text', journal),
+            },
         ]
         setting_group = 'general'
 
@@ -296,7 +315,7 @@ def get_settings_to_edit(group, journal):
         journal_settings = [
             'journal_name', 'journal_issn', 'journal_theme', 'journal_description',
             'enable_editorial_display', 'multi_page_editorial', 'enable_editorial_images', 'main_contact',
-            'publisher_name', 'publisher_url',
+            'publisher_name', 'publisher_url', 'privacy_policy_url',
             'maintenance_mode', 'maintenance_message', 'auto_signature', 'slack_logging', 'slack_webhook',
             'twitter_handle', 'switch_language', 'google_analytics_code', 'keyword_list_page',
         ]

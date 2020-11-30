@@ -358,8 +358,12 @@ class ArticleMetaImageForm(forms.ModelForm):
 class SectionForm(TranslatableModelForm):
     class Meta:
         model = submission_models.Section
-        fields = ['name', 'plural', 'number_of_reviewers', 'is_filterable', 'sequence', 'section_editors', 'editors',
-                  'public_submissions', 'indexing']
+        fields = [
+            'name', 'plural', 'number_of_reviewers',
+            'is_filterable', 'sequence', 'section_editors',
+            'editors', 'public_submissions', 'indexing',
+            'auto_assign_editors',
+        ]
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
@@ -401,7 +405,7 @@ class LoginForm(forms.Form):
                 "[FAILED_LOGIN:%s][FAILURES: %s]"
                 "" % (self.fields["user_name"], bad_logins),
             )
-        if bad_logins >= 3:
+        if bad_logins > 3:
             self.fields['captcha'] = self.captcha_field
         else:
             self.fields['captcha'] = forms.CharField(widget=forms.HiddenInput(), required=False)

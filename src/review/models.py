@@ -115,12 +115,15 @@ class ReviewAssignment(models.Model):
     def save_review_form(self, review_form, assignment):
         for k, v in review_form.cleaned_data.items():
             form_element = ReviewFormElement.objects.get(reviewform=assignment.form, name=k)
-            ReviewAssignmentAnswer.objects.create(
+            ReviewAssignmentAnswer.objects.update_or_create(
                 assignment=self,
                 element=form_element,
-                answer=v,
-                author_can_see=form_element.default_visibility,
+                defaults={
+                    "author_can_see": form_element.default_visibility,
+                    "answer": v,
+                },
             )
+
 
     @property
     def review_rating(self):
@@ -200,7 +203,14 @@ class ReviewAssignment(models.Model):
             }
 
     def __str__(self):
-        return u'{0} - Article: {1}, Reviewer: {2}'.format(self.id, self.article.title, self.reviewer.full_name())
+        if self.reviewer:
+            reviewer_name = self.reviewer.full_name()
+        else:
+            reviewer_name = "No reviewer"
+
+        return u'{0} - Article: {1}, Reviewer: {2}'.format(
+            self.id, self.article.title, reviewer_name)
+
 
 
 class ReviewForm(models.Model):
@@ -267,7 +277,7 @@ class ReviewFormElement(models.Model):
 class ReviewAssignmentAnswer(models.Model):
     assignment = models.ForeignKey(ReviewAssignment)
     element = models.ForeignKey(ReviewFormElement)
-    answer = models.TextField()
+    answer = models.TextField(blank=True, null=True)
     edited_answer = models.TextField(null=True, blank=True)
     author_can_see = models.BooleanField(default=True)
 
