@@ -85,14 +85,14 @@ class NavigationItem(TranslatableModel):
         """
 
         defaults = {
-            "link_name": issue_type.plural_name,
             "link": "/collections/%s" % (issue_type.code),
         }
         content_type = ContentType.objects.get_for_model(issue_type.journal)
 
         nav, created = cls.objects.language().fallbacks('en').get_or_create(
             content_type=content_type,
-            object_id=issue_type.pk,
+            object_id=issue_type.journal.pk,
+            link_name=issue_type.plural_name,
             defaults=defaults,
         )
 
@@ -106,20 +106,15 @@ class NavigationItem(TranslatableModel):
 
 
     @classmethod
-    def get_content_nav_for_journal(cls, journal):
-        return None
-
-#        for issue_type in journal.issuetype_set.filter(
-#            ~Q(code="issue") # Issues have their own navigation
-#        ):
-#            try:
-#                content_type = ContentType.objects.get_for_model(
-#                    issue_type.journal)
-#
-#                yield issue_type, cls.objects.language().fallbacks('en').get(
-#                    content_type=content_type,
-#                    object_id=issue_type.pk,
-#                )
-#            except cls.DoesNotExist:
-#                yield issue_type, None
-#
+    def get_issue_types_for_nav(cls, journal):
+        for issue_type in journal.issuetype_set.filter(
+            ~Q(code="issue") # Issues have their own navigation
+        ):
+            content_type = ContentType.objects.get_for_model(
+                issue_type.journal)
+            if not cls.objects.filter(
+                content_type=content_type,
+                object_id=issue_type.journal.pk,
+                link_name=issue_type.plural_name,
+            ).exists():
+                yield issue_type

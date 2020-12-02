@@ -41,7 +41,7 @@ class ReviewAssignmentForm(forms.ModelForm):
                                                    'default_review_form', journal, create=True).processed_value
 
         if journal:
-            self.fields['form'].queryset = models.ReviewForm.objects.filter(journal=journal)
+            self.fields['form'].queryset = models.ReviewForm.objects.filter(journal=journal, deleted=False)
 
         if default_visibility.value:
             self.fields['visibility'].initial = default_visibility.value
@@ -58,8 +58,9 @@ class ReviewAssignmentForm(forms.ModelForm):
 class ReviewerDecisionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
+        decision_required = kwargs.pop("decision_required", False)
         super().__init__(*args, **kwargs)
-        self.fields['decision'].required = True
+        self.fields['decision'].required = decision_required
 
     class Meta:
         model = models.ReviewAssignment
@@ -167,7 +168,7 @@ class GeneratedForm(forms.Form):
 class NewForm(forms.ModelForm):
     class Meta:
         model = models.ReviewForm
-        exclude = ('journal', 'elements')
+        exclude = ('journal', 'elements', 'deleted')
 
 
 class ElementForm(forms.ModelForm):

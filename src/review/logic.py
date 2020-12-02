@@ -482,3 +482,28 @@ def send_review_reminder(request, form, review_assignment, reminder_type):
         form.cleaned_data['body'],
         log_dict=log_dict
     )
+
+
+def assign_editor(article, editor, assignment_type, request=None, skip=True):
+        assignment, created = models.EditorAssignment.objects.get_or_create(
+            article=article, editor=editor, editor_type=assignment_type,
+        )
+        if request and created:
+            message_content = get_assignment_content(
+                request, article, editor,assignment)
+            kwargs = {'user_message_content': message_content,
+                    'editor_assignment': assignment,
+                    'request': request,
+                    'skip': skip,
+                    'acknowledgement': False}
+
+            event_logic.Events.raise_event(
+                event_logic.Events.ON_ARTICLE_ASSIGNED,
+                task_object=article, **kwargs,
+            )
+            if not skip:
+                event_logic.Events.raise_event(
+                    event_logic.Events.ON_ARTICLE_ASSIGNED_ACKNOWLEDGE,
+                    **kwargs,
+                )
+        return assignment, created

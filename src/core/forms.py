@@ -107,13 +107,17 @@ class RegistrationForm(forms.ModelForm):
     password_1 = forms.CharField(widget=forms.PasswordInput, label=_('Password'))
     password_2 = forms.CharField(widget=forms.PasswordInput, label=_('Repeat Password'))
 
-    if settings.CAPTCHA_TYPE == 'simple_math':
-        question_template = _('What is %(num1)i %(operator)s %(num2)i? ')
-        are_you_a_robot = MathCaptchaField(label=_('Answer this question: '))
-    elif settings.CAPTCHA_TYPE == 'recaptcha':
-        are_you_a_robot = ReCaptchaField(widget=ReCaptchaWidget())
-    else:
-        are_you_a_robot = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if settings.CAPTCHA_TYPE == 'simple_math':
+            question_template = _('What is %(num1)i %(operator)s %(num2)i? ')
+            are_you_a_robot = MathCaptchaField(label=_('Answer this question: '))
+        elif settings.CAPTCHA_TYPE == 'recaptcha':
+            are_you_a_robot = ReCaptchaField(widget=ReCaptchaWidget())
+        else:
+            are_you_a_robot = forms.CharField(widget=forms.HiddenInput(), required=False)
+        self.fields["are_you_a_robot"] = are_you_a_robot
 
     class Meta:
         model = models.Account
@@ -158,6 +162,7 @@ class EditAccountForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super(EditAccountForm, self).save(commit=False)
+        user.clean()
 
         posted_interests = self.cleaned_data['interests'].split(',')
         for interest in posted_interests:
@@ -221,7 +226,6 @@ class AdminUserForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super(AdminUserForm, self).save(commit=False)
-        user.username = self.cleaned_data['email']
 
         if self.cleaned_data.get('password_1'):
             user.set_password(self.cleaned_data["password_1"])
@@ -352,8 +356,12 @@ class ArticleMetaImageForm(forms.ModelForm):
 class SectionForm(TranslatableModelForm):
     class Meta:
         model = submission_models.Section
-        fields = ['name', 'plural', 'number_of_reviewers', 'is_filterable', 'sequence', 'section_editors', 'editors',
-                  'public_submissions', 'indexing','visible']
+        fields = [
+            'name', 'plural', 'number_of_reviewers',
+            'is_filterable', 'sequence', 'section_editors',
+            'editors', 'public_submissions', 'indexing',
+            'auto_assign_editors',
+        ]
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
@@ -395,7 +403,7 @@ class LoginForm(forms.Form):
                 "[FAILED_LOGIN:%s][FAILURES: %s]"
                 "" % (self.fields["user_name"], bad_logins),
             )
-        if bad_logins >= 3:
+        if bad_logins > 3:
             self.fields['captcha'] = self.captcha_field
         else:
             self.fields['captcha'] = forms.CharField(widget=forms.HiddenInput(), required=False)

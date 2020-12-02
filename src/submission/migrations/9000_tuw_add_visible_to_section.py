@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0048_submissionconfiguration_submission_file_text'),
+        ('submission', '0049_auto_20201117_1904'),
     ]
 
     operations = [

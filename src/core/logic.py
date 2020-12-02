@@ -162,7 +162,10 @@ def process_setting_list(settings_to_get, type, journal):
 
 def get_settings_to_edit(group, journal):
     review_form_choices = list()
-    for form in review_models.ReviewForm.objects.filter(journal=journal):
+    for form in review_models.ReviewForm.objects.filter(
+        journal=journal,
+        deleted=False,
+    ):
         review_form_choices.append([form.pk, form])
 
     if group == 'submission':
@@ -175,6 +178,13 @@ def get_settings_to_edit(group, journal):
                  'general',
                  'abstract_required',
                  journal,
+             )
+             },
+            {'name': 'display_about_on_submissions',
+             'object': setting_handler.get_setting(
+                 'general',
+                 'display_about_on_submissions',
+                 journal
              )
              },
             {'name': 'submission_intro_text',
@@ -250,8 +260,20 @@ def get_settings_to_edit(group, journal):
                 'object': setting_handler.get_setting('general', 'default_review_days', journal),
             },
             {
+                'name': 'enable_save_review_progress',
+                'object': setting_handler.get_setting('general', 'enable_save_review_progress', journal),
+            },
+            {
+                'name': 'default_review_days',
+                'object': setting_handler.get_setting('general', 'default_review_days', journal),
+            },
+            {
                 'name': 'enable_one_click_access',
                 'object': setting_handler.get_setting('general', 'enable_one_click_access', journal),
+            },
+            {
+                'name': 'enable_expanded_review_details',
+                'object': setting_handler.get_setting('general', 'enable_expanded_review_details', journal),
             },
             {
                 'name': 'draft_decisions',
@@ -265,7 +287,11 @@ def get_settings_to_edit(group, journal):
             {
                 'name': 'reviewer_form_download',
                 'object': setting_handler.get_setting('general', 'reviewer_form_download', journal),
-            }
+            },
+            {
+                'name': 'peer_review_upload_text',
+                'object': setting_handler.get_setting('general', 'peer_review_upload_text', journal),
+            },
         ]
         setting_group = 'general'
 
@@ -291,7 +317,7 @@ def get_settings_to_edit(group, journal):
         journal_settings = [
             'journal_name', 'journal_issn', 'journal_theme', 'journal_description',
             'enable_editorial_display', 'multi_page_editorial', 'enable_editorial_images', 'main_contact',
-            'publisher_name', 'publisher_url',
+            'publisher_name', 'publisher_url', 'privacy_policy_url',
             'maintenance_mode', 'maintenance_message', 'auto_signature', 'slack_logging', 'slack_webhook',
             'twitter_handle', 'switch_language', 'google_analytics_code', 'keyword_list_page',
         ]
@@ -313,6 +339,7 @@ def get_settings_to_edit(group, journal):
     elif group == 'article':
         article_settings = [
             'suppress_how_to_cite',
+            'display_guest_editors',
         ]
         settings = process_setting_list(article_settings, 'article', journal)
         setting_group = 'article'
@@ -407,6 +434,7 @@ def handle_email_change(request, email_address):
     request.user.email = email_address
     request.user.is_active = False
     request.user.confirmation_code = uuid.uuid4()
+    request.user.clean()
     request.user.save()
 
     context = {'user': request.user}

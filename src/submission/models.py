@@ -1086,9 +1086,17 @@ class Article(models.Model):
         else:
             return False
 
-    def snapshot_authors(self, article):
-        for order in self.articleauthororder_set.all():
-            order.author.snapshot_self(article)
+    def snapshot_authors(self, article=None, force_update=True):
+        """ Creates/updates FrozenAuthor records for this article's authors
+        :param article: (deprecated) should not pass this argument
+        :param force_update: (bool) Whether or not to update existing records
+        """
+        subq = models.Subquery(ArticleAuthorOrder.objects.filter(
+            article=self, author__id=models.OuterRef("id")
+        ).values_list("order"))
+        authors = self.authors.annotate(order=subq).order_by("order")
+        for author in authors:
+            author.snapshot_self(self, force_update)
 
     def frozen_authors(self):
         return FrozenAuthor.objects.filter(article=self)
@@ -1433,17 +1441,36 @@ class Section(TranslatableModel):
     journal = models.ForeignKey('journal.Journal')
     number_of_reviewers = models.IntegerField(default=2)
 
-    editors = models.ManyToManyField('core.Account')
-    section_editors = models.ManyToManyField('core.Account', related_name='section_editors')
+    editors = models.ManyToManyField('core.Account',
+        help_text="Editors assigned will be notified of submissions,"
+            " overruling the notification settings for the journal.",
+    )
+    section_editors = models.ManyToManyField('core.Account',
+        help_text="Section editors assigned will be notified of submissions,"
+            " overruling the notification settings for the journal.",
+        related_name='section_editors',
+    )
+    auto_assign_editors = models.BooleanField(default=False,
+        help_text="Articles submitted to this section will be automatically"
+            " assigned to the editors and/or section editors selected above.",
+    )
 
-    is_filterable = models.BooleanField(default=True)
+    is_filterable = models.BooleanField(default=True,
+        help_text="Allows filtering article search results by this section.")
     public_submissions = models.BooleanField(default=True)
-    indexing = models.BooleanField(default=True)
-    sequence = models.PositiveIntegerField(default=0)
+    indexing = models.BooleanField(default=True,
+        help_text="Whether this section is put forward for indexing")
+    sequence = models.PositiveIntegerField(default=0,
+        help_text="Determines the order in which the section is rendered"
+            " Sections can also be reorder by drag-and-drop",
+    )
 
     translations = TranslatedFields(
         name=models.CharField(max_length=200),
-        plural=models.CharField(max_length=200, null=True, blank=True)
+        plural=models.CharField(max_length=200, null=True, blank=True,
+            help_text="Pluralised name for the section"
+                " (e.g: Article -> Articles)"
+        )
     )
 
     visible = models.BooleanField(default=True)

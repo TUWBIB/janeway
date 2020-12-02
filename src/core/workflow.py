@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.utils.text import capfirst
 
 from core import models
+from review.logic import assign_editor
 from submission import models as submission_models
 from utils.logger import get_logger
 from utils.shared import clear_cache
@@ -256,3 +257,22 @@ def workflow_plugin_settings(element):
     return {}
 
 
+def workflow_auto_assign_editors(**kwargs):
+    """
+    Handler for auto assignment of editors
+    :param kwargs: A dict containing three keys handshake_url, request, article and optionally switch_stage
+    """
+    article = kwargs.get('article')
+    request = kwargs.get('request')
+    skip = kwargs.get('skip', False)
+
+    if article and article.section and article.section.auto_assign_editors:
+        section = article.section
+
+        assignment_type = "editor"
+        for editor in section.editors.all():
+            assign_editor(article, editor, assignment_type, request, skip)
+
+        assignment_type = "section-editor"
+        for s_editor in section.section_editors.all():
+            assign_editor(article, s_editor, assignment_type, request, skip)

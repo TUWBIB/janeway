@@ -69,6 +69,7 @@ urlpatterns = [
         press_views.serve_press_file,
         name='serve_press_file',
         ),
+    url(r'^press/merge_users/$', press_views.merge_users, name='merge_users'),
 
     # Notes
     url(r'^article/(?P<article_id>\d+)/note/(?P<note_id>\d+)/delete/$', core_views.delete_note,
@@ -109,10 +110,6 @@ urlpatterns = [
 
     # Templates
     url(r'^manager/templates/$', core_views.email_templates, name='core_email_templates'),
-    url(r'^manager/templates/(?P<template_code>[-\w.]+)/$', core_views.edit_email_template,
-        name='core_edit_email_template'),
-    url(r'^manager/templates/(?P<template_code>[-\w.]+)/(?P<subject>[-\w.]+)/$', core_views.edit_email_template,
-        name='core_edit_email_template_subject'),
 
     # Articles Images
     url(r'^manager/article/images/$', core_views.article_images, name='core_article_images'),

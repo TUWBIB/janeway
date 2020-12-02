@@ -34,6 +34,7 @@ from copyediting import models as copyediting_models
 from submission import models as submission_models
 from utils import setting_handler
 from utils.logger import get_logger
+from utils import logic as utils_logic
 
 fs = JanewayFileSystemStorage()
 logger = get_logger(__name__)
@@ -397,38 +398,33 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
         return False
 
-    def snapshot_self(self, article):
-        try:
-            order = submission_models.ArticleAuthorOrder.objects.get(
-                article=article,
-                author=self,
-            ).order
-        except submission_models.ArticleAuthorOrder.DoesNotExist:
-            order = 1
-
+    def snapshot_self(self, article, force_update=True):
         frozen_dict = {
-            'article': article,
-            'author': self,
             'first_name': self.first_name,
             'middle_name': self.middle_name,
             'last_name': self.last_name,
             'institution': self.institution,
             'department': self.department,
-            'order': order,
         }
 
         frozen_author = self.frozen_author(article)
 
-        if frozen_author:
-            # We prioritize the frozen_author.order because after a submission
-            # is complete backend reordering tools use FrozenAuthor.order over
-            # ArticleAuthorOrder.
-            frozen_dict['order'] = frozen_author.order
+        if frozen_author and force_update:
             for k, v in frozen_dict.items():
                 setattr(frozen_author, k, v)
             frozen_author.save()
+
         else:
-            submission_models.FrozenAuthor.objects.get_or_create(**frozen_dict)
+            try:
+                order = article.articleauthororder_set.get(author=self).order
+            except submission_models.ArticleAuthorOrder.DoesNotExist:
+                order = article.next_author_sort()
+
+            submission_models.FrozenAuthor.objects.get_or_create(
+                author=self,
+                article=article,
+                defaults=dict(order=order, **frozen_dict)
+            )
 
     def frozen_author(self, article):
         try:
@@ -448,6 +444,18 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def articles(self):
         return submission_models.Article.objects.filter(authors__in=[self])
+
+    def published_articles(self):
+        articles = submission_models.Article.objects.filter(
+            authors=self,
+            stage=submission_models.STAGE_PUBLISHED,
+            date_published__lte=timezone.now(),
+        )
+        request = utils_logic.get_current_request()
+        if request and request.journal:
+            articles.filter(journal=request.journal)
+
+        return articles
 
     def preprint_subjects(self):
         "Returns a list of preprint subjects this user is an editor for"

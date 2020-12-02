@@ -4,6 +4,7 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import json
+import re
 
 from django.conf import settings
 from django.contrib import messages
@@ -257,6 +258,15 @@ def issues(request):
 @decorators.frontend_enabled
 def current_issue(request, show_sidebar=True):
     """ Renders the current journal issue"""
+    issue_id = request.journal.current_issue_id
+    if not issue_id:
+        latest_issue = models.Issue.objects.filter(
+            date=timezone.now(),
+        ).order_by("-date").values("id").first()
+        if latest_issue:
+            issue_id = latest_issue.id
+    if not issue_id:
+        return redirect(reverse('journal_issues'))
     return issue(request, request.journal.current_issue_id, show_sidebar=show_sidebar)
 
 
@@ -986,7 +996,7 @@ def publish_article(request, article_id):
 
         if 'publish' in request.POST:
             article.stage = submission_models.STAGE_PUBLISHED
-            article.snapshot_authors(article)
+            article.snapshot_authors(force_update=False)
             article.close_core_workflow_objects()
 
             if not article.date_published:
