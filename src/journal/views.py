@@ -1800,27 +1800,27 @@ def search(request):
         return redir
     from itertools import chain
     if search_term:
+        escaped = re.escape(search_term)
         # checks titles, keywords and subtitles first,
         # then matches author based on below regex split search term.
-
-        search_regex = "^({})$".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
-
-        # problematic for authors with double names wih hyphens, when only part of the name is entered as search term
-        # relax rule, don't enforce match against end
-        search_regex_author = "^({})".format("|".join(set(name for name in set(chain(search_term.split(" "),(search_term,))))))
-        
+        split_term = [re.escape(word) for word in search_term.split(" ")]
+        split_term.append(escaped)
+        search_regex = "^({})$".format(
+            "|".join({name for name in split_term})
+        )
         identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
                         Q(keywords__word__iregex=search_regex) |
+                        Q(keywordsde__word__iregex=search_regex) |
                         Q(subtitle__icontains=search_term) |
                         Q(id__in=identifier_ids)
                     )
                     |
                     (
-                        Q(frozenauthor__first_name__iregex=search_regex_author) |
-                        Q(frozenauthor__last_name__iregex=search_regex_author)
+                        Q(frozenauthor__first_name__iregex=search_regex) |
+                        Q(frozenauthor__last_name__iregex=search_regex)
                     ),
                     journal=request.journal,
                     stage=submission_models.STAGE_PUBLISHED,
