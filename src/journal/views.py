@@ -4,7 +4,10 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import json
+import os
 import re
+from shutil import copyfile
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib import messages
@@ -200,16 +203,20 @@ def articles(request):
         journal=request.journal)]
     pinned_article_pks = [article.pk for article in pinned_articles]
 
-    article_objects = submission_models.Article.objects.filter(
-        journal=request.journal,
-        stage=submission_models.STAGE_PUBLISHED,
-        date_published__lte=timezone.now(),
-        section__pk__in=filters,
-    ).prefetch_related(
-        'frozenauthor_set',
-    ).order_by(sort).exclude(
-        pk__in=pinned_article_pks,
-    )
+    if len(filters)>0:
+        article_objects = submission_models.Article.objects.filter(journal=request.journal,
+                                                                date_published__lte=timezone.now(),
+                                                                stage=submission_models.STAGE_PUBLISHED,
+                                                                section__pk__in=filters).prefetch_related(
+            'frozenauthor_set').order_by(sort).exclude(
+            pk__in=pinned_article_pks)
+    else:
+        article_objects = submission_models.Article.objects.filter(journal=request.journal,
+                                                                date_published__lte=timezone.now(),
+                                                                stage=submission_models.STAGE_PUBLISHED,
+                                                                ).prefetch_related(
+            'frozenauthor_set').order_by(sort).exclude(
+            pk__in=pinned_article_pks)
 
     paginator = Paginator(article_objects, show)
 
@@ -1813,7 +1820,7 @@ def search(request):
                     (
                         Q(title__icontains=search_term) |
                         Q(keywords__word__iregex=search_regex) |
-                        Q(keywordsde__word__iregex=search_regex) |
+                        Q(keywords_de__word__iregex=search_regex) |
                         Q(subtitle__icontains=search_term) |
                         Q(id__in=identifier_ids)
                     )
