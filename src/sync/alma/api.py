@@ -209,10 +209,20 @@ class API:
 
             return setmembers if ok else None
 
+        def createBibRecord(self,xml,unsuppress=True):
+            url = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'
+            xml, errs = self.sendAPIRequest(url,type='POST',xml=xml)
 
-        def createBibRecord(self,xml):
-            url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'
-            return self.sendAPIRequest(url,type='POST',xml=xml)
+            if errs:
+                return (xml,errs)
+
+            if unsuppress:
+                if match := re.search('<mms_id>(\d+)</mms_id>',xml):
+                    mmsid = str(match[1])
+                    xml = re.sub('<suppress_from_publishing>true</suppress_from_publishing>','<suppress_from_publishing>false</suppress_from_publishing>',xml)
+                    (xml,errs) = self.updateBibRecord(xml,mmsid)
+
+            return (xml,errs)
 
         def updateBibRecord(self,xml,mmsid):
             url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/'+str(mmsid)
