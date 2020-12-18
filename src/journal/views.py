@@ -20,6 +20,7 @@ from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.db.models import Q, Count
+from django.db.models.functions import Lower
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -1636,6 +1637,7 @@ def search(request):
     redir = False
     sort = 'title'
 
+
     search_term, keyword, sort, form, redir = logic.handle_search_controls(request)
 
     if redir:
@@ -1650,14 +1652,17 @@ def search(request):
         search_regex = "^({})$".format(
             "|".join({name for name in split_term})
         )
+        search_regex_lower = search_regex.lower()
         identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
+        keywords = submission_models.Keyword.objects.annotate(word_lower=Lower('word')).filter(word_lower__iregex=search_regex_lower).values_list('article', flat=True)
+        keywordsde = submission_models.KeywordDe.objects.annotate(word_lower=Lower('word')).filter(word_lower__iregex=search_regex_lower).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
-                        Q(keywords__word__iregex=search_regex) |
-                        Q(keywords_de__word__iregex=search_regex) |
                         Q(subtitle__icontains=search_term) |
-                        Q(id__in=identifier_ids)
+                        Q(id__in=identifier_ids) |
+                        Q(id__in=keywords) |
+                        Q(id__in=keywordsde)
                     )
                     |
                     (
@@ -1671,20 +1676,33 @@ def search(request):
 
     # just single keyword atm. but keyword is included in article_search.
     elif keyword:
+        keyword_lower = keyword.lower()
+        keywords = submission_models.Keyword.objects.annotate(word_lower=Lower('word')).filter(word_lower=keyword_lower).values_list('article', flat=True)
+        keywordsde = submission_models.KeywordDe.objects.annotate(word_lower=Lower('word')).filter(word_lower=keyword_lower).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
-            keywords__word=keyword,
+            (
+                Q(id__in=keywords) |
+                Q(id__in=keywordsde)
+            ),
             journal=request.journal,
             stage=submission_models.STAGE_PUBLISHED,
             date_published__lte=timezone.now()
         ).order_by(sort)
 
-    keyword_limit = 20
+    keyword_limit = 10
     popular_keywords = submission_models.Keyword.objects.filter(
             article__journal=request.journal,
             article__stage=submission_models.STAGE_PUBLISHED,
             article__date_published__lte=timezone.now(),
         ).annotate(articles_count=Count('article')).order_by("-articles_count")[:keyword_limit]
+    popular_keywordsde = submission_models.KeywordDe.objects.filter(
+            article__journal=request.journal,
+            article__stage=submission_models.STAGE_PUBLISHED,
+            article__date_published__lte=timezone.now(),
+        ).annotate(articles_count=Count('article')).order_by("-articles_count")[:keyword_limit]
 
+    all_keywords = set(x.word for x in popular_keywords)
+    all_keywordsde = set(x.word for x in popular_keywordsde)
 
     template = 'journal/search.html'
     context = {
@@ -1693,7 +1711,7 @@ def search(request):
         'keyword': keyword,
         'form': form,
         'sort': sort,
-        'all_keywords': popular_keywords
+        'all_keywords': all_keywords.union(all_keywordsde)
     }
 
     return render(request, template, context)
