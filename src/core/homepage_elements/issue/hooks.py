@@ -25,7 +25,7 @@ def yield_homepage_element_context(request, homepage_elements):
                 'structure': issue_object.structure,  # for compatibility
                 'issues': issue_objects,
                 'articles': issue_object.get_sorted_articles(),
-                'show_sidebar': False,
+                'show_sidebar': True if request.journal.code == 'OES' else False
             }
 
             return context
