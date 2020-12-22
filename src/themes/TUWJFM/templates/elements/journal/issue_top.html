@@ -1,0 +1,29 @@
+{% load i18n %}
+
+<div class="col-md-6" id="issue_top">
+    {% regroup articles by section as grouped_articles %}
+    {% for section, section_articles in grouped_articles %}
+        {% if section.visible %}
+        <h3 class="em">{{ section.name }}</h3>
+        {% else %}
+        {% if not forloop.first %}<hr/>{% endif %}
+        {% endif %}
+        {% for article in section_articles %}
+            {% include "elements/article_listing.html" with article=article indent=section.visible suppress_issue_data=True %}
+        {% endfor %}
+    {% endfor %}
+</div>
+{% if issue.galley %}
+<div class="col-md-3">
+    <a target="_blank" href="{% url 'journal_view_galley' issue.id issue.galley.id %}">
+    {% if issue.large_image %}
+        <div class="card">
+            <img class="card-img img-fluid article-img" src="{{ issue.large_image.url }}" alt="Card image">
+        </div>
+    {% else %}
+        <h2 class="em">{{ issue.tuw_display_title }}</h2>
+        <p>{{ issue.issue_description|safe }}</p>
+    {% endif %}
+    </a>
+</div>
+{% endif %}

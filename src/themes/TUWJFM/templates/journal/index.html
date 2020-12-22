@@ -3,52 +3,10 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
-
-{% block sidebar %}
-{% if journal.code == "OES" %}
-<aside data-sticky-container>
-    <div class="sticky" data-sticky data-margin-top="0" data-sticky data-anchor="issue_top">
-        <div class="section">
-            <h3>{% trans 'Downloads' %}</h3>
-            {% if issue.galley %}
-            <p><a href="{% url 'journal_issue_download_galley' issue.pk issue.galley.pk %}">
-            <i class="fa fa-download">&nbsp</i>
-            {% if journal.code == "OES" %}
-                {% trans "Download Issue (PDF)" context "fe_oes" %}
-            {% else %}
-                {% trans "Download Issue (PDF)" %}
-            {% endif %}
-            </a></p>
-            {% endif %}
-            <p><a href="{% url 'journal_issue_download' issue.pk %}"><i class="fa fa-download">&nbsp</i>
-            {% if journal.code == "OES" %}
-                {% trans "Download Issue (ZIP)" context "fe_oes" %}
-            {% else %}
-                {% trans "Download Issue (ZIP)" %}
-            {% endif %}
-            </a></p>
-
-            <h3>{% if not collection %}{% trans "Issue Archive" %}{% else %}
-                {% with col=journal_settings.general.collection_name_plural %}{% if col %}{{ col }}{% else %}{% trans "Collections" %}{% endif %}{% endwith %}{% endif %}</h3>
-            <ul>
-                {% for issue in issues %}
-                {% if issue.issue_type.code == 'issue' %}
-                    <li><a href="{% url 'journal_issue' issue.id %}">{{ issue.tuw_display_title }} </a></li>
-                {% else %}
-                    <li><a href="{% url 'journal_collection' issue.id %}">{{ issue.issue_title }} </a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</aside>
-{% endif %}
-{% endblock sidebar %}
-
 {% block top_element %}
 {% if journal.code == "OES" %}
 <div class="row" style="margin-top: 15px;">
-    <div class="col-md-3"></div>
+    <div class="col-md-3" > </div>
     <div class="col-md-7">
         <div class="card" style="border:2px outset rgba(0, 0, 0, 0.125)">
         <div class="card-block mb-2"">
@@ -85,56 +43,8 @@
 {% endblock top_element %}
 
 {% block body %}
-{% if journal.code == "OES" %}
-<div class="row" style="margin-top: 15px;">
-        <div class="col-md-9 text-center"">
-                    <h3 style="line-height: :">{{ issue.tuw_display_title }}</h3>
-                    {% if issue.issue_title %}
-                    <br>{{ issue.issue_title }}
-                    {% endif %}
-                    <br>{{ issue.date|date:"d.M.Y" }}
-                    <br>
-        </div>
-        </div>
-
-        <div class="row" style="margin-top: 15px;"">
-            <div class="col-md-6">
-        
-            {% regroup articles by section as grouped_articles %}
-            {% for section, section_articles in grouped_articles %}
-                {% if section.visible %}
-                <h3 class="em">{{ section.name }}</h3>
-                {% else %}
-                {% if not forloop.first %}<hr/>{% endif %}
-                {% endif %}
-                {% for article in section_articles %}
-                    {% include "elements/article_listing.html" with article=article indent=section.visible suppress_issue_data=True %}
-                {% endfor %}
-            {% endfor %}
-        </div>
-        {% if issue.galley %}
-        <div class="col-md-3">
-            <a target="_blank" href="{% url 'journal_view_galley' issue.id issue.galley.id %}">
-            {% if issue.large_image %}
-                <div class="card">
-                    <img class="card-img img-fluid article-img" src="{{ issue.large_image.url }}" alt="Card image">
-                </div>
-            {% else %}
-                <h2 class="em">{{ issue.tuw_display_title }}</h2>
-                <p>{{ issue.issue_description|safe }}</p>
-            {% endif %}
-            </a>
-        </div>
-        {% endif %}
-        </div>
-</div>
-
-{% else %}
-    {% for element in homepage_elements %}
-    {% include element.template_path %}
-    <hr>
-    {% endfor %}
-{% endif %}
-    
-
+{% for element in homepage_elements %}
+{% include element.template_path %}
+<hr>
+{% endfor %}
 {% endblock body %}
