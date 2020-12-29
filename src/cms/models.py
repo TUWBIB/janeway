@@ -107,14 +107,16 @@ class NavigationItem(TranslatableModel):
 
     @classmethod
     def get_issue_types_for_nav(cls, journal):
-        for issue_type in journal.issuetype_set.filter(
-            ~Q(code="issue") # Issues have their own navigation
-        ):
-            content_type = ContentType.objects.get_for_model(
-                issue_type.journal)
-            if not cls.objects.filter(
-                content_type=content_type,
-                object_id=issue_type.journal.pk,
-                link_name=issue_type.plural_name,
-            ).exists():
-                yield issue_type
+        return None
+
+#        for issue_type in journal.issuetype_set.filter(
+#            ~Q(code="issue") # Issues have their own navigation
+#        ):
+#            content_type = ContentType.objects.get_for_model(
+#                issue_type.journal)
+#            if not cls.objects.language().fallbacks('en').filter(
+#                content_type=content_type,
+#                object_id=issue_type.journal.pk,
+#                link_name=issue_type.plural_name,
+#            ).exists():
+#                yield issue_type
