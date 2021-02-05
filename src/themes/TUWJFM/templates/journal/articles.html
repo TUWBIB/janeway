@@ -33,7 +33,9 @@
                     {% if articles.has_previous %}
                         <a style="margin-right: 15px;"href="?page={{ articles.previous_page_number }}" class="btn btn-primary">&lsaquo;</a>
                         &nbsp;{% endif %}
+                        <label for="nav_in" style="display: none">Current</label> 
                         <input id="nav_in" style="margin-right: 15px; width: 10ch;"type="text" value="{{ articles.number }}" maxlength="3">
+                        <label for="nav_goto" style="display: none;">Goto</label> 
                         <input id="nav_goto" style="margin-right: 15px;"type="submit" value="{% trans "Go to page" context "fe-pagination" %}"">
 
                     {% if articles.has_next %}

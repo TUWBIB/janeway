@@ -58,7 +58,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h2>{% block page_title %}{% endblock page_title %}</h2>
+                        {% block page_title %}{% endblock page_title %}
                     </div>
                 </div>
         
@@ -88,7 +88,7 @@
         <ul class="navbar-nav mx-auto">  
             
             <li class="nav-item">      
-            <a class="nav-link"><img src="{% static "TUWJFM/img/janeway_white_110x28.png" %}" data-toggle="modal" data-target="#myModal">
+            <a class="nav-link"><img src="{% static "TUWJFM/img/janeway_white_110x28.png" %}" alt="Janeway Logo" data-toggle="modal" data-target="#myModal">
             </a>         
             </li>            
             <li class="nav-item">    

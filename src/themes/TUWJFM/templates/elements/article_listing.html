@@ -26,6 +26,7 @@
                     <h4 class="card-title">{{ article.title|safe }}{% if article.is_remote %}&nbsp;
                         <i class="fa fa-external-link small-icon-text"></i>{% endif %}</h4>
                 </a>
+                {% if article.frozen_authors.all %}                
                 <h6 class="card-subtitle mb-2 text-muted">{% for author in article.frozen_authors.all %}{% if forloop.last %}
                     {% if article.frozen_authors.all|length > 1 %} {% trans "and" %}
                     {% endif %}{% endif %}{{ author.last_name }}{% if author.first_name %}, {{ author.first_name }}{% endif %}
@@ -33,6 +34,7 @@
                         {% if not forloop.counter == article.frozen_authors.all|length|add:-1 %},
                         {% endif %}{% endif %}{% endfor %}
                 </h6>
+                {% endif %}
                 {% if not suppress_issue_data %}
                 <p class="card-text">
                     <span class="date"><i class="fa fa-calendar"></i> {{ article.date_published|date:"Y-m-d" }}</span> 
@@ -45,7 +47,7 @@
                     {% endif %}
                     {% for pdf in article.pdfs %}
                     <a target="_blank" href="{% url 'article_view_galley' article.id pdf.id %}">
-                        <i class="fa fa-file-pdf-o">&nbsp;</i>
+                        <i class="fa fa-file-pdf-o">&nbsp;Download</i>
                     </a>
                     {% endfor %}
                 </p>
