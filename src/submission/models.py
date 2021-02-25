@@ -16,13 +16,14 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
 from hvad.models import TranslatableModel, TranslatedFields
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, m2m_changed
 from django.dispatch import receiver
 from django.core import exceptions
 from django.utils.html import mark_safe
 
-from core.file_system import JanewayFileSystemStorage
 from core import workflow
+from core.file_system import JanewayFileSystemStorage
+from core.model_utils import M2MOrderedThroughField
 from identifiers import logic as id_logic
 from metrics.logic import ArticleMetrics
 from preprint import models as preprint_models
@@ -308,6 +309,22 @@ class Keyword(models.Model):
         return self.word
 
 
+class KeywordArticle(models.Model):
+    keyword = models.ForeignKey("submission.Keyword")
+    article = models.ForeignKey("submission.Article")
+    order = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = ('keyword', 'article')
+
+    def __str__(self):
+        return self.word
+
+    def __repr__(self):
+        return "KeywordArticle(%s, %d)" % (self.keyword.word, self.article.id)
+
+
 class AllArticleManager(models.Manager):
     use_for_related_fields = True
 
@@ -316,6 +333,7 @@ class AllArticleManager(models.Manager):
 
 
 class ArticleManager(models.Manager):
+    use_in_migrations = True
     def get_queryset(self):
         return super(ArticleManager, self).get_queryset().filter(is_preprint=False)
 
@@ -370,7 +388,10 @@ class Article(models.Model):
     )
     non_specialist_summary = models.TextField(blank=True, null=True, help_text='A summary of the article for'
                                                                                ' non specialists.')
-    keywords = models.ManyToManyField(Keyword, blank=True, null=True)
+    keywords = M2MOrderedThroughField(
+        Keyword,
+        blank=True, null=True, through='submission.KeywordArticle',
+    )
     language = models.CharField(max_length=200, blank=True, null=True, choices=LANGUAGE_CHOICES,
                                 help_text=_('The primary language of the article'))
     section = models.ForeignKey('Section', blank=True, null=True, on_delete=models.SET_NULL)
@@ -518,6 +539,9 @@ class Article(models.Model):
         if self.issue:
             issue_str = "%s(%s)" % (issue.volume, issue.issue)
         doi_str = ""
+        pages_str = ""
+        if self.page_numbers:
+            pages_str = " p.{0}.".format(self.page_numbers)
         doi = self.get_doi()
         if doi:
             doi_str = ('doi: <a href="https://doi.org/{0}">'
@@ -530,6 +554,7 @@ class Article(models.Model):
             "journal_str": journal_str,
             "issue_str": issue_str,
             "doi_str": doi_str,
+            "pages_str": pages_str,
         }
         return render_to_string(template, context)
 
@@ -1604,3 +1629,22 @@ def remove_author_from_article(sender, instance, **kwargs):
         pass
 
     instance.article.authors.remove(instance.author)
+
+
+def order_keywords(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if action == 'post_add':
+        try:
+            latest = KeywordArticle.objects.filter(
+                article=instance).latest("order").order
+        except KeywordArticle.DoesNotExist:
+            latest = 0
+        for pk in pk_set:
+            latest += 1
+            keyword_article = KeywordArticle.objects.get(
+                keyword__pk=pk, article=instance)
+            if keyword_article.order == 1 != latest:
+                keyword_article.order = latest
+                keyword_article.save()
+
+
+m2m_changed.connect(order_keywords, sender=Article.keywords.through)

@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.contrib.contenttypes.models import ContentType
 
 from utils.importers import shared
@@ -620,9 +621,14 @@ def create_article_with_review_content(article_dict, journal, auth_file, base_ur
     # Add keywords
     keywords = article_dict.get('keywords')
     if keywords:
-        for keyword in keywords.split(';'):
+        for i, keyword in enumerate(keywords.split(';')):
+            keyword = strip_tags(keyword)
             word, created = models.Keyword.objects.get_or_create(word=keyword)
-            article.keywords.add(word)
+            models.KeywordArticle.objects.update_or_create(
+                keyword=keyword,
+                article=article,
+                defaults={"order":i},
+            )
 
     # Add authors
     for author in article_dict.get('authors'):
@@ -1215,7 +1221,7 @@ def scrape_editorial_team(journal, base_url):
 
 
 
-                    account, c = core_models.Account.objects.get_or_create(
+                    account, c = core_models.Account.objects.update_or_create(
                         email=email,
                         defaults=profile_dict,
                     )

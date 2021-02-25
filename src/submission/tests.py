@@ -92,7 +92,7 @@ class SubmissionTests(TestCase):
         <p>
          Sanchez M. M.,
         (2020) “Test article: a test article”,
-        <i>Janeway JS</i> 1(1).
+        <i>Janeway JS</i> 1(1). p.2-4.
         doi: <a href="https://doi.org/{0}">https://doi.org/{0}</a></p>
         """.format(article.get_doi())
         self.assertHTMLEqual(expected, article.how_to_cite)
@@ -238,3 +238,73 @@ class SubmissionTests(TestCase):
             [f.author for f in article.frozen_authors().order_by("order")],
             msg="Authors frozen in the wrong order",
         )
+
+    def test_article_keyword_default_order(self):
+        article = models.Article.objects.create(
+            journal = self.journal_one,
+            title="Test article: a test of keywords",
+        )
+        keywords = ["one", "two", "three", "four"]
+        for i, kw in enumerate(keywords):
+            kw_obj = models.Keyword.objects.create(word=kw)
+            models.KeywordArticle.objects.get_or_create(
+                keyword=kw_obj,
+                article=article
+            )
+
+        self.assertEqual(
+            keywords,
+            [kw.word for kw in article.keywords.all()],
+        )
+
+    def test_article_keyword_add(self):
+        article = models.Article.objects.create(
+            journal = self.journal_one,
+            title="Test article: a test of keywords",
+        )
+        keywords = ["one", "two", "three", "four"]
+        for i, kw in enumerate(keywords):
+            kw_obj = models.Keyword.objects.create(word=kw)
+            article.keywords.add(kw_obj)
+
+        self.assertEqual(
+            keywords,
+            [kw.word for kw in article.keywords.all()],
+        )
+
+    def test_article_keyword_remove(self):
+        article = models.Article.objects.create(
+            journal = self.journal_one,
+            title="Test article: a test of keywords",
+        )
+        keywords = ["one", "two", "three", "four"]
+        kw_objs = []
+        for i, kw in enumerate(keywords):
+            kw_obj = models.Keyword.objects.create(word=kw)
+            kw_objs.append(kw_obj)
+            article.keywords.add(kw_obj)
+
+        article.keywords.remove(kw_objs[1])
+        keywords.pop(1)
+
+        self.assertEqual(
+            keywords,
+            [kw.word for kw in article.keywords.all()],
+        )
+
+    def test_article_keyword_clear(self):
+        article = models.Article.objects.create(
+            journal = self.journal_one,
+            title="Test article: a test of keywords",
+        )
+        keywords = ["one", "two", "three", "four"]
+        for i, kw in enumerate(keywords):
+            kw_obj = models.Keyword.objects.create(word=kw)
+            article.keywords.add(kw_obj)
+        article.keywords.clear()
+
+        self.assertEqual(
+            [],
+            [kw.word for kw in article.keywords.all()],
+        )
+

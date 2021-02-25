@@ -170,7 +170,7 @@
                     </div>
                 {% endif %}
             </div>
-            {% if article.is_published and article_content %}
+            {% if article_content %}
                 <article>
                     <div id="main_article" itemprop="articleBody" class="article-body">
                         <div class="card">
@@ -187,6 +187,7 @@
         <div class="col m4">
             <div class="card">
                 <div class="card-content">
+                    {% include "common/elements/altmetric_badges.html" with article=article %}
                     <h4>
                         {% trans "Share" %}
                     </h4>
