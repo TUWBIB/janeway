@@ -16,7 +16,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Q, Count
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -1487,7 +1487,7 @@ def issue_article_order(request, issue_id=None):
                     " %s" % ids
                 )
                 continue
-            order_obj, c = models.ArticleOrdering.objects.get_or_create(
+            models.ArticleOrdering.objects.update_or_create(
                 issue=issue,
                 article=article,
                 defaults={
@@ -1495,9 +1495,8 @@ def issue_article_order(request, issue_id=None):
                     'section': article.section,
                 }
             )
-            order_obj.save()
 
-    return HttpResponse('Thanks')
+    return JsonResponse({'status': 'okay'})
 
 
 @editor_user_required
