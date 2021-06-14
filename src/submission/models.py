@@ -319,7 +319,7 @@ class KeywordArticle(models.Model):
         unique_together = ('keyword', 'article')
 
     def __str__(self):
-        return self.word
+        return self.keyword.word
 
     def __repr__(self):
         return "KeywordArticle(%s, %d)" % (self.keyword.word, self.article.id)
@@ -729,6 +729,11 @@ class Article(models.Model):
             or self.stage == "Author Copyediting" or self.stage == "Final Copyediting"\
             or self.stage == "Typesetting" or self.stage == "Proofing"
 
+    def peer_reviews_for_author_consumption(self):
+        return self.reviewassignment_set.filter(
+            for_author_consumption=True,
+        )
+
     def __str__(self):
         return u'%s - %s' % (self.pk, self.title)
 
@@ -992,6 +997,12 @@ class Article(models.Model):
                                                     reviewer=user).first()
         except review_models.ReviewAssignment.DoesNotExist:
             return None
+
+    def reviews_not_withdrawn(self):
+        return self.reviewassignment_set.exclude(decision='withdrawn')
+
+    def number_of_withdrawn_reviews(self):
+        return self.reviewassignment_set.filter(decision='withdrawn').count()
 
     def accept_article(self, stage=None):
         self.date_accepted = timezone.now()
@@ -1287,11 +1298,29 @@ class Article(models.Model):
 
         return article_link_count + book_link_count
 
+    def hidden_completed_reviews(self):
+        return self.reviewassignment_set.filter(
+            is_complete=True,
+            date_complete__isnull=False,
+            for_author_consumption=False,
+        ).exclude(
+            decision='withdrawn',
+        )
+
 
 class FrozenAuthor(models.Model):
     article = models.ForeignKey('submission.Article', blank=True, null=True)
     author = models.ForeignKey('core.Account', blank=True, null=True)
 
+    name_prefix = models.CharField(
+        max_length=300, null=True, blank=True,
+        help_text=_("Optional name prefix (e.g: Prof or Dr)")
+
+        )
+    name_suffix = models.CharField(
+        max_length=300, null=True, blank=True,
+        help_text=_("Optional name suffix (e.g.: Jr or III)")
+    )
     first_name = models.CharField(max_length=300, null=True, blank=True)
     middle_name = models.CharField(max_length=300, null=True, blank=True)
     last_name = models.CharField(max_length=300, null=True, blank=True)
@@ -1317,10 +1346,14 @@ class FrozenAuthor(models.Model):
     def full_name(self):
         if self.is_corporate:
             return self.corporate_name
-        elif self.middle_name:
-            return u"%s %s %s" % (self.first_name, self.middle_name, self.last_name)
-        else:
-            return u"%s %s" % (self.first_name, self.last_name)
+        full_name = u"%s %s" % (self.first_name, self.last_name)
+        if self.middle_name:
+            full_name = u"%s %s %s" % (self.first_name, self.middle_name, self.last_name)
+        if self.name_prefix:
+            full_name = "%s %s" % (_(self.name_prefix), full_name)
+        if self.name_suffix:
+            full_name = "%s %s" % (full_name, self.name_suffix)
+        return full_name
 
     @property
     def corporate_name(self):
@@ -1339,7 +1372,11 @@ class FrozenAuthor(models.Model):
         if self.first_name:
             first_initial = '{0}.'.format(self.first_name[:1])
 
-        return '{last} {first}{middle}'.format(last=self.last_name, first=first_initial, middle=middle_initial)
+        citation = '{last} {first}{middle}'.format(
+            last=self.last_name, first=first_initial, middle=middle_initial)
+        if self.name_suffix:
+            citation = '{}, {}'.format(citation, self.name_suffix)
+        return citation
 
     def given_names(self):
         if self.middle_name:
