@@ -1043,8 +1043,14 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:31
 msgid ""
-"There was no inactive account with this activation code found. It is "
-"possible that your account is already active, you can check by attempting to"
+"\n"
+"                <p>If you want to change your email address you may do so "
+"below, however, you will be logged out and your\n"
+"                account will be marked as inactive until you follow the "
+"instructions in the verification email. <strong>Note: </strong>\n"
+"                Changing your email address will also change your username "
+"as these are one and the same.</p>\n"
+"                "
 msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:32

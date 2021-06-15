@@ -344,7 +344,13 @@ def collections(request, issue_type_code="collection"):
         code=issue_type_code,
     )
     collections = models.Issue.objects.filter(
-        journal=request.journal, issue_type=issue_type)
+        journal=request.journal,
+        issue_type=issue_type,
+        date__lte=timezone.now(),
+    ).exclude(
+        # This has to be an .exclude because.filter won't do an INNER join
+        articles__isnull=True,
+    )
 
     template = 'journal/collections.html'
     context = {
@@ -402,7 +408,7 @@ def article(request, identifier_type, identifier):
     if article_object.is_published:
         store_article_access(request, article_object, 'view')
 
-    kw = article_object.keywords.all().order_by('submission_article_keywords.id')
+    kw = article_object.keywords.all()
     kw_de = article_object.keywords_de.all().order_by('submission_article_keywords_de.id')
 
     template = 'journal/article.html'
@@ -1514,16 +1520,16 @@ def issue_article_order(request, issue_id=None):
                     " %s" % ids
                 )
                 continue
-            order_obj, c = models.ArticleOrdering.objects.get_or_create(
+            models.ArticleOrdering.objects.update_or_create(
                 issue=issue,
                 article=article,
+                defaults={
+                    'order': order,
+                    'section': article.section,
+                }
             )
 
-            order_obj.order = order
-            order_obj.section = article.section
-            order_obj.save()
-
-    return HttpResponse('Thanks')
+    return JsonResponse({'status': 'okay'})
 
 
 @editor_user_required
@@ -1590,6 +1596,10 @@ def manage_archive_article(request, article_id):
                         request,
                         messages.ERROR,
                         "Uploaded file is not UTF-8 encoded",
+                    )
+                except production_logic.ZippedGalleyError:
+                    messages.add_message(request, messages.ERROR,
+                        "Galleys must be uploaded individually, not zipped",
                     )
 
         if 'pdf' in request.POST:
@@ -1924,7 +1934,7 @@ def manage_article_log(request, article_id):
     log_entries = utils_models.LogEntry.objects.filter(content_type=content_type, object_id=article.pk)
 
     if request.POST and settings.ENABLE_ENHANCED_MAILGUN_FEATURES:
-        call_command('check_mailgun_stat')
+        call_command('check_mailgun_stat', article_id=article_id)
         return redirect(reverse('manage_article_log', kwargs={'article_id': article.pk}))
 
     template = 'journal/article_log.html'
@@ -1991,7 +2001,7 @@ def send_user_email(request, user_id, article_id=None):
             )
             close = True
 
-    template = 'journal/send_user_email.html'
+    template = 'admin/journal/send_user_email.html'
     context = {
         'user': user,
         'close': close,
