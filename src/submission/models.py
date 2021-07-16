@@ -1592,7 +1592,7 @@ class Licence(models.Model):
                 lic_term=match.group(1)						
                 lic_ver=match.group(2)
 
-                str='https://licensebuttons.net/l/'+lic_term+'/'+lic_ver+'/80x15.png'
+                str='https://www.licensebuttons.net/l/'+lic_term+'/'+lic_ver+'/80x15.png'
 
         return str
 
