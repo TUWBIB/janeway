@@ -1749,7 +1749,7 @@ def contact(request):
             new_contact.save()
 
             logic.send_contact_message(new_contact, request)
-            messages.add_message(request, messages.SUCCESS, 'Your message has been sent.')
+            messages.add_message(request, messages.SUCCESS, _('Your message has been sent.'))
             return redirect(reverse('contact'))
 
     template = 'journal/contact.html'
