@@ -255,6 +255,7 @@ def issues(request):
         issue_type__code='issue',
         date__lte=timezone.now(),
     )
+
     template = 'journal/issues.html'
     context = {
         'issues': issue_objects,
@@ -307,11 +308,14 @@ def issue(request, issue_id, show_sidebar=True):
     except EmptyPage:
         articles = paginator.page(paginator.num_pages)
 
+# TUW
+# TODO check why the articles__isnull filter below leads to multiplcation of issues (for us)
+
     issue_objects = models.Issue.objects.filter(
         journal=request.journal,
         issue_type=issue_object.issue_type,
         date__lte=timezone.now(),
-        articles__isnull=False,
+#        articles__isnull=False,
     )
 
     editors = models.IssueEditor.objects.filter(
