@@ -11,8 +11,7 @@ from django.utils.timezone import get_current_timezone
 from submission import models as submission_models
 from identifiers import models as identifier_models
 from sync.datacite import api as datacite_api
-from sync.alma import api as alma_api
-from sync.alma import marc
+from laapy import API,MarcRecord,ControlField,DataField,SubField
 
 def create_article_doi(article):
     api = datacite_api.API()
@@ -337,9 +336,9 @@ def articleToMarc(article):
             if lang=='deu':
                 lang = 'ger'
 
-            mr=marc.MarcRecord()
+            mr=MarcRecord()
             mr.leader="03012naa a2200373 c 4500"
-            mr.addControlField(marc.ControlField.createControlField("007","cr#|||||||||||"))
+            mr.addControlField(ControlField.createControlField("007","cr#|||||||||||"))
 
             now = datetime.datetime.now()
             s = ''
@@ -354,59 +353,59 @@ def articleToMarc(article):
                 s += '   '
 
             s += ' c'
-            mr.addControlField(marc.ControlField.createControlField("008",s))
+            mr.addControlField(ControlField.createControlField("008",s))
 
 
             # 024 7_ doi, urn
             if article.get_doi():
-                datafield=marc.DataField.createDataField("024","7"," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a",article.get_doi()))
-                datafield.addSubfield(marc.SubField.createSubfield("2","doi"))
+                datafield=DataField.createDataField("024","7"," ")
+                datafield.addSubField(SubField.createSubField("a",article.get_doi()))
+                datafield.addSubField(SubField.createSubField("2","doi"))
                 mr.addDataField(datafield)
             if article.get_urn():
-                datafield=marc.DataField.createDataField("024","7"," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a",article.get_urn()))
-                datafield.addSubfield(marc.SubField.createSubfield("2","urn"))
+                datafield=DataField.createDataField("024","7"," ")
+                datafield.addSubField(SubField.createSubField("a",article.get_urn()))
+                datafield.addSubField(SubField.createSubField("2","urn"))
                 mr.addDataField(datafield)
 
             # 040 __ kat inst
-            datafield=marc.DataField.createDataField("040"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a","TUW"))
-            datafield.addSubfield(marc.SubField.createSubfield("b","ger"))
-            datafield.addSubfield(marc.SubField.createSubfield("c","JW"))
-            datafield.addSubfield(marc.SubField.createSubfield("d","AT-UBTUW"))
-            datafield.addSubfield(marc.SubField.createSubfield("e","rda"))
+            datafield=DataField.createDataField("040"," "," ")
+            datafield.addSubField(SubField.createSubField("a","TUW"))
+            datafield.addSubField(SubField.createSubField("b","ger"))
+            datafield.addSubField(SubField.createSubField("c","JW"))
+            datafield.addSubField(SubField.createSubField("d","AT-UBTUW"))
+            datafield.addSubField(SubField.createSubField("e","rda"))
             mr.addDataField(datafield)
 
             # 041 __ language
             if lang:
-                datafield=marc.DataField.createDataField("041"," "," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a",lang))
+                datafield=DataField.createDataField("041"," "," ")
+                datafield.addSubField(SubField.createSubField("a",lang))
                 mr.addDataField(datafield)
 
             # 044 __ country code, fix
-            datafield=marc.DataField.createDataField("044"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a",'XA-AT'))
+            datafield=DataField.createDataField("044"," "," ")
+            datafield.addSubField(SubField.createSubField("a",'XA-AT'))
             mr.addDataField(datafield)
 
             # primary author
             author=article.frozen_authors()[0]  
             if author:
-                datafield=marc.DataField.createDataField("100","1"," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a",''.join([author.last_name,', ',author.first_name])))
-                datafield.addSubfield(marc.SubField.createSubfield("4",'aut'))
+                datafield=DataField.createDataField("100","1"," ")
+                datafield.addSubField(SubField.createSubField("a",''.join([author.last_name,', ',author.first_name])))
+                datafield.addSubField(SubField.createSubField("4",'aut'))
                 if author.is_correspondence_author:
-                    datafield.addSubfield(marc.SubField.createSubfield("4",'oth'))
-                    datafield.addSubfield(marc.SubField.createSubfield("e",'Corresponding author'))
+                    datafield.addSubField(SubField.createSubField("4",'oth'))
+                    datafield.addSubField(SubField.createSubField("e",'Corresponding author'))
                 mr.addDataField(datafield)
 
             # 245 10 title statement
             author=article.frozen_authors()[0]  
             if author:
-                datafield=marc.DataField.createDataField("245","1","0")
+                datafield=DataField.createDataField("245","1","0")
             else:
-                datafield=marc.DataField.createDataField("245","0","0")
-            datafield.addSubfield(marc.SubField.createSubfield("a",escape(article.title)))
+                datafield=DataField.createDataField("245","0","0")
+            datafield.addSubField(SubField.createSubField("a",escape(article.title)))
             sf_b = ''
             if article.subtitle:
                 sf_b += article.subtitle
@@ -415,38 +414,38 @@ def articleToMarc(article):
             if article.subtitle_de:
                 sf_b += ' : '+article.subtitle_de
             if sf_b:
-                datafield.addSubfield(marc.SubField.createSubfield("b",escape(sf_b)))
+                datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
 
             auth = []
             for author in article.frozen_authors():
                 auth.append(author.first_name+" "+author.last_name)
-            datafield.addSubfield(marc.SubField.createSubfield("c",", ".join(auth)))
+            datafield.addSubField(SubField.createSubField("c",", ".join(auth)))
             mr.addDataField(datafield)
 
             # 246 11
             if article.title_de:
-                datafield=marc.DataField.createDataField("246","1","1")
-                datafield.addSubfield(marc.SubField.createSubfield("a",escape(article.title_de)))
+                datafield=DataField.createDataField("246","1","1")
+                datafield.addSubField(SubField.createSubField("a",escape(article.title_de)))
                 if article.subtitle_de:
-                    datafield.addSubfield(marc.SubField.createSubfield("b",escape(article.subtitle_de)))
+                    datafield.addSubField(SubField.createSubField("b",escape(article.subtitle_de)))
                 mr.addDataField(datafield)
 
             # 251 __ coar
-            datafield=marc.DataField.createDataField("251"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a","vor"))
-            datafield.addSubfield(marc.SubField.createSubfield("2","coar"))
+            datafield=DataField.createDataField("251"," "," ")
+            datafield.addSubField(SubField.createSubField("a","vor"))
+            datafield.addSubField(SubField.createSubField("2","coar"))
             mr.addDataField(datafield)
 
             # 264 _1 publication
-            datafield=marc.DataField.createDataField("264"," ","1")
-            datafield.addSubfield(marc.SubField.createSubfield("a","Wien"))
-            datafield.addSubfield(marc.SubField.createSubfield("b","Technische Universität Wien"))
-            datafield.addSubfield(marc.SubField.createSubfield("c",str(article.primary_issue.tuw_year)))
+            datafield=DataField.createDataField("264"," ","1")
+            datafield.addSubField(SubField.createSubField("a","Wien"))
+            datafield.addSubField(SubField.createSubField("b","Technische Universität Wien"))
+            datafield.addSubField(SubField.createSubField("c",str(article.primary_issue.tuw_year)))
             mr.addDataField(datafield)
 
 
             # 300 __ physical description
-            datafield=marc.DataField.createDataField("300"," "," ")
+            datafield=DataField.createDataField("300"," "," ")
             match=re.match('(\d+)-(\d+)',article.page_numbers)
             no_pages=None
             if match:
@@ -459,117 +458,117 @@ def articleToMarc(article):
                     sf_a+=" ("+str(no_pages)+" Seite)"
                 else:
                     sf_a+=" ("+str(no_pages)+" Seiten)"
-            datafield.addSubfield(marc.SubField.createSubfield("a",sf_a))
-            datafield.addSubfield(marc.SubField.createSubfield("b","Illustrationen, Diagramme"))
+            datafield.addSubField(SubField.createSubField("a",sf_a))
+            datafield.addSubField(SubField.createSubField("b","Illustrationen, Diagramme"))
             mr.addDataField(datafield)
            
             # 336-338
-            datafield=marc.DataField.createDataField("336"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("b","txt"))
+            datafield=DataField.createDataField("336"," "," ")
+            datafield.addSubField(SubField.createSubField("b","txt"))
             mr.addDataField(datafield)
 
-            datafield=marc.DataField.createDataField("337"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("b","c"))
+            datafield=DataField.createDataField("337"," "," ")
+            datafield.addSubField(SubField.createSubField("b","c"))
             mr.addDataField(datafield)
 
-            datafield=marc.DataField.createDataField("338"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("b","cr"))
+            datafield=DataField.createDataField("338"," "," ")
+            datafield.addSubField(SubField.createSubField("b","cr"))
             mr.addDataField(datafield)
 
             # 347 __ digital file
-            datafield=marc.DataField.createDataField("347"," "," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a","Textdatei"))
-            datafield.addSubfield(marc.SubField.createSubfield("b","PDF"))
+            datafield=DataField.createDataField("347"," "," ")
+            datafield.addSubField(SubField.createSubField("a","Textdatei"))
+            datafield.addSubField(SubField.createSubField("b","PDF"))
             mr.addDataField(datafield)
 
             # 500 __ peer reviewed
             if article.peer_reviewed:
-                datafield=marc.DataField.createDataField("500"," "," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a","Refereed/Peer-reviewed"))
+                datafield=DataField.createDataField("500"," "," ")
+                datafield.addSubField(SubField.createSubField("a","Refereed/Peer-reviewed"))
                 mr.addDataField(datafield)
 
             # 506 0_, open access, fixed
-            datafield=marc.DataField.createDataField("506","0"," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a","Open Access"))
-            datafield.addSubfield(marc.SubField.createSubfield("f","Unrestricted online access"))
-            datafield.addSubfield(marc.SubField.createSubfield("2","star"))
+            datafield=DataField.createDataField("506","0"," ")
+            datafield.addSubField(SubField.createSubField("a","Open Access"))
+            datafield.addSubField(SubField.createSubField("f","Unrestricted online access"))
+            datafield.addSubField(SubField.createSubField("2","star"))
             mr.addDataField(datafield)
 
             # 520, abstracts
             if article.abstract:
-                datafield=marc.DataField.createDataField("520"," "," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a","eng:"+" "+escape(article.abstract)))
+                datafield=DataField.createDataField("520"," "," ")
+                datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.abstract)))
                 mr.addDataField(datafield)
 
             if article.abstract_de:
-                datafield=marc.DataField.createDataField("520"," "," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a","ger:"+" "+escape(article.abstract_de)))
+                datafield=DataField.createDataField("520"," "," ")
+                datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.abstract_de)))
                 mr.addDataField(datafield)
 
             # 542, Lizenz
             if article.license is not None and article.license.short_name != 'Copyright':
-                datafield=marc.DataField.createDataField("542"," "," ")
-                datafield.addSubfield(marc.SubField.createSubfield("a","Unter einer CC-Lizenz, Details siehe Link"))
-                datafield.addSubfield(marc.SubField.createSubfield("f",article.license.short_name))
-                datafield.addSubfield(marc.SubField.createSubfield("2","cc"))
-                datafield.addSubfield(marc.SubField.createSubfield("u",article.license.url))
+                datafield=DataField.createDataField("542"," "," ")
+                datafield.addSubField(SubField.createSubField("a","Unter einer CC-Lizenz, Details siehe Link"))
+                datafield.addSubField(SubField.createSubField("f",article.license.short_name))
+                datafield.addSubField(SubField.createSubField("2","cc"))
+                datafield.addSubField(SubField.createSubField("u",article.license.url))
                 mr.addDataField(datafield)
 
             # 700 further authors
             if article.frozen_authors() and len(article.frozen_authors())>1:
                 for author in article.frozen_authors()[1:]:
-                    datafield=marc.DataField.createDataField("700","1"," ")
-                    datafield.addSubfield(marc.SubField.createSubfield("a",''.join([author.last_name,', ',author.first_name])))
-                    datafield.addSubfield(marc.SubField.createSubfield("4",'aut'))
+                    datafield=DataField.createDataField("700","1"," ")
+                    datafield.addSubField(SubField.createSubField("a",''.join([author.last_name,', ',author.first_name])))
+                    datafield.addSubField(SubField.createSubField("4",'aut'))
                     if author.is_correspondence_author:
-                        datafield.addSubfield(marc.SubField.createSubfield("4",'oth'))
-                        datafield.addSubfield(marc.SubField.createSubfield("e",'Corresponding author'))
+                        datafield.addSubField(SubField.createSubField("4",'oth'))
+                        datafield.addSubField(SubField.createSubField("e",'Corresponding author'))
                     mr.addDataField(datafield)
 
             # 773 08 relation
-            datafield=marc.DataField.createDataField("773","0","8")
-            datafield.addSubfield(marc.SubField.createSubfield("i","Enthalten in"))
+            datafield=DataField.createDataField("773","0","8")
+            datafield.addSubField(SubField.createSubField("i","Enthalten in"))
             if article.journal.code == 'OES' or article.journal.code == 'OEST':
-                datafield.addSubfield(marc.SubField.createSubfield("t","Der Öffentliche Sektor - The Public Sector"))
+                datafield.addSubField(SubField.createSubField("t","Der Öffentliche Sektor - The Public Sector"))
             elif article.journal.code == 'JFM' or article.journal.code == 'JFM':            
-                datafield.addSubfield(marc.SubField.createSubfield("t","IFM Journal"))
+                datafield.addSubField(SubField.createSubField("t","IFM Journal"))
             else:
                 pass
-            datafield.addSubfield(marc.SubField.createSubfield("d",str(article.primary_issue.tuw_year)))
+            datafield.addSubField(SubField.createSubField("d",str(article.primary_issue.tuw_year)))
             if article.journal.code == 'OES' or article.journal.code == 'OEST':
                 s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+str(article.primary_issue.tuw_year)+'), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
-                datafield.addSubfield(marc.SubField.createSubfield("g",s))
-            elif article.journal.code == 'JFM' or article.journal.code == 'JFM':
+                datafield.addSubField(SubField.createSubField("g",s))
+            elif article.journal.code == 'JFM' or article.journal.code == 'JFMT':
                 s = 'Jahrgang ('+str(article.primary_issue.tuw_year)+'), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
-                datafield.addSubfield(marc.SubField.createSubfield("g",s))
+                datafield.addSubField(SubField.createSubField("g",s))
             else:
                 pass
             if article.journal.code == 'OES' or article.journal.code == 'OEST':
-                datafield.addSubfield(marc.SubField.createSubfield("w","(AT-OBV)AC10863779"))
+                datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC10863779"))
             elif article.journal.code == 'JFM' or article.journal.code == 'JFM':
-                datafield.addSubfield(marc.SubField.createSubfield("w","(AT-OBV)AC13348910"))
+                datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC13348910"))
             else:
                 pass
             mr.addDataField(datafield)            
 
             # 856 link, doi
             if article.get_doi():
-                datafield=marc.DataField.createDataField("856","4","0")
-                datafield.addSubfield(marc.SubField.createSubfield("q",'text/html'))
-                datafield.addSubfield(marc.SubField.createSubfield("u",'https://doi.org/'+article.get_doi()))
-                datafield.addSubfield(marc.SubField.createSubfield("x",'TUW'))
-                datafield.addSubfield(marc.SubField.createSubfield("z",'kostenfrei'))
-                datafield.addSubfield(marc.SubField.createSubfield("3",'Volltext'))
+                datafield=DataField.createDataField("856","4","0")
+                datafield.addSubField(SubField.createSubField("q",'text/html'))
+                datafield.addSubField(SubField.createSubField("u",'https://doi.org/'+article.get_doi()))
+                datafield.addSubField(SubField.createSubField("x",'TUW'))
+                datafield.addSubField(SubField.createSubField("z",'kostenfrei'))
+                datafield.addSubField(SubField.createSubField("3",'Volltext'))
                 mr.addDataField(datafield)
 
             # 970 2_
-            datafield=marc.DataField.createDataField("970","2"," ")
-            datafield.addSubfield(marc.SubField.createSubfield("a",'TUW'))
-            datafield.addSubfield(marc.SubField.createSubfield("d",'OA-ARTICLE'))
+            datafield=DataField.createDataField("970","2"," ")
+            datafield.addSubField(SubField.createSubField("a",'TUW'))
+            datafield.addSubField(SubField.createSubField("d",'OA-ARTICLE'))
             mr.addDataField(datafield)
 
             # 971 8_ keywords_de
@@ -579,8 +578,8 @@ def articleToMarc(article):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:
-                    datafield=marc.DataField.createDataField("971","8"," ")
-                    datafield.addSubfield(marc.SubField.createSubfield("a",s))
+                    datafield=DataField.createDataField("971","8"," ")
+                    datafield.addSubField(SubField.createSubField("a",s))
                     mr.addDataField(datafield)
 
             # 971 9_ keywords
@@ -590,14 +589,14 @@ def articleToMarc(article):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:
-                    datafield=marc.DataField.createDataField("971","9"," ")
-                    datafield.addSubfield(marc.SubField.createSubfield("a",s))
+                    datafield=DataField.createDataField("971","9"," ")
+                    datafield.addSubField(SubField.createSubField("a",s))
                     mr.addDataField(datafield)
 
             # 996 33 reposiTUm
-            datafield=marc.DataField.createDataField("996","3","3")
-            datafield.addSubfield(marc.SubField.createSubfield("a",'Gold Open Access ; Journal Hosting System'))
-            datafield.addSubfield(marc.SubField.createSubfield("9",'LOCAL'))
+            datafield=DataField.createDataField("996","3","3")
+            datafield.addSubField(SubField.createSubField("9",'LOCAL'))
+            datafield.addSubField(SubField.createSubField("a",'Gold Open Access ; Journal Hosting System'))
             mr.addDataField(datafield)
 
             xml = mr.toXML()

@@ -29,8 +29,7 @@ from submission import models as submission_models
 from utils.logger import get_logger
 from sync import logic
 from sync.datacite import api as datacite_api
-from sync.alma import api as alma_api,marc
-
+from laapy import API,MarcRecord,stripXmlDeclaration
 
 logger = get_logger(__name__)
 
@@ -237,20 +236,21 @@ def almaViewCurrent(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
         
     try:
-        api = alma_api.API()
+        api = API(json_str=json.dumps(settings.LAAPY))
     except Exception as e:
         errors.append('error getting Alma API instance')
         errors.append(str(e))
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
-    (xml,errors) = api.getBibRecord(mmsid)
-
+    result = api.getBibRecord(mmsid)
+    xml = result.data
+    errors = result.errs
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-    xml = api.stripXmlDeclaration(xml)
+    xml = stripXmlDeclaration(xml)
     x = etree.fromstring(xml)
     xml = etree.tostring(x, pretty_print=True).decode("utf-8")
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
@@ -273,7 +273,7 @@ def almaCreateUpdateConfirm(article):
     ac = article.get_ac()
 
     try:
-        api = alma_api.API()
+        api = API(json_str=json.dumps(settings.LAAPY))
     except Exception as e:
         errors.append('error getting Alma API instance')
         errors.append(str(e))
@@ -286,7 +286,9 @@ def almaCreateUpdateConfirm(article):
             'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
     
     if mmsid:
-        (xml,errors) = api.getBibRecord(mmsid)
+        result = api.getBibRecord(mmsid)
+        xml = result.data
+        errors = result.errs
         if errors:
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
@@ -298,17 +300,19 @@ def almaCreateUpdateConfirm(article):
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-        (xml,errors) = api.updateBibRecord(xml,mmsid)
+        result = api.updateBibRecord(xml,mmsid)
     else:
-        (xml,errors) = api.createBibRecord(xml)
+        result = api.createBibRecord(xml)
     
+    xml = result.data
+    errors = result.errs
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': warnings,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
     try:
-        xml = api.stripXmlDeclaration(xml)
-        mr = marc.MarcRecord()
+        xml = stripXmlDeclaration(xml)
+        mr = MarcRecord()
         mr.parse(xml)
         mmsid = mr.getMMSId()
     except Exception as e:
@@ -335,14 +339,16 @@ def almaPushNZ(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
     try:
-        api = alma_api.API()
+        api = API(json_str=json.dumps(settings.LAAPY))
     except Exception as e:
         errors.append('error getting Alma API instance')
         errors.append(str(e))
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
-    (xml,errors) = api.getBibRecord(mmsid)
+    result = api.getBibRecord(mmsid)
+    xml = result.data
+    errors = result.errs
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
@@ -372,14 +378,16 @@ def almaPushNZConfirm(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
     try:
-        api = alma_api.API()
+        api = API(json_str=json.dumps(settings.LAAPY))
     except Exception as e:
         errors.append('error getting Alma API instance')
         errors.append(str(e))
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
-    (xml,errors) = api.getBibRecord(mmsid)
+    result = api.getBibRecord(mmsid)
+    xml = result.data
+    errors = result.errs
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
@@ -398,19 +406,22 @@ def almaPushNZConfirm(article):
     # 3. call job
     # 4. delete set XXX not possible until job has run
 
-    (setid,errors) = api.createItemizedBibRecordSet(setname='JW set - '+mmsid)
+    setid, result = api.createItemizedBibRecordSet(setname='JW set - '+mmsid)
+    errors = result.errs
     if errors:
         errors.insert(0,'error creating set')
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
 
-    (xml,errors) = api.addIdToSet(setid,mmsid)
+    result = api.addIdToSet(setid,mmsid)
+    errors = result.errs
     if errors:
         errors.insert(0,'error adding record to set')
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
    
-    (xml,errors) = api.runLinkJob(setid)
+    result = api.runLinkJob(setid)
+    errors = result.errs
     if errors:
         msg = ','.join(errors)    
         print (msg)        
@@ -439,14 +450,16 @@ def almaFetchAC(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
     try:
-        api = alma_api.API()
+        api = API(json_str=json.dumps(settings.LAAPY))
     except Exception as e:
         errors.append('error getting Alma API instance')
         errors.append(str(e))
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
-    (xml,errors) = api.getBibRecord(mmsid)
+    result = api.getBibRecord(mmsid)
+    xml = result.data
+    errors = result.errs
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
@@ -458,8 +471,8 @@ def almaFetchAC(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
     
     try:
-        xml = api.stripXmlDeclaration(xml)
-        mr = marc.MarcRecord()
+        xml = stripXmlDeclaration(xml)
+        mr = MarcRecord()
         mr.parse(xml)
         ac = mr.getAC()
     except Exception as e:
