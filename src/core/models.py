@@ -697,7 +697,7 @@ class File(models.Model):
     mime_type = models.CharField(max_length=255)
     original_filename = models.CharField(max_length=1000)
     uuid_filename = models.CharField(max_length=100)
-    label = models.CharField(max_length=200, null=True, blank=True, verbose_name=_('Label'))
+    label = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('Label'))
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     sequence = models.IntegerField(default=1)
     owner = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL)
@@ -892,6 +892,13 @@ class Galley(models.Model):
     type = models.CharField(max_length=100, choices=galley_type_choices())
     sequence = models.IntegerField(default=0)
 
+    def unlink_files(self):
+        if self.file and self.file.article_id:
+            self.file.unlink_file()
+        for image_file in self.images.all():
+            if  not image_file.images.exclude(galley=self).exists():
+                image_file.unlink_file()
+
     def __str__(self):
         return "{0} ({1})".format(self.id, self.label)
 
@@ -920,7 +927,8 @@ class Galley(models.Model):
 
         elements = {
             'img': 'src',
-            'graphic': 'xlink:href'
+            'graphic': 'xlink:href',
+            'inline-graphic': 'xlink:href',
         }
 
         missing_elements = []
@@ -1323,3 +1331,20 @@ def setup_user_signature(sender, instance, created, **kwargs):
     if created and not instance.signature:
         instance.signature = instance.full_name()
         instance.save()
+
+
+# This model is vestigial and will be removed in v1.5
+
+class SettingValueTranslation(models.Model):
+    hvad_value = models.TextField(
+        blank=True,
+        null=True,
+    )
+    language_code = models.CharField(
+        max_length=15,
+        db_index=True,
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'core_settingvalue_translation'

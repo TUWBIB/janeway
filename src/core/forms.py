@@ -14,16 +14,16 @@ from django.utils.translation import ugettext_lazy as _, get_language
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 
+from django_summernote.widgets import SummernoteWidget
 from snowpenguin.django.recaptcha2.fields import ReCaptchaField
 from snowpenguin.django.recaptcha2.widgets import ReCaptchaWidget
 from simplemathcaptcha.fields import MathCaptchaField
-from modeltranslation import forms as mt_forms, translator
 
 from core import models, validators
 from utils.logic import get_current_request
 from journal import models as journal_models
 from utils import setting_handler
-from utils.forms import KeywordModelForm
+from utils.forms import KeywordModelForm, JanewayTranslationModelForm
 from utils.logger import get_logger
 from submission import models as submission_models
 
@@ -32,13 +32,6 @@ from submission import models as submission_models
 setattr(Field, 'is_checkbox', lambda self: isinstance(self.widget, forms.CheckboxInput))
 
 logger = get_logger(__name__)
-
-
-class JanewayTranslationModelForm(mt_forms.TranslationModelForm):
-    def __init__(self, *args, **kwargs):
-        super(JanewayTranslationModelForm, self).__init__(*args, **kwargs)
-        opts = translator.translator.get_options_for_model(self._meta.model)
-        self.translated_field_names = opts.get_field_names()
 
 
 class EditKey(forms.Form):
@@ -95,6 +88,9 @@ class EditorialGroupForm(JanewayTranslationModelForm):
         model = models.EditorialGroup
         fields = ('name', 'description', 'sequence',)
         exclude = ('journal',)
+        widgets = {
+            'description': SummernoteWidget(),
+        }
 
 
 class PasswordResetForm(forms.Form):

@@ -31,6 +31,7 @@ from core import (
     plugin_loader,
     logic as core_logic,
 )
+from identifiers import models as id_models
 from journal import logic, models, issue_forms, forms, decorators
 from journal.logic import get_galley_content
 from metrics.logic import store_article_access
@@ -292,7 +293,9 @@ def issue(request, issue_id, show_sidebar=True):
         journal=request.journal,
         issue_type=issue_object.issue_type,
         date__lte=timezone.now(),
-        articles__isnull=False,
+    ).exclude(
+        # This has to be an .exclude because.filter won't do an INNER join
+        articles__isnull=True,
     )
 
     editors = models.IssueEditor.objects.filter(
@@ -377,8 +380,10 @@ def article(request, identifier_type, identifier):
     if article_object.is_published:
         content = get_galley_content(article_object, galleys, recover=True)
     else:
-        article_object.abstract = "<p><strong>This is an accepted article with a DOI pre-assigned " \
-                                  "that is not yet published.</strong></p>" + article_object.abstract
+        article_object.abstract = (
+            "<p><strong>This is an accepted article with a DOI pre-assigned"
+            " that is not yet published.</strong></p>"
+        ) + article_object.abstract or ""
 
     if not article_object.large_image_file or article_object.large_image_file.uuid_filename == '':
         article_object.large_image_file = core_models.File()
@@ -400,6 +405,17 @@ def article(request, identifier_type, identifier):
     }
 
     return render(request, template, context)
+
+
+def article_from_identifier(request, identifier_type, identifier):
+    identifier = get_object_or_404(
+        id_models.Identifier,
+        id_type=identifier_type,
+        identifier=identifier,
+        article__journal = request.journal
+    )
+    return redirect(identifier.article.url)
+
 
 
 @decorators.frontend_enabled
@@ -2101,12 +2117,31 @@ def document_management(request, article_id):
 
     if request.POST and request.FILES:
 
+        label = request.POST.get('label') if request.POST.get('label') else 'File'
+
         if 'manu' in request.POST:
             from core import files as core_files
             file = request.FILES.get('manu-file')
             new_file = core_files.save_file_to_article(file, document_article,
-                                                       request.user, label='MS File', is_galley=False)
+                                                       request.user, label=label, is_galley=False)
             document_article.manuscript_files.add(new_file)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Production file uploaded.'),
+            )
+
+        if 'fig' in request.POST:
+            from core import files as core_files
+            file = request.FILES.get('fig-file')
+            new_file = core_files.save_file_to_article(
+                file,
+                document_article,
+                request.user,
+                label=label,
+                is_galley=False,
+            )
+            document_article.data_figure_files.add(new_file)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2116,7 +2151,7 @@ def document_management(request, article_id):
         if 'prod' in request.POST:
             from production import logic as prod_logic
             file = request.FILES.get('prod-file')
-            prod_logic.save_prod_file(document_article, request, file, 'Production Ready File')
+            prod_logic.save_prod_file(document_article, request, file, label)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2126,7 +2161,7 @@ def document_management(request, article_id):
         if 'proof' in request.POST:
             from production import logic as prod_logic
             file = request.FILES.get('proof-file')
-            prod_logic.save_galley(document_article, request, file, True, 'File for Proofing')
+            prod_logic.save_galley(document_article, request, file, True, label)
             messages.add_message(
                 request,
                 messages.SUCCESS,

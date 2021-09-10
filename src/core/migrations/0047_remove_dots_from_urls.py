@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from django.db import migrations
 from django.utils import translation
 from django.conf import settings as django_settings
+from django.core.exceptions import FieldError
 
 URL_NAME_RE = r"url '(\w+)'"
 
@@ -18,13 +19,14 @@ def replace_setting_urls(apps, schema_editor):
         for setting in settings:
             setting.value = setting.value.replace("url }}.", "url }} ")
             setting.save()
-    except LookupError:
-        with translation.activate(django_settings.LANGUAGE_CODE):
+    except (LookupError, FieldError):
+        with translation.override(django_settings.LANGUAGE_CODE):
             SettingValue = apps.get_model('core', 'SettingValue')
             settings = SettingValue.objects.filter(setting__group__name="email")
             for setting in settings:
-                setting.value = setting.value.replace("url }}.", "url }} ")
-                setting.save()
+                if setting.value:
+                    setting.value = setting.value.replace("url }}.", "url }} ")
+                    setting.save()
 
 
 class Migration(migrations.Migration):
