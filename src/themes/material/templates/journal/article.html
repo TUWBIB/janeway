@@ -68,14 +68,13 @@
 
                             </span>
                     {% endif %}
-                    {% if article.abstract != '' %}
+                    {% if article.abstract and article.abstract != '' %}
                         <h2>{% trans "Abstract" %}</h2>
                         <p>{{ article.abstract | safe }}</p>
+                        <div class="spacer">
+                            <div class="divider"></div>
+                        </div>
                     {% endif %}
-
-                    <div class="spacer">
-                        <div class="divider"></div>
-                    </div>
 
                     {% if article.keywords.count > 0 %}
                         <h2>{% trans "Keywords" %}</h2>
@@ -87,7 +86,15 @@
                     {% endif %}
                     {% if article.is_published and not journal_settings.article.suppress_how_to_cite %}
                         <h2>{% trans "How to Cite" %}</h2>
-                        {% include "elements/journal/how_to_cite.html" with article=article %}
+                        {{ article.how_to_cite | safe }}
+
+                        <div class="spacer">
+                            <div class="divider"></div>
+                        </div>
+                    {% endif %}
+                    {% if article.rights %}
+                        <h2>{% trans "Rights" %}</h2>
+                        {{ article.rights | safe }}
 
                         <div class="spacer">
                             <div class="divider"></div>
@@ -211,17 +218,17 @@
                     </h4>
 
                     {% for author in article.frozen_authors.all %}
-                        <small>
                             {% if not forloop.first %}<br/> {% endif %}
                             {{ author.full_name }}
-                            {% if author.institution %}
+                            {% if author.orcid %}<a href="https://orcid.org/{{ author.orcid }}"
+                                class=""><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="orcid logo"></a>{% endif %}
+                            {% if author.institution  and author.institution != " " %}
                                 <span itemprop="worksFor" itemscope itemtype="http://schema.org/CollegeOrUniversity">
                                     <span itemprop="name">({{ author.institution }})
                             {% endif %}
                             {% if author.is_correspondence_author %}
-                                <a itemprop="email" href="mailto:{{ author.author.email }}"
+                                <a itemprop="email" href="mailto:{{ author.email }}"
                                    class="fa fa-envelope email-link"></a>{% endif %}
-                        </small>
                     {% endfor %}
 
                     <div class="spacer">
