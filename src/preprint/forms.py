@@ -80,22 +80,27 @@ class PreprintInfo(forms.ModelForm):
 
         posted_keywords = self.cleaned_data['keywords'].split(',')
         for keyword in posted_keywords:
-            new_keyword, c = submission_models.Keyword.objects.get_or_create(word=keyword)
+            new_keyword, c = submission_models.Keyword.objects.get_or_create(
+                word=keyword,
+                language='en',
+                )
             article.keywords.add(new_keyword)
 
-        for keyword in article.keywords.all():
+        for keyword in article.keywords.filter(language='en'):
             if keyword.word not in posted_keywords:
                 article.keywords.remove(keyword)
 
-        posted_keywords_de = self.cleaned_data['keywords_de'].split(',')
-        for keyword_de in posted_keywords_de:
-            new_keyword_de, c = submission_models.KeywordDe.objects.get_or_create(word=keyword_de)
-            article.keywords_de.add(new_keyword_de)
+        posted_keywords = self.cleaned_data['keywords_de'].split(',')
+        for keyword in posted_keywords:
+            new_keyword, c = submission_models.Keyword.objects.get_or_create(
+                word=keyword,
+                language='de',
+                )
+            article.keywords.add(new_keyword)
 
-        for keyword_de in article.keywords_de.all():
-            if keyword_de.word not in posted_keywords_de:
-                article.keywords_de.remove(keyword_de)
-
+        for keyword in article.keywords.filter(language='de'):
+            if keyword.word not in posted_keywords:
+                article.keywords.remove(keyword)
 
         if self.cleaned_data.get('subject', None):
             article.set_preprint_subject(self.cleaned_data['subject'])

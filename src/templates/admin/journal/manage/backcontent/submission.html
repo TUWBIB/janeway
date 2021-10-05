@@ -76,16 +76,16 @@
                             {{ article_form.license.errors }}
                         </div>
                         <div class="large-12 columns">
-                            <label for="id_keywords">{% trans "Keywords" %}</label>
+                            <label for="id_keywords">{% trans "Keywords" context "bc" %}</label>
                             <input type="text" id="id_keywords" name="keywords" value="
-                                    {% if article_form.cleaned_data.keywords %}{{ article_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                                    {% trans "Hit Enter to add a new keyword." %}
+                                    {% if article_form.cleaned_data.keywords %}{{ article_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords_lang_en.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                                    {% trans "Hit Enter to add a new keyword." context "bc" %}
                         </div>
                         <div class="large-12 columns">
-                            <label for="id_keywords_de">{% trans "Keywords (German)" %}</label>
+                            <label for="id_keywords_de">{% trans "Keywords (German)" context "bc" %}</label>
                             <input type="text" id="id_keywords_de" name="keywords_de" value="
-                                    {% if article_form.cleaned_data.keywords_de %}{{ article_form.cleaned_data.keywords_de }}{% else %}{% for keyword_de in article.keywords_de.all %}{{ keyword_de.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                                    {% trans "Hit Enter to add a new keyword." %}
+                                    {% if article_form.cleaned_data.keywords_de %}{{ article_form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_lang_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                                    {% trans "Hit Enter to add a new keyword." context "bc" %}
                         </div>
                     </div>
 

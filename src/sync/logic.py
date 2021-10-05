@@ -116,13 +116,13 @@ def articleToDataCiteXML(article_id):
 
             l.append('</titles>')
 
-            if article.keywords or article.keywords_de:
+            if article.keywords:
                 l.append('<subjects>')
-                for kw in article.keywords.all():
+                for kw in article.keywords.filter(language='en'):
                     l.append('<subject xml:lang="en">')
                     l.append(escape(kw.word))
                     l.append('</subject>')
-                for kw in article.keywords_de.all():
+                for kw in article.keywords.filter(language='de'):
                     l.append('<subject xml:lang="de">')
                     l.append(escape(kw.word))
                     l.append('</subject>')

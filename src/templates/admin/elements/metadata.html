@@ -57,13 +57,13 @@
         <th colspan="4">{% trans "Keywords" %}</th>
     </tr>
     <tr>
-        <td colspan="4">{% for keyword in article.keywords.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
+        <td colspan="4">{% for keyword in article.keywords_lang_en.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
     </tr>
     <tr>
         <th colspan="4">{% trans "Keywords (German)" %}</th>
     </tr>
     <tr>
-        <td colspan="4">{% for keyword_de in article.keywords_de.all %}{{ keyword_de }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
+        <td colspan="4">{% for keyword in article.keywords_lang_de.all %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "No keywords recorded" %}{% endfor %}</td>
     </tr>
     {% if journal_settings.general.submission_summary %}
         <tr>

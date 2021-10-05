@@ -32,7 +32,6 @@ class KeywordModelForm(ModelForm):
     """ A ModelForm for models implementing a Keyword M2M relationship """
     keywords = CharField(
             required=False, help_text=_("Hit Enter to add a new keyword."))
-
     keywords_de = CharField(
             required=False, help_text=_("Hit Enter to add a new keyword."))
 
@@ -40,12 +39,12 @@ class KeywordModelForm(ModelForm):
         super().__init__(*args, **kwargs)
 
         if hasattr(self.instance, 'keywords'):
-            current_keywords = self.instance.keywords.values_list("word", flat=True)
+            current_keywords = self.instance.keywords_lang_en().values_list("word", flat=True)
             field = self.fields["keywords"]
             field.initial = ",".join(current_keywords)
 
         if hasattr(self.instance, 'keywords_de'):
-            current_keywords_de = self.instance.keywords_de.values_list("word", flat=True)
+            current_keywords_de = self.instance.keywords_lang_de().values_list("word", flat=True)
             field = self.fields["keywords_de"]
             field.initial = ",".join(current_keywords_de)
 
@@ -53,30 +52,39 @@ class KeywordModelForm(ModelForm):
     def save(self, commit=True, *args, **kwargs):
         instance = super().save(commit=commit, *args, **kwargs)
 
+        # en keywords
         if 'keywords' in self.cleaned_data:
+            print ("*** A")
             posted_keywords = self.cleaned_data.get('keywords', '').split(',')
             for keyword in posted_keywords:
+                print (keyword)
                 if keyword != '':
                     obj, _ = submission_models.Keyword.objects.get_or_create(
-                            word=keyword)
+                            word=keyword,
+                            language='en',
+                            )
                     instance.keywords.add(obj)
 
-            for keyword in instance.keywords.all():
+            for keyword in instance.keywords.filter(language='en'):
                 if keyword.word not in posted_keywords:
                     instance.keywords.remove(keyword)
 
-
+        # de keywords
         if 'keywords_de' in self.cleaned_data:
-            posted_keywords_de = self.cleaned_data.get('keywords_de', '').split(',')
-            for keyword_de in posted_keywords_de:
-                if keyword_de != '':
-                    obj, _ = submission_models.KeywordDe.objects.get_or_create(
-                            word=keyword_de)
-                    instance.keywords_de.add(obj)
+            print ("*** B")
+            posted_keywords = self.cleaned_data.get('keywords_de', '').split(',')
+            for keyword in posted_keywords:
+                print (keyword)
+                if keyword != '':
+                    obj, _ = submission_models.Keyword.objects.get_or_create(
+                            word=keyword,
+                            language='de',
+                            )
+                    instance.keywords.add(obj)
 
-            for keyword_de in instance.keywords_de.all():
-                if keyword_de.word not in posted_keywords_de:
-                    instance.keywords_de.remove(keyword_de)
+            for keyword in instance.keywords.filter(language='de'):
+                if keyword.word not in posted_keywords:
+                    instance.keywords.remove(keyword)
 
         if commit:
             instance.save()
