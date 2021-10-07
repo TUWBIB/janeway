@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from journal.views import keyword
+
 def migrate_keywords_de(apps, schema_editor):
     Article = apps.get_model('submission', 'Article')
     Keyword = apps.get_model('submission', 'Keyword')
@@ -25,11 +27,10 @@ def migrate_keywords_de(apps, schema_editor):
                 keyword = kw,
                 order = latest,
             )
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '9002_tuw_external_sync'),
+        ('submission', '9003_tuw_repair_order'),
     ]
 
     operations = [
