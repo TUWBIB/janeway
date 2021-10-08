@@ -67,7 +67,6 @@ class IssueViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-
 class LicenceViewSet(viewsets.ModelViewSet):
     """
     API Endpoint for journals.
@@ -84,15 +83,9 @@ class LicenceViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-
 class KeywordsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.KeywordsSerializer
     queryset = submission_models.Keyword.objects.all()
-    http_method_names = ['get']
-
-class KeywordsDeViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.KeywordsDeSerializer
-    queryset = submission_models.KeywordDe.objects.all()
     http_method_names = ['get']
 
 class ArticleViewSet(viewsets.ModelViewSet):

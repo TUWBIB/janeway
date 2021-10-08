@@ -321,14 +321,6 @@ class Keyword(models.Model):
 
     def __str__(self):
         return self.word
-
-class KeywordDe(models.Model):
-    word = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.word
-
-
 class KeywordArticle(models.Model):
     keyword = models.ForeignKey("submission.Keyword")
     article = models.ForeignKey("submission.Article")
@@ -424,8 +416,6 @@ class Article(models.Model):
     subtitle_de = models.CharField(max_length=300, blank=True, null=True,
                                 help_text=_('Subtitle of the parallel title of the article'))
     abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
-    keywords_de = models.ManyToManyField(KeywordDe, blank=True, null=True, help_text=_('Keywords (German)'))
-
 
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
     # this is useful for overlay journals. The ToC display of an issue uses this flag to link to a DOI rather
