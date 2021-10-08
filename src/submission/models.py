@@ -317,7 +317,7 @@ class PublisherNote(models.Model):
 
 class Keyword(models.Model):
     word = models.CharField(max_length=200)
-    language = models.CharField(max_length=2)
+    language = models.CharField(max_length=2,default='en',null=False)
 
     def __str__(self):
         return self.word
@@ -1394,11 +1394,9 @@ class Article(models.Model):
         )
 
     def keywords_lang_en(self):
-        print ("*** keywords_lang_en")
         return self.keywords.filter(language='en')
 
     def keywords_lang_de(self):
-        print ("*** keywords_lang_de")
         return self.keywords.filter(language='de')
 class FrozenAuthor(models.Model):
     article = models.ForeignKey('submission.Article', blank=True, null=True)

@@ -413,8 +413,8 @@ def article(request, identifier_type, identifier):
     if article_object.is_published:
         store_article_access(request, article_object, 'view')
 
-    kw = article_object.keywords.all()
-    kw_de = article_object.keywords_de.all().order_by('submission_article_keywords_de.id')
+    kw = article_object.keywords.filter(language='en')
+    kw_de = article_object.keywords.filter(language='de')
 
     template = 'journal/article.html'
     context = {
@@ -1831,7 +1831,6 @@ def search(request):
     redir = False
     sort = 'title'
 
-
     search_term, keyword, sort, form, redir = logic.handle_search_controls(request)
 
     if redir:
@@ -1849,14 +1848,12 @@ def search(request):
         search_regex_lower = search_regex.lower()
         identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
         keywords = submission_models.Keyword.objects.annotate(word_lower=Lower('word')).filter(word_lower__iregex=search_regex_lower).values_list('article', flat=True)
-        keywordsde = submission_models.KeywordDe.objects.annotate(word_lower=Lower('word')).filter(word_lower__iregex=search_regex_lower).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
                         Q(subtitle__icontains=search_term) |
                         Q(id__in=identifier_ids) |
-                        Q(id__in=keywords) |
-                        Q(id__in=keywordsde)
+                        Q(id__in=keywords)
                     )
                     |
                     (
@@ -1872,11 +1869,9 @@ def search(request):
     elif keyword:
         keyword_lower = keyword.lower()
         keywords = submission_models.Keyword.objects.annotate(word_lower=Lower('word')).filter(word_lower=keyword_lower).values_list('article', flat=True)
-        keywordsde = submission_models.KeywordDe.objects.annotate(word_lower=Lower('word')).filter(word_lower=keyword_lower).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
             (
-                Q(id__in=keywords) |
-                Q(id__in=keywordsde)
+                Q(id__in=keywords)
             ),
             journal=request.journal,
             stage=submission_models.STAGE_PUBLISHED,
@@ -1889,15 +1884,8 @@ def search(request):
             article__stage=submission_models.STAGE_PUBLISHED,
             article__date_published__lte=timezone.now(),
         ).annotate(articles_count=Count('article')).order_by("-articles_count")[:keyword_limit]
-    popular_keywordsde = submission_models.KeywordDe.objects.filter(
-            article__journal=request.journal,
-            article__stage=submission_models.STAGE_PUBLISHED,
-            article__date_published__lte=timezone.now(),
-        ).annotate(articles_count=Count('article')).order_by("-articles_count")[:keyword_limit]
 
     all_keywords = set(x.word for x in popular_keywords)
-    all_keywordsde = set(x.word for x in popular_keywordsde)
-
     template = 'journal/search.html'
     context = {
         'articles': articles,
@@ -1905,7 +1893,7 @@ def search(request):
         'keyword': keyword,
         'form': form,
         'sort': sort,
-        'all_keywords': all_keywords.union(all_keywordsde)
+        'all_keywords': all_keywords,
     }
 
     return render(request, template, context)

@@ -22,11 +22,11 @@
 
             {% if article.language == 'eng' %}
                 {% if article.keywords %}
-                    {% for x in article.keywords.all %}
+                    {% for x in article.keywords_lang_en %}
                         <dc:subject>{{ x }}</dc:subject>
                     {% endfor %}
                 {% else %}
-                    {% for x in article.keywords_de.all %}
+                    {% for x in article.keywords_lang_de %}
                         <dc:subject>{{ x }}</dc:subject>
                     {% endfor %}
                 {% endif %}
@@ -34,11 +34,11 @@
 
             {% if article.language == 'deu' %}
                 {% if article.keywords_de %}
-                    {% for x in article.keywords_de.all %}
+                    {% for x in article.keywords_lang_de %}
                         <dc:subject>{{ x }}</dc:subject>
                     {% endfor %}
                 {% else %}
-                    {% for x in article.keywords.all %}
+                    {% for x in article.keywords.lang_en %}
                         <dc:subject>{{ x }}</dc:subject>
                     {% endfor %}
                 {% endif %}

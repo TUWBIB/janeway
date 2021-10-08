@@ -572,9 +572,9 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 971 8_ keywords_de
-            if article.keywords_de:
+            if article.keywords:
                 kws = []
-                for k in article.keywords_de.all():
+                for k in article.keywords.filter(language='de'):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:
@@ -582,10 +582,10 @@ def articleToMarc(article):
                     datafield.addSubField(SubField.createSubField("a",s))
                     mr.addDataField(datafield)
 
-            # 971 9_ keywords
+            # 971 9_keywords en
             if article.keywords:
                 kws = []
-                for k in article.keywords.all():
+                for k in article.keywords.filter(language='en'):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:

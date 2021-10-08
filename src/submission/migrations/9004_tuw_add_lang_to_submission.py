@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='keyword',
             name='language',
-            field=models.CharField(default='en', max_length=2),
+            field=models.CharField(default='en', max_length=2, null=False),
             preserve_default=False,
         ),
         migrations.RunPython(migrate_keywords_de, reverse_code=migrations.RunPython.noop),
