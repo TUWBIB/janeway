@@ -9,6 +9,7 @@ import statistics
 import json
 from datetime import timedelta
 import pytz
+from hijack.signals import hijack_started, hijack_ended
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -414,14 +415,19 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
         else:
             try:
-                order = article.articleauthororder_set.get(author=self).order
+                order_object = article.articleauthororder_set.get(author=self)
             except submission_models.ArticleAuthorOrder.DoesNotExist:
-                order = article.next_author_sort()
+                order_integer = article.next_author_sort()
+                order_object, c = submission_models.ArticleAuthorOrder.objects.get_or_create(
+                    article=article,
+                    author=self,
+                    defaults={'order': order_integer}
+                )
 
             submission_models.FrozenAuthor.objects.get_or_create(
                 author=self,
                 article=article,
-                defaults=dict(order=order, **frozen_dict)
+                defaults=dict(order=order_object.order, **frozen_dict)
             )
 
     def frozen_author(self, article):
@@ -883,13 +889,22 @@ class Galley(models.Model):
     css_file = models.ForeignKey(File, related_name='css_file', null=True, blank=True, on_delete=models.SET_NULL)
     images = models.ManyToManyField(File, related_name='images', null=True, blank=True)
     xsl_file = models.ForeignKey('core.XSLFile', related_name='xsl_file', null=True, blank=True, on_delete=models.SET_NULL)
+    public = models.BooleanField(
+        default=True,
+        help_text='Uncheck if the typeset file should not be publicly available after the article is published.'
+    )
 
     # Remote Galley
     is_remote = models.BooleanField(default=False)
     remote_file = models.URLField(blank=True, null=True)
 
     # All Galleys
-    label = models.CharField(max_length=400)
+    label = models.CharField(
+        max_length=400,
+        help_text='Typeset file labels are displayed in download links and have the format "Download Label" eg. if '
+                  'you set the label to be PDF the link will be Download PDF. If you want Janeway to set a label for '
+                  'you, leave it blank.',
+    )
     type = models.CharField(max_length=100, choices=galley_type_choices())
     sequence = models.IntegerField(default=0)
 
@@ -993,6 +1008,7 @@ def upload_to_journal(instance, filename):
         return "journals/%d/%s" % (instance.journal.pk, filename)
     else:
         return filename
+
 
 class XSLFile(models.Model):
     file = models.FileField(
@@ -1189,6 +1205,9 @@ class DomainAlias(AbstractSiteModel):
     def redirect_url(self):
            return self.site_object.site_url()
 
+    def build_redirect_url(self, path=None):
+           return self.site_object.site_url(path=path)
+
     def save(self, *args, **kwargs):
         if not bool(self.journal) ^ bool(self.press):
             raise ValidationError(
@@ -1349,3 +1368,48 @@ class SettingValueTranslation(models.Model):
     class Meta:
         managed = False
         db_table = 'core_settingvalue_translation'
+
+
+def log_hijack_started(sender, hijacker_id, hijacked_id, request, **kwargs):
+    from utils import models as utils_models
+    hijacker = Account.objects.get(pk=hijacker_id)
+    hijacked = Account.objects.get(pk=hijacked_id)
+    action = '{} ({}) has hijacked {} ({})'.format(
+        hijacker.full_name(),
+        hijacker.pk,
+        hijacked.full_name(),
+        hijacked.pk,
+    )
+
+    utils_models.LogEntry.add_entry(
+        types='Hijack Start',
+        description=action,
+        level='Info',
+        actor=hijacker,
+        request=request,
+        target=hijacked
+    )
+
+
+def log_hijack_ended(sender, hijacker_id, hijacked_id, request, **kwargs):
+    from utils import models as utils_models
+    hijacker = Account.objects.get(pk=hijacker_id)
+    hijacked = Account.objects.get(pk=hijacked_id)
+    action = '{} ({}) has released {} ({})'.format(
+        hijacker.full_name(),
+        hijacker.pk,
+        hijacked.full_name(),
+        hijacked.pk,
+    )
+
+    utils_models.LogEntry.add_entry(
+        types='Hijack Release',
+        description=action,
+        level='Info',
+        actor=hijacker,
+        request=request,
+        target=hijacked
+    )
+
+hijack_started.connect(log_hijack_started)
+hijack_ended.connect(log_hijack_ended)

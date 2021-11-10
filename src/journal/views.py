@@ -232,14 +232,19 @@ def issues(request):
     :param request: the request associated with this call
     :return: a rendered template of all issues
     """
+    issue_type = models.IssueType.objects.get(
+        code="issue",
+        journal=request.journal,
+    )
     issue_objects = models.Issue.objects.filter(
         journal=request.journal,
-        issue_type__code='issue',
+        issue_type=issue_type,
         date__lte=timezone.now(),
     )
     template = 'journal/issues.html'
     context = {
         'issues': issue_objects,
+        'issue_type': issue_type,
     }
     return render(request, template, context)
 
@@ -259,6 +264,22 @@ def current_issue(request, show_sidebar=True):
         return redirect(reverse('journal_issues'))
     return issue(request, request.journal.current_issue_id, show_sidebar=show_sidebar)
 
+@has_journal
+@decorators.frontend_enabled
+def volume(request, volume_number, issue_number):
+    """ Redirects to an issue from its issue/volume number combination"""
+    issue = models.Issue.objects.filter(
+        issue=issue_number,
+        volume=volume_number,
+        issue_type__code="issue",
+        journal=request.journal,
+    ).first()
+
+    if issue:
+        return redirect(reverse(
+            'journal_issue', kwargs={'issue_id': issue.pk}
+        ))
+    raise Http404
 
 @has_journal
 @decorators.frontend_enabled
@@ -374,7 +395,7 @@ def article(request, identifier_type, identifier):
     article_object = submission_models.Article.get_article(request.journal, identifier_type, identifier)
 
     content = None
-    galleys = article_object.galley_set.all()
+    galleys = article_object.galley_set.filter(public=True)
 
     # check if there is a galley file attached that needs rendering
     if article_object.is_published:
@@ -417,7 +438,6 @@ def article_from_identifier(request, identifier_type, identifier):
     return redirect(identifier.article.url)
 
 
-
 @decorators.frontend_enabled
 @article_exists
 @article_stage_accepted_or_later_required
@@ -432,7 +452,7 @@ def print_article(request, identifier_type, identifier):
     article_object = submission_models.Article.get_article(request.journal, identifier_type, identifier)
 
     content = None
-    galleys = article_object.galley_set.all()
+    galleys = article_object.galley_set.filter(public=True)
 
     # check if there is a galley file attached that needs rendering
     if article_object.stage == submission_models.STAGE_PUBLISHED:
@@ -534,7 +554,11 @@ def download_galley(request, article_id, galley_id):
                                 journal=request.journal,
                                 date_published__lte=timezone.now(),
                                 stage__in=submission_models.PUBLISHED_STAGES)
-    galley = get_object_or_404(core_models.Galley, pk=galley_id)
+    galley = get_object_or_404(
+        core_models.Galley,
+        pk=galley_id,
+        public=True,
+    )
 
     embed = request.GET.get('embed', False)
 
@@ -917,7 +941,7 @@ def publish_article(request, article_id):
     models.FixedPubCheckItems.objects.get_or_create(article=article)
 
     doi_data, doi = logic.get_doi_data(article)
-    issues = request.journal.issues()
+    issues = request.journal.issues
     new_issue_form = issue_forms.NewIssue(journal=article.journal)
     modal = request.GET.get('m', None)
     pubdate_errors = []
@@ -1591,37 +1615,46 @@ def manage_archive_article(request, article_id):
     :param article_id: Article object PK
     :return: HttpResponse or HttpRedirect if Posted
     """
-    from production import logic as production_logic
+    from production import logic as production_logic, forms as production_forms
     from identifiers import models as identifier_models
     from submission import forms as submission_forms
 
     article = get_object_or_404(submission_models.Article, pk=article_id)
     galleys = production_logic.get_all_galleys(article)
     identifiers = identifier_models.Identifier.objects.filter(article=article)
+    galley_form = production_forms.GalleyForm()
 
     if request.POST:
 
         if 'file' in request.FILES:
-            label = request.POST.get('label')
-            for uploaded_file in request.FILES.getlist('file'):
-                try:
-                    production_logic.save_galley(
-                        article,
-                        request,
-                        uploaded_file,
-                        True,
-                        label=label,
-                    )
-                except UnicodeDecodeError:
-                    messages.add_message(
-                        request,
-                        messages.ERROR,
-                        _("Uploaded file is not UTF-8 encoded"),
-                    )
-                except production_logic.ZippedGalleyError:
-                    messages.add_message(request, messages.ERROR,
-                        "Galleys must be uploaded individually, not zipped",
-                    )
+            galley_form = production_forms.GalleyForm(request.POST, request.FILES)
+            if galley_form.is_valid():
+                for uploaded_file in request.FILES.getlist('file'):
+                    try:
+                        production_logic.save_galley(
+                            article,
+                            request,
+                            uploaded_file,
+                            True,
+                            label=galley_form.cleaned_data.get('label'),
+                            public=galley_form.cleaned_data.get('public'),
+                        )
+                    except UnicodeDecodeError:
+                        messages.add_message(
+                            request,
+                            messages.ERROR,
+                            _("Uploaded file is not UTF-8 encoded"),
+                        )
+                    except production_logic.ZippedGalleyError:
+                        messages.add_message(request, messages.ERROR,
+                            "Galleys must be uploaded individually, not zipped",
+                        )
+            else:
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    'Galley form not valid.',
+                )
 
         if 'delete_note' in request.POST:
             note_id = int(request.POST['delete_note'])
@@ -1660,7 +1693,8 @@ def manage_archive_article(request, article_id):
         'galleys': galleys,
         'identifiers': identifiers,
         'newnote_form': newnote_form,
-        'note_forms': note_forms
+        'note_forms': note_forms,
+        'galley_form': galley_form,
     }
 
     return render(request, template, context)
