@@ -34,12 +34,12 @@
                         {% endif %}
 
                         <div class="{% if request.journal.submissionconfiguration.subtitle %}large-6{% else %}large-12{% endif %} columns">
-                            {{ form.title_de|foundation }}
+                            {{ form.title_de_tuw|foundation }}
                         </div>
 
                         {% if request.journal.submissionconfiguration.subtitle %}
                         <div class="large-6 columns">
-                            {{ form.subtitle_de|foundation }}
+                            {{ form.subtitle_de_tuw|foundation }}
                         </div>
                         {% endif %}
 
@@ -51,7 +51,7 @@
 
                         {% if request.journal.submissionconfiguration.abstract %}
                             <div class="large-12 columns">
-                                {{ form.abstract_de|foundation }}
+                                {{ form.abstract_de_tuw|foundation }}
                             </div>
                         {% endif %}
 

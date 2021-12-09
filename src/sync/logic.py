@@ -104,14 +104,14 @@ def articleToDataCiteXML(article_id):
                     l.append(escape(article.subtitle))
                     l.append('</title>')
 
-            if article.title_de:
+            if article.title_de_tuw:
                 l.append('<title titleType="AlternativeTitle">')
-                l.append(escape(article.title_de))
+                l.append(escape(article.title_de_tuw))
                 l.append('</title>')
 
-            if article.subtitle_de:
+            if article.subtitle_de_tuw:
                 l.append('<title titleType="Other">')
-                l.append(escape(article.subtitle_de))
+                l.append(escape(article.subtitle_de_tuw))
                 l.append('</title>')
 
             l.append('</titles>')
@@ -172,16 +172,16 @@ def articleToDataCiteXML(article_id):
                 l.append('</relatedIdentifiers>')
 
             l.append('<descriptions>')
-            if article.abstract or article.abstract_de:
+            if article.abstract or article.abstract_de_tuw:
                 if article.abstract:
                     l.append('<description xml:lang="')
                     l.append('en" descriptionType="Abstract">')
                     l.append(escape(article.abstract))
                     l.append('</description>')
-                if article.abstract_de:
+                if article.abstract_de_tuw:
                     l.append('<description xml:lang="')
                     l.append('de" descriptionType="Abstract">')
-                    l.append(escape(article.abstract_de))
+                    l.append(escape(article.abstract_de_tuw))
                     l.append('</description>')
             else:
                 warnings.append("neither english nor german abstract")
@@ -409,10 +409,10 @@ def articleToMarc(article):
             sf_b = ''
             if article.subtitle:
                 sf_b += article.subtitle
-            if article.title_de:
-                sf_b += ' = '+article.title_de
-            if article.subtitle_de:
-                sf_b += ' : '+article.subtitle_de
+            if article.title_de_tuw:
+                sf_b += ' = '+article.title_de_tuw
+            if article.subtitle_de_tuw:
+                sf_b += ' : '+article.subtitle_de_tuw
             if sf_b:
                 datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
 
@@ -423,11 +423,11 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 246 11
-            if article.title_de:
+            if article.title_de_tuw:
                 datafield=DataField.createDataField("246","1","1")
-                datafield.addSubField(SubField.createSubField("a",escape(article.title_de)))
-                if article.subtitle_de:
-                    datafield.addSubField(SubField.createSubField("b",escape(article.subtitle_de)))
+                datafield.addSubField(SubField.createSubField("a",escape(article.title_de_tuw)))
+                if article.subtitle_de_tuw:
+                    datafield.addSubField(SubField.createSubField("b",escape(article.subtitle_de_tuw)))
                 mr.addDataField(datafield)
 
             # 251 __ coar
@@ -500,9 +500,9 @@ def articleToMarc(article):
                 datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.abstract)))
                 mr.addDataField(datafield)
 
-            if article.abstract_de:
+            if article.abstract_de_tuw:
                 datafield=DataField.createDataField("520"," "," ")
-                datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.abstract_de)))
+                datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.abstract_de_tuw)))
                 mr.addDataField(datafield)
 
             # 542, Lizenz

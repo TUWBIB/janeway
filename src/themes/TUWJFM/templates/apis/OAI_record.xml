@@ -45,8 +45,8 @@
             {% endif %}
 
             {% if article.language == 'deu' %}
-                {% if article.abstract_de %}
-                    <dc:description>{{ article.abstract_de }}</dc:description>
+                {% if article.abstract_de_tuw %}
+                    <dc:description>{{ article.abstract_de_tuw }}</dc:description>
                 {% else %}
                     {% if article.abstract %}
                         <dc:description>{{ article.abstract }}</dc:description>
@@ -58,8 +58,8 @@
                 {% if article.abstract %}
                     <dc:description>{{ article.abstract }}</dc:description>
                 {% else %}
-                    {% if article.abstract_de %}
-                        <dc:description>{{ article.abstract_de }}</dc:description>
+                    {% if article.abstract_de_tuw %}
+                        <dc:description>{{ article.abstract_de_tuw }}</dc:description>
                     {% endif %}
                 {% endif %}
             {% endif %}

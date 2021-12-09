@@ -42,8 +42,8 @@
                         </tr>
 
                         <tr>
-                            <td colspan="{% if request.journal.submissionconfiguration.subtitle %}2{% else %}3{% endif %}">{{ article.title_de }}</td>
-                            {% if request.journal.submissionconfiguration.subtitle %}<td>{{ article.subtitle_de }}</td>{% endif %}
+                            <td colspan="{% if request.journal.submissionconfiguration.subtitle %}2{% else %}3{% endif %}">{{ article.title_de_tuw }}</td>
+                            {% if request.journal.submissionconfiguration.subtitle %}<td>{{ article.subtitle_de_tuw }}</td>{% endif %}
                         </tr>
 
 
@@ -61,7 +61,7 @@
                             <th colspan="3">{% trans "Abstract (German)" %}</th>
                         </tr>
                         <tr>
-                            <td colspan="3">{{ article.abstract_de|safe }}</td>
+                            <td colspan="3">{{ article.abstract_de_tuw|safe }}</td>
                         </tr>
                         {% endif %}
 

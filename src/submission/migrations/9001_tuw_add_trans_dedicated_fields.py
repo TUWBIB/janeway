@@ -14,17 +14,17 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='article',
-            name='abstract_de',
+            name='abstract_de_tuw',
             field=models.TextField(blank=True, help_text='Abstract (de)', null=True),
         ),
         migrations.AddField(
             model_name='article',
-            name='subtitle_de',
+            name='subtitle_de_tuw',
             field=models.CharField(blank=True, help_text='Subtitle of the article display format; Title: Subtitle (de)', max_length=300, null=True),
         ),
         migrations.AddField(
             model_name='article',
-            name='title_de',
+            name='title_de_tuw',
             field=models.CharField(blank=True, help_text='Your article title (de)', max_length=300, null=True),
         ),
         migrations.CreateModel(

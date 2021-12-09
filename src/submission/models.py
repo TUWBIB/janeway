@@ -412,10 +412,10 @@ class Article(models.Model):
 
 
     # TUW extensions
-    title_de = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'))
-    subtitle_de = models.CharField(max_length=300, blank=True, null=True,
+    title_de_tuw = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'))
+    subtitle_de_tuw = models.CharField(max_length=300, blank=True, null=True,
                                 help_text=_('Subtitle of the parallel title of the article'))
-    abstract_de = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
+    abstract_de_tuw = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
 
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
     # this is useful for overlay journals. The ToC display of an issue uses this flag to link to a DOI rather

@@ -105,15 +105,15 @@
                         {% endif %}
                         </td>
                     </tr>
-                    {% if article.title_de %}
-                        {% if article.title_de != article.title %}
+                    {% if article.title_de_tuw %}
+                        {% if article.title_de_tuw != article.title %}
                         <tr>
                                 <th>{% trans "Parallel title" %}</th>
                                 <td>
-                                {{ article.title_de }}
-                                {% if article.subtitle_de %}
+                                {{ article.title_de_tuw }}
+                                {% if article.subtitle_de_tuw %}
                                 <br>
-                                {{ article.subtitle_de }}
+                                {{ article.subtitle_de_tuw }}
                                 {% endif %}
                                 </td>                                
                             </tr>
@@ -227,11 +227,11 @@
                 {% endif %}
             </div>
             {% endif %}
-            {% if article.abstract_de %}
+            {% if article.abstract_de_tuw %}
             <div id="article">
-                {% if article.abstract_de != '' %}
+                {% if article.abstract_de_tuw != '' %}
                     <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
-                    <p>{{ article.abstract_de | safe }}</p>
+                    <p>{{ article.abstract_de_tuw | safe }}</p>
                 {% endif %}
             </div>
             {% endif %}

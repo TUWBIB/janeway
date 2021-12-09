@@ -13,9 +13,9 @@
             class="fa fa-edit">&nbsp;</i>Edit</a>
 {% endif %}
 <h4>{{ article.title|safe }}</h4>
-{% if article.title_de %}<h4>{{ article.title_de|safe }}</h4>{% endif %}
+{% if article.title_de_tuw %}<h4>{{ article.title_de_tuw|safe }}</h4>{% endif %}
 {% if article.subtitle %}<h4>{{ article.subtitle|safe }}</h4>{% endif %}
-{% if article.subtitle_de %}<h4>{{ article.subtitle_de|safe }}</h4>{% endif %}
+{% if article.subtitle_de_tuw %}<h4>{{ article.subtitle_de_tuw|safe }}</h4>{% endif %}
 <table class="scroll small">
     <tr>
         <th>Section</th>
@@ -51,7 +51,7 @@
         <th colspan="4">{% trans "Abstract (German)" %}</th>
     </tr>
     <tr>
-        <td colspan="4">{{ article.abstract_de|safe }}</td>
+        <td colspan="4">{{ article.abstract_de_tuw|safe }}</td>
     </tr>
     <tr>
         <th colspan="4">{% trans "Keywords" %}</th>

@@ -69,17 +69,17 @@ class ArticleInfo(KeywordModelForm):
 
     class Meta:
         model = models.Article
-        fields = ('title', 'title_de', 'subtitle', 'subtitle_de', 'abstract', 'abstract_de', 'non_specialist_summary',
+        fields = ('title', 'title_de_tuw', 'subtitle', 'subtitle_de_tuw', 'abstract', 'abstract_de_tuw', 'non_specialist_summary',
                   'language', 'section', 'license', 'primary_issue',
                   'page_numbers', 'is_remote', 'remote_url', 'peer_reviewed',
                   'custom_how_to_cite',)
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
-            'title_de': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
-            'subtitle_de': forms.TextInput(attrs={'placeholder': _('Subtitle of parallel title')}),
+            'title_de_tuw': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
+            'subtitle_de_tuw': forms.TextInput(attrs={'placeholder': _('Subtitle of parallel title')}),
             'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
-            'abstract_de': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (German)')}),
+            'abstract_de_tuw': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (German)')}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -102,10 +102,10 @@ class ArticleInfo(KeywordModelForm):
 
         self.fields['title'].label=_('Title')
         self.fields['subtitle'].label=_('Subtitle')
-        self.fields['title_de'].label=_('Parallel title')
-        self.fields['subtitle_de'].label=_('Subtitle of parallel title')
+        self.fields['title_de_tuw'].label=_('Parallel title')
+        self.fields['subtitle_de_tuw'].label=_('Subtitle of parallel title')
         self.fields['abstract'].label=_('Abstract')
-        self.fields['abstract_de'].label=_('Abstract (German)')
+        self.fields['abstract_de_tuw'].label=_('Abstract (German)')
         self.fields['language'].label=_('Language')
         self.fields['license'].label=_('License')
         self.fields['section'].label=_('Section')
