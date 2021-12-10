@@ -412,7 +412,7 @@ class Article(models.Model):
 
 
     # TUW extensions
-    title_de_tuw = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'))
+    title_de_tuw = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'), db_column='title_de_tuw')
     subtitle_de_tuw = models.CharField(max_length=300, blank=True, null=True,
                                 help_text=_('Subtitle of the parallel title of the article'))
     abstract_de_tuw = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
