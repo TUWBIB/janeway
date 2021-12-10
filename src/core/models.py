@@ -228,6 +228,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
+    # TUW extensions
+    gndid = models.CharField(max_length=40, null=True, blank=True, verbose_name=_('GND iD'))
+
     objects = AccountManager()
 
     USERNAME_FIELD = 'username'

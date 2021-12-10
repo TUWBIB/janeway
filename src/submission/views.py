@@ -249,7 +249,7 @@ def submit_authors(request, article_id):
         else:
             try:
                 search_author = core_models.Account.objects.get(
-                    Q(email=search) | Q(orcid=search)
+                    Q(email=search) | Q(orcid=search) | Q(gndid=search)
                 )
                 logic.add_user_as_author(search_author, article)
                 messages.add_message(

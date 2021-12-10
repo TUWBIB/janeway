@@ -2415,8 +2415,8 @@ def backcontent_add_author(request,article_id):
     status="info"
     author = None
 
-    # check email or orcid
-    authors=core_models.Account.objects.filter(email=s) | core_models.Account.objects.filter(orcid=s)
+    # check email or orcid or gndid
+    authors=core_models.Account.objects.filter(email=s) | core_models.Account.objects.filter(orcid=s) | core_models.Account.objects.filter(gndid=s)
     if authors:
         if authors.count()>1:
             message="multiple authors found, something's very fishy"
@@ -2428,7 +2428,6 @@ def backcontent_add_author(request,article_id):
         if len(l)==1:
             authors = core_models.Account.objects.filter(last_name__istartswith=l[0].lower())
         else:
-
             authors = core_models.Account.objects.filter(last_name__istartswith=l[0].lower()) & core_models.Account.objects.filter(first_name__istartswith=l[1].lower())
 
         if authors:

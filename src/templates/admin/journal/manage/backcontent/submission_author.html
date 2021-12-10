@@ -52,10 +52,13 @@
                         {{ form.website|foundation }}
                     </div>
 
-                    <div class="large-6 columns">
+                    <div class="large-4 columns">
                         {{ form.orcid|foundation }}
                     </div>
-                    <div class="large-6 columns">
+                    <div class="large-4 columns">
+                        {{ form.gndid|foundation }}
+                    </div>
+                    <div class="large-4 columns">
                         {{ form.email|foundation }}
                     </div>
                 </div>
@@ -76,6 +79,7 @@
                 var linkedinInput = document.getElementById("id_linkedin")
                 var websiteInput = document.getElementById("id_website")
                 var orcidInput = document.getElementById("id_orcid")
+                var gndiidInput = document.getElementById("id_gndid")
                 var institutionInput = document.getElementById("id_institution")
                 var mailInput = document.getElementById("id_email")
 
@@ -132,6 +136,7 @@
                         "linkedin": linkedinInput.value,
                         "website": websiteInput.value,
                         "orcid": orcidInput.value,
+                        "gndid": gndidInput.value,
                         "institution": institutionInput.value,
                         "email": mailInput.value,
                         "add_author": true
