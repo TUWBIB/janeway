@@ -1847,18 +1847,22 @@ def search(request):
         )
         search_regex_lower = search_regex.lower()
         identifier_ids = identifiers_models.Identifier.objects.filter(identifier=search_term).values_list('article', flat=True)
+        author_ids = core_models.Account.objects.filter(Q(orcid__icontains=search_term) | Q(gndid__icontains=search_term))
         keywords = submission_models.Keyword.objects.annotate(word_lower=Lower('word')).filter(word_lower__iregex=search_regex_lower).values_list('article', flat=True)
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
                         Q(subtitle__icontains=search_term) |
+                        Q(title_de_tuw__icontains=search_term) |
+                        Q(subtitle_de_tuw__icontains=search_term) |
                         Q(id__in=identifier_ids) |
                         Q(id__in=keywords)
                     )
                     |
                     (
                         Q(frozenauthor__first_name__iregex=search_regex) |
-                        Q(frozenauthor__last_name__iregex=search_regex)
+                        Q(frozenauthor__last_name__iregex=search_regex) |
+                        Q(frozenauthor__author__id__in=author_ids)
                     ),
                     journal=request.journal,
                     stage=submission_models.STAGE_PUBLISHED,
