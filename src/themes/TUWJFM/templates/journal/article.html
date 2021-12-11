@@ -53,14 +53,11 @@
     <meta name="citation_abstract_html_url" content="{{ article.url }}"/>
     <meta name="citation_language" content="{{ article.language }}"/>
 
-    {% if article.keywords %}
-        <meta name="citation_keywords" xml:lang="en" content="
-
-
-
-
-
-                {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
+    {% if kw.all %}
+    <meta name="citation_keywords" xml:lang="en" content="{% for kw in kw.all %}{{ kw.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
+    {% endif %}
+    {% if kw_de.all %}
+    <meta name="citation_keywords" xml:lang="de" content="{% for kw in kw_de.all %}{{ kw.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
     {% endif %}
 
     {% for pdf in pdfs %}
