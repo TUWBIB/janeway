@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='account',
             name='gndid',
-            field=models.CharField(blank=True, max_length=40, null=True, verbose_name='GND iD'),
+            field=models.CharField(blank=True, max_length=40, null=True, verbose_name='GND ID'),
         ),
     ]
