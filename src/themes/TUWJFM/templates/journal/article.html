@@ -128,7 +128,7 @@
                             <a href="https://orcid.org/{{author.author.orcid}}"><img src="{% static "TUWJFM/img/orcid_16x16.png" %}" alt="orcid logo"></a>
                             {% endif %}
                             {% if author.author.gndid %}
-                            <a href="https://lobid.org/gnd/{{ user.gndid }}"><img src="{% static "common/img/icons/lobid.png" %}"  style="width:16px; height:16px;" alt="lobid logo"></a>
+                            <a href="https://lobid.org/gnd/{{author.author.gndid }}"><img src="{% static "common/img/icons/lobid.png" %}"  style="width:16px; height:16px;" alt="lobid logo"></a>
                             {% endif %}
                             {% endfor %}
                         </td>
