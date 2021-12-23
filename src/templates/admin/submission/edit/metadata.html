@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load field %}
 
+{% load bool_fa %}
 
 {% block title %}Edit Metadata - {{ article.pk }}{% endblock title %}
 
@@ -24,6 +25,7 @@
                     <a class="button" href="{{ return }}"><i class="fa fa-arrow-left"></i>Back</a>
                 </div>
                 <div class="content">
+                    {% include "elements/translations/form_tabs.html" with object=article %}
                     {% include "elements/forms/errors.html" with form=info_form %}
                     {% csrf_token %}
                     <div class="row expanded">
@@ -62,7 +64,21 @@
                             {{ info_form.license|foundation }}
                         </div>
                         <div class="large-3 columns">
+                            {{ info_form.article_number|foundation }}
+                        </div>
+                    </div>
+                    <div class="row expanded">
+                        <div class="large-3 columns">
+                            {{ info_form.first_page|foundation }}
+                        </div>
+                        <div class="large-3 columns">
+                            {{ info_form.last_page|foundation }}
+                        </div>
+                        <div class="large-3 columns">
                             {{ info_form.page_numbers|foundation }}
+                        </div>
+                        <div class="large-3 columns">
+                            {{ info_form.total_pages|foundation }}
                         </div>
                     </div>
                     <div class="row expanded">

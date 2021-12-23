@@ -49,6 +49,7 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,7 +85,6 @@ INSTALLED_APPS = [
     # 3rd Party
     'django_summernote',
     'markdown_deux',
-    'hvad',
     'raven.contrib.django.raven_compat',
     'bootstrap4',
     'rest_framework',
@@ -121,6 +121,7 @@ MIDDLEWARE_CLASSES = [
     'core.middleware.PressMiddleware',
     'core.middleware.GlobalRequestMiddleware',
     'django.middleware.gzip.GZipMiddleware',
+    'journal.middleware.LanguageMiddleware',
 ]
 
 # DEBUG = True
@@ -166,6 +167,7 @@ TEMPLATES = [
             ],
             'builtins': [
                 'core.templatetags.fqdn',
+                'django.templatetags.i18n',
             ]
         },
     },
@@ -183,6 +185,8 @@ SETTINGS_EXPORT = [
     'ENABLE_ORCID',
     'DEBUG',
     'LANGUAGE_CODE',
+    'URL_CONFIG',
+    'HIJACK_USERS_ENABLED',
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
@@ -245,7 +249,12 @@ LANGUAGES = (
     ('en', ugettext('English')),
 #    ('fr', ugettext('French')),
     ('de', ugettext('German')),
+#    ('nl', ugettext('Dutch')),
+#    ('cy', ugettext('Welsh')),
 )
+
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -283,7 +292,7 @@ SUMMERNOTE_CONFIG = {
 
     # Change editor size
     'width': '100%',
-    'height': '480',
+    'height': '350',
 
     # Need authentication while uploading attachments.
     'attachment_require_authentication': True,
@@ -482,7 +491,7 @@ HTTP_TIMEOUT_SECONDS = 5
 
 # New XML galleys will be associated with this stylesheet by default when they
 # are first uploaded
-DEFAULT_XSL_FILE_LABEL = 'Janeway default (latest)'
+DEFAULT_XSL_FILE_LABEL = 'Janeway default (1.4.0)'
 
 # Skip migrations by default on sqlite for faster execution
 if (
@@ -510,3 +519,6 @@ if (
     logging.disable(logging.CRITICAL)
     MIGRATION_MODULES = SkipMigrations()
 
+# A potentially dangerous feature, this allows superusers to hijack and control a user's account.
+HIJACK_USERS_ENABLED = False
+HIJACK_LOGIN_REDIRECT_URL = '/manager/'

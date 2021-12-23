@@ -4,7 +4,7 @@
 {% load i18n %}
 {% load files %}
 
-{% block page_title %}{% if article.preprint %}Preprint {% endif %}Article{% endblock %}
+{% block page_title %}{% if article.preprint %}{% trans "Preprint" %} {% endif %}{% trans "Article" %}{% endblock %}
 
 {% block title %}{{ article.frozen_authors.0.last_name | striptags }} | {{ article.title | striptags }} |
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
@@ -68,14 +68,13 @@
 
                             </span>
                     {% endif %}
-                    {% if article.abstract != '' %}
+                    {% if article.abstract and article.abstract != '' %}
                         <h2>{% trans "Abstract" %}</h2>
                         <p>{{ article.abstract | safe }}</p>
+                        <div class="spacer">
+                            <div class="divider"></div>
+                        </div>
                     {% endif %}
-
-                    <div class="spacer">
-                        <div class="divider"></div>
-                    </div>
 
                     {% if article.keywords.count > 0 %}
                         <h2>{% trans "Keywords" %}</h2>
@@ -87,7 +86,15 @@
                     {% endif %}
                     {% if article.is_published and not journal_settings.article.suppress_how_to_cite %}
                         <h2>{% trans "How to Cite" %}</h2>
-                        {% include "elements/journal/how_to_cite.html" with article=article %}
+                        {{ article.how_to_cite | safe }}
+
+                        <div class="spacer">
+                            <div class="divider"></div>
+                        </div>
+                    {% endif %}
+                    {% if article.rights %}
+                        <h2>{% trans "Rights" %}</h2>
+                        {{ article.rights | safe }}
 
                         <div class="spacer">
                             <div class="divider"></div>
@@ -124,20 +131,20 @@
                                     <h5>
                                         {{ article.metrics.views }}
                                     </h5>
-                                    <p><i class="fa fa-eye"></i> Views</p>
+                                    <p><i class="fa fa-eye"></i>{% trans "Views" %}</p>
                                 </div>
                                 <div class="alm">
                                     <h5>
                                         {{ article.metrics.downloads }}
                                     </h5>
-                                    <p><i class="fa fa-download"></i> Downloads</p>
+                                    <p><i class="fa fa-download"></i>{% trans "Downloads" %}</p>
                                 </div>
                                 {% if article.metrics.alm.twitter %}
                                     <div class="alm">
                                         <h5>
                                             {{ article.metrics.alm.twitter }}
                                         </h5>
-                                        <p><i class="fa fa-twitter"></i> Tweets</p>
+                                        <p><i class="fa fa-twitter"></i>{% trans "Tweets" %}</p>
                                     </div>
                                 {% endif %}
                                 {% if article.metrics.alm.wikipedia %}
@@ -145,7 +152,7 @@
                                         <h5>
                                             {{ article.metrics.alm.wikipedia }}
                                         </h5>
-                                        <p><i class="fa fa-wikipedia-w"></i> Wikipedia</p>
+                                        <p><i class="fa fa-wikipedia-w"></i>{% trans "Wikipedia" %}</p>
                                     </div>
                                 {% endif %}
                                 {% if article.metrics.alm.reddit %}
@@ -153,7 +160,7 @@
                                         <h5>
                                             {{ article.metrics.alm.reddit }}
                                         </h5>
-                                        <p><i class="fa fa-reddit"></i> Reddit</p>
+                                        <p><i class="fa fa-reddit"></i>{% trans "Reddit" %}</p>
                                     </div>
                                 {% endif %}
 
@@ -162,7 +169,7 @@
                                         <h5>
                                             {{ article.citation_count }}
                                         </h5>
-                                        <p><i class="fa fa-quote-left"></i> Citations</p>
+                                        <p><i class="fa fa-quote-left"></i>{% trans "Citations" %}</p>
                                     </div>
                                 {% endif %}
                             </div>
@@ -203,6 +210,7 @@
                             target="_blank"><i class="fa fa-linkedin"></i></a></button>
                       {% endwith %}
 
+                    {% if article.frozen_authors.count > 0 %}
                     <div class="spacer">
                         <div class="divider"></div>
                     </div>
@@ -211,18 +219,19 @@
                     </h4>
 
                     {% for author in article.frozen_authors.all %}
-                        <small>
                             {% if not forloop.first %}<br/> {% endif %}
                             {{ author.full_name }}
-                            {% if author.institution %}
+                            {% if author.orcid %}<a href="https://orcid.org/{{ author.orcid }}"
+                                class=""><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="orcid logo"></a>{% endif %}
+                            {% if author.institution  and author.institution != " " %}
                                 <span itemprop="worksFor" itemscope itemtype="http://schema.org/CollegeOrUniversity">
                                     <span itemprop="name">({{ author.institution }})
                             {% endif %}
-                            {% if author.is_correspondence_author %}
-                                <a itemprop="email" href="mailto:{{ author.author.email }}"
+                            {% if author.display_email and not journal_settings.article.hide_author_email_links %}
+                                <a itemprop="email" href="mailto:{{ author.email }}"
                                    class="fa fa-envelope email-link"></a>{% endif %}
-                        </small>
                     {% endfor %}
+                    {% endif %}
 
                     <div class="spacer">
                         <div class="divider"></div>
@@ -256,6 +265,40 @@
                      <div class="spacer">
                         <div class="divider"></div>
                     </div>
+                    {% if article.has_publication_details %}
+                    <div class="section">
+                        <h4>{% trans "Publication details" %}</h4>
+                        <table class="sidebar-table">
+                            {% if article.page_range %}
+                            <tr>
+                                <th>{% trans "Pages" %}</th>
+                                <td>{{ article.page_range }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if article.article_number %}
+                            <tr>
+                                <th>{% trans "Article No." %}</th>
+                                <td>{{ article.article_number }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if article.publisher_name %}
+                            <tr>
+                                <th>{% trans "Publisher" %}</th>
+                                <td>{{ article.publisher_name }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if article.publication_title %}
+                            <tr>
+                                <th>{% trans "Publication" %}</th>
+                                <td>{{ article.publication_title }}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    <div class="spacer">
+                     <div class="divider"></div>
+                    </div>
+                    {% endif %}
 
                     {% if article.supplementary_files.all %}
                         <h4>{% trans "Supplementary Files" %}</h4>
@@ -273,36 +316,34 @@
 
                     {% if journal_settings.general.submission_summary %}
                         <h4>{% trans "Non Specialist Summary" %}</h4>
-                        <a href="#summarymodal" class="modal-trigger">View Summary</a>
+                        <a href="#summarymodal" class="modal-trigger">{% trans "View Summary" %}</a>
                         <div class="spacer">
                             <div class="divider"></div>
                         </div>
                     {% endif %}
 
+                    {% if article.date_accepted or article.date_published %}
                     <h4>
                         {% trans "Dates" %}
                     </h4>
-
                     <table class="sidebar-table">
-                        <tr>
-                            <th>{% trans "Submitted" %}</th>
-                            <td>{{ article.date_submitted|date:"Y-m-d" }}</td>
-                        </tr>
                         {% if article.date_accepted %}
                             <tr>
                                 <th>{% trans "Accepted" %}</th>
                                 <td>{{ article.date_accepted|date:"Y-m-d" }}</td>
                             </tr>
                         {% endif %}
+                        {% if article.date_published %}
                         <tr>
                             <th>{% trans "Published" %}</th>
                             <td>{{ article.date_published|date:"Y-m-d" }}</td>
                         </tr>
+                        {% endif %}
                     </table>
-
                     <div class="spacer">
                         <div class="divider"></div>
                     </div>
+                    {% endif %}
 
                     <h4>
                         {% trans "Licence" %}
@@ -310,6 +351,16 @@
                     <p>{{ article.license.name }} {% if article.license.url %}
                         <a rel="license" href="{{ article.license.url }}"><i class="fa fa-external-link"></i></a>{% endif %}</p>
 
+                    {% if article.competing_interests %}
+                    <div class="spacer">
+                        <div class="divider"></div>
+                    </div>
+
+                    <h4>
+                        {% trans "Competing Interests" %}
+                    </h4>
+                    <p>{{ article.competing_interests }}</p>
+                    {% endif %}
                     <div class="spacer">
                         <div class="divider"></div>
                     </div>

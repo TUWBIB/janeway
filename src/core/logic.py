@@ -182,7 +182,7 @@ def settings_for_context(request):
 
 @cache(600)
 def cached_settings_for_context(journal, language):
-    setting_groups = ['general', 'crosscheck', 'article']
+    setting_groups = ['general', 'crosscheck', 'article', 'news']
     _dict = {group: {} for group in setting_groups}
 
     for group in setting_groups:
@@ -193,7 +193,6 @@ def cached_settings_for_context(journal, language):
                 group,
                 setting.name,
                 journal,
-                fallback=True,
             ).processed_value
 
     return _dict
@@ -228,13 +227,6 @@ def get_settings_to_edit(group, journal):
                  'general',
                  'abstract_required',
                  journal,
-             )
-             },
-            {'name': 'display_about_on_submissions',
-             'object': setting_handler.get_setting(
-                 'general',
-                 'display_about_on_submissions',
-                 journal
              )
              },
             {'name': 'submission_intro_text',
@@ -314,10 +306,6 @@ def get_settings_to_edit(group, journal):
                 'object': setting_handler.get_setting('general', 'enable_save_review_progress', journal),
             },
             {
-                'name': 'default_review_days',
-                'object': setting_handler.get_setting('general', 'default_review_days', journal),
-            },
-            {
                 'name': 'enable_one_click_access',
                 'object': setting_handler.get_setting('general', 'enable_one_click_access', journal),
             },
@@ -346,6 +334,14 @@ def get_settings_to_edit(group, journal):
                 'name': 'enable_peer_review_data_block',
                 'object': setting_handler.get_setting('general', 'enable_peer_review_data_block', journal),
             },
+            {
+                'name': 'enable_suggested_reviewers',
+                'object': setting_handler.get_setting('general', 'enable_suggested_reviewers', journal),
+            },
+            {
+                'name': 'hide_review_metadata_from_authors',
+                'object': setting_handler.get_setting('general', 'hide_review_metadata_from_authors', journal),
+            },
         ]
         setting_group = 'general'
 
@@ -369,15 +365,16 @@ def get_settings_to_edit(group, journal):
 
     elif group == 'journal':
         journal_settings = [
-            'journal_name', 'journal_issn', 'journal_theme', 'journal_description',
-            'enable_editorial_display', 'multi_page_editorial', 'enable_editorial_images', 'main_contact',
-            'publisher_name', 'publisher_url', 'privacy_policy_url',
-            'maintenance_mode', 'maintenance_message', 'auto_signature', 'slack_logging', 'slack_webhook',
-            'twitter_handle', 'switch_language', 'google_analytics_code', 'keyword_list_page',
+            'journal_name', 'journal_issn', 'print_issn', 'journal_theme',
+            'journal_description', 'main_contact', 'publisher_name',
+            'publisher_url', 'privacy_policy_url', 'auto_signature',
+            'slack_logging', 'slack_webhook', 'twitter_handle',
+            'switch_language', 'enable_language_text', 'google_analytics_code',
+            'display_login_page_notice', 'login_page_notice',
         ]
 
         settings = process_setting_list(journal_settings, 'general', journal)
-        settings[2]['choices'] = get_theme_list()
+        settings[3]['choices'] = get_theme_list()
         setting_group = 'general'
         settings.append({
             'name': 'from_address',
@@ -397,9 +394,34 @@ def get_settings_to_edit(group, journal):
             'suppress_citations_metric',
             'display_altmetric_badge',
             'altmetric_badge_type',
+            'hide_author_email_links',
         ]
         settings = process_setting_list(article_settings, 'article', journal)
         setting_group = 'article'
+    elif group == 'styling':
+        settings = [
+            {
+                'name': 'enable_editorial_images',
+                'object': setting_handler.get_setting('general',
+                                                      'enable_editorial_images',
+                                                      journal),
+            },
+            {
+                'name': 'multi_page_editorial',
+                'object': setting_handler.get_setting('general',
+                                                      'multi_page_editorial',
+                                                      journal),
+            }
+        ]
+        setting_group = 'general'
+    elif group == 'news':
+        settings = [
+            {
+                'name': 'news_title',
+                'object': setting_handler.get_setting('news', 'news_title', journal),
+            },
+        ]
+        setting_group = 'news'
     else:
         settings = []
         setting_group = None
@@ -416,8 +438,12 @@ def get_theme_list():
 
 def handle_default_thumbnail(request, journal, attr_form):
     if request.FILES.get('default_thumbnail'):
-        new_file = files.save_file_to_journal(request, request.FILES.get('default_thumbnail'), 'Default Thumb',
-                                              'default')
+        new_file = files.save_file_to_journal(
+            request,
+            request.FILES.get('default_thumbnail'),
+            'Default Thumb',
+            'default',
+        )
 
         if journal.thumbnail_image:
             journal.thumbnail_image.unlink_file(journal=journal)

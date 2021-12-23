@@ -35,7 +35,7 @@ def get_site_resources(request):
     :return: press.models.Press,journal.models.Journal,HttpResponseRedirect
     """
     journal = press = redirect_obj = None
-    try: # try journal site
+    try:  # try journal site
         if settings.URL_CONFIG == 'path':
             code = request.path.split('/')[1]
             journal = journal_models.Journal.objects.get(code=code)
@@ -56,7 +56,8 @@ def get_site_resources(request):
                 alias = core_models.DomainAlias.get_by_request(request)
                 if alias.redirect:
                     logger.debug("Matched a redirect: %s" % alias.redirect_url)
-                    redirect_obj = redirect(alias.redirect_url)
+                    redirect_obj = redirect(
+                        alias.build_redirect_url(path=request.path))
                 else:
                     journal = alias.journal
                     press = journal.press if journal else alias.press

@@ -3,6 +3,7 @@
 {% load svg from press_url %}
 {% load i18n %}
 {% load roles %}
+{% load hooks %}
 
 <!doctype html>
 <html class="no-js" lang="en">
@@ -30,6 +31,7 @@
     }</script>
 
     {% block css %}{% endblock %}
+    {% hook 'base_head_css' %}
 
     {% if request.journal %}
         <link href="{% journal_url 'rss_articles' %}" type="application/atom+xml" rel="alternate" title="Article Feed for Journal">
@@ -53,7 +55,11 @@
             <div class="top-bar-left header-image-bar border-right">
                 {% if request.journal %}
                     {% if request.journal.header_image %}
-                        <a href="{{ request.journal.site_url }}"><img src="{{ request.journal.header_image.url }}" class="header-image top-bar-image"></a>
+                        {% if 'svg' in request.journal.header_image.path %}
+                          <a href="{{ request.journal.site_url }}">{% svg request.journal.header_image.path %}</a>
+                        {% else %}
+                          <a href="{{ request.journal.site_url }}"><img src="{{ request.journal.header_image.url }}" class="header-image top-bar-image"></a>
+                        {% endif %}
                     {% else %}
                         <a href="{{ request.journal.site_url }}"><img src="{% static "common/img/sample/janeway.png" %}"></a>
                     {% endif %}
@@ -80,7 +86,7 @@
             </div>
 
             {% if request.journal %}
-            <div class="top-bar-left hide-for-medium-only" id="search-menu">
+            <div class="top-bar-left hide-for-medium-only{% if journal_settings.general.switch_language %} border-right{% endif %}" id="search-menu">
                 <ul class="menu global-search">
                     <li>
                         <form method="POST" action="{% url 'search' %}">
@@ -95,6 +101,34 @@
                     </li>
                 </ul>
             </div>
+            {% endif %}
+            {% if journal_settings.general.switch_language %}
+                <div class="top-bar-left">
+                <ul class="menu language-menu">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% get_language_info_list for LANGUAGES as languages %}
+
+                    {% for language in languages %}
+                        {% if language.code in request.available_languages %}
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.PATH }}"/>
+                                {% if journal_settings.general.enable_language_text %}
+                                    <button name="language" value="{{ language.code }}" class="tiny success button{% if language.code == LANGUAGE_CODE %} flag-active{% endif %}">{{ language.name_local }}</button>&nbsp;
+                                {% else %}
+                                <button class="flag-button{% if language.code == LANGUAGE_CODE %} flag-active{% endif %}" name="language" value="{{ language.code }}"
+                                        style="background: url(/static/common/img/flags/{{ language.code }}.png) no-repeat; background-size: contain;">
+                                    &nbsp;
+                                </button>
+                                {% endif %}
+                            </form>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                </ul>
+                </div>
             {% endif %}
             <div class="top-bar-right border-left hide-for-small-only">
                 <ul class="dropdown menu" data-dropdown-menu>

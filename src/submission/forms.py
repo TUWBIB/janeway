@@ -4,14 +4,13 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django import forms
-from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from submission import models
 from core import models as core_models
 from identifiers import models as ident_models
 from review.forms import render_choices
-from utils.forms import KeywordModelForm
+from utils.forms import KeywordModelForm, JanewayTranslationModelForm
 from utils import setting_handler
 
 
@@ -64,14 +63,15 @@ class ArticleStart(forms.ModelForm):
             self.fields.pop('comments_editor')
 
 
-class ArticleInfo(KeywordModelForm):
+class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
     FILTER_PUBLIC_FIELDS = False
 
     class Meta:
         model = models.Article
         fields = ('title', 'title_de_tuw', 'subtitle', 'subtitle_de_tuw', 'abstract', 'abstract_de_tuw', 'non_specialist_summary',
                   'language', 'section', 'license', 'primary_issue',
-                  'page_numbers', 'is_remote', 'remote_url', 'peer_reviewed',
+                  'article_number', 'is_remote', 'remote_url', 'peer_reviewed',
+                  'first_page', 'last_page', 'page_numbers', 'total_pages',
                   'custom_how_to_cite',)
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
@@ -115,8 +115,7 @@ class ArticleInfo(KeywordModelForm):
 
         if 'instance' in kwargs:
             article = kwargs['instance']
-            section_queryset = models.Section.objects.language().fallbacks(
-                'en').filter(
+            section_queryset = models.Section.objects.filter(
                 journal=article.journal,
                 public_submissions=True,
             ).order_by('name')
@@ -328,6 +327,16 @@ class EditFrozenAuthor(forms.ModelForm):
         super().__init__(*args, **kwargs)
         instance = kwargs.pop("instance", None)
         if instance:
+            if instance.author:
+                self.fields["frozen_email"].help_text += ugettext(
+                    "Currently linked to %s, leave blank to use this address"
+                    "" % instance.author.email,
+                )
+                if instance.author.orcid:
+                    self.fields["frozen_orcid"].help_text += ugettext(
+                        "If left blank, the account ORCiD will be used (%s)"
+                        "" % instance.author.orcid,
+                    )
             del self.fields["is_corporate"]
             if instance.is_corporate:
                 del self.fields["name_prefix"]
@@ -348,7 +357,24 @@ class EditFrozenAuthor(forms.ModelForm):
             'department',
             'country',
             'is_corporate',
+            'frozen_email',
+            'frozen_orcid',
+            'display_email',
         )
+
+    def save(self, commit=True, *args, **kwargs):
+        obj = super().save(*args, **kwargs)
+        if commit is True and obj.frozen_email:
+            try:
+                # Associate with account if one exists
+                account = core_models.Account.objects.get(
+                    username=obj.frozen_email.lower())
+                obj.author = account
+                obj.frozen_email = None
+            except core_models.Account.DoesNotExist:
+                pass
+            obj.save()
+        return obj
 
 
 class IdentifierForm(forms.ModelForm):
@@ -386,9 +412,7 @@ class ConfiguratorForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ConfiguratorForm, self).__init__(*args, **kwargs)
-        self.fields['default_section'].queryset = models.Section.objects.language().fallbacks(
-            settings.LANGUAGE_CODE,
-        ).filter(
+        self.fields['default_section'].queryset = models.Section.objects.filter(
             journal=self.instance.journal,
         )
         self.fields[

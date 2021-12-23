@@ -6,7 +6,6 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from hvad.admin import TranslatableAdmin
 from django.utils.safestring import mark_safe
 
 from core import models, forms
@@ -46,6 +45,8 @@ class AccountAdmin(UserAdmin):
         }),
     )
 
+    raw_id_fields = ('interest',)
+
 
 class RoleAdmin(admin.ModelAdmin):
     """Displays Role objects in the Django admin interface."""
@@ -61,9 +62,12 @@ class PasswordResetAdmin(admin.ModelAdmin):
     raw_id_fields = ('account',)
 
 
-class SettingValueAdmin(TranslatableAdmin):
+class SettingValueAdmin(admin.ModelAdmin):
     list_display = ('setting_journal', 'setting_pretty_name')
     list_filter = ('setting', 'journal')
+    raw_id_fields = (
+        'setting', 'journal',
+    )
 
     @staticmethod
     def apply_select_related(self, qs):

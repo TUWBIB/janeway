@@ -380,6 +380,10 @@ def in_review(request, article_id):
 
     if request.POST:
 
+        if 'move_to_review' in request.POST and article.stage == submission_models.STAGE_UNASSIGNED:
+            article.stage = submission_models.STAGE_UNDER_REVIEW
+            article.save()
+
         if 'new_review_round' in request.POST:
 
             # Complete all existing review assignments.
@@ -411,6 +415,7 @@ def in_review(request, article_id):
         'article': article,
         'review_rounds': review_rounds,
         'revisions_requests': revisions_requests,
+        'review_stages': submission_models.REVIEW_STAGES,
     }
 
     return render(request, template, context)
@@ -807,11 +812,8 @@ def do_review(request, assignment_id):
         'general', 'enable_save_review_progress', request.journal,
     ).processed_value
 
-    fields_required = decision_required = True
-    if allow_save_review:
-        fields_required = decision_required = False
-    elif assignment.review_file:
-        fields_required = False
+    fields_required = False
+    decision_required = False if allow_save_review else True
 
     review_round = assignment.article.current_review_round_object()
     form = forms.GeneratedForm(
@@ -877,6 +879,13 @@ def do_review(request, assignment_id):
                     messages.SUCCESS,
                     'Progress saved',
                 )
+                return redirect(
+                    logic.generate_access_code_url(
+                        'do_review',
+                        assignment,
+                        access_code,
+                    )
+                )
             else:
                 assignment.date_complete = timezone.now()
                 assignment.is_complete = True
@@ -906,7 +915,6 @@ def do_review(request, assignment_id):
                 messages.ERROR,
                 'Found errors on the form. Please, resolve them and try again',
             )
-
 
     template = 'review/review_form.html'
     context = {
@@ -1023,9 +1031,6 @@ def add_review_assignment(request, article_id):
     form = forms.ReviewAssignmentForm(journal=request.journal)
     new_reviewer_form = core_forms.QuickUserForm()
     reviewers = logic.get_reviewer_candidates(article, request.user)
-    suggested_reviewers = logic.get_suggested_reviewers(article, reviewers)
-    user_list = logic.get_enrollable_users(request)
-
     modal = None
 
     # Check if this review round has files
@@ -1035,33 +1040,7 @@ def add_review_assignment(request, article_id):
 
     if request.POST:
 
-        if 'quick_assign' in request.POST:
-            logic.quick_assign(request, article)
-            return redirect(reverse('review_in_review', kwargs={'article_id': article_id}))
-        elif 'add_and_assign' in request.POST:
-            # first check whether the user exists
-            new_reviewer_form = core_forms.QuickUserForm(request.POST)
-
-            try:
-                user = core_models.Account.objects.get(email=new_reviewer_form.data['email'])
-                user.add_account_role('reviewer', request.journal)
-            except core_models.Account.DoesNotExist:
-                user = None
-
-            if user:
-                logic.quick_assign(request, article, reviewer_user=user)
-                return redirect(reverse('review_in_review', kwargs={'article_id': article_id}))
-
-            valid = new_reviewer_form.is_valid()
-
-            if valid:
-                acc = logic.handle_reviewer_form(request, new_reviewer_form)
-                logic.quick_assign(request, article, reviewer_user=acc)
-                return redirect(reverse('review_in_review', kwargs={'article_id': article_id}))
-            else:
-                modal = 'reviewer'
-
-        elif 'assign' in request.POST:
+        if 'assign' in request.POST:
             # first check whether the user exists
             new_reviewer_form = core_forms.QuickUserForm(request.POST)
 
@@ -1081,14 +1060,6 @@ def add_review_assignment(request, article_id):
                 return redirect(reverse('review_add_review_assignment', kwargs={'article_id': article.pk}) + '?' + parse.urlencode({'user': new_reviewer_form.data['email'], 'id': str(acc.pk)}))
             else:
                 modal = 'reviewer'
-
-        elif 'enrollusers' in request.POST:
-            user_ids = request.POST.getlist('user_id')
-            users = core_models.Account.objects.filter(pk__in=user_ids)
-            for user in users:
-                user.add_account_role('reviewer', request.journal)
-                messages.add_message(request, messages.SUCCESS, '{0} enrolled as a reviewer.'.format(user.full_name()))
-            return redirect(reverse('review_add_review_assignment', kwargs={'article_id': article.pk}))
         else:
 
             form = forms.ReviewAssignmentForm(request.POST, journal=request.journal)
@@ -1128,9 +1099,13 @@ def add_review_assignment(request, article_id):
         'reviewers': reviewers,
         'new_reviewer_form': new_reviewer_form,
         'modal': modal,
-        'user_list': user_list,
-        'suggested_reviewers': suggested_reviewers,
     }
+
+    if request.journal.get_setting('general', 'enable_suggested_reviewers'):
+        context['suggested_reviewers'] = logic.get_suggested_reviewers(
+            article,
+            reviewers,
+        )
 
     return render(request, template, context)
 
@@ -2279,7 +2254,7 @@ def review_forms(request):
     default_form = setting_handler.get_setting(
         'general', 'default_review_form', request.journal,
     ).processed_value
-    if default_form.isdigit():
+    if default_form and default_form.isdigit():
         default_form = int(default_form)
 
     if request.POST:
@@ -2291,7 +2266,7 @@ def review_forms(request):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "This form is selected as the defaul form and thus"
+                    "This form is selected as the default form and thus"
                     " can't be deleted",
                 )
                 return redirect(reverse('review_review_forms'))

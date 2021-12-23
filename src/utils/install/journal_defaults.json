@@ -50,7 +50,7 @@
         },
         "setting": {
             "description": "Name of the Journal's Publisher. Displayed throughout the site and metadata.",
-            "is_translatable": false,
+            "is_translatable": true,
             "name": "publisher_name",
             "pretty_name": "Publisher Name",
             "type": "char"
@@ -274,7 +274,7 @@
             "name": "email"
         },
         "setting": {
-            "description": "Email sent to reviewers when they agree to undertake a review.",
+            "description": "Email sent to reviewers when they decline to undertake a review.",
             "is_translatable": true,
             "name": "review_decline_acknowledgement",
             "pretty_name": "Review Decline Acknowledgement",
@@ -650,13 +650,28 @@
         },
         "setting": {
             "description": "The ISSN of the journal.",
-            "is_translatable": true,
+            "is_translatable": false,
             "name": "journal_issn",
             "pretty_name": "Journal ISSN",
             "type": "char"
         },
         "value": {
             "default": "0000-0000"
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "The ISSN of the printed version of the journal.",
+            "is_translatable": false,
+            "name": "print_issn",
+            "pretty_name": "Print ISSN",
+            "type": "char"
+        },
+        "value": {
+            "default": ""
         }
     },
     {
@@ -1091,7 +1106,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "Recommended steps for completing the Production stage:<ol><li>Assign a Typesetter (optional){% if production_assignment.typeset_tasks %}<i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i> {% endif %}</li>{% for task in production_assignment.typeset_tasks %}<li>Review typesetting task by {{ task.typesetter.full_name }} {% if task.editor_reviewed %}<i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i> {% endif %}</li>{% endfor %}<li>Have at lease one Galley file uploaded (required) {% if article.has_galley %} <i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i>{% endif %}</li></ol>"
+            "default": "Recommended steps for completing the Production stage:<ol><li>Assign a Typesetter (optional){% if production_assignment.typeset_tasks %}<i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i> {% endif %}</li>{% for task in production_assignment.typeset_tasks %}<li>Review typesetting task by {{ task.typesetter.full_name }} {% if task.editor_reviewed %}<i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i> {% endif %}</li>{% endfor %}<li>Have at least one Galley file uploaded (required) {% if article.has_galley %} <i style=\"color: green;\" class=\"fa fa-check-circle info\">&nbsp;</i>{% endif %}</li></ol>"
         }
     },
     {
@@ -1357,7 +1372,7 @@
             "description": "If enabled, the review dashboard will show all active reviews, otherwise just a count of completed reviews",
             "is_translatable": false,
             "name": "enable_expanded_review_details",
-            "pretty_name": "Enable expanded review cdetauls",
+            "pretty_name": "Enable expanded review details",
             "type": "boolean"
         },
         "value": {
@@ -1415,7 +1430,7 @@
         },
         "setting": {
             "description": "You can set your DOI pattern, fallback is 10.xxxx/{{ article.pk }}",
-            "is_translatable": true,
+            "is_translatable": false,
             "name": "doi_pattern",
             "pretty_name": "DOI Pattern",
             "type": "char"
@@ -1730,7 +1745,7 @@
         },
         "setting": {
             "description": "Allow users to change their language.",
-            "is_translatable": true,
+            "is_translatable": false,
             "name": "switch_language",
             "pretty_name": "Switch Language",
             "type": "boolean"
@@ -2407,7 +2422,7 @@
             "type": "text",
             "pretty_name": "Review Declination Acknowledgement",
             "is_translatable": true,
-            "description": "Subject for Email sent to reviewers when they agree to undertake a review.",
+            "description": "Subject for Email sent to reviewers when they decline to undertake a review.",
             "name": "subject_review_decline_acknowledgement"
         },
         "group": {
@@ -2616,7 +2631,7 @@
         "setting": {
             "type": "boolean",
             "pretty_name": "Disable Submission",
-            "is_translatable": true,
+            "is_translatable": false,
             "description": "If true, users cannot submit new articles.",
             "name": "disable_journal_submission"
         },
@@ -2751,7 +2766,7 @@
         "setting": {
             "type": "rich-text",
             "pretty_name": "Review File Help",
-            "is_translatable": false,
+            "is_translatable": true,
             "description": "Text displayed when a journal defaults to blind or double-blind review ensuring that files are anonymous.",
             "name": "review_file_help"
         },
@@ -2802,21 +2817,6 @@
         },
         "value": {
             "default": ""
-        }
-    },
-    {
-        "group": {
-            "name": "general"
-        },
-        "setting": {
-            "description": "If enabled, the journal about block will be rendered in the submissions page",
-            "is_translatable": false,
-            "name": "display_about_on_submissions",
-            "pretty_name": "Display 'About' on submissions",
-            "type": "boolean"
-        },
-        "value": {
-            "default": "on"
         }
     },
     {
@@ -2982,6 +2982,156 @@
         },
         "value": {
             "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "If enabled the language buttons will use text rather than flags.",
+            "is_translatable": false,
+            "name": "enable_language_text",
+            "pretty_name": "Language Button Text Override",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "When this setting is enabled the review assignment page will attempt to match keywords with interests. Warning: This is an expensive process.",
+            "is_translatable": false,
+            "name": "enable_suggested_reviewers",
+            "pretty_name": "Enable Suggested Reviewers",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Enable if you want to hide review metadata from authors (date assigned, decision, date completed).",
+            "is_translatable": false,
+            "name": "hide_review_metadata_from_authors",
+            "pretty_name": "Hide Review Metadata from Authors",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+          }
+    },
+    {
+        "group": {
+            "name": "news"
+        },
+        "setting": {
+            "description": "Title for the News Page and Homepage block",
+            "is_translatable": true,
+            "name": "news_title",
+            "pretty_name": "News Title",
+            "type": "char"
+        },
+        "value": {
+            "default": "News"
+        }
+    },
+    {
+        "group": {
+            "name": "article"
+        },
+        "setting": {
+            "description": "If enabled the article page will not display links to email correspondence authors.",
+            "is_translatable": false,
+            "name": "hide_author_email_links",
+            "pretty_name": "Hide Author Email Links",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "If set to true the Login Page Notice will display.",
+            "is_translatable": true,
+            "name": "display_login_page_notice",
+            "pretty_name": "Display Login Page Notice",
+            "type": "boolean"
+        },
+        "value": {
+            "default": false
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Message to display if you enable Display Login Notice.",
+            "is_translatable": true,
+            "name": "login_page_notice",
+            "pretty_name": "Login Page Notice",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "crossref"
+        },
+        "setting": {
+            "description": "For migrated content where we need to tweak the crossref date.",
+            "is_translatable": true,
+            "name": "crossref_date_suffix",
+            "pretty_name": "Crossref Date Suffix",
+            "type": "text"
+        },
+        "value": {
+            "default": ""
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Languages available for this journal.",
+            "is_translatable": false,
+            "name": "journal_languages",
+            "pretty_name": "Journal Languages",
+            "type": "json"
+        },
+        "value": {
+            "default": "[]"
+        }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "The default language for the journal.",
+            "is_translatable": false,
+            "name": "default_journal_language",
+            "pretty_name": "Default Journal Language",
+            "type": "text"
+        },
+        "value": {
+            "default": "en"
         }
     }
 ]

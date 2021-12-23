@@ -67,12 +67,14 @@ class ReviewAssignmentForm(forms.ModelForm):
             due_date = timezone.now() + timedelta(days=int(default_due))
             self.fields['date_due'].initial = due_date
 
-        if default_form:
+        if default_form and not self.instance.form:
             form = models.ReviewForm.objects.get(pk=default_form)
             self.fields['form'].initial = form
 
         if self.instance.date_accepted:
-            self.fields['form'].required = False
+            # Form should not be changed after request has been accepted
+            self.fields['form'].initial = self.instance.form
+            self.fields['form'].disabled = True
 
 
 class ReviewerDecisionForm(forms.ModelForm):
@@ -192,6 +194,14 @@ class GeneratedForm(forms.Form):
 
             if answer:
                 self.fields[str(element.pk)].initial = answer.edited_answer if answer.edited_answer else answer.answer
+
+            answers = review_assignment.review_form_answers()
+            if answers:
+                try:
+                    answer = answers.get(original_element=element)
+                    self.fields[str(element.pk)].initial = answer.answer
+                except models.ReviewFormAnswer.DoesNotExist:
+                    pass
 
 
 class NewForm(forms.ModelForm):

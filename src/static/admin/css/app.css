@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@import url(https://fonts.googleapis.com/css?family=Merriweather:400,300,700);
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 /**
  * Foundation for Sites by ZURB
  * Version 6.3.0
@@ -579,7 +579,7 @@ body {
   margin: 0;
   padding: 0;
   background: #f5f6f9;
-  font-family: "Merriweather", serif;
+  font-family: "Open Sans", sans-serif;
   font-weight: 300;
   line-height: 1.5;
   color: #0a0a0a;
@@ -5117,4 +5117,9 @@ ul.actions li a {
 
 .submission-content {
   padding-bottom: 25px !important;
+}
+
+.padded-group-item {
+  padding-top: 20px;
+  padding-bottom: 20px;
 }

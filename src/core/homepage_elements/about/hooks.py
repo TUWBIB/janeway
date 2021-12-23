@@ -23,6 +23,8 @@ def yield_homepage_element_context(request, homepage_elements):
 
         except IndexError:
             title_value = _('About this Journal')
+        except AttributeError:
+            title_value = _('About this Journal')
 
         return {
             'about_content': about_content,

@@ -17,7 +17,7 @@ from core import (
 )
 from journal import models as journal_models
 from press import models as press_models
-from utils.install import update_xsl_files
+from utils.install import update_xsl_files, update_settings
 
 
 def create_user(username, roles=None, journal=None):
@@ -59,17 +59,13 @@ def create_journals():
     Creates a set of dummy journals for testing
     :return: a 2-tuple of two journals
     """
+    update_settings()
     update_xsl_files()
     journal_one = journal_models.Journal(code="TST", domain="testserver")
     journal_one.save()
 
     journal_two = journal_models.Journal(code="TSA", domain="journal2.localhost")
     journal_two.save()
-
-    out = StringIO()
-    sys.stdout = out
-
-    call_command('load_default_settings', stdout=out)
 
     journal_one.name = 'Journal One'
     journal_two.name = 'Journal Two'

@@ -1,7 +1,16 @@
 from django.forms import CharField, ModelForm, DateInput
 from django.utils.translation import gettext_lazy as _
 
+from modeltranslation import forms as mt_forms, translator
+
 from submission import models as submission_models
+
+
+class JanewayTranslationModelForm(mt_forms.TranslationModelForm):
+    def __init__(self, *args, **kwargs):
+        super(JanewayTranslationModelForm, self).__init__(*args, **kwargs)
+        opts = translator.translator.get_options_for_model(self._meta.model)
+        self.translated_field_names = opts.get_field_names()
 
 
 class FakeModelForm(ModelForm):

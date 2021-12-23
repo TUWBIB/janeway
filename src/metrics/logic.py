@@ -9,6 +9,7 @@ from datetime import timedelta
 from user_agents import parse as parse_ua_string
 import geoip2.database
 from geoip2.errors import AddressNotFoundError
+import hashlib
 
 from django.db import transaction, OperationalError
 from django.utils import timezone
@@ -19,6 +20,7 @@ from utils import shared
 from utils.decorators import retry
 from utils.function_cache import cache
 from core import models as core_models
+from events import logic as event_logic
 
 
 @cache(300)
@@ -210,8 +212,10 @@ class ArticleMetrics:
         self.downloads = get_article_downloads(article)
         self.alm = get_altmetrics(article)
 
+
 @retry(exc=OperationalError)
 def store_article_access(request, article, access_type, galley_type='view'):
+    current_time = timezone.now()
 
     try:
         user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))
@@ -222,14 +226,24 @@ def store_article_access(request, article, access_type, galley_type='view'):
     iso_country_code = get_iso_country_code(ip)
     country = iso_to_country_object(iso_country_code)
     counter_tracking_id = request.session.get('counter_tracking')
-    identifier = counter_tracking_id if counter_tracking_id else ip
 
     if user_agent and not user_agent.is_bot:
 
+        if counter_tracking_id:
+            identifier = counter_tracking_id
+        else:
+            string = "{ip}-{agent}-{secret_key}".format(
+                ip=ip,
+                agent=user_agent,
+                secret_key=settings.SECRET_KEY,
+            ).encode('utf-8')
+            identifier = hashlib.sha512(string).hexdigest()
+
         # check if the current IP has accessed this article recently.
         with transaction.atomic():
-            time_to_check = timezone.now() - timedelta(seconds=30)
+            time_to_check = current_time - timedelta(seconds=3600)
             exists = models.ArticleAccess.objects.filter(
+                article=article,
                 identifier=identifier,
                 accessed__gte=time_to_check,
                 type=access_type,
@@ -261,8 +275,18 @@ def store_article_access(request, article, access_type, galley_type='view'):
                     country=country,
                     ip=ip
                 )
-
-            return access
+                # Raise the Article Access event.
+                event_kwargs = {
+                    'article_access': access,
+                    'article': article,
+                    'request': request,
+                }
+                event_logic.Events.raise_event(
+                    event_logic.Events.ON_ARTICLE_ACCESS,
+                    task_object=article,
+                    **event_kwargs,
+                )
+                return access
     return None
 
 

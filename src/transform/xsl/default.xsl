@@ -439,7 +439,9 @@
         <xsl:variable name="fn-number">
             <xsl:number level="any" count="fn[not(ancestor::front)]" from="article | sub-article | response"/>
         </xsl:variable>
-        <xsl:apply-templates/> [<span class="footnotemarker" id="fn{$fn-number}"></span><span class="footnotemarker" id="n{$fn-number}"><a href="#nm{$fn-number}"><sup>^</sup></a></span>]
+        <span class="footnotemarker" id="fn{$fn-number}"></span>
+        <xsl:apply-templates/>
+        [<span class="footnotemarker" id="n{$fn-number}"><a href="#nm{$fn-number}"><sup>^</sup></a></span>]
     </xsl:template>
 
     <xsl:template match="author-notes/fn[@fn-type='con']/p">
@@ -1197,9 +1199,16 @@
 
     <xsl:template match="fig">
         <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
-        <div class="fig" data-doi="{$data-doi}">
+        <xsl:choose>
+          <xsl:when test="./media">
+            <xsl:apply-templates/>
+           </xsl:when>
+           <xsl:otherwise>
+          <div class="fig" data-doi="{$data-doi}">
             <xsl:apply-templates select="." mode="testing"/>
-        </div>
+          </div>
+           </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- fig caption -->
@@ -1442,6 +1451,57 @@
         </div>
     </xsl:template>
 
+    <xsl:template match="media" mode="vimeo">
+      <xsl:variable name="vimeo_url" select="./@xlink:href"/>
+        <div class="media video-content">
+          <div class="media-inline video-inline">
+            <div class="acta-inline-video">
+              <div style="padding:56.25% 0 0 0;position:relative;">
+                <iframe
+                  src="{$vimeo_url}"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;"
+                  frameborder="0" allow="autoplay; fullscreen; picture-in-picture"
+                allowfullscreen="yes"
+                ></iframe>
+                <script src="https://player.vimeo.com/api/player.js"></script>
+              </div>
+            </div>
+          </div>
+        </div>
+          <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="media" mode="youtube">
+      <div class="media video-content">
+        <div class="media-inline video-inline">
+          <div class="acta-inline-video">
+            <iframe
+              width="560" height="315"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              src="{@xlink:href}" frameborder="0"
+              allowfullscreen="yes"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+          <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="media" mode="soundcloud">
+      <div class="media audio-content">
+        <div class="media-inline audio-inline">
+          <div class="acta-inline-audio">
+            <iframe
+              width="100%" height="150"
+              scrolling="no" frameborder="no" allow="autoplay"
+              src="{@xlink:href}"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+          <xsl:apply-templates/>
+    </xsl:template>
+
     <xsl:template match="media" mode="testing">
         <xsl:choose>
             <xsl:when test="@mimetype != 'video'">
@@ -1505,7 +1565,7 @@
     </xsl:template>
     <xsl:template match="ref-list/title">
         <xsl:if test="node() != ''">
-            <xsl:element name="h3">
+            <xsl:element name="h2">
                 <xsl:apply-templates/>
             </xsl:element>
         </xsl:if>
@@ -3035,13 +3095,45 @@
     <xsl:template match="media">
         <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
         <xsl:choose>
+            <!-- Handle Video Media-->
             <xsl:when test="@mimetype = 'video'">
-                <div class="media" data-doi="{$data-doi}">
-                    <xsl:apply-templates select="." mode="testing"/>
-                </div>
+              <xsl:choose>
+                <!-- Embed Vimeo -->
+                <xsl:when test="contains(./@xlink:href, 'player.vimeo.com')">
+                  <div class="media" data-doi="{$data-doi}">
+                    <xsl:apply-templates select="." mode="vimeo"/>
+                  </div>
+                </xsl:when>
+
+                <!-- Embed Youtube -->
+                <xsl:when test="contains(./@xlink:href, 'youtube.com')">
+                  <div class="media" data-doi="{$data-doi}">
+                    <xsl:apply-templates select="." mode="youtube"/>
+                  </div>
+                </xsl:when>
+                <xsl:otherwise>
+                  <a href="{@xlink:href}">Video URL</a>
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:when>
+
+            <!-- Handle Audio Media-->
+            <xsl:when test="@mimetype = 'audio'">
+              <xsl:choose>
+                <xsl:when test="contains(./@xlink:href, 'soundcloud.com/player')">
+                  <div class="media" data-doi="{$data-doi}">
+                    <xsl:apply-templates select="." mode="soundcloud"/>
+                  </div>
+                </xsl:when>
+                <xsl:otherwise>
+                  <a href="{@xlink:href}">Video URL</a>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:when>
+
             <xsl:otherwise>
-                <xsl:apply-templates select="." mode="testing"/>
+            <!-- MSL: I think this is test code that doesn't do much -->
+              <xsl:apply-templates select="." mode="testing"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -3229,16 +3321,25 @@
         <xsl:apply-templates select="//back/app-group/app" mode="testing"/>
     </xsl:template>
 
-    <xsl:template match="app" mode="testing">
-        <div class="section app">
-            <xsl:if test="@id">
-                <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
-            </xsl:if>
-            <xsl:if test="title">
-                <h3><xsl:value-of select="title"/></h3>
-            </xsl:if>
-            <xsl:apply-templates mode="testing"/>
+    <xsl:template match="app">
+        <div id="{@id}">
+            <xsl:apply-templates />
         </div>
+    </xsl:template>
+
+    <xsl:template match="app//title">
+        <h2>
+            <xsl:if test="preceding-sibling::label">
+                <xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
+            <xsl:value-of select="node()"/>
+        </h2>
+    </xsl:template>
+
+    <xsl:template match="app//sec//title">
+        <h3>
+            <xsl:if test="preceding-sibling::label"><xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
+            <xsl:value-of select="node()"/>
+        </h3>
     </xsl:template>
 
     <!-- START - general format -->
@@ -3373,6 +3474,12 @@
         </span>
     </xsl:template>
 
+    <xsl:template match="strike">
+        <span class="strikethrough">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
     <xsl:template match="monospace">
         <span class="monospace">
             <xsl:apply-templates/>
@@ -3463,9 +3570,10 @@
 
     <!-- nodes to remove -->
     <xsl:template match="aff/label"/>
+    <xsl:template match="app/label"/>
+    <xsl:template match="sec/label"/>
     <xsl:template match="fn/label"/>
     <xsl:template match="disp-formula/label"/>
-    <xsl:template match="app/title"/>
     <xsl:template match="fn-group[@content-type='competing-interest']/title"/>
     <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
     <xsl:template match="fn-group[@content-type='author-contribution']/title"/>

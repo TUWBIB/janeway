@@ -103,6 +103,11 @@ def register_crossref_component(article, xml, supp_file):
 
 
 def create_crossref_context(identifier):
+    timestamp_suffix = identifier.article.journal.get_setting(
+        'crossref',
+        'crossref_date_suffix',
+    )
+
     from utils import setting_handler
     template_context = {
         'batch_id': uuid4(),
@@ -113,9 +118,13 @@ def create_crossref_context(identifier):
                                                        identifier.article.journal).processed_value,
         'registrant': setting_handler.get_setting('Identifiers', 'crossref_registrant',
                                                   identifier.article.journal).processed_value,
-        'journal_title': identifier.article.journal.name,
+        'journal_title': (
+                identifier.article.publication_title
+                or identifier.article.journal.name
+        ),
         'abstract': strip_tags(identifier.article.abstract or ''),
         'journal_issn': identifier.article.journal.issn,
+        'print_issn': identifier.article.journal.print_issn or None,
         'date_published': identifier.article.date_published,
         'date_accepted': identifier.article.date_accepted,
         'pages': identifier.article.page_numbers,
@@ -128,6 +137,7 @@ def create_crossref_context(identifier):
         'doi': identifier.identifier,
         'article_url': identifier.article.url,
         'now': timezone.now(),
+        'timestamp_suffix': timestamp_suffix,
     }
 
     # append citations for i4oc compatibility
@@ -220,7 +230,22 @@ def send_crossref_deposit(test_mode, identifier):
     filename = uuid4()
 
     depositor = Depositor(prefix=doi_prefix, api_user=username, api_key=password, use_test_server=test_mode)
-    response = depositor.register_doi(submission_id=filename, request_xml=rendered)
+
+    try:
+        response = depositor.register_doi(submission_id=filename, request_xml=rendered)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+        status = 'Error depositing. Could not connect to Crossref ({0}). Error: {1}'.format(
+            depositor.get_endpoint(verb='deposit'),
+            e,
+        )
+        util_models.LogEntry.add_entry(
+            'Error',
+            status,
+            'Debug',
+            target=identifier.article,
+        )
+        logger.error(status)
+        return status, error
 
     logger.debug("[CROSSREF:DEPOSIT:{0}] Sending".format(identifier.article.id))
     logger.debug("[CROSSREF:DEPOSIT:%s] Response code %s" % (identifier.article.id, response.status_code))
