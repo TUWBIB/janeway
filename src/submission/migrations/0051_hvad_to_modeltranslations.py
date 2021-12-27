@@ -21,7 +21,7 @@ def migrate_sections(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0050_support_ordered_keywords'),
+        ('submission', '9006_tuw_rename_de_fields'),
     ]
 
     operations = [

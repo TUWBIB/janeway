@@ -15,7 +15,7 @@ def check_use_i18n_on(*args, **kwargs):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0046_delete_review_request_sent'),
+        ('core', '9000_tuw_add_gndid'),
     ]
 
     operations = [

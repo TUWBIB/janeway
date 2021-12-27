@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0002_migrate_issue_types'),
+        ('cms', '9008_TUW_navitem_translatable_4'),
     ]
 
     operations = [
