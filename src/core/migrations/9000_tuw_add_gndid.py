@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0060_remove_display_about_on_submissions'),
+        ('core', '0051_auto_20210607_1100'),
     ]
 
     operations = [
