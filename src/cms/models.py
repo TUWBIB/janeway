@@ -43,12 +43,12 @@ class Page(models.Model):
     is_markdown = models.BooleanField(default=True)
     edited = models.DateTimeField(auto_now=timezone.now)
 
-    translations = TranslatedFields(
-        display_name = models.CharField(max_length=100, help_text=_('Name of the page, max 100 chars, displayed '
-                                                                'in the nav and on the header of the page eg. '
-                                                                'About or Contact')),
-        content = models.TextField(null=True, blank=True)
-    )
+#    translations = TranslatedFields(
+#        display_name = models.CharField(max_length=100, help_text=_('Name of the page, max 100 chars, displayed '
+#                                                                'in the nav and on the header of the page eg. '
+#                                                                'About or Contact')),
+#        content = models.TextField(null=True, blank=True)
+#    )
 
     def __str__(self):
         return u'{0} - {1}'.format(self.content_type, self.display_name)
