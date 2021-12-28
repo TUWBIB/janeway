@@ -47,23 +47,21 @@ class KeywordModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if hasattr(self.instance, 'keywords'):
+        if hasattr(self.instance, 'keywords_lang_en'):
             current_keywords = self.instance.keywords_lang_en().values_list("word", flat=True)
             field = self.fields["keywords"]
             field.initial = ",".join(current_keywords)
 
-        if hasattr(self.instance, 'keywords_de'):
-            current_keywords_de = self.instance.keywords_lang_de().values_list("word", flat=True)
+        if hasattr(self.instance, 'keywords_lang_de'):
+            current_keywords = self.instance.keywords_lang_de().values_list("word", flat=True)
             field = self.fields["keywords_de"]
-            field.initial = ",".join(current_keywords_de)
-
+            field.initial = ",".join(current_keywords)
 
     def save(self, commit=True, *args, **kwargs):
         instance = super().save(commit=commit, *args, **kwargs)
 
         # en keywords
         if 'keywords' in self.cleaned_data:
-            print ("*** A")
             posted_keywords = self.cleaned_data.get('keywords', '').split(',')
             for keyword in posted_keywords:
                 print (keyword)

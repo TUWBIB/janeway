@@ -161,6 +161,12 @@ class Journal(AbstractSiteModel):
     def __str__(self):
         return u'{0}: {1}'.format(self.code, self.domain)
 
+    def keywords_lang_en(self):
+        return self.keywords.filter(language='en')
+
+    def keywords_lang_de(self):
+        return self.keywords.filter(language='de')
+
     @staticmethod
     def override_cover(request, absolute=True):
         if request.journal.press_image_override:
