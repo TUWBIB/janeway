@@ -14,13 +14,6 @@
             {% endif %}
             </a></p>
             {% endif %}
-            <p><a href="{% url 'journal_issue_download' issue.pk %}"><i class="fa fa-download">&nbsp</i>
-            {% if journal.code == "OES" %}
-                {% trans "Download Issue (ZIP)" context "fe_oes" %}
-            {% else %}
-                {% trans "Download Issue (ZIP)" %}
-            {% endif %}
-            </a></p>
             <h3>{% if not collection %}{% trans "Issue Archive" %}{% else %}
                 {% with col=journal_settings.general.collection_name_plural %}{% if col %}{{ col }}{% else %}{% trans "Collections" %}{% endif %}{% endwith %}{% endif %}</h3>
             <ul>
