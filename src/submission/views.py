@@ -576,6 +576,7 @@ def edit_metadata(request, article_id):
             instance=article,
             submission_summary=submission_summary,
             pop_disabled_fields=False,
+            additional_fields=additional_fields,
         )
         frozen_author, modal = None, None
         return_param = request.GET.get('return')
