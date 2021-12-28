@@ -26,11 +26,8 @@ class PageForm(JanewayTranslationModelForm):
 class NavForm(JanewayTranslationModelForm):
 
     class Meta:
-#        model = models.NavigationItem
-#        fields = ['link_name', 'link', 'is_external', 'sequence', 'page', 'has_sub_nav', 'top_level_nav', 'language']
-
         model = models.NavigationItem
-        fields = ('link_name', 'link', 'is_external', 'sequence', 'has_sub_nav', 'top_level_nav')
+        fields = ('link_name', 'is_external', 'sequence', 'has_sub_nav', 'top_level_nav', 'language')
         exclude = ('page', 'content_type', 'object_id')
 
     def __init__(self, *args, **kwargs):

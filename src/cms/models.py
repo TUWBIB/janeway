@@ -43,16 +43,8 @@ class Page(models.Model):
     is_markdown = models.BooleanField(default=True)
     edited = models.DateTimeField(auto_now=timezone.now)
 
-#    translations = TranslatedFields(
-#        display_name = models.CharField(max_length=100, help_text=_('Name of the page, max 100 chars, displayed '
-#                                                                'in the nav and on the header of the page eg. '
-#                                                                'About or Contact')),
-#        content = models.TextField(null=True, blank=True)
-#    )
-
     def __str__(self):
         return u'{0} - {1}'.format(self.content_type, self.display_name)
-
 
 class NavigationItem(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='nav_content', null=True)
@@ -80,7 +72,7 @@ class NavigationItem(models.Model):
         return self.link_name
 
     def sub_nav_items(self):
-        return NavigationItem.objects.language().fallbacks('en').filter(top_level_nav=self)
+        return NavigationItem.objects.filter(top_level_nav=self)
 
     @property
     def build_url_for_request(self):
@@ -107,7 +99,7 @@ class NavigationItem(models.Model):
         }
         content_type = ContentType.objects.get_for_model(issue_type.journal)
 
-        nav, created = cls.objects.language().fallbacks('en').get_or_create(
+        nav, created = cls.objects.get_or_create(
             content_type=content_type,
             object_id=issue_type.journal.pk,
             link_name=issue_type.plural_name,
