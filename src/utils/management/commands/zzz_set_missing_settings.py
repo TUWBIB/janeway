@@ -7,8 +7,11 @@ from django.core.management.base import BaseCommand
 from django.utils import translation
 from django.conf import settings
 
+from core import models as core_models
 from journal import models as journal_models
 from utils import setting_handler
+from utils import install
+
 
 class Command(BaseCommand):
     """A management command to add missing default settings to journals."""
@@ -42,13 +45,28 @@ class Command(BaseCommand):
             journals = journal_models.Journal.objects.all()
         
         for journal in journals:
+            install.update_settings(journal,management_command=True)
             for o in default_data:
                 setting_name = o['setting']['name']
-                setting_group = o['group']['name']
+                setting_group_name = o['group']['name']
                 default_value = o['value']['default']
 
                 try:
-                    setting_handler.get_setting(setting_group=setting_group,setting_name=setting_name,journal=journal)
+                    setting_handler.get_setting(setting_group_name=setting_group_name,setting_name=setting_name,journal=journal)
                 except Exception as e:
-                    print (f'setting not found {journal.code}, {setting_group}, {setting_name}')
-                    setting_handler.save_setting(setting_group=setting_group,setting_name=setting_name,journal=journal,value=default_value)
+                    print (f'setting not found {journal.code}, {setting_group_name}, {setting_name}')
+                    try:
+                        group = core_models.SettingGroup.objects.get(
+                            name=setting_group_name
+                        )
+                    except:
+                        group = core_models.SettingGroup.objects.get(
+                            name=setting_group_name
+                        )
+                        setting_group_name='Plugin:'+setting_group_name
+
+                    setting = core_models.Setting.objects.get_or_create(
+                        name=setting_name,
+                        group=group,
+                    )
+                    setting_handler.save_setting(setting_group_name=setting_group_name,setting_name=setting_name,journal=journal,value=default_value)
