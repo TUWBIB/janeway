@@ -1029,11 +1029,6 @@ msgstr ""
 #: src/templates/admin/elements/submit/file.html:15
 #: src/themes/OLH/templates/elements/submit/file.html:11
 #: src/themes/TUWJFM/templates/elements/submit/file.html:20
-#, fuzzy
-#| msgid ""
-#| "Please upload your manuscript file, it should be in RTF, ODT or DOC/X "
-#| "format. LaTeX may be accepted later in the process but a simple, readable "
-#| "file is required at this stage."
 msgid ""
 "Please upload your manuscript file, it should be in PDF, RTF, ODT or DOC/X "
 "format. LaTeX may be accepted later in the process but a simple, readable "
@@ -1181,6 +1176,8 @@ msgid ""
 "will be automatically added as an author. This search only returns exact "
 "matches."
 msgstr ""
+"Suche nach Autoren mit E-Mail oder ORCID. Wenn ein Autor gefunden wird,
+so wird er automatisch ergänzt. Die Suche liefert nur exakte Treffer."
 
 #: src/templates/admin/journal/manage/backcontent/submission.html:119
 #: src/templates/admin/submission/submit_authors.html:31
@@ -1513,20 +1510,20 @@ msgid ""
 "Note: This article has completed reviews that have not been made available "
 "to the author:"
 msgstr ""
+"Anmerkung: Für diesen Artikel gibt es reviews, die dem Autor noch nicht zur "
+"Verfügung gestellt wurden:"
 
 #: src/templates/admin/review/in_review.html:24
-#, fuzzy
-#| msgid "This article has not been peer reviewed."
 msgid "This article is not yet in the review stage"
 msgstr "Dieser Artikel wurde noch nicht begutachtet."
 
 #: src/templates/admin/review/in_review.html:26
 msgid "Before you can move this paper into review you need to"
-msgstr ""
+msgstr "Bevor der Artikel zum review geschoben werden kann, muss"
 
 #: src/templates/admin/review/in_review.html:27
 msgid "assign an editor"
-msgstr ""
+msgstr "ein Editor zugeteilt werden"
 
 #: src/templates/admin/review/in_review.html:40
 #: src/templates/admin/review/unassigned_article.html:287
