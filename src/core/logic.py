@@ -4,7 +4,7 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import os
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import uuid
 from importlib import import_module
 from datetime import timedelta
@@ -120,7 +120,14 @@ def resize_and_crop(img_path, size, crop_type='middle'):
     """
 
     # If height is higher we resize vertically, if not we resize horizontally
-    img = Image.open(img_path)
+    try:
+        img = Image.open(img_path)
+    except FileNotFoundError:
+        logger.warning("File not found, can't resize: %s" % img_path)
+        return
+    except UnidentifiedImageError:
+        # Could be an SVG
+        return
 
     # Get current and desired ratio for the images
     img_ratio = img.size[0] / float(img.size[1])
@@ -180,7 +187,7 @@ def settings_for_context(request):
 
 @cache(600)
 def cached_settings_for_context(journal, language):
-    setting_groups = ['general', 'crosscheck', 'article', 'news']
+    setting_groups = ['general', 'crosscheck', 'article', 'news', 'styling']
     _dict = {group: {} for group in setting_groups}
 
     for group in setting_groups:
@@ -192,7 +199,6 @@ def cached_settings_for_context(journal, language):
                 setting.name,
                 journal,
             ).processed_value
-
     return _dict
 
 
@@ -401,18 +407,24 @@ def get_settings_to_edit(display_group, journal):
         settings = [
             {
                 'name': 'enable_editorial_images',
-                'object': setting_handler.get_setting('general',
+                'object': setting_handler.get_setting('styling',
                                                       'enable_editorial_images',
                                                       journal),
             },
             {
                 'name': 'multi_page_editorial',
-                'object': setting_handler.get_setting('general',
+                'object': setting_handler.get_setting('styling',
                                                       'multi_page_editorial',
+                                                      journal),
+            },
+            {
+                'name': 'display_journal_title',
+                'object': setting_handler.get_setting('styling',
+                                                      'display_journal_title',
                                                       journal),
             }
         ]
-        setting_group = 'general'
+        setting_group = 'styling'
     elif display_group == 'news':
         settings = [
             {
