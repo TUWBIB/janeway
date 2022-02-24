@@ -1809,7 +1809,7 @@ def contact(request):
             )
             return redirect(reverse('contact'))
 
-    if request.journal.disable_front_end:
+    if request.journal and request.journal.disable_front_end:
         template = 'admin/journal/contact.html'
     else:
         template = 'journal/contact.html'
@@ -2329,6 +2329,23 @@ def serve_article_xml(request, identifier_type, identifier):
         xml_galley.file.get_file(article_object),
         content_type=xml_galley.file.mime_type,
     )
+
+
+def serve_article_pdf(request, identifier_type, identifier):
+    article_object = submission_models.Article.get_article(
+        request.journal,
+        identifier_type,
+        identifier,
+    )
+
+    if not article_object:
+        raise Http404
+
+    pdf = article_object.pdfs.first()
+    if not pdf:
+        raise Http404
+
+    return files.serve_file(request, pdf.file, article_object, public=True)
 
 
 @editor_user_required

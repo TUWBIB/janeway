@@ -282,7 +282,14 @@ def get_settings_to_edit(display_group, journal):
              },
             {'name': 'copyright_submission_label',
              'object': setting_handler.get_setting('general', 'copyright_submission_label', journal)
-             }
+             },
+            {
+                'name': 'file_submission_guidelines',
+                'object': setting_handler.get_setting(
+                    'general',
+                    'file_submission_guidelines', journal
+                ),
+            }
         ]
         setting_group = 'general'
 
@@ -858,7 +865,7 @@ def render_nested_setting(
     setting = setting_handler.get_setting(
         setting_group,
         setting_name,
-        request.journal
+        request.journal,
     ).value
 
     setting_context = {}
