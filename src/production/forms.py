@@ -95,5 +95,3 @@ class GalleyForm(forms.ModelForm):
         if not include_file:
             self.fields.pop('file')
             self.fields.pop('create_title_page')
-    class Media:
-        js = ('common/js/backcontent.js',)
