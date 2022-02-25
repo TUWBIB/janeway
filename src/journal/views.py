@@ -1646,13 +1646,12 @@ def manage_archive_article(request, article_id):
     galley_form = production_forms.GalleyForm()
 
     if request.POST:
-
         if 'file' in request.FILES:
             galley_form = production_forms.GalleyForm(request.POST, request.FILES)
             if galley_form.is_valid():
-                for uploaded_file in request.FILES.getlist('file'):
+                for index, uploaded_file in enumerate(request.FILES.getlist('file')):
                     try:
-                        production_logic.save_galley(
+                        galley = production_logic.save_galley(
                             article,
                             request,
                             uploaded_file,
@@ -1670,19 +1669,30 @@ def manage_archive_article(request, article_id):
                         messages.add_message(request, messages.ERROR,
                             "Galleys must be uploaded individually, not zipped",
                         )
+
+                    if index == 0:
+                        if 'create_title_page' in request.POST:
+                            if files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
+                                try:
+                                    core_logic.create_article_file_from_galley(article, request, galley)
+                                except:
+                                    messages.add_message(
+                                        request,
+                                        messages.ERROR,
+                                        'Error creating tile page from pdf file.',
+                                    )
+                            else:
+                                messages.add_message(
+                                    request,
+                                    messages.WARNING,
+                                    'No pdf file. Cannot create title page.',
+                                )
             else:
                 messages.add_message(
                     request,
                     messages.WARNING,
                     'Galley form not valid.',
                 )
-
-        if 'pdf' in request.POST:
-            create_title_page = request.POST.get('create_title_page', False)
-            for uploaded_file in request.FILES.getlist('pdf-file'):
-                galley = production_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
-                if create_title_page:
-                    core_logic.create_article_file_from_galley(article, request, galley)
 
         if 'delete_note' in request.POST:
             note_id = int(request.POST['delete_note'])
@@ -2476,6 +2486,7 @@ def backcontent(request):
 
 @editor_user_required
 def backcontent_article(request, article_id):
+    from production import logic as production_logic,forms as production_forms    
     article = get_object_or_404(submission_models.Article, pk=article_id, journal=request.journal)
     additional_fields = submission_models.Field.objects.filter(journal=request.journal)
 
@@ -2487,13 +2498,15 @@ def backcontent_article(request, article_id):
     author_form = bc_forms.BackContentAuthorForm()
     pub_form = bc_forms.PublicationInfo(instance=article)
     remote_form = bc_forms.RemoteArticle(instance=article)
+    galley_form = production_forms.GalleyForm()
+
     modal = None
 
     if request.POST:
         if 'add_author' in request.POST:
             return handleAddAuthor(request, article)
         
-        if 'xml' in request.POST or 'pdf' in request.POST or 'other' in request.POST:
+        if 'file' in request.FILES:
             return handleFileUpload(request, article)
 
         if 'publish' in request.POST:
@@ -2523,6 +2536,7 @@ def backcontent_article(request, article_id):
         'remote_form': remote_form,
         'modal': modal,
         'additional_fields': additional_fields,
+        'galley_form': galley_form
     }
 
     return render(request, template, context)
@@ -2734,32 +2748,56 @@ def handleAddAuthor(request, article):
     return JsonResponse(data)
 
 def handleFileUpload(request, article):
+    from production import logic as production_logic, forms as production_forms
     context = { }
     galley = None
 
-    if 'xml' in request.POST:
-        for uploaded_file in request.FILES.getlist('xml-file'):
-            if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.MIMETYPES_WITH_FIGURES):
-                messages.add_message(request, messages.WARNING, 'File is not XML/HTML!')
-            else:
-                galley = prod_logic.save_galley(article, request, uploaded_file, True, "XML", True)
-                messages.add_message(request, messages.SUCCESS, 'File added!')
+    galley_form = production_forms.GalleyForm(request.POST, request.FILES)
+    if galley_form.is_valid():
+        for index, uploaded_file in enumerate(request.FILES.getlist('file')):
+            try:
+                galley = production_logic.save_galley(
+                    article,
+                    request,
+                    uploaded_file,
+                    True,
+                    label=galley_form.cleaned_data.get('label'),
+                    public=galley_form.cleaned_data.get('public'),
+                )
+            except UnicodeDecodeError:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    _("Uploaded file is not UTF-8 encoded"),
+                )
+            except production_logic.ZippedGalleyError:
+                messages.add_message(request, messages.ERROR,
+                    "Galleys must be uploaded individually, not zipped",
+                )
 
-    if 'pdf' in request.POST:
-        create_title_page = request.POST.get('create_title_page', False)
-        for uploaded_file in request.FILES.getlist('pdf-file'):
-            if not files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
-                messages.add_message(request, messages.WARNING, 'File is not PDF!')
-            else:
-                galley = prod_logic.save_galley(article, request, uploaded_file, True, "PDF", True)
-                if create_title_page:
-                    core_logic.create_article_file_from_galley(article, request, galley)
-                messages.add_message(request, messages.SUCCESS, 'File added!')
-
-    if 'other' in request.POST:
-        for uploaded_file in request.FILES.getlist('other-file'):
-            galley = prod_logic.save_galley(article, request, uploaded_file, True, "Other", True)
-            messages.add_message(request, messages.SUCCESS, 'File added!')
+            if index == 0:
+                if 'create_title_page' in request.POST:
+                    if uploaded_file.content_type == 'application/pdf':
+                        try:
+                            core_logic.create_article_file_from_galley(article, request, galley)
+                        except:
+                            messages.add_message(
+                                request,
+                                messages.ERROR,
+                                'Error creating tile page from pdf file.',
+                            )
+                    else:
+                        messages.add_message(
+                            request,
+                            messages.WARNING,
+                            'No pdf file. Cannot create title page.',
+                        )
+    else:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            'Galley form not valid.',
+        )
 
     if galley != None:
         context['galley']= serializers.serialize('json', [galley], fields=["article", "file", "label"])

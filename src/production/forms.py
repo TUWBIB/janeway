@@ -76,17 +76,24 @@ class AssignTypesetter(forms.ModelForm):
 
 class GalleyForm(forms.ModelForm):
     file = forms.FileField()
+    create_title_page = forms.BooleanField()
 
+    field_order = ['label', 'public', 'file', 'create_title_page']
     class Meta:
         model = core_models.Galley
         fields = (
             'label',
             'public',
+            'create_title_page',
         )
 
     def __init__(self, *args, **kwargs):
         include_file = kwargs.pop('include_file', True)
         super().__init__(*args, **kwargs)
         self.fields['label'].required = False
+        self.fields['create_title_page'].required = False
         if not include_file:
             self.fields.pop('file')
+            self.fields.pop('create_title_page')
+    class Media:
+        js = ('common/js/backcontent.js',)
