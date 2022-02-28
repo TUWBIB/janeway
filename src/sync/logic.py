@@ -398,6 +398,9 @@ def articleToMarc(article):
                     datafield.addSubField(SubField.createSubField("4",'oth'))
                     datafield.addSubField(SubField.createSubField("e",'Corresponding author'))
                 mr.addDataField(datafield)
+                if author.author.gndid:
+                    datafield.addSubField(SubField.createSubField("0",'(DE-588)'+author.author.gndid))
+
 
             # 245 10 title statement
             author=article.frozen_authors()[0]  
@@ -524,6 +527,8 @@ def articleToMarc(article):
                         datafield.addSubField(SubField.createSubField("4",'oth'))
                         datafield.addSubField(SubField.createSubField("e",'Corresponding author'))
                     mr.addDataField(datafield)
+                    if author.author.gndid:
+                        datafield.addSubField(SubField.createSubField("0",'(DE-588)'+author.author.gndid))
 
             # 773 08 relation
             datafield=DataField.createDataField("773","0","8")
