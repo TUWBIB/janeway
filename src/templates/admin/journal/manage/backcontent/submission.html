@@ -460,6 +460,9 @@
             $("#uploadbox").on("click", "button", function(e) {
                 e.preventDefault();
 
+                $("#uploadbox button").prop("disabled",true);
+
+
                 var csrf_token = $("#uploadbox input[name='csrfmiddlewaretoken']").val();
                 var label = $("#uploadbox input[name='label']").val();
                 var public = $("#uploadbox input[name='public']").prop('checked');
@@ -474,60 +477,67 @@
                 formData.append('file', file);
                 if (create_title_page) { formData.append('create_title_page', create_title_page); }
 
-                $.ajax({ 
-                    url: '', 
-                    type: 'post', 
-                    data: formData, 
-                    contentType: false, 
-                    processData: false, 
-                    success: function(response){ 
-                        if(response != 0){ 
-                            context = JSON.parse(response.context)
-                            if(context.galley != undefined) {
-                                var jsonGalley = JSON.parse(context.galley)[0]
+                try 
+                {
+                     $.ajax({ 
+                        url: '', 
+                        type: 'post', 
+                        data: formData, 
+                        contentType: false, 
+                        processData: false, 
+                        success: function(response){ 
+                            if(response != 0){ 
+                                context = JSON.parse(response.context)
+                                if(context.galley != undefined) {
+                                    var jsonGalley = JSON.parse(context.galley)[0]
 
-                                var filename = file.name.length > 37 ? file.name.substring(0, 37) + "..." : file.name
-                                var editLink = '<a href="/production/' + jsonGalley.fields.article + '/galley/' + jsonGalley.pk + '/?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/" class="fa fa-edit"></a>'
-                                var downloadLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/"><i class="fa fa-download"></i></a>'
-                                var replaceLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/replace?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-cloud-upload"></i></a>'
-                                var historyLink = '<a href="/' + jsonGalley.fields.article + '/files/' + jsonGalley.fields.file + '/history/?return=/plugnis/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-history"></i></a>'
-                                
-                                var files = $("#upload-table > tbody > tr")
-                                var emptyFiles = files.eq(1).children().length === 1;
+                                    var filename = file.name.length > 37 ? file.name.substring(0, 37) + "..." : file.name
+                                    var editLink = '<a href="/production/' + jsonGalley.fields.article + '/galley/' + jsonGalley.pk + '/?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/" class="fa fa-edit"></a>'
+                                    var downloadLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/"><i class="fa fa-download"></i></a>'
+                                    var replaceLink = '<a href="/article/id/' + jsonGalley.fields.article + '/file/' + jsonGalley.fields.file + '/replace?return=/plugins/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-cloud-upload"></i></a>'
+                                    var historyLink = '<a href="/' + jsonGalley.fields.article + '/files/' + jsonGalley.fields.file + '/history/?return=/plugnis/back_content/article/' + jsonGalley.fields.article + '/"><i class="fa fa-history"></i></a>'
+                                    
+                                    var files = $("#upload-table > tbody > tr")
+                                    var emptyFiles = files.eq(1).children().length === 1;
 
-                                if(emptyFiles) {
-                                    files[1].remove();
+                                    if(emptyFiles) {
+                                        files[1].remove();
+                                    }
+
+                                    $("#upload-table > tbody").append("<tr><td>" + jsonGalley.fields.label + "</td><td>" 
+                                    + filename + "<td>Galley</td><td>" 
+                                    + editLink + "</td><td>" 
+                                    + downloadLink + "</td><td>" 
+                                    + replaceLink + "</td><td>" 
+                                    + historyLink + "</td>"
+                                    + "<td>Function for XML only</td>"
+                                    + "<td>Function for XML only</td></tr>");
                                 }
-
-                                $("#upload-table > tbody").append("<tr><td>" + jsonGalley.fields.label + "</td><td>" 
-                                + filename + "<td>Galley</td><td>" 
-                                + editLink + "</td><td>" 
-                                + downloadLink + "</td><td>" 
-                                + replaceLink + "</td><td>" 
-                                + historyLink + "</td>"
-                                + "<td>Function for XML only</td>"
-                                + "<td>Function for XML only</td></tr>");
-                            }
-                            messages = JSON.parse(response.msg)
-                            if(messages != undefined) {
-                                for (var i = 0; i < messages.length; i++) {
-                                    if(messages[i].tags == "success") {
-                                        toastr.success(messages[i].message);
-                                    } else if(messages[i].tags == "warn") {
-                                        toastr.warn(messages[i].message);
-                                    } else {
-                                        toastr.error(messages[i].message);
+                                messages = JSON.parse(response.msg)
+                                if(messages != undefined) {
+                                    for (var i = 0; i < messages.length; i++) {
+                                        if(messages[i].tags == "success") {
+                                            toastr.success(messages[i].message);
+                                        } else if(messages[i].tags == "warn") {
+                                            toastr.warn(messages[i].message);
+                                        } else {
+                                            toastr.error(messages[i].message);
+                                        }
                                     }
                                 }
-                            }
-                        } 
-                        else{ 
-                            alert('file not uploaded'); 
-                        } 
+                            } 
+                            else{ 
+                                alert('file not uploaded'); 
+                            } 
 
-                        $('#uploadbox').foundation('close');
-                    }, 
-                }); 
+                            $('#uploadbox').foundation('close');
+                        }, 
+                    }); 
+                }
+                finally 
+                {
+                    $("#uploadbox button").prop("disabled",false);
+                }
             })
         });
 
