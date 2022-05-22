@@ -245,8 +245,44 @@
                         </div>
                     </div>
 
+
+
+
+
                 </div>
             </div>
+
+            <div class="title-area">
+                <h2>{% trans "Cited Reference" %}</h2>
+                <a href="#" class="button" data-open="add_citref">{% trans "Add Cited Reference" %}</a>
+            </div>
+
+            <div class="row expanded">
+                <div class="large-12 columns">
+                    <table class="scroll">
+                        <thead>
+                        <tr>
+                            <th>Text</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="sortable">
+                        {% for citref in article.citedreference_set.all %}
+                            <tr id="citref-{{ citref.pk }}">
+                                <td>{{ citref.text }}</td>
+                                <td><a href="{% url 'delete_citref' article.pk citref.pk %}?return={{ request.path|urlencode }}"><i
+                                        class="fa fa-trash">
+                                    &nbsp;</i></a></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2">No cited references.</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
 
             <div class="small reveal" id="add_funder_blank" data-reveal>
                 <div class="card">
@@ -280,6 +316,28 @@
                     </div>
                 </div>
             </div>
+
+            <div class="small reveal" id="add_citref" data-reveal>
+                <div class="card">
+                    <div class="card-divider">
+                        <h5>Add cited reference</h5>
+                    </div>
+                    <div class="card-section">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="large-12 columns">
+                                    <input type="text" id="citref_text" name="citref_text"/>
+                                    <p class="help-text">Cited reference text</p>
+                                </div>
+                            </div>
+                            <button type="submit" name="add_citref" class="success button">Add cited reference</button>
+                            <button type="button" data-close="" class="close-button">&times;</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             </div>
         </div>
     </div>

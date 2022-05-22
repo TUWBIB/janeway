@@ -364,6 +364,21 @@ def delete_funder(request, article_id, funder_id):
 
     return redirect(reverse('submit_funding', kwargs={'article_id': article_id}))
 
+@login_required
+@article_edit_user_required
+def delete_citref(request, article_id, citref_id):
+    citref = get_object_or_404(
+        models.CitedReference,
+        pk=citref_id
+    )
+
+    citref.delete()
+
+    if request.GET.get('return'):
+        return redirect(request.GET['return'])
+
+#    return redirect(reverse('submit_funding', kwargs={'article_id': article_id}))
+
 
 
 @login_required
@@ -604,6 +619,16 @@ def edit_metadata(request, article_id):
                 funder.save()
                 article.funders.add(funder)
                 article.save()
+
+            if 'add_citref' in request.POST:
+                citref = models.CitedReference(
+                    article=article,
+                    text=request.POST.get('citref_text', default=''),
+                )
+
+                citref.save()
+#                article.save()
+
 
             if 'metadata' in request.POST:
                 info_form = forms.ArticleInfo(

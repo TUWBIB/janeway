@@ -293,6 +293,9 @@ class Funder(models.Model):
     fundref_id = models.CharField(max_length=500, blank=True, null=True)
     funding_id = models.CharField(max_length=500, blank=True, null=True)
 
+class CitedReference(models.Model):
+    article =  models.ForeignKey('submission.Article')
+    text = models.CharField(max_length=2000, blank=False, null=False)
 
 class ArticleStageLog(models.Model):
     article = models.ForeignKey('Article')
@@ -579,7 +582,6 @@ class Article(models.Model):
     datacite_ts = models.DateTimeField(blank=True, null=True)
     # funding
     funders = models.ManyToManyField('Funder', blank=True)
-
     class Meta:
         ordering = ('-date_published', 'title')
 
