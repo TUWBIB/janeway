@@ -50,4 +50,4 @@ django-hijack==2.1.10
 geoip2==3.0.0 # Newer versions require python >= 3.6
 maxminddb==1.5.4
 pdf2image==1.11.0
-git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.2
+git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.2.3
