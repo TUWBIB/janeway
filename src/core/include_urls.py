@@ -17,7 +17,10 @@ from press import views as press_views
 from cms import views as cms_views
 from submission import views as submission_views
 from journal import views as journal_views
+from utils.logger import get_logger
 from sync import urls as sync_urls
+
+logger = get_logger(__name__)
 
 urlpatterns = [
     url(r'^submit/', include('submission.urls')),
@@ -39,15 +42,17 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^news/', include('comms.urls')),
     url(r'^reports/', include('reports.urls')),
-    url(r'^preprints/', include('preprint.urls')),
-    url(r'^repository/', include('preprint.urls')),
+    url(r'^repository/', include('repository.urls')),
     url(r'^utils/', include('utils.urls')),
     url(r'^workflow/', include('workflow.urls')),
+    url(r'^discussion/', include('discussion.urls')),
+    url('oidc/', include('mozilla_django_oidc.urls')),
     url(r'^', include(sync_urls)),
 
     # Root Site URLS
     url(r'^$', press_views.index, name='website_index'),
     url(r'^journals/$', press_views.journals, name='press_journals'),
+    url(r'^article_list/$', core_views.FilteredArticlesListView.as_view(), name='article_list'),
     url(r'^conferences/$', press_views.conferences, name='press_conferences'),
     url(r'^kanban/$', core_views.kanban, name='kanban'),
     url(r'^login/$', core_views.user_login, name='core_login'),
@@ -70,6 +75,7 @@ urlpatterns = [
         name='serve_press_file',
         ),
     url(r'^press/merge_users/$', press_views.merge_users, name='merge_users'),
+    url(r'^doi_manager/$', press_views.IdentifierManager.as_view(), name='press_identifier_manager'),
 
     # Notes
     url(r'^article/(?P<article_id>\d+)/note/(?P<note_id>\d+)/delete/$', core_views.delete_note,
@@ -87,7 +93,7 @@ urlpatterns = [
     url(r'^manager/settings/group/(?P<setting_group>[-\w.: ]+)/default_setting/(?P<setting_name>[-\w.]+)/$',
         core_views.edit_setting,
         name='core_edit_default_setting'),
-    url(r'^manager/settings/(?P<group>[-\w.]+)/$', core_views.edit_settings_group, name='core_edit_settings_group'),
+    url(r'^manager/settings/(?P<display_group>[-\w.]+)/$', core_views.edit_settings_group, name='core_edit_settings_group'),
     url(r'^manager/settings/(?P<plugin>[-\w.:]+)/(?P<setting_group_name>[-\w.]+)/(?P<journal>\d+)/$',
         core_views.edit_plugin_settings_groups, name='core_edit_plugin_settings_groups'),
 
@@ -193,13 +199,17 @@ urlpatterns = [
     # Public Profiles
     url(r'profile/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/$', core_views.public_profile, name='core_public_profile'),
 
-    url(r'^sitemap/$', journal_views.sitemap, name='journal_sitemap'),
+    url(r'^robots.txt$', press_views.robots, name='website_robots'),
+    url(r'^sitemap.xml$', press_views.sitemap, name='website_sitemap'),
+    url(r'^(?P<issue_id>\d+)_sitemap.xml$', journal_views.sitemap, name='website_sitemap'),
 
     url(r'^download/file/(?P<file_id>\d+)/$', journal_views.download_journal_file, name='journal_file'),
 
     url(r'^set-timezone/$', core_views.set_session_timezone, name='set_timezone'),
 
     url(r'^jsi18n/$', cache_page(60 * 60, key_prefix='jsi18n_catalog')(JavaScriptCatalog.as_view()), name='javascript-catalog'),
+    url(r'permission/submit/$', core_views.request_submission_access, name='request_submission_access'),
+    url(r'permission/requests/$', core_views.manage_access_requests, name='manage_access_requests'),
 ]
 
 # Journal homepage block loading
@@ -214,9 +224,11 @@ if blocks:
                 url(r'^homepage/elements/{0}/'.format(block.name),
                     include('core.homepage_elements.{0}.urls'.format(block.name))),
             ]
+            logger.debug("Loaded URLs for %s", block.name)
         except ImportError as e:
-            print("Error loading a block: {0}, {1}".format(block.name, e))
-            pass
+            logger.debug(
+                "Homepage Element %s has no urls.py module", block.name
+            )
 
 # Plugin Loading
 # TODO: plugin_loader should handle the logic below
@@ -228,11 +240,9 @@ if plugins:
             urlpatterns += [
                 url(r'^plugins/{0}/'.format(plugin.best_name(slug=True)), include('plugins.{0}.urls'.format(plugin.name))),
             ]
-            if settings.DEBUG:
-                print("Loaded URLs for {0}".format(plugin.name))
+            logger.debug("Loaded URLs for %s", plugin.name)
         except ImportError as e:
-            print("Error loading a plugin: {0}, {1}".format(plugin.name, e))
-            pass
+            logger.debug("Plugin %s has no urls.py module", plugin.name)
 
 # load the notification plugins
 if len(settings.NOTIFY_FUNCS) == 0:

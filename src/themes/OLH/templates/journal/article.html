@@ -20,7 +20,7 @@
             <div class="row">
                 <div class="large-8 columns">
                     <small class="uppercase">{{ article.section.name }}</small>
-                    <h3>{{ article.title|safe }}</h3>
+                    <h2>{{ article.title|safe }}</h2>
                     <p>
                         <strong>{% if article.frozen_authors.count > 1 %}
                             {% trans "Authors" %}:
@@ -118,7 +118,7 @@
                         </div>
                         <div class="large-6 columns">
                             <ul class="menu vertical medium-horizontal align-right"
-                                data-responsive-menu="drilldown medium-dropdown">
+                                data-responsive-menu="dropdown">
                                 {% hook 'article_buttons' %}
                                 <li><a href="{{ article.local_url }}print/"><i class="fa fa-print">&nbsp;</i></a></li>
                                 <li><a href="javascript:resizeText(-1)">A-</a></li>
@@ -127,7 +127,7 @@
                                 <li><a href="#" id="dyslexia-mode">{% trans "Dyslexia" %}</a></li>
                                 <li>
                                     <a><i class="fa fa-comments"></i></a>
-                                    <ul class="menu">
+                                    <ul class="menu vertical">
                                         <li><a data-open="HarvardModal">{% trans "View" %} Harvard Citation Style</a></li>
                                         <li><a data-open="VancouverModal">{% trans "View" %} Vancouver Citation Style</a></li>
                                         <li><a data-open="APAModal">{% trans "View" %} APA Citation Style</a></li>
@@ -167,7 +167,7 @@
                 <hr/>
                 {% endif %}
                             {% if article.abstract and article.abstract != ''%}
-                                <h2>{% trans "Abstract" %}</h2>
+                                <h3>{% trans "Abstract" %}</h3>
                                 <p>{{ article.abstract|safe }}</p>
                             {% endif %}
                             {% if article.keywords.count > 0 %}<p><strong>{% trans "Keywords" %}:</strong> {% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
@@ -187,6 +187,23 @@
                                             <li>{{ note.text|safe }}</li>
                                         {% endfor %}
                                     </ul>
+                                </div>
+                            {% endif %}
+
+                            {% if article.is_published and galleys %}
+                                <div class="show-for-small-only">
+                                    <p>
+                                        <strong>Downloads:</strong><br/>
+                                        {% for galley in galleys %}
+                                            <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
+                                            <br/>
+                                            {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
+                                                <a target="_blank"
+                                                   href="{% url 'article_view_galley' article.id galley.id %}">View
+                                                    PDF</a><br/>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </p>
                                 </div>
                             {% endif %}
 
@@ -263,9 +280,9 @@
                         </div>
                     </div>
                 </div>
-                <aside class="large-4 columns" data-sticky-container>
+                <aside class="large-4 columns " data-sticky-container>
                     <div class="sticky" data-sticky data-margin-top="0"
-                         data-sticky data-anchor="content">
+                          data-anchor="content" data-sticky-on="large">
 
                             {% include "common/elements/altmetric_badges.html" with article=article class='section' %}
                             {% if journal.disable_article_images %}
@@ -339,6 +356,9 @@
                                  {% if article.publication_title %}
                                  <li>{% trans "Original Publication" %}: {{ article.publication_title }}</li>
                                  {% endif %}
+                                 {% if article.publication_title %}
+                                 <li>{% trans "Original ISSN" %}: {{ article.ISSN_override }}</li>
+                                 {% endif %}
                              </ul>
                          </div>
                          {% endif %}
@@ -387,10 +407,18 @@
                         <div class="section hide-for-small-only">
                             <h3>{% trans field.field.name %}</h3>
                             <ul>
-                                <li>{{ field.answer }}</li>
+                                <li>{{ field.answer|safe }}</li>
                             </ul>
                         </div>
                         {% endfor %}
+
+                        {% if article.preprint %}
+                        <div class="section hide-for-small-only">
+                            <h3>{{ article.preprint.repository.object_name }}</h3>
+                            <p>This article is linked to a {{ article.preprint.repository.object_name }} in {{ article.preprint.repository.name }}.</p>
+                            <p><a href="{{ article.preprint.url }}">{{ article.preprint.title }}</a></p>
+                        </div>
+                        {% endif %}
 
                         <div class="section hide-for-small-only">
                             <h3>{% trans "File Checksums (MD5)" %}</h3>
@@ -411,11 +439,11 @@
     <!-- article citation modals -->
     {% include "elements/journal/citation_modals.html" with article=article %}
     {% include "elements/journal/summary_modal.html" %}
+    {% for table in tables_in_galley %}
+        {% include "elements/journal/table_modal.html" with content=table.content tableid=table.id %}
+    {% endfor %}
     <div class="hline"></div>
     <br/>
-
-    </div>
-
 
 {% endblock body %}
 
@@ -423,4 +451,10 @@
     <script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     {% hook 'article_js_block' %}
+    <script>
+    $('.table-expansion').each(function(){
+        var child = $(this).children(":first")
+        child.append('<br /><small><a data-open="table-' + $(this).attr('id') + '">View Larger Table</a></small>');
+    });
+    </script>
 {% endblock js %}

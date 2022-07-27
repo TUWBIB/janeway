@@ -3,7 +3,6 @@ __author__ = "Martin Paul Eve & Andy Byers"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
-
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -16,11 +15,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from core import files, models as core_models
-from preprint import models as preprint_models
+from repository import models as preprint_models
 from security.decorators import (
     article_edit_user_required,
     production_user_or_editor_required,
     editor_user_required,
+    submission_authorised,
+    article_is_not_submitted
 )
 from submission import forms, models, logic, decorators
 from events import logic as event_logic
@@ -32,9 +33,11 @@ from utils.shared import create_language_override_redirect
 
 @login_required
 @decorators.submission_is_enabled
+@submission_authorised
 def start(request, type=None):
     """
-    Starts the submission process, presents various checkboxes and then creates a new article.
+    Starts the submission process, presents various checkboxes
+    and then creates a new article.
     :param request: HttpRequest object
     :param type: string, None or 'preprint'
     :return: HttpRedirect or HttpResponse
@@ -97,7 +100,9 @@ def submit_submissions(request):
 @login_required
 @decorators.submission_is_enabled
 @decorators.funding_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_funding(request, article_id):
     """
     Presents a form for the user to complete with article information
@@ -147,7 +152,9 @@ def submit_funding(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_info(request, article_id):
     """
     Presents a form for the user to complete with article information
@@ -163,7 +170,13 @@ def submit_info(request, article_id):
             'submission_summary',
             request.journal,
         ).processed_value
-        form = forms.ArticleInfoSubmit(
+
+        # Determine the form to use depending on whether the user is an editor.
+        article_info_form = forms.ArticleInfoSubmit
+        if request.user.is_editor(request):
+            article_info_form = forms.EditorArticleInfoSubmit
+
+        form = article_info_form(
             instance=article,
             additional_fields=additional_fields,
             submission_summary=submission_summary,
@@ -171,7 +184,7 @@ def submit_info(request, article_id):
         )
 
         if request.POST:
-            form = forms.ArticleInfoSubmit(
+            form = article_info_form(
                 request.POST,
                 instance=article,
                 additional_fields=additional_fields,
@@ -217,7 +230,9 @@ def publisher_notes_order(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_authors(request, article_id):
     """
     Allows the submitting author to add other authors to the submission.
@@ -414,7 +429,9 @@ def delete_author(request, article_id, author_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_files(request, article_id):
     """
     Allows the submitting author to upload files and links them to the submission
@@ -496,7 +513,8 @@ def submit_files(request, article_id):
             else:
                 error = "You must upload a manuscript file."
 
-    template = "admin/submission//submit_files.html"
+    template = "admin/submission/submit_files.html"
+
     context = {
         'article': article,
         'error': error,
@@ -509,7 +527,9 @@ def submit_files(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_review(request, article_id):
     """
     A page that allows the user to review a submission.
@@ -535,6 +555,14 @@ def submit_review(request, article_id):
         article.snapshot_authors(article)
         article.save()
 
+        event_logic.Events.raise_event(
+            event_logic.Events.ON_WORKFLOW_ELEMENT_COMPLETE,
+            **{'handshake_url': 'submit_review',
+               'request': request,
+               'article': article,
+               'switch_stage': False}
+        )
+
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -549,14 +577,6 @@ def submit_review(request, article_id):
             event_logic.Events.ON_ARTICLE_SUBMITTED,
             task_object=article,
             **kwargs
-        )
-
-        event_logic.Events.raise_event(
-            event_logic.Events.ON_WORKFLOW_ELEMENT_COMPLETE,
-            **{'handshake_url': 'submit_review',
-               'request': request,
-               'article': article,
-               'switch_stage': False}
         )
 
         return redirect(reverse('core_dashboard'))

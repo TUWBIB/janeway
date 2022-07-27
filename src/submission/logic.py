@@ -29,7 +29,23 @@ def add_user_as_author(user, article, give_role=True):
     :param give_role: If true, the user is given the author role in the journal
     """
     if give_role:
-        user.add_account_role("author", article.journal)
+        submission_requires_authorisation = article.journal.get_setting(
+            group_name='general',
+            setting_name='limit_access_to_submission',
+        )
+        if submission_requires_authorisation and not user.check_role(article.journal, 'author'):
+            role = core_models.Role.objects.get(
+                slug='author',
+            )
+            core_models.AccessRequest.objects.get_or_create(
+                journal=article.journal,
+                user=user,
+                role=role,
+                text='Automatic request as author added to an article.',
+            )
+        else:
+            user.add_account_role("author", article.journal)
+
     article.authors.add(user)
     models.ArticleAuthorOrder.objects.get_or_create(
         article=article,
@@ -111,6 +127,17 @@ def parse_authors(soup):
     return author_list
 
 
+def add_keywords(soup, article):
+    keywords = soup.find_all('kwd')
+
+    for keyword in keywords:
+        if keyword.text not in [None, '', ' ']:
+            obj, c = models.Keyword.objects.get_or_create(
+                word=str(keyword.text).strip(),
+            )
+            article.keywords.add(obj)
+
+
 def import_from_jats_xml(path, journal, first_author_is_primary=False):
     with open(path) as file:
         soup = BeautifulSoup(file, 'lxml-xml')
@@ -158,6 +185,8 @@ def import_from_jats_xml(path, journal, first_author_is_primary=False):
         if first_author_is_primary and article.authors.all():
             article.correspondence_author = article.authors.all().first()
             article.save()
+
+        add_keywords(soup, article)
 
         return article
 

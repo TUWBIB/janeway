@@ -70,10 +70,13 @@ src/core/settings.py
 /src/files/import_cache
 /src/files/data_backup
 /src/files/xsl
+/src/files/preprints
+/src/files/repos
 /src/media/django-summernote
 /src/media/*
 /src/collected-static
-
+/src/files/robots/**
+/src/files/sitemaps/**
 mydatabase
 node_modules/
 src/plugins/*
@@ -112,8 +115,8 @@ janeway\.sublime-workspace
 terminal\.glue
 
 src/core/management/commands
-
 src/core/management/__init__\.py
+src/utils/management/commands/test_command.py
 
 src/auth\.json
 
@@ -127,9 +130,16 @@ src/static/superhero/
 src/themes/clean
 src/themes/superhero
 
+src/static/superhero/
+src/themes/superhero
+
 # Lando
-dockerfiles/lando_local.env
+local.env
 .lando.local.yml
+dockerfiles/lando_local.env
+
+# Emacs backup files
+*~
 
 # TUW stuff
 src/vl2janeway

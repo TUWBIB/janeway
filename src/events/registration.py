@@ -48,6 +48,8 @@ event_logic.Events.register_for_event(event_logic.Events.ON_REVISIONS_REQUESTED_
                                       transactional_emails.send_revisions_request)
 event_logic.Events.register_for_event(event_logic.Events.ON_REVISIONS_COMPLETE,
                                       transactional_emails.send_revisions_complete)
+event_logic.Events.register_for_event(event_logic.Events.ON_REVISIONS_COMPLETE,
+                                      transactional_emails.send_revisions_author_receipt)
 
 # Copyediting
 event_logic.Events.register_for_event(event_logic.Events.ON_COPYEDIT_ASSIGNMENT,
@@ -122,11 +124,35 @@ event_logic.Events.register_for_event(event_logic.Events.ON_ARTICLE_ACCEPTED,
 event_logic.Events.register_for_event(event_logic.Events.ON_PREPRINT_SUBMISSION,
                                       transactional_emails.preprint_submission)
 
-event_logic.Events.register_for_event(event_logic.Events.ON_PREPRINT_PUBLICATION,
-                                      transactional_emails.preprint_publication)
+event_logic.Events.register_for_event(event_logic.Events.ON_PREPRINT_NOTIFICATION,
+                                      transactional_emails.preprint_notification)
 
 event_logic.Events.register_for_event(event_logic.Events.ON_PREPRINT_COMMENT,
                                       transactional_emails.preprint_comment)
+event_logic.Events.register_for_event(
+    event_logic.Events.ON_PREPRINT_VERSION_UPDATE,
+    transactional_emails.preprint_version_update,
+)
+
+event_logic.Events.register_for_event(
+    event_logic.Events.ON_ACCESS_REQUEST,
+    transactional_emails.access_request_notification,
+)
+
+event_logic.Events.register_for_event(
+    event_logic.Events.ON_ACCESS_REQUEST_COMPLETE,
+    transactional_emails.access_request_complete,
+)
+
+event_logic.Events.register_for_event(
+    event_logic.Events.ON_PREPRINT_REVIEW_NOTIFICATION,
+    transactional_emails.preprint_review_notification,
+)
+
+event_logic.Events.register_for_event(
+    event_logic.Events.ON_PREPRINT_REVIEW_STATUS_CHANGE,
+    transactional_emails.preprint_review_status_change,
+)
 
 # wire up task-creation events
 event_logic.Events.register_for_event(event_logic.Events.ON_ARTICLE_SUBMITTED,

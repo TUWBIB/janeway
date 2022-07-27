@@ -11,8 +11,10 @@ from operator import itemgetter
 import collections
 import uuid
 import os
+import re
 
 from django.conf import settings
+from django.core import validators
 from django.db import models, transaction
 from django.db.models import OuterRef, Subquery, Value
 from django.db.models.signals import post_save, m2m_changed
@@ -30,7 +32,7 @@ from core import (
         workflow,
 )
 from core.file_system import JanewayFileSystemStorage
-from core.model_utils import AbstractSiteModel
+from core.model_utils import AbstractSiteModel, SVGImageField, AbstractLastModifiedModel
 from press import models as press_models
 from submission import models as submission_models
 from utils import setting_handler, logic, install
@@ -83,19 +85,66 @@ class Journal(AbstractSiteModel):
     current_issue = models.ForeignKey('Issue', related_name='current_issue', null=True, blank=True,
                                       on_delete=models.SET_NULL)
     carousel = models.OneToOneField('carousel.Carousel', related_name='journal', null=True, blank=True)
-    thumbnail_image = models.ForeignKey('core.File', null=True, blank=True, related_name='thumbnail_image',
-                                        on_delete=models.SET_NULL)
-    press_image_override = models.ForeignKey('core.File', null=True, blank=True, related_name='press_image_override')
-    default_cover_image = models.ImageField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
-    default_large_image = models.ImageField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
-    header_image = models.ImageField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
-    favicon = models.ImageField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
+    thumbnail_image = models.ForeignKey(
+        'core.File',
+        null=True,
+        blank=True,
+        related_name='thumbnail_image',
+        on_delete=models.SET_NULL,
+        help_text=ugettext('The default thumbnail for articles, not to be '
+                           'confused with \'Default cover image\'.'),
+    )
+    press_image_override = models.ForeignKey(
+        'core.File',
+        null=True,
+        blank=True,
+        related_name='press_image_override',
+        help_text=ugettext('Replaces the press logo in the footer.'),
+    )
+    default_cover_image = SVGImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=ugettext('The default cover image for journal issues and for '
+                           'the journal\'s listing on the press-level website.'),
+    )
+    default_large_image = SVGImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=ugettext('The default background image for article openers '
+                           'and carousel items.'),
+    )
+    header_image = SVGImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=ugettext('The logo-sized image at the top of all pages, '
+                           'typically used for journal logos.'),
+    )
+    favicon = models.ImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=ugettext('The tiny round or square image appearing in browser '
+                           'tabs before the webpage title'),
+    )
+    # DEPRECATED "description" in favour of "journal_description" setting
     description = models.TextField(null=True, blank=True, verbose_name="Journal Description")
     contact_info = models.TextField(null=True, blank=True, verbose_name="Contact Information")
     keywords = models.ManyToManyField("submission.Keyword", blank=True, null=True)
 
     disable_metrics_display = models.BooleanField(default=False)
-    disable_article_images = models.BooleanField(default=False)
+    disable_article_images = models.BooleanField(
+        default=False,
+        help_text=ugettext('When checked, articles will not have header images'
+                           'or thumbnail images. Does not affect figures and'
+                           'tables within an article.'),
+    )
     enable_correspondence_authors = models.BooleanField(default=True)
     disable_html_downloads = models.BooleanField(default=False)
     full_width_navbar = models.BooleanField(default=False)
@@ -104,6 +153,11 @@ class Journal(AbstractSiteModel):
         help_text=_('When enabled, the journal is marked as not hosted in Janeway.'),
     )
     is_conference = models.BooleanField(default=False)
+    is_archived = models.BooleanField(
+        default=False,
+        help_text="The journal is no longer publishing. This is only used as "
+            "part of the journal metadata.",
+    )
     remote_submit_url = models.URLField(
         blank=True,
         null=True,
@@ -155,6 +209,14 @@ class Journal(AbstractSiteModel):
     display_issue_number = models.BooleanField(default=True)
     display_issue_year = models.BooleanField(default=True)
     display_issue_title = models.BooleanField(default=True)
+    display_article_number = models.BooleanField(
+        default=False,
+        help_text=ugettext(
+            "Whether to display article numbers. Article numbers are distinct " \
+            "from article ID and can be set in Edit Metadata.",
+        )
+    )
+    display_article_page_numbers = models.BooleanField(default=True)
 
     disable_front_end = models.BooleanField(default=False)
 
@@ -215,13 +277,7 @@ class Journal(AbstractSiteModel):
     @property
     @cache(120)
     def use_crossref(self):
-        try:
-            return setting_handler.get_setting('Identifiers',
-                                               'crossref_prefix',
-                                               self,
-                                               default=True).processed_value
-        except IndexError:
-            return False
+        return setting_handler.get_setting('Identifiers', 'use_crossref', self, default=True).processed_value
 
     @issn.setter
     def issn(self, value):
@@ -246,34 +302,34 @@ class Journal(AbstractSiteModel):
         press = press_models.Press.objects.all()[0]
         return press
 
+    @classmethod
+    def get_by_request(cls, request):
+        obj, path = super().get_by_request(request)
+        if not obj:
+            # Lookup by code
+            try:
+                code = request.path.split('/')[1]
+                obj = cls.objects.get(code=code)
+                path = code
+            except (IndexError, cls.DoesNotExist):
+                pass
+        return obj, path
+
     def site_url(self, path=""):
-        if settings.URL_CONFIG == "path":
-            return self._site_path_url(path)
+        if self.domain and not settings.URL_CONFIG == 'path':
 
-        return logic.build_url(
-                netloc=self.domain,
-                scheme=self.SCHEMES[self.is_secure],
-                port=None,
-                path=path,
-        )
-
-    def _site_path_url(self, path=None):
-        request = logic.get_current_request()
-        if request and request.journal == self:
-            if not path:
-                path = "/{}".format(self.code)
-            return request.build_absolute_uri(path)
+            # Handle domain journal being browsed in path mode
+            site_path = f'/{self.code}'
+            if path and path.startswith(site_path):
+                path = path[len(site_path):]
+            return logic.build_url(
+                    netloc=self.domain,
+                    scheme=self.SCHEMES[self.is_secure],
+                    port=None,
+                    path=path,
+            )
         else:
-            return self.press.journal_path_url(self, path)
-
-    def full_url(self, request=None):
-        logger.warning("Using journal.full_url is deprecated")
-        return self.site_url()
-
-    def full_reverse(self, request, url_name, kwargs):
-        base_url = self.full_url(request)
-        url_path = reverse(url_name, kwargs=kwargs)
-        return "{0}{1}".format(base_url, url_path)
+            return self.press.site_path_url(self, path)
 
     def next_issue_order(self):
         issue_orders = [issue.order for issue in Issue.objects.filter(journal=self)]
@@ -283,8 +339,23 @@ class Journal(AbstractSiteModel):
     def issues(self):
         return Issue.objects.filter(journal=self)
 
+    @property
+    def issue_type_plural_name(self):
+        try:
+            issue_type = IssueType.objects.get(journal=self, code="issue")
+            return issue_type.plural_name
+        except IssueType.DoesNotExist:
+            return None
+
     def serial_issues(self):
         return Issue.objects.filter(journal=self, issue_type__code='issue')
+
+    @property
+    def published_issues(self):
+        return Issue.objects.filter(
+            journal=self,
+            date__lte=timezone.now(),
+        )
 
     def editors(self):
         """ Returns all users enrolled as editors for the journal
@@ -428,12 +499,14 @@ class PinnedArticle(models.Model):
         return '{0}, {1}: {2}'.format(self.sequence, self.journal.code, self.article.title)
 
 
+
+ISSUE_CODE_RE = re.compile("^[a-zA-Z0-9-_]+$")
+
 # *TUW mod*
 # added tuw_year in case the 'issue year' differs from the publication date
 # added tuw_issue_str for double issues like '1/2'
 # added tuw_vlid since we need to be able to resolve bookmarks pointing to vl
-
-class Issue(models.Model):
+class Issue(AbstractLastModifiedModel):
     journal = models.ForeignKey(Journal)
 
     # issue metadata
@@ -449,13 +522,13 @@ class Issue(models.Model):
     issue_description = models.TextField(blank=True, null=True)
     short_description = models.CharField(max_length=600, blank=True, null=True)
 
-    cover_image = models.ImageField(
+    cover_image = SVGImageField(
         upload_to=cover_images_upload_path, null=True, blank=True, storage=fs,
         help_text=_(
             "Image representing the the cover of a printed issue or volume",
         )
     )
-    large_image = models.ImageField(
+    large_image = SVGImageField(
         upload_to=issue_large_image_path, null=True, blank=True, storage=fs,
         help_text=_(
             "landscape hero image used in the carousel and issue page"
@@ -472,6 +545,14 @@ class Issue(models.Model):
         null=True,
         related_name='guest_editors',
         through='IssueEditor',
+    )
+
+    code = models.SlugField(
+        max_length=700, null=True, blank=True,
+        help_text=ugettext(
+            "An optional alphanumeric code (Slug) used to generate a verbose "
+            " url for this issue. e.g: 'winter-special-issue'."
+        ),
     )
 
     tuw_year = models.IntegerField(null=True)
@@ -596,21 +677,12 @@ class Issue(models.Model):
     def display_title(self):
         if self.issue_type.code != 'issue':
             return self.issue_title
+        else:
+            return self.pretty_issue_identifier
 
+    def issue_title_parts(self, article=None):
         journal = self.journal
-        issue_identifier = self.pretty_issue_identifier
-
-        title = "{}".format(
-            self.issue_title) if journal.display_issue_title else ""
-
-        title_list = [issue_identifier, title]
-
-        return mark_safe(" &bull; ".join((filter(None, title_list))))
-
-    @property
-    def pretty_issue_identifier(self):
-        journal = self.journal
-        volume = issue = year = ''
+        volume = issue = year = issue_title = article_number = page_numbers = ''
 
         if journal.display_issue_volume and self.volume:
             volume = _("Volume") + " {}".format(self.volume)
@@ -618,11 +690,30 @@ class Issue(models.Model):
             issue = _("Issue") + " {}".format(self.issue)
         if journal.display_issue_year and self.date:
             year = "{}".format(self.date.year)
+        if journal.display_issue_title:
+            issue_title = self.issue_title
+        if journal.display_article_number and article and article.article_number:
+            article_number = ugettext("Article") + " {}".format(article.article_number)
+        if journal.display_article_page_numbers and article:
+            if article.page_range:
+                page_numbers = article.page_range
+            elif article.total_pages:
+                if article.total_pages != 1:
+                    label = ugettext('pages')
+                else:
+                    label = ugettext('page')
+                num_pages = str(article.total_pages)
+                page_numbers = f'{num_pages} {label}'
 
-        parts = [volume, issue, year]
+        return [volume, issue, year, issue_title, article_number, page_numbers]
 
-        return mark_safe(" &bull; ".join((filter(None, parts))))
+    @property
+    def pretty_issue_identifier(self):
+        return mark_safe(" &bull; ".join((filter(None, self.issue_title_parts()))))
 
+    @property
+    def non_pretty_issue_identifier(self):
+        return " ".join((filter(None, self.issue_title_parts())))
 
     @property
     def manage_issue_list(self):
@@ -850,6 +941,7 @@ class Issue(models.Model):
 
     class Meta:
         ordering = ("order", "-date")
+        unique_together = ("journal", "code")
 
 
 class IssueType(models.Model):

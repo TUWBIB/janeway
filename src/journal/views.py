@@ -399,6 +399,29 @@ def collection(request, collection_id, show_sidebar=True):
     return issue(request, collection_id, show_sidebar)
 
 
+@has_journal
+@decorators.frontend_enabled
+def collection_by_code(request, collection_code):
+    """
+    A proxy view for an issue or collection by its code
+    :param request: request object
+    :param collection_code: alphanumeric string matching an Issue.code
+    :return: a rendered template
+    """
+    issue = get_object_or_404(
+        models.Issue,
+        code=collection_code,
+        journal=request.journal,
+    )
+    if issue.issue_type.code == "issue":
+        return redirect(reverse(
+            'journal_issue', kwargs={'issue_id': issue.pk},
+        ))
+    return redirect(reverse(
+        "journal_collection", kwargs={"collection_id": issue.pk},
+    ))
+
+
 @decorators.frontend_enabled
 @article_exists
 @article_stage_accepted_or_later_required
@@ -412,12 +435,13 @@ def article(request, identifier_type, identifier):
     """
     article_object = submission_models.Article.get_article(request.journal, identifier_type, identifier)
 
-    content = None
+    content, tables_in_galley = None, None
     galleys = article_object.galley_set.filter(public=True)
 
     # check if there is a galley file attached that needs rendering
     if article_object.is_published:
         content = get_galley_content(article_object, galleys, recover=True)
+        tables_in_galley = logic.get_all_tables_from_html(content)
     else:
         article_object.abstract = (
             "<p><strong>This is an accepted article with a DOI pre-assigned"
@@ -437,6 +461,7 @@ def article(request, identifier_type, identifier):
         'identifier_type': identifier_type,
         'identifier': identifier,
         'article_content': content,
+        'tables_in_galley': tables_in_galley,
         'kw': kw,
         'kw_de': kw_de,
     }
@@ -472,7 +497,8 @@ def print_article(request, identifier_type, identifier):
 
     # check if there is a galley file attached that needs rendering
     if article_object.stage == submission_models.STAGE_PUBLISHED:
-        content = get_galley_content(article_object, galleys)
+        content = get_galley_content(article_object, galleys, recover=True)
+
     else:
         article_object.abstract = "This is an accepted article with a DOI pre-assigned that is not yet published."
 
@@ -491,7 +517,7 @@ def print_article(request, identifier_type, identifier):
         'galleys': galleys,
         'identifier_type': identifier_type,
         'identifier': identifier,
-        'article_content': content
+        'article_content': content,
     }
 
     return render(request, template, context)
@@ -565,7 +591,7 @@ def download_galley(request, article_id, galley_id):
     :param galley_id: an Galley object PK
     :return: a streaming response of the requested file or a 404.
     """
-    article = get_object_or_404(submission_models.Article.allarticles,
+    article = get_object_or_404(submission_models.Article,
                                 pk=article_id,
                                 journal=request.journal,
                                 date_published__lte=timezone.now(),
@@ -598,7 +624,7 @@ def view_galley(request, article_id, galley_id):
     :return: an HttpResponse with a PDF attachment
     """
     article_to_serve = get_object_or_404(
-        submission_models.Article.allarticles,
+        submission_models.Article,
         pk=article_id,
         journal=request.journal,
         date_published__lte=timezone.now(),
@@ -771,7 +797,7 @@ def submit_files_info(request, article_id, file_id):
     :param file_id: the file ID for which to submit information
     :return: a rendered template to submit file information
     """
-    article_object = get_object_or_404(submission_models.Article.allarticlesd, pk=article_id)
+    article_object = get_object_or_404(submission_models.Article, pk=article_id)
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     form = review_forms.ReplacementFileDetails(instance=file_object)
@@ -807,7 +833,7 @@ def file_history(request, article_id, file_id):
     if request.POST:
         return redirect(request.GET['return'])
 
-    article_object = get_object_or_404(submission_models.Article.allarticles, pk=article_id)
+    article_object = get_object_or_404(submission_models.Article, pk=article_id)
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     template = "journal/file_history.html"
@@ -848,7 +874,7 @@ def file_delete(request, article_id, file_id):
     :param file_id: the file ID for which to view the history
     :return: a redirect to the URL at the GET parameter 'return'
     """
-    article_object = get_object_or_404(submission_models.Article.allarticles, pk=article_id)
+    article_object = get_object_or_404(submission_models.Article, pk=article_id)
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     file_object.delete()
@@ -866,7 +892,7 @@ def article_file_make_galley(request, article_id, file_id):
     :param file_id: the file ID for which to view the history
     :return: a redirect to the URL at the GET parameter 'return'
     """
-    article_object = get_object_or_404(submission_models.Article.allarticles, pk=article_id)
+    article_object = get_object_or_404(submission_models.Article, pk=article_id)
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     logic.create_galley_from_file(file_object, article_object, owner=request.user)
@@ -1797,7 +1823,6 @@ def become_reviewer(request):
     return render(request, template, context)
 
 
-@decorators.frontend_enabled
 def contact(request):
     """
     Displays a form that allows a user to contact admins or editors.
@@ -1828,7 +1853,10 @@ def contact(request):
             )
             return redirect(reverse('contact'))
 
-    template = 'journal/contact.html'
+    if request.journal and request.journal.disable_front_end:
+        template = 'admin/journal/contact.html'
+    else:
+        template = 'journal/contact.html'
     context = {
         'contact_form': contact_form,
         'contacts': contacts,
@@ -1876,7 +1904,7 @@ def author_list(request):
     return render(request, template, context)
 
 
-def sitemap(request):
+def sitemap(request, issue_id=None):
     """
     Renders an XML sitemap based on articles and pages available to the journal.
     :param request: HttpRequest object
@@ -1884,18 +1912,73 @@ def sitemap(request):
     """
     articles = submission_models.Article.objects.filter(date_published__lte=timezone.now(), journal=request.journal)
     cms_pages = cms_models.Page.objects.language().fallbacks('en').filter(object_id=request.site_type.id, content_type=request.model_content_type)
+    try:
+        path_parts = None
+        if issue_id:
+            issue = get_object_or_404(
+                models.Issue,
+                pk=issue_id,
+                journal=request.journal,
+            )
+            path_parts = [
+                request.journal.code,
+                '{}_sitemap.xml'.format(issue.pk),
+            ]
+        else:
+            path_parts = [
+                request.journal.code,
+                'sitemap.xml',
+            ]
 
-    template = 'journal/sitemap.xml'
+        if path_parts:
+            return files.serve_sitemap_file(path_parts)
+    except FileNotFoundError:
+        logger.warning('Sitemap for {} not found.'.format(request.journal.name))
 
-    context = {
-        'articles': articles,
-        'cms_pages': cms_pages,
-    }
-    return render(request, template, context, content_type="application/xml")
-
+    raise Http404()
 
 @decorators.frontend_enabled
 def search(request):
+    if settings.ENABLE_FULL_TEXT_SEARCH:
+        return full_text_search(request)
+    else:
+        return old_search(request)
+
+@decorators.frontend_enabled
+def full_text_search(request):
+    """ Allows a user to search for articles using various filters
+    :param request: HttpRequest object
+    :return: HttpResponse object
+    """
+    search_term = None
+    keyword = None
+    redir = False
+    sort = 'title'
+    articles = []
+
+    search_term, keyword, sort, form, redir = logic.handle_search_controls(
+        request,
+    )
+    if search_term:
+        form.is_valid()
+        articles = submission_models.Article.objects.search(
+            search_term, form.get_search_filters(),
+            sort=form.cleaned_data.get("sort"),
+            site=request.site_object,
+        )
+
+    template = 'journal/full-text-search.html'
+    context = {
+        'articles': articles,
+        'article_search': search_term,
+        'keyword': keyword,
+        'form': form,
+    }
+
+    return render(request, template, context)
+
+@decorators.frontend_enabled
+def old_search(request):
     """
     Allows a user to search for articles by name or author name.
     :param request: HttpRequest object
@@ -2173,7 +2256,7 @@ def download_table(request, identifier_type, identifier, table_name):
 
 
 def download_supp_file(request, article_id, supp_file_id):
-    article = get_object_or_404(submission_models.Article.allarticles, pk=article_id,
+    article = get_object_or_404(submission_models.Article, pk=article_id,
                                 stage=submission_models.STAGE_PUBLISHED)
     supp_file = get_object_or_404(core_models.SupplementaryFile, pk=supp_file_id)
 
@@ -2397,6 +2480,22 @@ def serve_article_xml(request, identifier_type, identifier):
         xml_galley.file.get_file(article_object),
         content_type=xml_galley.file.mime_type,
     )
+
+def serve_article_pdf(request, identifier_type, identifier):
+    article_object = submission_models.Article.get_article(
+        request.journal,
+        identifier_type,
+        identifier,
+    )
+
+    if not article_object:
+        raise Http404
+
+    pdf = article_object.pdfs.first()
+    if not pdf:
+        raise Http404
+
+    return files.serve_file(request, pdf.file, article_object, public=True)
 
 @editor_user_required
 def manage_languages(request):

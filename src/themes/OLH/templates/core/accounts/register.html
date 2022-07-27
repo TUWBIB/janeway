@@ -76,7 +76,7 @@
                         </div>
                         <div class="row">
                             <div class="large-12 columns">
-                                {{ form.are_you_a_robot|foundation }}
+                                {{ form.captcha|foundation }}
                                 <br/>
                                 <p>{% trans "By registering an account you agree to our" %}
                                   {% if journal_settings.general.privacy_policy_url %}
@@ -87,6 +87,9 @@
                                 </p>
                             </div>
                         </div>
+                        {% if journal_settings.general.display_register_page_notice %}
+                        {{ journal_settings.general.register_page_notice|safe }}
+                        {% endif %}
                         <p>
                             <button type="submit" class="success button float-right">{% trans "Register" %}</button>
                         </p>

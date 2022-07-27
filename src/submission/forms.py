@@ -3,6 +3,8 @@ __author__ = "Martin Paul Eve & Andy Byers"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
+import re
+
 from django import forms
 from django.utils.translation import ugettext, ugettext_lazy as _
 
@@ -72,7 +74,7 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
                   'language', 'section', 'license', 'primary_issue',
                   'article_number', 'is_remote', 'remote_url', 'peer_reviewed',
                   'first_page', 'last_page', 'page_numbers', 'total_pages',
-                  'custom_how_to_cite',)
+                  'competing_interests', 'custom_how_to_cite',)
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
@@ -261,6 +263,11 @@ class ArticleInfoSubmit(ArticleInfo):
     FILTER_PUBLIC_FIELDS = True
 
 
+class EditorArticleInfoSubmit(ArticleInfo):
+    # Used when an editor is making a submission.
+    FILTER_PUBLIC_FIELDS = False
+
+
 class AuthorForm(forms.ModelForm):
 
     class Meta:
@@ -280,7 +287,6 @@ class AuthorForm(forms.ModelForm):
             'password',
             'username',
             'roles',
-
         )
 
         widgets = {
@@ -297,7 +303,6 @@ class AuthorForm(forms.ModelForm):
             'orcid': forms.TextInput(attrs={'placeholder': 'ORCID ID'}),
             'gndid': forms.TextInput(attrs={'placeholder': 'GND ID'}),
             'email': forms.TextInput(attrs={'placeholder': 'Email address'}),
-
         }
 
     def __init__(self, *args, **kwargs):
@@ -305,6 +310,19 @@ class AuthorForm(forms.ModelForm):
         self.fields['password'].required = False
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
+
+    def clean_orcid(self):
+        orcid_string = self.cleaned_data.get('orcid')
+        print(orcid_string)
+        try:
+            return utility_clean_orcid(orcid_string)
+        except ValueError:
+            self.add_error(
+                'orcid',
+                'An ORCID must be in the pattern https://orcid.org/0000-0000-0000-0000 or'
+                ' 0000-0000-0000-0000',
+            )
+        return orcid_string
 
 
 class FileDetails(forms.ModelForm):
@@ -355,6 +373,7 @@ class EditFrozenAuthor(forms.ModelForm):
             'name_suffix',
             'institution',
             'department',
+            'frozen_biography',
             'country',
             'is_corporate',
             'frozen_email',
@@ -375,6 +394,18 @@ class EditFrozenAuthor(forms.ModelForm):
                 pass
             obj.save()
         return obj
+
+    def clean_frozen_orcid(self):
+        orcid_string = self.cleaned_data.get('frozen_orcid')
+        try:
+            return utility_clean_orcid(orcid_string)
+        except ValueError:
+            self.add_error(
+                'frozen_orcid',
+                'An ORCID must be in the pattern https://orcid.org/0000-0000-0000-0000 or'
+                ' 0000-0000-0000-0000',
+            )
+        return orcid_string
 
 
 class IdentifierForm(forms.ModelForm):
@@ -465,3 +496,20 @@ class ProjectedIssueForm(forms.ModelForm):
     class Meta:
         model = models.Article
         fields = ('projected_issue',)
+
+
+def utility_clean_orcid(orcid):
+    """
+    Utility function that cleans an ORCID ID.
+    """
+    if orcid:
+        orcid_regex = re.compile('([0]{4})-([0-9]{4})-([0-9]{4})-([0-9]{3})([0-9X]{1})')
+        result = orcid_regex.search(orcid)
+
+        if result:
+            return result.group(0)
+        else:
+            raise ValueError('ORCID is not valid.')
+
+    # ORCID is None.
+    return orcid

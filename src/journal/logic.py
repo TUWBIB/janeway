@@ -428,10 +428,9 @@ def handle_search_controls(request, search_term=None, keyword=None, redir=False,
         search_term = request.GET.get('article_search', '')
         keyword = request.GET.get('keyword', False)
         sort = request.GET.get('sort', 'title')
-        if keyword:
-            form = SearchForm({'article_search':'', 'sort': sort})
-        else:
-            form = SearchForm({'article_search':search_term, 'sort': sort})
+        if sort == "relevance":
+            sort = 'title'
+        form = SearchForm(request.GET)
 
         return search_term, keyword, sort, form, None
 
@@ -552,6 +551,25 @@ def get_table_from_html(table_name, content):
     table_div = soup.find("div", {'id': table_name})
     table = table_div.find("table")
     return table
+
+
+def get_all_tables_from_html(content):
+    """
+    Uses BS4 to fetch all tables in html.
+    :param content: HTML content
+    """
+    soup = BeautifulSoup(str(content), 'lxml')
+    tables = []
+
+    for table in soup.findAll('div', attrs={'class': 'table-expansion'}):
+        tables.append(
+            {
+                'id': table.get('id'),
+                'content': str(table)
+            }
+        )
+
+    return tables
 
 
 def parse_html_table_to_csv(table, table_name):
