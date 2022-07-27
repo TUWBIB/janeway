@@ -702,7 +702,22 @@ ul.actions li button {
 
 ul.menu {
     font-weight: 400;
+}
 
 .wrap-long-text{
     word-wrap: anywhere;
+}
+
+.spacer-top-20 {
+ margin-top: 20px;
+}
+
+#review_controls {
+    padding-bottom: 20px;
+}
+
+.facet {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
 }

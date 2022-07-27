@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.shortcuts import render, get_object_or_404, redirect, Http404
 from django.template.defaultfilters import linebreaksbr
 from django.utils import timezone
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.contrib.sessions.models import Session
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -29,6 +29,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils import translation
 from django.db.models import Q
+from django.utils.decorators import method_decorator
+from django.views import generic
 
 from core import models, forms, logic, workflow, models as core_models
 from security.decorators import editor_user_required, article_author_required, has_journal
@@ -41,8 +43,12 @@ from proofing import logic as proofing_logic
 from proofing import models as proofing_models
 from utils import models as util_models, setting_handler, orcid
 from utils.logger import get_logger
+from utils.logic import get_janeway_version
 from utils.decorators import GET_language_override
 from utils.shared import language_override_redirect
+from utils.logic import get_janeway_version
+from repository import models as rm
+from events import logic as events_logic
 
 
 logger = get_logger(__name__)
@@ -630,8 +636,8 @@ def manager_index(request):
     support_message = logic.render_nested_setting(
         'support_contact_message_for_staff',
         'general',
-        [('support_email','general')],
-        request
+        request,
+        nested_settings=[('support_email','general')],
     )
 
     context = {
@@ -641,6 +647,7 @@ def manager_index(request):
             journal=request.journal
         ).select_related('section')[:25],
         'support_message': support_message,
+        'version': get_janeway_version(),
     }
     return render(request, template, context)
 
@@ -1662,26 +1669,25 @@ def kanban(request):
     assigned_table = production_models.ProductionAssignment.objects.filter(article__journal=request.journal)
     assigned = [assignment.article.pk for assignment in assigned_table]
 
-    prod_unassigned_articles = submission_models.Article.objects.filter(
-        stage=submission_models.STAGE_TYPESETTING, journal=request.journal).exclude(
-        id__in=assigned)
-    assigned_articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_TYPESETTING,
-                                                                 journal=request.journal).exclude(
-        id__in=unassigned_articles)
+    prod_articles = submission_models.Article.objects.filter(
+        stage=submission_models.STAGE_TYPESETTING, journal=request.journal)
+    assigned_articles = submission_models.Article.objects.filter(pk__in=assigned)
 
-    proofing_assigned_table = proofing_models.ProofingAssignment.objects.filter(article__journal=request.journal)
+    proofing_assigned_table = proofing_models.ProofingAssignment.objects.filter(
+        article__journal=request.journal,
+    )
     proofing_assigned = [assignment.article.pk for assignment in proofing_assigned_table]
 
-    proof_unassigned_articles = submission_models.Article.objects.filter(
-        stage=submission_models.STAGE_PROOFING, journal=request.journal).exclude(
-        id__in=proofing_assigned)
-    proof_assigned_articles = submission_models.Article.objects.filter(stage=submission_models.STAGE_PROOFING,
-                                                                       journal=request.journal).exclude(
-        id__in=proof_unassigned_articles)
+    proof_articles = submission_models.Article.objects.filter(
+        stage=submission_models.STAGE_PROOFING, journal=request.journal)
+    proof_assigned_articles = submission_models.Article.objects.filter(
+        pk__in=proofing_assigned,
+    )
 
-    prepub = submission_models.Article.objects.filter(Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION),
-                                                      journal=request.journal) \
-        .order_by('-date_submitted')
+    prepub = submission_models.Article.objects.filter(
+        Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION),
+        journal=request.journal,
+    ).order_by('-date_submitted')
 
     articles_in_workflow_plugins = workflow.articles_in_workflow_plugins(request)
 
@@ -1689,9 +1695,9 @@ def kanban(request):
         'unassigned_articles': unassigned_articles,
         'in_review': in_review,
         'copyediting': copyediting,
-        'production': prod_unassigned_articles,
+        'production': prod_articles,
         'production_assigned': assigned_articles,
-        'proofing': proof_unassigned_articles,
+        'proofing': proof_articles,
         'proofing_assigned': proof_assigned_articles,
         'prepubs': prepub,
         'articles_in_workflow_plugins': articles_in_workflow_plugins,
@@ -2016,3 +2022,299 @@ def set_session_timezone(request):
             content_type='application/json',
             status=200,
     )
+
+
+@login_required
+def request_submission_access(request):
+    if request.repository:
+        check = rm.RepositoryRole.objects.filter(
+            repository=request.repository,
+            user=request.user,
+            role__slug='author',
+        ).exists()
+    elif request.journal:
+        check = request.user.is_author(request)
+    else:
+        raise Http404('The Submission Access page is only accessible on Repository and Journal sites.')
+
+    active_request = models.AccessRequest.objects.filter(
+        user=request.user,
+        journal=request.journal,
+        repository=request.repository,
+        processed=False,
+    ).first()
+    role = models.Role.objects.get(slug='author')
+    form = forms.AccessRequestForm(
+        journal=request.journal,
+        repository=request.repository,
+        user=request.user,
+        role=role,
+    )
+
+    if request.POST and not active_request:
+        form = forms.AccessRequestForm(
+            request.POST,
+            journal=request.journal,
+            repository=request.repository,
+            user=request.user,
+            role=role,
+        )
+        if form.is_valid():
+            access_request = form.save()
+            event_kwargs = {
+                'request': request,
+                'access_request': access_request,
+            }
+            events_logic.Events.raise_event(
+                'on_access_request',
+                **event_kwargs,
+            )
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Access Request Sent.',
+            )
+            return redirect(
+                reverse(
+                    'request_submission_access'
+                )
+            )
+
+    template = 'admin/core/request_submission_access.html'
+    context = {
+        'check': check,
+        'active_request': active_request,
+        'form': form,
+    }
+    return render(
+        request,
+        template,
+        context,
+    )
+
+
+@staff_member_required
+def manage_access_requests(request):
+    # If we don't have a journal or repository return a 404.
+    if not request.journal and not request.repository:
+        raise Http404('The Submission Access page is only accessible on Repository and Journal sites.')
+
+    active_requests = models.AccessRequest.objects.filter(
+        journal=request.journal,
+        repository=request.repository,
+        processed=False,
+    )
+    if request.POST:
+        if 'approve' in request.POST:
+            pk = request.POST.get('approve')
+            access_request = active_requests.get(pk=pk)
+            decision = 'approve'
+
+            if request.journal:
+                access_request.user.add_account_role(
+                    access_request.role.slug,
+                    request.journal,
+                )
+            elif request.repository:
+                rm.RepositoryRole.objects.get_or_create(
+                    repository=access_request.repository,
+                    user=access_request.user,
+                    role=access_request.role
+                )
+        elif 'reject' in request.POST:
+            pk = request.POST.get('reject')
+            access_request = active_requests.get(pk=pk)
+            decision = 'reject'
+
+        if access_request:
+            eval_note = request.POST.get('eval_note')
+            access_request.evaluation_note = eval_note
+            access_request.processed = True
+            access_request.save()
+            event_kwargs = {
+                'decision': decision,
+                'access_request': access_request,
+                'request': request,
+            }
+            events_logic.Events.raise_event(
+                'on_access_request_complete',
+                **event_kwargs,
+            )
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Access Request Processed.',
+            )
+        return redirect(
+            reverse(
+                'manage_access_requests',
+            )
+        )
+    template = 'admin/core/manage_access_requests.html'
+    context = {
+        'active_requests': active_requests,
+    }
+    return render(
+        request,
+        template,
+        context,
+    )
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class FilteredArticlesListView(generic.ListView):
+    model = submission_models.Article
+    template_name = 'core/manager/article_list.html'
+    paginate_by = '25'
+    facets = {}
+
+    def get_paginate_by(self, queryset):
+        paginate_by = self.request.GET.get('paginate_by', self.paginate_by)
+        if paginate_by == 'all':
+            if queryset:
+                paginate_by = len(queryset)
+            else:
+                paginate_by = self.paginate_by
+        return paginate_by
+
+    def get_context_data(self, **kwargs):
+        params_querydict = self.request.GET.copy()
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        context['paginate_by'] = params_querydict.get('paginate_by', self.paginate_by)
+        facets = self.get_facets()
+
+        # Most initial values are in list form
+        # The exception is date_time facets
+        initial = dict(params_querydict.lists())
+        for keyword, value in initial.items():
+            if keyword in facets:
+                if facets[keyword]['type'] == 'date_time':
+                    initial[keyword] = value[0]
+
+        context['facet_form'] = forms.CBVFacetForm(
+            queryset=queryset,
+            facet_queryset=self.get_facet_queryset(),
+            facets=facets,
+            initial=initial,
+        )
+
+        context['actions'] = self.get_actions()
+
+        params_querydict.pop('action_status', '')
+        params_querydict.pop('action_error', '')
+        context['params_string'] = params_querydict.urlencode()
+        context['version'] = get_janeway_version()
+        context['action_maximum_size'] = setting_handler.get_setting(
+            'Identifiers',
+            'doi_manager_action_maximum_size',
+            self.request.journal if self.request.journal else None,
+        ).processed_value
+        return context
+
+    def get_queryset(self, params_querydict=None):
+        if not params_querydict:
+            params_querydict = self.request.GET.copy()
+
+        # Clear any previous action status and error
+        params_querydict.pop('action_status', '')
+        params_querydict.pop('action_error', False)
+
+        self.queryset = super().get_queryset()
+        q_stack = []
+        facets = self.get_facets()
+        for facet in facets.values():
+            self.queryset = self.queryset.annotate(**facet.get('annotations', {}))
+        for keyword, value_list in params_querydict.lists():
+            if keyword in facets and value_list:
+                if value_list[0]:
+                    predicates = [(keyword, value) for value in value_list]
+                elif facets[keyword]['type'] != 'date_time':
+                    if value_list[0] == '' and facets[keyword]['type'] != 'date_time':
+                        predicates = [(keyword, '')]
+                    else:
+                        predicates = [(keyword+'__isnull', True)]
+                else:
+                    predicates = []
+                query = Q()
+                for predicate in predicates:
+                    query |= Q(predicate)
+                q_stack.append(query)
+        return self.order_queryset(
+            self.filter_queryset_if_journal(
+                self.queryset.filter(*q_stack)
+            )
+        ).exclude(
+            stage=submission_models.STAGE_UNSUBMITTED,
+        )
+
+    def order_queryset(self, queryset):
+        return queryset.order_by('title')
+
+    def get_facets(self):
+        facets = {}
+        return self.filter_facets_if_journal(facets)
+
+    def get_facet_queryset(self):
+        # The default behavior is for the facets to stay the same
+        # when a filter is chosen.
+        # To make them change dynamically, return None 
+        # instead of a separate facet.
+        # return None
+        queryset = self.filter_queryset_if_journal(
+            self.model.objects.all()
+        ).exclude(
+            stage=submission_models.STAGE_UNSUBMITTED
+        )
+        facets = self.get_facets()
+        for facet in facets.values():
+            queryset = queryset.annotate(**facet.get('annotations', {}))
+        return queryset
+
+    def get_actions(self):
+        return []
+
+    def post(self, request, *args, **kwargs):
+
+        action_status = ''
+        action_error = False
+        params_string = request.POST.get('params_string')
+        params_querydict = QueryDict(params_string, mutable=True)
+        actions = self.get_actions()
+        queryset = self.get_queryset(params_querydict=params_querydict)
+        if request.journal:
+            querysets = [queryset]
+        else:
+            querysets = []
+            for journal in {article.journal for article in queryset}:
+                querysets.append(queryset.filter(journal=journal))
+
+        if actions:
+            for action in actions:
+                if action.get('name') in request.POST:
+                    for queryset in querysets:
+                        action_status, action_error = action.get('action')(queryset)
+                        messages.add_message(
+                            request,
+                            messages.INFO if not action_error else messages.ERROR,
+                            action_status,
+                        )
+
+        if params_string:
+            return redirect(f'{request.path}?{params_string}')
+        else:
+            return redirect(request.path)
+
+
+    def filter_queryset_if_journal(self, queryset):
+        if self.request.journal:
+            return queryset.filter(journal=self.request.journal)
+        else:
+            return queryset
+
+    def filter_facets_if_journal(self, facets):
+        if self.request.journal:
+            facets.pop('journal__pk', '')
+            return facets
+        else:
+            return facets

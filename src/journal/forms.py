@@ -13,15 +13,19 @@ from simplemathcaptcha.fields import MathCaptchaField
 from snowpenguin.django.recaptcha2.fields import ReCaptchaField
 from snowpenguin.django.recaptcha2.widgets import ReCaptchaWidget
 from django_summernote.widgets import SummernoteWidget
+from hcaptcha.fields import hCaptchaField
 
 from core import models as core_models
 from journal import models as journal_models, logic
+from utils.forms import CaptchaForm, LeftBooleanField
 
 SEARCH_SORT_OPTIONS = [
-        ('title', 'Titles A-Z'),
-        ('-title', 'Titles Z-A'),
-        ('-date_published', 'Newest'),
-        ('date_published', 'Oldest'),
+        # Translators: Search order options
+        ('relevance', _('Relevance')),
+        ('title', _('Titles A-Z')),
+        ('-title', _('Titles Z-A')),
+        ('-date_published', _('Newest')),
+        ('date_published', _('Oldest')),
       ]
 
 
@@ -36,15 +40,7 @@ class JournalForm(forms.ModelForm):
         }
 
 
-class ContactForm(forms.ModelForm):
-
-    if settings.CAPTCHA_TYPE == 'simple_math':
-        question_template = _('What is %(num1)i %(operator)s %(num2)i? ')
-        are_you_a_robot = MathCaptchaField(label=_('Answer this question: '))
-    elif settings.CAPTCHA_TYPE == 'recaptcha':
-        are_you_a_robot = ReCaptchaField(widget=ReCaptchaWidget())
-    else:
-        are_you_a_robot = forms.CharField(widget=forms.HiddenInput(), required=False)
+class ContactForm(forms.ModelForm, CaptchaForm):
 
     def __init__(self, *args, **kwargs):
         subject = kwargs.pop('subject', None)
@@ -104,8 +100,36 @@ class EmailForm(forms.Form):
 
 
 class SearchForm(forms.Form):
-    article_search = forms.CharField(label='search term', min_length=3, max_length=100, required=False)
-    sort = forms.ChoiceField(label='sort by', widget=forms.Select, choices=SEARCH_SORT_OPTIONS)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.ENABLE_FULL_TEXT_SEARCH:
+            self.fields.pop('full_text', None)
+
+    article_search = forms.CharField(label=_('Search term'), min_length=3, max_length=100, required=False)
+    title = LeftBooleanField(initial=True, label=_('Search Titles'), required=False)
+    abstract = LeftBooleanField(initial=True, label=_('Search Abstract'), required=False)
+    authors = LeftBooleanField(initial=True, label=_('Search Authors'), required=False)
+    keywords = LeftBooleanField(label=_("Search Keywords"), required=False)
+    full_text = LeftBooleanField(initial=True, label=_("Search Full Text"), required=False)
+    orcid = LeftBooleanField(label=_("Search ORCIDs"), required=False)
+    sort = forms.ChoiceField(label=_('Sort results by'), widget=forms.Select, choices=SEARCH_SORT_OPTIONS)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.ENABLE_FULL_TEXT_SEARCH:
+            self.fields["sort"].choices = SEARCH_SORT_OPTIONS[1:]
+
+    def get_search_filters(self):
+        """ Generates a dictionary of search_filters from a search form"""
+        return {
+            "full_text": self.cleaned_data["full_text"],
+            "title": self.cleaned_data["title"],
+            "authors": self.cleaned_data["authors"],
+            "abstract": self.cleaned_data["abstract"],
+            "keywords": self.cleaned_data["keywords"],
+            "orcid": self.cleaned_data["orcid"],
+        }
 
 
 class IssueDisplayForm(forms.ModelForm):
@@ -116,4 +140,6 @@ class IssueDisplayForm(forms.ModelForm):
             'display_issue_number',
             'display_issue_year',
             'display_issue_title',
+            'display_article_number',
+            'display_article_page_numbers',
         )

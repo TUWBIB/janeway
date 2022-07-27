@@ -14,6 +14,7 @@ django-markdown-deux==1.0.5
 django-settings-export==1.2.1
 -e git+https://github.com/BirkbeckCTP/django-simple-math-captcha@1.11_fix#egg=django-simple-math-captcha
 django-recaptcha2==1.0.3
+django-hCaptcha==0.2.0
 django-summernote==0.8.11.1
 djangorestframework==3.11.2
 -e git+https://github.com/BirkbeckCTP/django-dynamicsites@f439c524cf964d957a75fbec4b23ad03a9a5d159#egg=dynamicsites
@@ -28,15 +29,17 @@ libsass==0.11.1
 lxml==4.6.5
 markdown2
 mock
+mozilla-django-oidc==1.2.4
 mysqlclient==1.3.12
 pdfkit
-Pillow==7.1.0
+pdfminer
+Pillow>=8.4.0
 psycopg2-binary~=2.8.0
 pyasn1==0.1.9
 pycparser==2.14
-PyJWT==1.6.1
+PyJWT==2.4.0
 python-crontab==2.2.3
-python-dateutil==2.6.0
+python-dateutil==2.8.1
 python-magic==0.4.13
 python-docx==0.8.6
 raven==6.0.0 # TODO: Optional for sentry
@@ -45,7 +48,9 @@ six==1.14.0
 sqlparse==0.2.3
 ua-parser==0.7.2
 user-agents==1.0.1
--e git+https://github.com/BirkbeckCTP/django-materialize.git@bcfbfd9150887328dddce965674c84b2b6e6b785#egg=django_materialize
+-e git+https://github.com/BirkbeckCTP/django-materialize.git@d92226dba2aa56de6933db06bbe144253bc08454#egg=django_materialize
 django-hijack==2.1.10
 geoip2==3.0.0 # Newer versions require python >= 3.6
 maxminddb==1.5.4
+freezegun==1.2.0
+swapper

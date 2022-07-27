@@ -344,6 +344,7 @@ def get_unpublished_preprints(request, user_subject_pks):
         date_submitted__isnull=False,
         date_declined__isnull=True,
         date_accepted__isnull=True,
+        repository=request.repository,
     ).prefetch_related(
         'preprintauthor_set'
     )
@@ -357,7 +358,9 @@ def get_unpublished_preprints(request, user_subject_pks):
 def get_published_preprints(request, user_subject_pks):
     published_preprints = models.Preprint.objects.filter(
         date_published__isnull=False,
-        date_submitted__isnull=False).prefetch_related(
+        date_submitted__isnull=False,
+        repository=request.repository,
+    ).prefetch_related(
         'preprintauthor_set'
     )
 
@@ -367,27 +370,16 @@ def get_published_preprints(request, user_subject_pks):
         return published_preprints.filter(pk__in=user_subject_pks)
 
 
-def get_preprint_if_id(preprint_id):
-    if preprint_id:
-        article = get_object_or_404(
-            models.Preprint,
-            pk=preprint_id,
-            date_submitted__isnull=True,
-        )
-    else:
-        article = None
-
-    return article
-
-
-# TODO: Update this
 @cache(300)
-def list_articles_without_subjects():
+def list_articles_without_subjects(repository=None):
     preprints = models.Preprint.objects.filter(
         date_submitted__isnull=False,
         subject__isnull=True,
     )
-
+    if repository:
+        preprints = preprints.filter(
+            repository=repository,
+        )
     return preprints
 
 
@@ -512,3 +504,29 @@ def store_preprint_access(request, preprint, file=None):
                 identifier=identifier,
                 country=country,
             )
+
+
+def get_review_notification(request, preprint, review):
+    url = request.repository.site_url(
+        path=reverse(
+            'repository_submit_review',
+            kwargs={
+                'review_id': review.pk,
+                'access_code': review.access_code,
+            }
+        )
+    )
+    context = {
+        'preprint': preprint,
+        'request': request,
+        'review': review,
+        'url': url,
+    }
+    template = request.repository.review_invitation
+    email_content = render_template.get_message_content(
+        request,
+        context,
+        template,
+        template_is_setting=True,
+    )
+    return email_content

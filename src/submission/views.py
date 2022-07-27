@@ -20,6 +20,8 @@ from security.decorators import (
     article_edit_user_required,
     production_user_or_editor_required,
     editor_user_required,
+    submission_authorised,
+    article_is_not_submitted
 )
 from submission import forms, models, logic, decorators
 from events import logic as event_logic
@@ -31,6 +33,7 @@ from utils.shared import create_language_override_redirect
 
 @login_required
 @decorators.submission_is_enabled
+@submission_authorised
 def start(request, type=None):
     """
     Starts the submission process, presents various checkboxes
@@ -97,7 +100,9 @@ def submit_submissions(request):
 @login_required
 @decorators.submission_is_enabled
 @decorators.funding_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_funding(request, article_id):
     """
     Presents a form for the user to complete with article information
@@ -147,7 +152,9 @@ def submit_funding(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_info(request, article_id):
     """
     Presents a form for the user to complete with article information
@@ -163,7 +170,13 @@ def submit_info(request, article_id):
             'submission_summary',
             request.journal,
         ).processed_value
-        form = forms.ArticleInfoSubmit(
+
+        # Determine the form to use depending on whether the user is an editor.
+        article_info_form = forms.ArticleInfoSubmit
+        if request.user.is_editor(request):
+            article_info_form = forms.EditorArticleInfoSubmit
+
+        form = article_info_form(
             instance=article,
             additional_fields=additional_fields,
             submission_summary=submission_summary,
@@ -171,7 +184,7 @@ def submit_info(request, article_id):
         )
 
         if request.POST:
-            form = forms.ArticleInfoSubmit(
+            form = article_info_form(
                 request.POST,
                 instance=article,
                 additional_fields=additional_fields,
@@ -217,7 +230,9 @@ def publisher_notes_order(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_authors(request, article_id):
     """
     Allows the submitting author to add other authors to the submission.
@@ -398,7 +413,9 @@ def delete_author(request, article_id, author_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_files(request, article_id):
     """
     Allows the submitting author to upload files and links them to the submission
@@ -482,17 +499,11 @@ def submit_files(request, article_id):
 
     template = "admin/submission/submit_files.html"
 
-    guidelines = request.journal.get_setting(
-        'general',
-        'file_submission_guidelines'
-    )
-
     context = {
         'article': article,
         'error': error,
         'form': form,
         'modal': modal,
-        'file_submission_guidelines': guidelines,
     }
 
     return render(request, template, context)
@@ -500,7 +511,9 @@ def submit_files(request, article_id):
 
 @login_required
 @decorators.submission_is_enabled
+@article_is_not_submitted
 @article_edit_user_required
+@submission_authorised
 def submit_review(request, article_id):
     """
     A page that allows the user to review a submission.

@@ -15,18 +15,29 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import (
+    connection,
+    models,
+    transaction,
+)
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+import swapper
 
 from core import files, validators
 from core.file_system import JanewayFileSystemStorage
-from core.model_utils import AbstractSiteModel, PGCaseInsensitiveEmailField
+from core.model_utils import (
+    AbstractLastModifiedModel,
+    AbstractSiteModel,
+    PGCaseInsensitiveEmailField,
+    SearchLookup,
+)
 from review import models as review_models
 from copyediting import models as copyediting_models
 from submission import models as submission_models
@@ -134,6 +145,7 @@ TIMEZONE_CHOICES = tuple(zip(pytz.all_timezones, pytz.all_timezones))
 
 SUMMERNOTE_SENTINEL = '<p><br></p>'
 
+
 class Country(models.Model):
     code = models.TextField(max_length=5)
     name = models.TextField(max_length=255)
@@ -187,7 +199,7 @@ class AccountManager(BaseUserManager):
 
 class Account(AbstractBaseUser, PermissionsMixin):
     email = PGCaseInsensitiveEmailField(unique=True, verbose_name=_('Email'))
-    username = models.CharField(max_length=48, unique=True, verbose_name=_('Username'))
+    username = models.CharField(max_length=254, unique=True, verbose_name=_('Username'))
 
     first_name = models.CharField(max_length=300, null=True, blank=False, verbose_name=_('First name'))
     middle_name = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Middle name'))
@@ -198,7 +210,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
                                   verbose_name=_('Salutation'))
     biography = models.TextField(null=True, blank=True, verbose_name=_('Biography'))
     orcid = models.CharField(max_length=40, null=True, blank=True, verbose_name=_('ORCiD'))
-    institution = models.CharField(max_length=1000, verbose_name=_('Institution'))
+    institution = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('Institution'))
     department = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Department'))
     twitter = models.CharField(max_length=300, null=True, blank=True, verbose_name="Twitter Handle")
     facebook = models.CharField(max_length=300, null=True, blank=True, verbose_name="Facebook Handle")
@@ -283,10 +295,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
                                   self.middle_name if self.middle_name is not None else '')
 
     def full_name(self):
-        if self.middle_name:
-            return u"%s %s %s" % (self.first_name, self.middle_name, self.last_name)
-        else:
-            return u"%s %s" % (self.first_name, self.last_name)
+        name_elements = [
+            self.first_name,
+            self.middle_name,
+            self.last_name
+        ]
+        return " ".join([name for name in name_elements if name])
 
     def salutation_name(self):
         if self.salutation:
@@ -304,10 +318,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
             return 'N/A'
 
     def affiliation(self):
-        if self.department:
-            return "{0}, {1}".format(self.department, self.institution)
-
-        return self.institution
+        if self.institution and self.department:
+            return "{}, {}".format(self.department, self.institution)
+        elif self.institution:
+            return self.institution
+        else:
+            return ''
 
     def active_reviews(self):
         return review_models.ReviewAssignment.objects.filter(
@@ -709,7 +725,7 @@ class SettingValue(models.Model):
         super().save(*args, **kwargs)
 
 
-class File(models.Model):
+class File(AbstractLastModifiedModel):
     article_id = models.PositiveIntegerField(blank=True, null=True, verbose_name="Article PK")
 
     mime_type = models.CharField(max_length=255)
@@ -722,7 +738,6 @@ class File(models.Model):
     privacy = models.CharField(max_length=20, choices=privacy_types, default="owner")
 
     date_uploaded = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
 
     is_galley = models.BooleanField(default=False)
 
@@ -730,7 +745,15 @@ class File(models.Model):
     is_remote = models.BooleanField(default=False)
     remote_url = models.URLField(blank=True, null=True, verbose_name="Remote URL of file")
 
-    history = models.ManyToManyField('FileHistory')
+    history = models.ManyToManyField(
+        'FileHistory',
+        blank=True,
+    )
+    text = models.OneToOneField(swapper.get_model_name('core', 'FileText'),
+        blank=True, null=True,
+        related_name="file",
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         ordering = ('sequence', 'pk')
@@ -853,11 +876,117 @@ class File(models.Model):
         else:
             return self.original_filename
 
+    def index_full_text(self, save=True):
+        """ Extracts text from the File and stores it into an indexed model
+
+        Depending on the database backend, preprocessing ahead of indexing varies;
+        As an example, for Postgresql, instead of storing the text as a LOB, a
+        tsvector of the text is generated which is used for indexing. There is no
+        such approach for MySQL, so the text is stored in full and then indexed,
+        which takes significantly more disk space.
+
+        Custom indexing routines can be provided with the swappable model under
+        settings.py `CORE_FILETEXT_MODEL`
+        :return: A bool indicating if the file has been succesfully indexed
+        """
+        indexed = False
+        try:
+            # TODO: Only aricle files are supported at the moment since File
+            # objects don't know the path to the actual file unless you also
+            # know the context (article/preprint/journal...) of the file
+            path = self.self_article_path()
+            if not path:
+                return indexed
+            text_parser = files.MIME_TO_TEXT_PARSER[self.mime_type]
+        except KeyError:
+            # We have no support for indexing files of this type yet
+            return indexed
+        parsed_text = text_parser(path)
+        FileTextModel = swapper.load_model("core", "FileText")
+        preprocessed_text = FileTextModel.preprocess_contents(parsed_text)
+        if self.text:
+            self.text.update_contents(preprocessed_text)
+            indexed = True
+        else:
+            file_text_obj = FileTextModel.objects.create(
+                contents=preprocessed_text,
+                file=self,
+            )
+            self.text = file_text_obj
+            if save:
+                self.save()
+            indexed = True
+
+        return indexed
+
+
     def __str__(self):
         return u'%s' % self.original_filename
 
     def __repr__(self):
         return u'%s' % self.original_filename
+
+
+class AbstractFileText(models.Model):
+    contents = models.TextField(blank=True, null=True)
+    date_populated = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        abstract = True
+
+    @staticmethod
+    def preprocess_contents(text, lang=None):
+        return text
+
+    def update_contents(self, text, lang=None):
+        self.contents = self.preprocess_contents(text)
+        self.save()
+
+    def save(self, *args, **kwargs):
+        self.date_populated = timezone.now()
+        super().save(*args, **kwargs)
+
+
+class FileText(AbstractFileText):
+    class Meta:
+        swappable = swapper.swappable_setting('core', 'FileText')
+    pass
+
+
+class PGFileText(AbstractFileText):
+    contents = SearchVectorField(blank=True, null=True, editable=False)
+
+    class Meta:
+        required_db_vendor = "postgresql"
+
+
+    @staticmethod
+    def preprocess_contents(text, lang=None):
+        """ Casts the given text into a postgres TSVector
+
+        The result can be cached so that there is no need to store the original
+        text and also speed up the search queries.
+        The drawback is that the cached TSVector needs to be regenerated
+        whenever the underlying field changes.
+
+        Postgres `to_tsvector()` function normalises the input before handing it
+        over to `tsvector()`.
+        """
+        cursor = connection.cursor()
+        # Remove NULL characters before vectorising
+        text = text.replace("\x00", "\uFFFD")
+        result = cursor.execute("SELECT to_tsvector(%s) as vector", [text])
+        return cursor.fetchone()[0]
+
+
+@receiver(models.signals.pre_save, sender=File)
+def update_file_index(sender, instance, **kwargs):
+    """ Updates the indexed contents in the database """
+    if not instance.pk:
+        return False
+
+    if settings.ENABLE_FULL_TEXT_SEARCH and instance.text:
+        instance.index_full_text(save=False)
 
 
 class FileHistory(models.Model):
@@ -893,7 +1022,7 @@ def galley_type_choices():
     )
 
 
-class Galley(models.Model):
+class Galley(AbstractLastModifiedModel):
     # Local Galley
     article = models.ForeignKey('submission.Article', null=True)
     file = models.ForeignKey(File)
@@ -1254,6 +1383,10 @@ BASE_ELEMENTS = [
      'article_url': True}
 ]
 
+BASE_ELEMENT_NAMES = [
+    element.get('name') for element in BASE_ELEMENTS
+]
+
 
 class Workflow(models.Model):
     journal = models.ForeignKey('journal.Journal')
@@ -1357,6 +1490,50 @@ class LoginAttempt(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
 
 
+class AccessRequest(models.Model):
+    journal = models.ForeignKey(
+        'journal.Journal',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    repository = models.ForeignKey(
+        'repository.Repository',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        'core.Account',
+        on_delete=models.CASCADE,
+    )
+    role = models.ForeignKey(
+        'core.Role',
+        on_delete=models.CASCADE,
+    )
+    requested = models.DateTimeField(
+        default=timezone.now,
+    )
+    processed = models.BooleanField(
+        default=False,
+    )
+    text = models.TextField(
+        blank=True,
+        null=True,
+    )
+    evaluation_note = models.TextField(
+        null=True,
+        help_text='This note will be sent to the requester when you approve or decline their request.',
+    )
+
+    def __str__(self):
+        return 'User {} requested {} permission for {}'.format(
+            self.user.full_name(),
+            self.journal.name if self.journal else self.repository.name,
+            self.role.name,
+        )
+
+
 @receiver(post_save, sender=Account)
 def setup_user_signature(sender, instance, created, **kwargs):
     if created and not instance.signature:
@@ -1421,6 +1598,7 @@ def log_hijack_ended(sender, hijacker_id, hijacked_id, request, **kwargs):
         request=request,
         target=hijacked
     )
+
 
 hijack_started.connect(log_hijack_started)
 hijack_ended.connect(log_hijack_ended)

@@ -75,7 +75,8 @@ src/core/settings.py
 /src/media/django-summernote
 /src/media/*
 /src/collected-static
-
+/src/files/robots/**
+/src/files/sitemaps/**
 mydatabase
 node_modules/
 src/plugins/*
@@ -114,8 +115,8 @@ janeway\.sublime-workspace
 terminal\.glue
 
 src/core/management/commands
-
 src/core/management/__init__\.py
+src/utils/management/commands/test_command.py
 
 src/auth\.json
 
@@ -131,3 +132,9 @@ src/themes/superhero
 local.env
 .lando.local.yml
 dockerfiles/lando_local.env
+
+src/utils/management/commands/test_command.py
+
+# Emacs backup files
+*~
+

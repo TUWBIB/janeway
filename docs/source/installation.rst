@@ -141,7 +141,7 @@ and follow the on screen instructions.
 
    > Press main contact (email): ajrbyers@gmail.com
 
-   > Thanks! We will now set up out first journal.
+   > Thanks! We will now set up our first journal.
 
    > Journal #1 code: tstj
 
@@ -156,3 +156,14 @@ Install)|Janeway,-Apache-and-WSGI]] guide.
 4. Once the command line installer is complete you can complete the
    setup process by directing your browser to:
    http://yourfirstjournal.com/install/
+
+Single Sign On
+--------------
+Janeway supports single sign on from two sources: Open ID Connect (OIDC) and ORCiD.
+
+.. toctree::
+   :maxdepth: 4
+   :caption: SSO Providers
+
+   oidc
+   orcid

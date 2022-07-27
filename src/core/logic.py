@@ -226,6 +226,15 @@ def get_settings_to_edit(display_group, journal):
             {'name': 'disable_journal_submission',
              'object': setting_handler.get_setting('general', 'disable_journal_submission', journal)
              },
+            {'name': 'limit_access_to_submission',
+             'object': setting_handler.get_setting('general', 'limit_access_to_submission', journal)
+             },
+            {'name': 'submission_access_request_text',
+             'object': setting_handler.get_setting('general', 'submission_access_request_text', journal)
+             },
+            {'name': 'submission_access_request_contact',
+             'object': setting_handler.get_setting('general', 'submission_access_request_contact', journal)
+             },
             {'name': 'abstract_required',
              'object': setting_handler.get_setting(
                  'general',
@@ -288,6 +297,20 @@ def get_settings_to_edit(display_group, journal):
                 'object': setting_handler.get_setting(
                     'general',
                     'file_submission_guidelines', journal
+                ),
+            },
+            {
+                'name': 'manuscript_file_submission_instructions',
+                'object': setting_handler.get_setting(
+                    'general',
+                    'manuscript_file_submission_instructions', journal
+                ),
+            },
+            {
+                'name': 'data_figure_file_submission_instructions',
+                'object': setting_handler.get_setting(
+                    'general',
+                    'data_figure_file_submission_instructions', journal
                 ),
             }
         ]
@@ -353,6 +376,10 @@ def get_settings_to_edit(display_group, journal):
                 'name': 'hide_review_metadata_from_authors',
                 'object': setting_handler.get_setting('general', 'hide_review_metadata_from_authors', journal),
             },
+            {
+                'name': 'accept_article_warning',
+                'object': setting_handler.get_setting('general', 'accept_article_warning', journal),
+            },
         ]
         setting_group = 'general'
 
@@ -360,7 +387,7 @@ def get_settings_to_edit(display_group, journal):
         xref_settings = [
             'use_crossref', 'crossref_test', 'crossref_username', 'crossref_password', 'crossref_email',
             'crossref_name', 'crossref_prefix', 'crossref_registrant', 'doi_display_prefix', 'doi_display_suffix',
-            'doi_pattern'
+            'doi_pattern', 'doi_manager_action_maximum_size',
         ]
 
         settings = process_setting_list(xref_settings, 'Identifiers', journal)
@@ -381,7 +408,8 @@ def get_settings_to_edit(display_group, journal):
             'publisher_url', 'privacy_policy_url', 'auto_signature',
             'slack_logging', 'slack_webhook', 'twitter_handle',
             'switch_language', 'enable_language_text', 'google_analytics_code',
-            'display_login_page_notice', 'login_page_notice',
+            'use_ga_four', 'display_login_page_notice', 'login_page_notice', 
+            'display_register_page_notice', 'register_page_notice',
             'support_email', 'support_contact_message_for_staff',
         ]
 
@@ -855,26 +883,34 @@ def get_homepage_elements(request):
 
     return homepage_elements, homepage_element_names
 
+
 def render_nested_setting(
         setting_name,
         setting_group,
-        nested_settings,
-        request
+        request,
+        article=None,
+        nested_settings=None,
     ):
 
     setting = setting_handler.get_setting(
         setting_group,
         setting_name,
         request.journal,
-    ).value
+    ).processed_value
 
     setting_context = {}
+
+    if article:
+        setting_context['article'] = article
+
+    if not nested_settings:
+        nested_settings=[]
     for name, group in nested_settings:
         setting_context[name] = setting_handler.get_setting(
             group,
             name,
             request.journal
-        ).value
+        ).processed_value
 
     rendered_string = render_template.get_message_content(
         request,

@@ -224,7 +224,6 @@ header {
 
     .top-bar-image {
       max-height: $topbar-height;
-      min-height: $topbar-height;
       max-width:330px;
       padding: 5px;
       margin-top:-20px;
@@ -1282,4 +1281,20 @@ button.list-group-item-danger.active:focus {
 
 .homepage-element-about {
   margin-top: 30px;
+}
+
+.homepage-element-about {
+  margin-top: 30px;
+}
+
+.homepage-element-search-bar {
+  font-size: 1.5rem;
+}
+
+.homepage-element-search-bar input[type="text"] {
+  font-size: 1.5rem;
+}
+
+.table-wrap {
+  overflow-x: scroll;
 }

@@ -1860,26 +1860,79 @@ def author_list(request):
     return render(request, template, context)
 
 
-def sitemap(request):
+def sitemap(request, issue_id=None):
     """
     Renders an XML sitemap based on articles and pages available to the journal.
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    articles = submission_models.Article.objects.filter(date_published__lte=timezone.now(), journal=request.journal)
-    cms_pages = cms_models.Page.objects.filter(object_id=request.site_type.id, content_type=request.model_content_type)
+    try:
+        path_parts = None
+        if issue_id:
+            issue = get_object_or_404(
+                models.Issue,
+                pk=issue_id,
+                journal=request.journal,
+            )
+            path_parts = [
+                request.journal.code,
+                '{}_sitemap.xml'.format(issue.pk),
+            ]
+        else:
+            path_parts = [
+                request.journal.code,
+                'sitemap.xml',
+            ]
 
-    template = 'journal/sitemap.xml'
+        if path_parts:
+            return files.serve_sitemap_file(path_parts)
+    except FileNotFoundError:
+        logger.warning('Sitemap for {} not found.'.format(request.journal.name))
 
-    context = {
-        'articles': articles,
-        'cms_pages': cms_pages,
-    }
-    return render(request, template, context, content_type="application/xml")
-
+    raise Http404()
 
 @decorators.frontend_enabled
 def search(request):
+    if settings.ENABLE_FULL_TEXT_SEARCH:
+        return full_text_search(request)
+    else:
+        return old_search(request)
+
+@decorators.frontend_enabled
+def full_text_search(request):
+    """ Allows a user to search for articles using various filters
+    :param request: HttpRequest object
+    :return: HttpResponse object
+    """
+    search_term = None
+    keyword = None
+    redir = False
+    sort = 'title'
+    articles = []
+
+    search_term, keyword, sort, form, redir = logic.handle_search_controls(
+        request,
+    )
+    if search_term:
+        form.is_valid()
+        articles = submission_models.Article.objects.search(
+            search_term, form.get_search_filters(),
+            sort=form.cleaned_data.get("sort"),
+            site=request.site_object,
+        )
+
+    template = 'journal/full-text-search.html'
+    context = {
+        'articles': articles,
+        'article_search': search_term,
+        'keyword': keyword,
+        'form': form,
+    }
+
+    return render(request, template, context)
+
+@decorators.frontend_enabled
+def old_search(request):
     """
     Allows a user to search for articles by name or author name.
     :param request: HttpRequest object

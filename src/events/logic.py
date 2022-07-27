@@ -232,6 +232,14 @@ class Events:
     # raised when an PreprintVersion is approved or declined
     ON_PREPRINT_VERSION_UPDATE = 'on_preprint_version_update'
 
+    # kwargs: request, preprint, review, message
+    # raised when an Review invite is sent
+    ON_PREPRINT_REVIEW_NOTIFICATION = 'on_preprint_review_notification'
+
+    # kwargs: request, review, status_change [accept, delcine, withdraw, complete]
+    # raised when a Review changes status
+    ON_PREPRINT_REVIEW_STATUS_CHANGE = 'on_preprint_review_status_change'
+
     # kwargs: handshake_url, request, article, switch_stage (optional)
     # raised when a workflow element completes to hand over to the next one
     ON_WORKFLOW_ELEMENT_COMPLETE = 'on_workflow_element_complete'
@@ -239,6 +247,14 @@ class Events:
     # kwargs: request, article, article_access
     # raised when a view or download passes COUNTER-style compliance checks
     ON_ARTICLE_ACCESS = 'on_article_access'
+
+    # kwargs: request, access_request
+    # raised when a user requests access to submit an article to a journal or repo.
+    ON_ACCESS_REQUEST = 'on_access_request'
+
+    # kwargs: request
+    # raised when a user access request is evaluated by staff.
+    ON_ACCESS_REQUEST_COMPLETE = 'on_access_request_complete'
 
     @staticmethod
     def raise_event(event_name, task_object=None, **kwargs):

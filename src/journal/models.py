@@ -28,7 +28,7 @@ from core import (
         workflow,
 )
 from core.file_system import JanewayFileSystemStorage
-from core.model_utils import AbstractSiteModel, SVGImageField
+from core.model_utils import AbstractSiteModel, SVGImageField, AbstractLastModifiedModel
 from press import models as press_models
 from submission import models as submission_models
 from utils import setting_handler, logic, install
@@ -129,6 +129,7 @@ class Journal(AbstractSiteModel):
         help_text=ugettext('The tiny round or square image appearing in browser '
                            'tabs before the webpage title'),
     )
+    # DEPRECATED "description" in favour of "journal_description" setting
     description = models.TextField(null=True, blank=True, verbose_name="Journal Description")
     contact_info = models.TextField(null=True, blank=True, verbose_name="Contact Information")
     keywords = models.ManyToManyField("submission.Keyword", blank=True, null=True)
@@ -148,6 +149,11 @@ class Journal(AbstractSiteModel):
         help_text=ugettext('When enabled, the journal is marked as not hosted in Janeway.'),
     )
     is_conference = models.BooleanField(default=False)
+    is_archived = models.BooleanField(
+        default=False,
+        help_text="The journal is no longer publishing. This is only used as "
+            "part of the journal metadata.",
+    )
     remote_submit_url = models.URLField(
         blank=True,
         null=True,
@@ -199,6 +205,14 @@ class Journal(AbstractSiteModel):
     display_issue_number = models.BooleanField(default=True)
     display_issue_year = models.BooleanField(default=True)
     display_issue_title = models.BooleanField(default=True)
+    display_article_number = models.BooleanField(
+        default=False,
+        help_text=ugettext(
+            "Whether to display article numbers. Article numbers are distinct " \
+            "from article ID and can be set in Edit Metadata.",
+        )
+    )
+    display_article_page_numbers = models.BooleanField(default=True)
 
     disable_front_end = models.BooleanField(default=False)
 
@@ -253,13 +267,7 @@ class Journal(AbstractSiteModel):
     @property
     @cache(120)
     def use_crossref(self):
-        try:
-            return setting_handler.get_setting('Identifiers',
-                                               'crossref_prefix',
-                                               self,
-                                               default=True).processed_value
-        except IndexError:
-            return False
+        return setting_handler.get_setting('Identifiers', 'use_crossref', self, default=True).processed_value
 
     @issn.setter
     def issn(self, value):
@@ -331,6 +339,13 @@ class Journal(AbstractSiteModel):
 
     def serial_issues(self):
         return Issue.objects.filter(journal=self, issue_type__code='issue')
+
+    @property
+    def published_issues(self):
+        return Issue.objects.filter(
+            journal=self,
+            date__lte=timezone.now(),
+        )
 
     def editors(self):
         """ Returns all users enrolled as editors for the journal
@@ -477,7 +492,7 @@ class PinnedArticle(models.Model):
 ISSUE_CODE_RE = re.compile("^[a-zA-Z0-9-_]+$")
 
 
-class Issue(models.Model):
+class Issue(AbstractLastModifiedModel):
     journal = models.ForeignKey(Journal)
 
     # issue metadata
@@ -519,7 +534,7 @@ class Issue(models.Model):
     )
 
     code = models.SlugField(
-        max_length=999, null=True, blank=True,
+        max_length=700, null=True, blank=True,
         help_text=ugettext(
             "An optional alphanumeric code (Slug) used to generate a verbose "
             " url for this issue. e.g: 'winter-special-issue'."
@@ -579,20 +594,12 @@ class Issue(models.Model):
     def display_title(self):
         if self.issue_type.code != 'issue':
             return self.issue_title
+        else:
+            return self.pretty_issue_identifier
 
+    def issue_title_parts(self, article=None):
         journal = self.journal
-        issue_identifier = self.pretty_issue_identifier
-
-        title = "{}".format(
-            self.issue_title) if journal.display_issue_title else ""
-
-        title_list = [issue_identifier, title]
-
-        return mark_safe(" &bull; ".join((filter(None, title_list))))
-
-    def issue_title_parts(self):
-        journal = self.journal
-        volume = issue = year = ''
+        volume = issue = year = issue_title = article_number = page_numbers = ''
 
         if journal.display_issue_volume and self.volume:
             volume = ugettext("Volume") + " {}".format(self.volume)
@@ -600,8 +607,22 @@ class Issue(models.Model):
             issue = ugettext("Issue") + " {}".format(self.issue)
         if journal.display_issue_year and self.date:
             year = "{}".format(self.date.year)
+        if journal.display_issue_title:
+            issue_title = self.issue_title
+        if journal.display_article_number and article and article.article_number:
+            article_number = ugettext("Article") + " {}".format(article.article_number)
+        if journal.display_article_page_numbers and article:
+            if article.page_range:
+                page_numbers = article.page_range
+            elif article.total_pages:
+                if article.total_pages != 1:
+                    label = ugettext('pages')
+                else:
+                    label = ugettext('page')
+                num_pages = str(article.total_pages)
+                page_numbers = f'{num_pages} {label}'
 
-        return [volume, issue, year]
+        return [volume, issue, year, issue_title, article_number, page_numbers]
 
     @property
     def pretty_issue_identifier(self):
@@ -610,7 +631,6 @@ class Issue(models.Model):
     @property
     def non_pretty_issue_identifier(self):
         return " ".join((filter(None, self.issue_title_parts())))
-
 
     @property
     def manage_issue_list(self):

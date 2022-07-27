@@ -606,10 +606,12 @@ def send_copyedit_deleted(**kwargs):
 
 def send_copyedit_decision(**kwargs):
     request = kwargs['request']
+    decision = kwargs["decision"]
     copyedit_assignment = kwargs['copyedit_assignment']
 
-    description = '{0} has accepted copyediting task for {1} due on {2}.'.format(
+    description = '{0} has {1}ed copyediting task for {2} due on {3}.'.format(
         copyedit_assignment.copyeditor.full_name(),
+        decision,
         copyedit_assignment.article.title,
         copyedit_assignment.due)
 
@@ -1247,7 +1249,6 @@ def send_author_copyedit_complete(**kwargs):
     )
 
 
-
 def preprint_submission(**kwargs):
     """
     Called by events.Event.ON_PRePINT_SUBMISSIONS, logs and emails the author
@@ -1521,5 +1522,142 @@ def send_draft_decision_declined(**kwargs):
         'subject_notify_se_draft_declined',
         draft_decision.section_editor.email,
         context=kwargs,
+        log_dict=log_dict,
+    )
+
+
+def access_request_notification(**kwargs):
+    request = kwargs.get('request')
+    access_request = kwargs.get('access_request')
+    description = '{} has requested the {} role for {}'.format(
+        request.user,
+        access_request.role.name,
+        request.site_type.name,
+    )
+
+    if request.journal:
+        contact = request.journal.get_setting('general', 'submission_access_request_contact')
+    else:
+        contact = request.repository.submission_access_contact
+
+    log_dict = {
+        'level': 'Info',
+        'action_text': description,
+        'types': 'Access Request',
+        'target': request.site_type,
+    }
+    if contact:
+        notify_helpers.send_email_with_body_from_setting_template(
+            request,
+            'submission_access_request_notification',
+            'subject_submission_access_request_notification',
+            contact,
+            context={'description': description},
+            log_dict=log_dict,
+        )
+
+
+def access_request_complete(**kwargs):
+    request = kwargs.get('request')
+    access_request = kwargs.get('access_request')
+    decision = kwargs.get('decision')
+    description = "Access request from {} evaluated by {}: {}".format(
+        access_request.user.full_name,
+        request.user,
+        decision,
+    )
+    log_dict = {
+        'level': 'Info',
+        'action_text': description,
+        'types': 'Access Request',
+        'target': request.site_type,
+    }
+    notify_helpers.send_email_with_body_from_setting_template(
+        request,
+        'submission_access_request_complete',
+        'subject_submission_access_request_complete',
+        access_request.user.email,
+        context={
+            'access_request': access_request,
+            'decision': decision,
+        },
+        log_dict=log_dict,
+    )
+
+
+def preprint_review_notification(**kwargs):
+    request = kwargs.get('request')
+    preprint = kwargs.get('preprint')
+    review = kwargs.get('review')
+    message = kwargs.get('message')
+    skip = kwargs.get('skip', None)
+
+    if not skip:
+        description = 'Review of {} requested from {} by {}.'.format(
+            preprint.title,
+            review.reviewer.full_name(),
+            review.manager.full_name(),
+        )
+        log_dict = {
+            'level': 'Info',
+            'action_text': description,
+            'types': 'Review',
+            'target': preprint,
+        }
+        notify_helpers.send_email_with_body_from_user(
+            request,
+            '{} Review Invitation'.format(request.repository.object_name),
+            review.reviewer.email,
+            message,
+            log_dict=log_dict,
+        )
+
+
+def preprint_review_status_change(**kwargs):
+    request = kwargs.get('request')
+    review = kwargs.get('review')
+    status_change = kwargs.get('status_change')
+
+    description = "Status of review {} by {} is now: {}".format(
+        review.pk,
+        review.reviewer.full_name(),
+        status_change,
+    )
+    log_dict = {
+        'level': 'Info',
+        'action_text': description,
+        'types': 'Review',
+        'target': review.preprint,
+    }
+
+    if status_change in ['accept', 'decline', 'complete']:
+        to = review.manager.email
+        template = request.repository.manager_review_status_change
+    else:  # withdraw
+        to = review.reviewer.email
+        template = request.repository.reviewer_review_status_change
+
+    context = {
+        'review': review,
+        'status_change': status_change,
+        'url': request.repository.site_url(path=reverse(
+            'repository_review_detail',
+            kwargs={
+                'preprint_id': review.preprint.pk,
+                'review_id': review.pk
+            }
+        ))
+    }
+    email_text = render_template.get_message_content(
+        request,
+        context,
+        template,
+        template_is_setting=True,
+    )
+    notify_helpers.send_email_with_body_from_user(
+        request,
+        '{} Review Invitation Status'.format(request.repository.object_name),
+        to,
+        email_text,
         log_dict=log_dict,
     )

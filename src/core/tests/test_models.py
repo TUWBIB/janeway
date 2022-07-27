@@ -1,12 +1,17 @@
+from datetime import timedelta
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
 from django.forms import Form
 from django.test import TestCase
+from django.utils import timezone
+from freezegun import freeze_time
 
 from core import forms, models
 from core.model_utils import merge_models, SVGImageFieldForm
 from journal import models as journal_models
 from utils.testing import helpers
+from submission import models as submission_models
 
 
 class TestAccount(TestCase):
@@ -188,6 +193,15 @@ class TestAccount(TestCase):
             msg="Failed to merge user models",
         )
 
+    def test_full_name(self):
+        author = models.Account.objects.create(
+            email='test@example.com',
+            first_name='',
+            middle_name='',
+            last_name='Sky',
+        )
+        self.assertEqual('Sky', author.full_name())
+
 
 class TestSVGImageFormField(TestCase):
     def test_upload_svg_to_svg_image_form_field(self):
@@ -241,3 +255,112 @@ class TestSVGImageFormField(TestCase):
         )
         form = TestForm({}, {"file": image_file})
         self.assertTrue(form.is_valid())
+
+
+class TestLastModifiedModel(TestCase):
+
+    def setUp(self):
+        self.press = helpers.create_press()
+        self.press.save()
+        self.journal_one, self.journal_two = helpers.create_journals()
+        self.issue = helpers.create_issue(self.journal_one)
+
+        self.article, c = submission_models.Article.objects.get_or_create(
+            title='Test Model Utils Article',
+        )
+
+    def test_abstract_last_mod_save(self):
+        test_abstract_text = 'The Phantom Menace Sucks'
+        self.article.abstract = test_abstract_text
+        self.article.save()
+
+        self.assertEqual(
+            self.article.abstract,
+            test_abstract_text
+        )
+
+    def test_abstract_last_mod_update_doesnt_die(self):
+        article_last_mod = self.article.last_modified
+
+        articles = submission_models.Article.objects.filter(
+            pk=self.article.pk
+        ).update(
+            title='You\'re Wrong About the Phantom Menace'
+        )
+
+    def test_last_modified_model(self):
+        # prepare
+        with freeze_time("2021-01-02"):
+            issue_date = self.issue.last_modified = (
+                timezone.now() - timedelta(days=1)
+            )
+            self.issue.save()
+        with freeze_time("2021-01-01"):
+            self.article.last_modified = (
+                timezone.now() - timedelta(days=2)
+            )
+            self.article.save()
+
+        # Test
+        self.assertEqual(self.article.best_last_modified_date(), issue_date)
+
+    def test_last_modified_model_recursive(self):
+        # prepare
+
+        with freeze_time("2021-01-03"):
+            file_obj = models.File.objects.create()
+            file_date = file_obj.las_modified = timezone.now()
+            file_obj.save()
+
+        with freeze_time("2021-01-02"):
+            galley = helpers.create_galley(self.article, file_obj)
+            galley.last_modified = timezone.now()
+            galley.save()
+
+        with freeze_time("2021-01-01"):
+            self.article.last_modified = timezone.now()
+            self.article.save()
+
+        # Test
+        self.assertEqual(self.article.best_last_modified_date(), file_date)
+
+    def test_last_modified_model_recursive_circular(self):
+        # prepare
+
+        with freeze_time("2021-01-03"):
+            file_obj = models.File.objects.create()
+            file_date = file_obj.las_modified = timezone.now()
+            file_obj.save()
+
+        with freeze_time("2021-01-02"):
+            galley = helpers.create_galley(self.article, file_obj)
+            galley.article = self.article
+            galley.last_modified = timezone.now()
+            galley.save()
+
+        with freeze_time("2021-01-01"):
+            self.article.last_modified = timezone.now()
+            self.article.save()
+
+        # Test
+        self.assertEqual(self.article.best_last_modified_date(), file_date)
+
+    def test_last_modified_model_recursive_doubly_linked(self):
+        with freeze_time("2021-01-03"):
+            file_obj = models.File.objects.create()
+            file_date = file_obj.las_modified = timezone.now()
+            file_obj.save()
+
+        with freeze_time("2021-01-02"):
+            galley = helpers.create_galley(self.article, file_obj)
+            galley.article = self.article
+            galley.last_modified = timezone.now()
+            galley.save()
+
+        with freeze_time("2021-01-01"):
+            self.article.render_galley = galley
+            self.article.last_modified = timezone.now()
+            self.article.save()
+
+        # Test
+        self.assertEqual(self.article.best_last_modified_date(), file_date)
