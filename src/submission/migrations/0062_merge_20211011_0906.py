@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('submission', '0058_auto_20210812_1254'),
         ('submission', '0061_auto_20210923_1615'),
+        ('submission', '9007_tuw_add_cited_references'),
     ]
 
     operations = [
