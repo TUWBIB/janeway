@@ -8,7 +8,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('identifiers', '0006_crossrefdeposit'),
+        ('identifiers', '9000_TUW_identifier_choices'),
     ]
 
     operations = [
