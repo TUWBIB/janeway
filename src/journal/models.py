@@ -91,7 +91,7 @@ class Journal(AbstractSiteModel):
         blank=True,
         related_name='thumbnail_image',
         on_delete=models.SET_NULL,
-        help_text=ugettext('The default thumbnail for articles, not to be '
+        help_text=_('The default thumbnail for articles, not to be '
                            'confused with \'Default cover image\'.'),
     )
     press_image_override = models.ForeignKey(
@@ -99,14 +99,14 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         related_name='press_image_override',
-        help_text=ugettext('Replaces the press logo in the footer.'),
+        help_text=_('Replaces the press logo in the footer.'),
     )
     default_cover_image = SVGImageField(
         upload_to=cover_images_upload_path,
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The default cover image for journal issues and for '
+        help_text=_('The default cover image for journal issues and for '
                            'the journal\'s listing on the press-level website.'),
     )
     default_large_image = SVGImageField(
@@ -114,7 +114,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The default background image for article openers '
+        help_text=_('The default background image for article openers '
                            'and carousel items.'),
     )
     header_image = SVGImageField(
@@ -122,7 +122,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The logo-sized image at the top of all pages, '
+        help_text=_('The logo-sized image at the top of all pages, '
                            'typically used for journal logos.'),
     )
     favicon = models.ImageField(
@@ -130,7 +130,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The tiny round or square image appearing in browser '
+        help_text=_('The tiny round or square image appearing in browser '
                            'tabs before the webpage title'),
     )
     # DEPRECATED "description" in favour of "journal_description" setting
@@ -141,7 +141,7 @@ class Journal(AbstractSiteModel):
     disable_metrics_display = models.BooleanField(default=False)
     disable_article_images = models.BooleanField(
         default=False,
-        help_text=ugettext('When checked, articles will not have header images'
+        help_text=_('When checked, articles will not have header images'
                            'or thumbnail images. Does not affect figures and'
                            'tables within an article.'),
     )
@@ -211,7 +211,7 @@ class Journal(AbstractSiteModel):
     display_issue_title = models.BooleanField(default=True)
     display_article_number = models.BooleanField(
         default=False,
-        help_text=ugettext(
+        help_text=_(
             "Whether to display article numbers. Article numbers are distinct " \
             "from article ID and can be set in Edit Metadata.",
         )
@@ -549,7 +549,7 @@ class Issue(AbstractLastModifiedModel):
 
     code = models.SlugField(
         max_length=700, null=True, blank=True,
-        help_text=ugettext(
+        help_text=_(
             "An optional alphanumeric code (Slug) used to generate a verbose "
             " url for this issue. e.g: 'winter-special-issue'."
         ),
@@ -693,15 +693,15 @@ class Issue(AbstractLastModifiedModel):
         if journal.display_issue_title:
             issue_title = self.issue_title
         if journal.display_article_number and article and article.article_number:
-            article_number = ugettext("Article") + " {}".format(article.article_number)
+            article_number = _("Article") + " {}".format(article.article_number)
         if journal.display_article_page_numbers and article:
             if article.page_range:
                 page_numbers = article.page_range
             elif article.total_pages:
                 if article.total_pages != 1:
-                    label = ugettext('pages')
+                    label = _('pages')
                 else:
-                    label = ugettext('page')
+                    label = _('page')
                 num_pages = str(article.total_pages)
                 page_numbers = f'{num_pages} {label}'
 
