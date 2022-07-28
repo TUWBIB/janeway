@@ -1911,7 +1911,7 @@ def sitemap(request, issue_id=None):
     :return: HttpResponse object
     """
     articles = submission_models.Article.objects.filter(date_published__lte=timezone.now(), journal=request.journal)
-    cms_pages = cms_models.Page.objects.language().fallbacks('en').filter(object_id=request.site_type.id, content_type=request.model_content_type)
+    cms_pages = cms_models.Page.objects.filter(object_id=request.site_type.id, content_type=request.model_content_type)
     try:
         path_parts = None
         if issue_id:
