@@ -77,12 +77,12 @@ class KeywordModelForm(ModelForm):
         posted_keywords = self.cleaned_data.get( 'keywords', '')
 
         instance = super().save(commit=commit, *args, **kwargs)
+        instance.keywords.clear()
 
         # en keywords
         if 'keywords' in self.cleaned_data:
             posted_keywords = self.cleaned_data.get('keywords', '').split(',')
             for keyword in posted_keywords:
-                print (keyword)
                 if keyword != '':
                     obj, _ = submission_models.Keyword.objects.get_or_create(
                             word=keyword,
@@ -96,10 +96,8 @@ class KeywordModelForm(ModelForm):
 
         # de keywords
         if 'keywords_de' in self.cleaned_data:
-            print ("*** B")
             posted_keywords = self.cleaned_data.get('keywords_de', '').split(',')
             for keyword in posted_keywords:
-                print (keyword)
                 if keyword != '':
                     obj, _ = submission_models.Keyword.objects.get_or_create(
                             word=keyword,
@@ -110,8 +108,6 @@ class KeywordModelForm(ModelForm):
             for keyword in instance.keywords.filter(language='de'):
                 if keyword.word not in posted_keywords:
                     instance.keywords.remove(keyword)
-
-        instance.keywords.clear()
 
         if commit:
             instance.save()
