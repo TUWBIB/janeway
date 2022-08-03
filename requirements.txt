@@ -55,5 +55,5 @@ maxminddb==1.5.4
 pdf2image==1.11.0
 freezegun==1.2.0
 swapper
-git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.2.3
+git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.3
 gunicorn
