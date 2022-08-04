@@ -1,10 +1,12 @@
 import traceback
 import re
+import json
 import lxml.etree as etree
 import datetime
 import locale
 from xml.sax.saxutils import escape, unescape
 
+from django.conf import settings
 from django.db.models import Max
 from django.utils.timezone import get_current_timezone
 
@@ -14,7 +16,7 @@ from sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField
 
 def create_article_doi(article):
-    api = datacite_api.API()
+    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     journal_code = article.journal.code
     prefix = api.journals[journal_code]['prefix']
     namespace_separator = api.journals[journal_code]['namespace_separator']
