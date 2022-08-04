@@ -37,7 +37,7 @@ def checkArticleMandatoryFields(article):
 
 def articleToDataCiteXML(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
-    api = datacite_api.API()
+    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
     errors = checkArticleMandatoryFields(article)
 
@@ -218,7 +218,7 @@ def articleToDataCiteXML(article_id):
 
 def getCurrentDataCiteXML(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
-    api = datacite_api.API()
+    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
     warnings = []
     errors = []
@@ -242,7 +242,7 @@ def getCurrentDataCiteXML(article_id):
 
 def getCurrentDataCiteURL(article_id):
     article = submission_models.Article.objects.get(pk=article_id)
-    api = datacite_api.API()
+    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
     warnings = []
     errors = []
@@ -643,7 +643,7 @@ def setAC(article,ac):
 
 
 #def get_next_doi(journal_code,year):
-#    api = datacite_api.API()
+#    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 #    prefix = api.journals[journal_code]['prefix']
 #    namespace_separator = api.journals[journal_code]['namespace_separator']
 #    searchstr = prefix+'/'+namespace_separator

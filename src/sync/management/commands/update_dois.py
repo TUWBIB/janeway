@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import time
 import re
 import traceback
@@ -72,7 +73,7 @@ class Command(BaseCommand):
 
     def op_setJFMURLs(self):
         try:
-            self.api=datacite_api.API()
+            self.api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         except Exception as e:
             print (traceback.format_exc())
 
