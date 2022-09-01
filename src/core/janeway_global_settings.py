@@ -261,6 +261,13 @@ LANGUAGES = (
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
+MODELTRANSLATION_FALLBACK_LANGUAGES = {
+    'default' : ('en','de',),
+    'en' : ('de',),
+    'de' : ('en',),
+}
+
+
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
