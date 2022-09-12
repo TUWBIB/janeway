@@ -2839,6 +2839,8 @@ def handleAddAuthor(request, article):
                 }
             else:
                 messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
+        else:
+            messages.add_message(request, messages.ERROR,"form invalid")
 
     data = {
         'msg': loader.render_to_string('common/elements/messages.html', { 'messages': get_messages(request) }, None),

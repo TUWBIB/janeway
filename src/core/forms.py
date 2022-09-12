@@ -150,12 +150,20 @@ class EditAccountForm(forms.ModelForm):
 
     interests = forms.CharField(required=False)
 
+
     class Meta:
         model = models.Account
         exclude = ('email', 'username', 'activation_code', 'email_sent',
                    'date_confirmed', 'confirmation_code', 'is_active',
                    'is_staff', 'is_admin', 'date_joined', 'password',
-                   'is_superuser', 'enable_digest')
+                   'is_superuser',)
+
+#['last_login', 'groups', 'user_permissions', 
+#'first_name', 'middle_name', 'last_name', 'salutation', 'biography', 
+#'orcid', 'institution', 'department', 'twitter', 'facebook', 'linkedin',
+# 'website', 'github', 'profile_image', 'signature', 'interest', 'country', 
+# 'preferred_timezone', 'enable_public_profile', 'gndid')
+
 
     def save(self, commit=True):
         user = super(EditAccountForm, self).save(commit=False)
