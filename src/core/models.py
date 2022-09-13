@@ -439,22 +439,27 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 setattr(frozen_author, k, v)
             frozen_author.save()
 
-        else:
-            try:
-                order_object = article.articleauthororder_set.get(author=self)
-            except submission_models.ArticleAuthorOrder.DoesNotExist:
-                order_integer = article.next_author_sort()
-                order_object, c = submission_models.ArticleAuthorOrder.objects.get_or_create(
-                    article=article,
-                    author=self,
-                    defaults={'order': order_integer}
-                )
-
-            submission_models.FrozenAuthor.objects.get_or_create(
-                author=self,
+#        else:
+        try:
+            order_object = article.articleauthororder_set.get(author=self)
+        except submission_models.ArticleAuthorOrder.DoesNotExist:
+            order_integer = article.next_author_sort()
+            order_object, c = submission_models.ArticleAuthorOrder.objects.get_or_create(
                 article=article,
-                defaults=dict(order=order_object.order, **frozen_dict)
+                author=self,
+                defaults={'order': order_integer}
             )
+
+        fa, c = submission_models.FrozenAuthor.objects.get_or_create(
+            author=self,
+            article=article,
+            defaults=dict(order=order_object.order, **frozen_dict)
+        )
+      
+        fa.order=order_object.order
+        fa.save()
+
+
 
     def frozen_author(self, article):
         try:

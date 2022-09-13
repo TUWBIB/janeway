@@ -2663,6 +2663,8 @@ def backcontent_order_authors(request, article_id):
             author_order.order = order
             author_order.save()
 
+    article.snapshot_authors()
+
     return HttpResponse('Complete')
 
 
@@ -2693,6 +2695,7 @@ def backcontent_delete_author(request, article_id, author_id):
     except submission_models.ArticleAuthorOrder.DoesNotExist:
         pass
 
+        
     return redirect(reverse('backcontent_article', kwargs={'article_id': article_id}))
 
 @editor_user_required
