@@ -2695,7 +2695,15 @@ def backcontent_delete_author(request, article_id, author_id):
     except submission_models.ArticleAuthorOrder.DoesNotExist:
         pass
 
-        
+    try:
+        ordering = submission_models.FrozenAuthor.objects.get(
+            article=article,
+            author=author,
+        ).delete()
+    except submission_models.FrozenAuthor.DoesNotExist:
+        print("frozen author does not exists")
+        pass
+       
     return redirect(reverse('backcontent_article', kwargs={'article_id': article_id}))
 
 @editor_user_required
@@ -2750,6 +2758,7 @@ def backcontent_add_author(request,article_id):
             article.authors.add(author)
             aao=setAuthorOrder(article,author)
             submission_models.ArticleAuthorOrder.objects.get_or_create(article=article, author=author)
+            article.snapshot_authors()
 
             message="author added"
             status="success"
