@@ -2614,7 +2614,7 @@ def backcontent_article(request, article_id):
 #                id_logic.generate_crossref_doi_with_pattern(article)
                 article.stage = submission_models.STAGE_PUBLISHED
                 article.save()
-            article.snapshot_authors(article)
+            article.snapshot_authors()
 
             return redirect(reverse('backcontent'))
 
@@ -2824,6 +2824,8 @@ def handleAddAuthor(request, article):
         if not author_on_article:
             article.authors.add(author_exists)
             aao=setAuthorOrder(article,author_exists)
+            article.snapshot_authors()
+
             messages.add_message(request, messages.SUCCESS, '%s added to the article' % author_exists.full_name())
             context = { 
                     'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': author_exists.pk }), 
@@ -2843,6 +2845,8 @@ def handleAddAuthor(request, article):
 
                 article.authors.add(new_author)
                 aao=setAuthorOrder(article,new_author)
+                article.snapshot_authors()
+                
                 messages.add_message(request, messages.SUCCESS, '%s added to the article' % new_author.full_name())
                 context = { 
                     'url': reverse('backcontent_delete_author', kwargs={'article_id': article.pk, 'author_id': new_author.pk }), 
