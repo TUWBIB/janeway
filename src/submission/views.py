@@ -600,8 +600,8 @@ def edit_metadata(request, article_id):
     :return: contextualised django template
     """
     with translation.override(request.override_language):
-        additional_fields = models.Field.objects.filter(journal=request.journal)
         article = get_object_or_404(models.Article, pk=article_id)
+        additional_fields = models.Field.objects.filter(journal=request.journal)
         submission_summary = setting_handler.get_setting(
             'general',
             'submission_summary',
@@ -722,8 +722,8 @@ def edit_metadata(request, article_id):
         'author_form': author_form,
         'modal': modal,
         'frozen_author': frozen_author,
-        'return': return_param,
         'additional_fields': additional_fields,
+        'return': return_param
     }
 
     return render(request, template, context)

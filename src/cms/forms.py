@@ -14,7 +14,7 @@ from cms import models
 class PageForm(JanewayTranslationModelForm):
     class Meta:
         model = models.Page
-        fields = ('name', 'display_name', 'content')
+        fields = ('display_name', 'name', 'content')
         exclude = ('journal', 'is_markdown', 'content_type', 'object_id')
 
     def __init__(self, *args, **kwargs):

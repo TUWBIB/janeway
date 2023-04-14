@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db.models import Max, Q, Value
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext as _
 
 from utils import shared
 
@@ -152,6 +153,9 @@ class ReviewAssignment(models.Model):
                                            verbose_name="Comments for the Editor")
     review_file = models.ForeignKey('core.File', blank=True, null=True)
     display_review_file = models.BooleanField(default=False)
+    permission_to_make_public = models.BooleanField(default=False, help_text='This journal has a policy of sharing reviews openly alongside the published article to aid in transparency. If you give permission here and the article is published, your name and review will be visible.')
+    display_public = models.BooleanField(default=False, help_text='Whether this review should be publicly displayed.')
+
 
     def review_form_answers(self):
         return ReviewAssignmentAnswer.objects.filter(assignment=self).order_by('frozen_element__order')
@@ -245,6 +249,11 @@ class ReviewAssignment(models.Model):
                 'date': '',
                 'reminder': 'request',
             }
+
+    def visibility_statement(self):
+        if self.for_author_consumption:
+            return _("available for the author to access")
+        return _("not available for the author to access")
 
     def __str__(self):
         if self.reviewer:
@@ -356,6 +365,15 @@ class ReviewAssignmentAnswer(models.Model):
     def element(self):
         return self.frozen_element
 
+    @property
+    def best_label(self):
+        if self.original_element:
+            return self.original_element.name
+        elif self.frozen_element:
+            return self.frozen_element.name
+        else:
+            return 'element'  # this is a fallback incase the two links above are removed.
+
 
 class FrozenReviewFormElement(BaseReviewFormElement):
     """ A snapshot of a review form element at the time an answer is created"""
@@ -416,7 +434,7 @@ class RevisionRequest(models.Model):
     actions = models.ManyToManyField(RevisionAction)  # List of actions Author took during Revision Request
     type = models.CharField(max_length=20, choices=revision_type(), default='minor_revisions')
 
-    date_requested = models.DateField(default=timezone.now)
+    date_requested = models.DateTimeField(default=timezone.now)
     date_due = models.DateField()
     date_completed = models.DateTimeField(blank=True, null=True)
 
