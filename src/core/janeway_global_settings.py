@@ -253,7 +253,8 @@ def ugettext(s):
 
 
 LANGUAGES = (
-    ('en', ugettext('English')),
+    ('en', ugettext('English (GB)')),
+    ('en-us', ugettext('English (US)')),
 #    ('fr', ugettext('French')),
     ('de', ugettext('German')),
 #    ('nl', ugettext('Dutch')),
@@ -588,3 +589,9 @@ CORE_THEMES = [
     'clean',
 ]
 INSTALLATION_BASE_THEME = 'OLH'
+
+# Use pagination for all of our APIs based on Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
+}

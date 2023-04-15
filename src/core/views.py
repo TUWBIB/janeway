@@ -410,8 +410,14 @@ def edit_profile(request):
     :return: HttpResponse object
     """
     user = request.user
-
     form = forms.EditAccountForm(instance=user)
+    send_reader_notifications = False
+    if request.journal:
+        send_reader_notifications = setting_handler.get_setting(
+            'notifications',
+            'send_reader_notifications',
+            request.journal
+        ).value
 
     if request.POST:
         if 'email' in request.POST:
@@ -455,7 +461,7 @@ def edit_profile(request):
             else:
                 messages.add_message(request, messages.WARNING, 'Old password is not correct.')
 
-        elif 'subscribe' in request.POST and request.journal:
+        elif 'subscribe' in request.POST and send_reader_notifications:
             request.user.add_account_role(
                 'reader',
                 request.journal,
@@ -466,7 +472,7 @@ def edit_profile(request):
                 'Successfully subscribed to article notifications.',
             )
 
-        elif 'unsubscribe' in request.POST and request.journal:
+        elif 'unsubscribe' in request.POST and send_reader_notifications:
             request.user.remove_account_role(
                 'reader',
                 request.journal
@@ -492,6 +498,7 @@ def edit_profile(request):
     context = {
         'form': form,
         'user_to_edit': user,
+        'send_reader_notifications': send_reader_notifications,
     }
 
     return render(request, template, context)
@@ -648,12 +655,11 @@ def dashboard(request):
 def active_submissions(request):
     template = 'core/active_submissions.html'
 
-    active_submissions = submission_models.Article.objects.exclude(
-            stage=submission_models.STAGE_PUBLISHED).exclude(
-            stage=submission_models.STAGE_REJECTED).exclude(
-            stage=submission_models.STAGE_UNSUBMITTED).filter(
-            journal=request.journal
-        ).order_by('pk', 'title')
+    active_submissions = submission_models.Article.active_objects.exclude(
+        stage=submission_models.STAGE_PUBLISHED,
+    ).filter(
+        journal=request.journal
+    ).order_by('pk', 'title')
 
     if not request.user.is_editor(request) and request.user.is_section_editor(request):
         active_submissions = logic.filter_articles_to_editor_assigned(

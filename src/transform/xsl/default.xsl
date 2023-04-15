@@ -1618,7 +1618,7 @@
   </xsl:template>
 
   <!-- becomes content of table cell, column 1-->
-  <xsl:template match="ref/label | element-citation/label">
+  <xsl:template match="element-citation/label">
     <strong>
       <em>
         <xsl:apply-templates/>
@@ -1627,6 +1627,10 @@
     </strong>
   </xsl:template>
 
+  <xsl:template match="ref/label">
+        <xsl:apply-templates/>
+        <xsl:text>&#160;</xsl:text>
+  </xsl:template>
 
   <!-- ============================================================= -->
   <!--  54. CITATION (for NLM Archiving DTD)                         -->
@@ -3129,6 +3133,7 @@
                 </xsl:when>
                 <xsl:otherwise>
                   <a href="{@xlink:href}">Video URL</a>
+                  <xsl:apply-templates/>
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:when>
@@ -3142,7 +3147,8 @@
                   </div>
                 </xsl:when>
                 <xsl:otherwise>
-                  <a href="{@xlink:href}">Video URL</a>
+                  <a href="{@xlink:href}">Audio URL</a>
+                  <xsl:apply-templates/>
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:when>
@@ -3688,7 +3694,6 @@
     <xsl:template match="author-notes/fn[@fn-type='other']/label"/>
     <xsl:template match="author-notes/corresp/label"/>
     <xsl:template match="abstract/title"/>
-    <xsl:template match="ref/label"/>
     <xsl:template match="fig/graphic"/>
     <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
     <xsl:template match="ack/title"/>
