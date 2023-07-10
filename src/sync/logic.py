@@ -513,7 +513,6 @@ def articleToMarc(article):
             # 540, Lizenz
             if article.license is not None and article.license.short_name != 'Copyright':
                 datafield=DataField.createDataField("540"," "," ")
-                datafield.addSubField(SubField.createSubField("a","Unter einer CC-Lizenz, Details siehe Link"))
                 datafield.addSubField(SubField.createSubField("f",article.license.short_name))
                 datafield.addSubField(SubField.createSubField("2","cc"))
                 datafield.addSubField(SubField.createSubField("u",article.license.url))
