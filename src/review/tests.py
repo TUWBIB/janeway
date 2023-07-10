@@ -5,14 +5,14 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 
 import datetime
+import os
 
-from django.test import TestCase, Client, override_settings
-from django.utils import timezone
+from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.core.management import call_command
+from django.utils import timezone
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-
-from core import models as core_models
+from core import models as core_models, files
 from journal import models as journal_models
 from production import models as production_models
 from review import models as review_models, forms, logic
@@ -22,6 +22,7 @@ from press import models as press_models
 from utils.install import update_xsl_files, update_settings
 from utils import setting_handler
 from utils.testing import helpers
+from review.const import ReviewerDecisions as RD
 
 
 # Create your tests here.
@@ -98,6 +99,165 @@ class ReviewTests(TestCase):
             data=data,
         )
         self.assertFalse(form.is_valid())
+
+    def test_csv_reviewer_import_good(self):
+        # create a fake request object
+        request = self.setup_request_object()
+
+        # prep csv
+        csv_content = "{}\n{}".format(
+            self.reviewer_csv_header_row,
+            self.good_reviewer_content_line,
+        )
+        self.test_csv = SimpleUploadedFile(
+            'test_reviewer_file.csv',
+            bytes(csv_content.encode("utf-8"))
+        )
+        filename, path = files.save_file_to_temp(self.test_csv)
+
+        # prep form with data
+        details_form = forms.BulkReviewAssignmentForm(
+            {
+                'visibility': 'double-blind',
+                'form': self.review_form,
+                'date_due': '2023-01-01',
+            }
+        )
+        details_form.is_valid()
+
+        reviewers, error = logic.process_reviewer_csv(
+            path,
+            request,
+            self.article_under_review,
+            details_form,
+        )
+        self.assertTrue(
+            isinstance(
+                reviewers[0].get('review_assignment'),
+                review_models.ReviewAssignment,
+            )
+        )
+        self.assertFalse(
+            error
+        )
+        os.unlink(path)
+
+    def test_csv_reviewer_import_bad(self):
+        # create a fake request object
+        request = self.setup_request_object()
+        self.test_csv = SimpleUploadedFile(
+            'test_reviewer_file.csv',
+            bytes(self.empty_reviewer_content_line)
+        )
+        filename, path = files.save_file_to_temp(self.test_csv)
+
+        # prep form with data
+        details_form = forms.BulkReviewAssignmentForm(
+            {
+                'visibility': 'double-blind',
+                'form': self.review_form,
+                'date_due': '2023-01-01',
+            }
+        )
+        details_form.is_valid()
+        reviewers, error = logic.process_reviewer_csv(
+            path,
+            request,
+            self.article_under_review,
+            details_form,
+        )
+        self.assertFalse(reviewers)
+        os.unlink(path)
+
+    def test_csv_review_import_uses_existing_user_account(self):
+        request = self.setup_request_object()
+
+        # prep csv
+        csv_content = "{}\n{}".format(
+            self.reviewer_csv_header_row,
+            self.regular_user_csv_line,
+        )
+        self.test_csv = SimpleUploadedFile(
+            'test_reviewer_file.csv',
+            bytes(csv_content.encode("utf-8"))
+        )
+        filename, path = files.save_file_to_temp(self.test_csv)
+
+        # prep form with data
+        details_form = forms.BulkReviewAssignmentForm(
+            {
+                'visibility': 'double-blind',
+                'form': self.review_form,
+                'date_due': '2023-01-01',
+            }
+        )
+        details_form.is_valid()
+        reviewers, error = logic.process_reviewer_csv(
+            path,
+            request,
+            self.article_under_review,
+            details_form,
+        )
+        self.assertTrue(
+            reviewers[0].get('account'),
+            self.regular_user,
+        )
+
+    def test_csv_doesnt_create_duplicate_assignments(self):
+        request = self.setup_request_object()
+
+        # prep csv
+        csv_content = "{}\n{}".format(
+            self.reviewer_csv_header_row,
+            self.regular_user_csv_line,
+        )
+        self.test_csv = SimpleUploadedFile(
+            'test_reviewer_file.csv',
+            bytes(csv_content.encode("utf-8"))
+        )
+        filename, path = files.save_file_to_temp(self.test_csv)
+
+        # prep form with data
+        details_form = forms.BulkReviewAssignmentForm(
+            {
+                'visibility': 'double-blind',
+                'form': self.review_form,
+                'date_due': '2023-01-01',
+            }
+        )
+        details_form.is_valid()
+        reviewers, error = logic.process_reviewer_csv(
+            path,
+            request,
+            self.article_review_completed,
+            details_form,
+        )
+        self.assertTrue(
+            reviewers[0].get('review_assignment'),
+            self.review_assignment_complete,
+        )
+
+    def test_withdrawing_review_assignment(self):
+        review_to_withdraw, created = review_models.ReviewAssignment.objects.get_or_create(
+            article=self.article_under_review,
+            reviewer=self.second_reviewer,
+            editor=self.editor,
+            date_due=timezone.now(),
+            form=self.review_form,
+        )
+        review_to_withdraw.withdraw()
+        self.assertTrue(
+            review_to_withdraw.decision,
+            RD.DECISION_WITHDRAWN.value,
+        )
+
+    def setup_request_object(self):
+        request = helpers.Request()
+        request.user = self.editor
+        request.journal = self.journal_one
+        request.press = self.journal_one.press
+        request.site_type = self.journal_one
+        return request
 
     @staticmethod
     def create_user(username, roles=None, journal=None):
@@ -348,7 +508,9 @@ class ReviewTests(TestCase):
             form=self.review_form,
             is_complete=True,
             decision='withdrawn',
+            date_complete = timezone.now()
         )
+
 
         self.review_assignment = review_models.ReviewAssignment(article=self.article_under_review,
                                                                 reviewer=self.second_user,
@@ -478,4 +640,31 @@ class ReviewTests(TestCase):
         update_settings(
             self.journal_one,
             management_command=False,
+        )
+        self.reviewer_csv_header_row = b"salutation,firstname,middlename,lastname,email_address,department,institution,country,interests,reason"
+        self.good_reviewer_content_line = b"Mr,Andy,James,Byers,andy@janeway.systems,Open Library of Humanities,Birkbeck,GB,,Test Reason"
+        self.empty_reviewer_content_line = b" "
+        self.regular_user_csv_line = b"Mr,Regular,,User,regularuser@martineve.com,Somewhere Dept,Some Inst,GB,,A Reason"
+
+    def test_request_revisions_context(self):
+        self.client.force_login(self.editor)
+        response = self.client.get(
+            reverse(
+                'review_request_revisions',
+                kwargs={'article_id': self.article_review_completed.pk},
+            ),
+            SERVER_NAME=self.journal_one.domain,
+        )
+        self.assertEqual(
+            self.article_review_completed,
+            response.context.get('article'),
+        )
+        # This test does not cover the revision request form
+        self.assertEqual(
+            0,
+            response.context.get('pending_approval').count(),
+        )
+        self.assertEqual(
+            0,
+            response.context.get('incomplete').count(),
         )

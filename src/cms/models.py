@@ -104,7 +104,12 @@ class NavigationItem(models.Model):
                   'to replace them with custom elements to change their '
                   'order.',
     )
-    page = models.ForeignKey(Page, blank=True, null=True)
+    page = models.ForeignKey(
+        Page,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     has_sub_nav = models.BooleanField(
         default=False,
         verbose_name="Has sub navigation",
@@ -117,6 +122,7 @@ class NavigationItem(models.Model):
         verbose_name="Top-level nav item",
         help_text='If this is a sub-nav item, which top-level '
                   'item should it go under?',
+        on_delete=models.CASCADE,
     )
     language = models.CharField(
         max_length=200,
@@ -144,7 +150,7 @@ class NavigationItem(models.Model):
 
     @property
     def url(self):
-        #alias for backwards compatibility with templates
+        # alias for backwards compatibility with templates
         if self.link:
             return self.build_url_for_request
         return ''
@@ -209,11 +215,19 @@ class SubmissionItem(models.Model):
     Model containing information to render the Submission page.
     SubmissionItems is registered for translation in cms.translation.
     """
-    journal = models.ForeignKey('journal.Journal')
+    journal = models.ForeignKey(
+        'journal.Journal',
+        on_delete=models.CASCADE,
+    )
     title = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
     order = models.IntegerField(default=99)
-    existing_setting = models.ForeignKey('core.Setting', blank=True, null=True)
+    existing_setting = models.ForeignKey(
+        'core.Setting',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         ordering = ('order', 'title')
@@ -252,6 +266,7 @@ class MediaFile(models.Model):
         'journal.Journal',
         null=True,
         blank=True,
+        on_delete=models.CASCADE,
     )
     uploaded = models.DateTimeField(
         default=timezone.now,

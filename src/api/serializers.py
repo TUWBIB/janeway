@@ -118,11 +118,18 @@ class AccountRoleSerializer(serializers.ModelSerializer):
         model = core_models.AccountRole
         fields = ('pk', 'journal', 'user', 'role')
 
-    def create(self, validated_data):
-        role = validated_data.get("role")
+    def validate(self, data):
+        request = self.context.get('request', None)
+        role = data.get("role")
 
-        if role.slug == 'reader':
-            raise serializers.ValidationError({"role": "You cannot add a user as a reader via the API."})
-        else:
-            account_role = core_models.AccountRole.objects.create(**validated_data)
-            return account_role
+        excluded_roles = ['reader']
+
+        # if the current user is not staff add the journal-manager role to
+        # the list of excluded roles.
+        if not request or not request.user.is_staff:
+            excluded_roles.append('journal-manager')
+
+        if role.slug in excluded_roles:
+            raise serializers.ValidationError({"error": "You cannot add a user to that role via the API."})
+
+        return data

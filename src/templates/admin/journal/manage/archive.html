@@ -1,7 +1,7 @@
 {% extends "admin/core/base.html" %}}
 {% load securitytags %}
 {% load files %}
-{% load static from staticfiles %}
+{% load static %}
 {% load foundation %}
 
 {% block title %}Article Archive{% endblock title %}
@@ -80,14 +80,4 @@
 
 {% block js %}
 {% include "elements/datatables.html" with target=".article_list" %}
-<script type="text/javascript">
-    $(document).ready(function () 
-    {
-        var table = $('.article_list').DataTable();
-
-        table
-            .order( [[ 0, 'desc' ]] )
-            .draw();
-    })
-</script>
 {% endblock %}

@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, Http404
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from repository import forms, logic as repository_logic, models
 from core import models as core_models, files, logic as core_logic, forms as core_forms
@@ -359,10 +359,10 @@ def repository_search(request, search_term=None):
 
         from_author = models.PreprintAuthor.objects.filter(
             (
-                    Q(author__first_name__in=split_search_term) |
-                    Q(author__middle_name__in=split_search_term) |
-                    Q(author__last_name__in=split_search_term) |
-                    Q(author__affiliation__icontains=search_term)
+                Q(account__first_name__in=split_search_term) |
+                Q(account__middle_name__in=split_search_term) |
+                Q(account__last_name__in=split_search_term) |
+                Q(account__institution__icontains=search_term)
             )
         )
 

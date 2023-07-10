@@ -10,7 +10,7 @@ from django_summernote.widgets import SummernoteWidget
 
 from django import forms
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.template.defaultfilters import linebreaksbr
 
 from review import models, logic
@@ -88,8 +88,10 @@ class ReviewAssignmentForm(forms.ModelForm, core_forms.ConfirmableIfErrorsForm):
             self.fields['date_due'].initial = due_date
 
         if default_form and not self.instance.form:
-            form = models.ReviewForm.objects.get(pk=default_form)
-            self.fields['form'].initial = form
+            try:
+                self.fields['form'].initial = models.ReviewForm.objects.get(pk=default_form)
+            except models.ReviewForm.DoesNotExist:
+                self.fields['form'].initial = ''
 
         if self.reviewers:
             self.fields['reviewer'].queryset = self.reviewers
@@ -125,6 +127,37 @@ class ReviewAssignmentForm(forms.ModelForm, core_forms.ConfirmableIfErrorsForm):
         return potential_errors
 
 
+class BulkReviewAssignmentForm(forms.ModelForm):
+    template = forms.CharField(
+        widget=SummernoteWidget,
+        label='Email Template',
+    )
+    reviewer_csv = forms.FileField(
+        label='Upload Reviewer CSV File',
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.journal = kwargs.pop('journal', None)
+        super(BulkReviewAssignmentForm, self).__init__(*args, **kwargs)
+        self.fields['form'].queryset = models.ReviewForm.objects.filter(
+            journal=self.journal,
+            deleted=False,
+        )
+        review_assignment_template = setting_handler.get_setting(
+            setting_group_name='email',
+            setting_name='review_assignment',
+            journal=self.journal,
+        ).processed_value
+        self.fields['template'].initial = review_assignment_template
+
+    class Meta:
+        model = models.ReviewAssignment
+        fields = ('visibility', 'form', 'date_due')
+        widgets = {
+            'date_due': HTMLDateInput,
+        }
+
+
 class EditReviewAssignmentForm(forms.ModelForm):
     class Meta:
         model = models.ReviewAssignment
@@ -141,8 +174,32 @@ class ReviewerDecisionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         decision_required = kwargs.pop("decision_required", False)
+        open_review_initial = kwargs.pop("open_review_initial", False)
         super().__init__(*args, **kwargs)
         self.fields['decision'].required = decision_required
+        self.fields['decision'].choices = models.reviewer_decision_choices()
+        self.fields['permission_to_make_public'].widget.attrs['checked'] = open_review_initial
+
+        if self.instance:
+            self.disable_reviewer_decision = setting_handler.get_setting(
+                'general',
+                'disable_reviewer_recommendation',
+                self.instance.article.journal,
+            ).processed_value
+            if self.disable_reviewer_decision:
+                del self.fields['decision']
+
+    def save(self, commit=True):
+        review_assignment = super().save(commit=False)
+
+        # sets the decision to none, if decisions are disabled.
+        if self.disable_reviewer_decision:
+            review_assignment.decision = models.RD.DECISION_NO_RECOMMENDATION.value
+
+        if commit:
+            review_assignment.save()
+
+        return review_assignment
 
     class Meta:
         model = models.ReviewAssignment

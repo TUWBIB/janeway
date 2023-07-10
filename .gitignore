@@ -141,6 +141,10 @@ dockerfiles/lando_local.env
 # Emacs backup files
 *~
 
+# docker env
+\.env
+
+
 # TUW stuff
 src/vl2janeway
 api.cfg

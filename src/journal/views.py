@@ -15,17 +15,16 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
-from django.db import IntegrityError
 from django.db.models import Q, Count
 from django.db.models.functions import Lower
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.management import call_command
@@ -1522,6 +1521,7 @@ def add_guest_editor(request, issue_id):
 
     current_editors = issue.editors.all()
     users = logic.potential_issue_editors(request.journal, current_editors)
+    editors = models.IssueEditor.objects.filter(issue=issue)
 
     if request.POST:
         if 'user' in request.POST:
@@ -1555,12 +1555,19 @@ def add_guest_editor(request, issue_id):
                     kwargs={'issue_id': issue.pk}
                 )
             )
-
+        elif 'guesteditors[]' in request.POST:
+            posted_guest_editor_pks = [int(pk) for pk in request.POST.getlist('guesteditors[]')]
+            shared.set_order(
+                objects=editors,
+                order_attr_name='sequence',
+                pk_list=posted_guest_editor_pks
+            )
+            return HttpResponse('Guest Editor Sequence Updated.')
     template = 'journal/manage/add_guest_editor.html'
     context = {
         'issue': issue,
         'users': users,
-        'editors': models.IssueEditor.objects.filter(issue=issue),
+        'editors': editors,
     }
 
     return render(request, template, context)
@@ -1858,12 +1865,12 @@ def become_reviewer(request):
     code = 'not-logged-in'
     message = _('You must login before you can become a reviewer. Click the button below to login.')
 
-    if request.user and request.user.is_authenticated() and not request.user.is_reviewer(request):
+    if request.user and request.user.is_authenticated and not request.user.is_reviewer(request):
         # We have a user, they are logged in and not yet a reviewer
         code = 'not-reviewer'
         message = _('You are not yet a reviewer for this journal. Click the button below to become a reviewer.')
 
-    elif request.user and request.user.is_authenticated() and request.user.is_reviewer(request):
+    elif request.user and request.user.is_authenticated and request.user.is_reviewer(request):
         # The user is logged in, and is already a reviewer
         code = 'already-reviewer'
         message = _('You are already a reviewer.')
@@ -2292,8 +2299,8 @@ def delete_note(request, article_id, note_id):
 def download_journal_file(request, file_id):
     file = get_object_or_404(core_models.File, pk=file_id)
 
-    if file.privacy == 'public' or (request.user.is_authenticated() and request.user.is_staff) or \
-            (request.user.is_authenticated() and request.user.is_editor(request)):
+    if file.privacy == 'public' or (request.user.is_authenticated and request.user.is_staff) or \
+            (request.user.is_authenticated and request.user.is_editor(request)):
         return files.serve_journal_cover(request, file)
     else:
         raise Http404

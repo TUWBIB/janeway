@@ -14,7 +14,6 @@ import os
 import re
 
 from django.conf import settings
-from django.core import validators
 from django.db import models, transaction
 from django.db.models import OuterRef, Subquery, Value
 from django.db.models.signals import post_save, m2m_changed
@@ -25,6 +24,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import ugettext
 from django.utils.translation import pgettext
+from django.utils.translation import gettext
 from django.utils.functional import cached_property
 
 from core import (
@@ -36,7 +36,7 @@ from core.file_system import JanewayFileSystemStorage
 from core.model_utils import AbstractSiteModel, SVGImageField, AbstractLastModifiedModel
 from press import models as press_models
 from submission import models as submission_models
-from utils import setting_handler, logic, install, shared
+from utils import setting_handler, logic, install
 from utils.function_cache import cache, mutable_cached_property
 from utils.logger import get_logger
 
@@ -79,7 +79,7 @@ def issue_large_image_path(instance, filename):
 
 
 class Journal(AbstractSiteModel):
-    code = models.CharField(max_length=24, unique=True, help_text=ugettext(
+    code = models.CharField(max_length=24, unique=True, help_text=gettext(
         'Short acronym for the journal. Used as part of the journal URL'
         'in path mode and to uniquely identify the journal'
     ))
@@ -98,7 +98,7 @@ class Journal(AbstractSiteModel):
         blank=True,
         related_name='thumbnail_image',
         on_delete=models.SET_NULL,
-        help_text=ugettext('The default thumbnail for articles, not to be '
+        help_text=gettext('The default thumbnail for articles, not to be '
                            'confused with \'Default cover image\'.'),
     )
     press_image_override = SVGImageField(
@@ -106,14 +106,14 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('Replaces the press logo in the footer.'),
+        help_text=gettext('Replaces the press logo in the footer.'),
     )
     default_cover_image = SVGImageField(
         upload_to=cover_images_upload_path,
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The default cover image for journal issues and for '
+        help_text=gettext('The default cover image for journal issues and for '
                            'the journal\'s listing on the press-level website.'),
     )
     default_large_image = SVGImageField(
@@ -121,7 +121,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The default background image for article openers '
+        help_text=gettext('The default background image for article openers '
                            'and carousel items.'),
     )
     header_image = SVGImageField(
@@ -129,7 +129,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The logo-sized image at the top of all pages, '
+        help_text=gettext('The logo-sized image at the top of all pages, '
                            'typically used for journal logos.'),
     )
     favicon = models.ImageField(
@@ -137,7 +137,7 @@ class Journal(AbstractSiteModel):
         null=True,
         blank=True,
         storage=fs,
-        help_text=ugettext('The tiny round or square image appearing in browser '
+        help_text=gettext('The tiny round or square image appearing in browser '
                            'tabs before the webpage title'),
     )
     # DEPRECATED "description" in favour of "journal_description" setting
@@ -148,7 +148,7 @@ class Journal(AbstractSiteModel):
     disable_metrics_display = models.BooleanField(default=False)
     disable_article_images = models.BooleanField(
         default=False,
-        help_text=ugettext('This field has been deprecated in v1.4.3'),
+        help_text=gettext('This field has been deprecated in v1.4.3'),
     )
     enable_correspondence_authors = models.BooleanField(default=True)
     disable_html_downloads = models.BooleanField(
@@ -158,7 +158,7 @@ class Journal(AbstractSiteModel):
     full_width_navbar = models.BooleanField(default=False)
     is_remote = models.BooleanField(
         default=False,
-        help_text=ugettext('When enabled, the journal is marked as not hosted in Janeway.'),
+        help_text=gettext('When enabled, the journal is marked as not hosted in Janeway.'),
     )
     is_conference = models.BooleanField(default=False)
     is_archived = models.BooleanField(
@@ -169,16 +169,16 @@ class Journal(AbstractSiteModel):
     remote_submit_url = models.URLField(
         blank=True,
         null=True,
-        help_text=ugettext('If the journal is remote you can link to its submission page.'),
+        help_text=gettext('If the journal is remote you can link to its submission page.'),
     )
     remote_view_url = models.URLField(
         blank=True,
         null=True,
-        help_text=ugettext('If the journal is remote you can link to its home page.'),
+        help_text=gettext('If the journal is remote you can link to its home page.'),
     )
     view_pdf_button = models.BooleanField(
         default=False,
-        help_text=ugettext('Enables a "View PDF" link on article pages.'),
+        help_text=gettext('Enables a "View PDF" link on article pages.'),
     )
 
     # Nav Items
@@ -219,7 +219,7 @@ class Journal(AbstractSiteModel):
     display_issue_title = models.BooleanField(default=True)
     display_article_number = models.BooleanField(
         default=False,
-        help_text=ugettext(
+        help_text=gettext(
             "Whether to display article numbers. Article numbers are distinct " \
             "from article ID and can be set in Edit Metadata.",
         )
@@ -230,7 +230,10 @@ class Journal(AbstractSiteModel):
     disable_front_end = models.BooleanField(default=False)
 
     def __str__(self):
-        return u'{0}: {1}'.format(self.code, self.domain)
+        if self.domain:
+            return u'{0}: {1}'.format(self.code, self.domain)
+        else:
+            return self.code
 
     def keywords_lang_en(self):
         return self.keywords.filter(language='en')
@@ -284,7 +287,7 @@ class Journal(AbstractSiteModel):
         return setting_handler.get_setting('Identifiers', 'title_doi', self, default=True).value or None
 
     @doi.setter
-    def doi(self, value):
+    def doi_setter(self, value):
         setting_handler.save_setting('Identifiers', 'title_doi', self, value)
 
     @property
@@ -317,7 +320,7 @@ class Journal(AbstractSiteModel):
 
     @property
     def press(self):
-        press = press_models.Press.objects.all()[0]
+        press = press_models.Press.objects.all().first()
         return press
 
     @classmethod
@@ -520,8 +523,14 @@ class Journal(AbstractSiteModel):
 
 
 class PinnedArticle(models.Model):
-    journal = models.ForeignKey(Journal)
-    article = models.ForeignKey('submission.Article')
+    journal = models.ForeignKey(
+        Journal,
+        on_delete=models.CASCADE,
+    )
+    article = models.ForeignKey(
+        'submission.Article',
+        on_delete=models.CASCADE,
+    )
     sequence = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -539,7 +548,10 @@ ISSUE_CODE_RE = re.compile("^[a-zA-Z0-9-_]+$")
 # added tuw_issue_str for double issues like '1/2'
 # added tuw_vlid since we need to be able to resolve bookmarks pointing to vl
 class Issue(AbstractLastModifiedModel):
-    journal = models.ForeignKey(Journal)
+    journal = models.ForeignKey(
+        Journal,
+        on_delete=models.CASCADE,
+    )
 
     # issue metadata
     volume = models.IntegerField(default=1)
@@ -548,7 +560,7 @@ class Issue(AbstractLastModifiedModel):
     cached_display_title = models.CharField(
         null=True, blank=True, max_length=300,
         editable=False,
-        help_text=ugettext(
+        help_text=gettext(
             "Autogenerated cache of the display format of an issue title"
         ),
     )
@@ -563,13 +575,13 @@ class Issue(AbstractLastModifiedModel):
 
     cover_image = SVGImageField(
         upload_to=cover_images_upload_path, null=True, blank=True, storage=fs,
-        help_text=ugettext(
+        help_text=gettext(
             "Image representing the cover of a printed issue or volume",
         )
     )
     large_image = SVGImageField(
         upload_to=issue_large_image_path, null=True, blank=True, storage=fs,
-        help_text=ugettext(
+        help_text=gettext(
             "landscape hero image used in the carousel and issue page"
         )
     )
@@ -588,7 +600,7 @@ class Issue(AbstractLastModifiedModel):
 
     code = models.SlugField(
         max_length=700, null=True, blank=True,
-        help_text=ugettext(
+        help_text=gettext(
             "An optional alphanumeric code (Slug) used to generate a verbose "
             " url for this issue. e.g: 'winter-special-issue'."
         ),
@@ -614,7 +626,7 @@ class Issue(AbstractLastModifiedModel):
         blank=True,
         null=True,
         verbose_name="ISBN",
-        help_text=ugettext(
+        help_text=gettext(
             "An ISBN is relevant for non-serial collections such as"
             " conference proceedings"
         ),
@@ -656,7 +668,7 @@ class Issue(AbstractLastModifiedModel):
         if not self.is_serial:
             return self.issue_type.pretty_name
         if self == self.journal.current_issue:
-            return ugettext("Current Issue")
+            return gettext("Current Issue")
         else:
             return ""
 
@@ -777,9 +789,9 @@ class Issue(AbstractLastModifiedModel):
                 page_numbers = article.page_range
             elif article.total_pages:
                 if article.total_pages != 1:
-                    label = ugettext('pages')
+                    label = gettext('pages')
                 else:
-                    label = ugettext('page')
+                    label = gettext('page')
                 num_pages = str(article.total_pages)
                 page_numbers = f"{num_pages} {label}"
 
@@ -1059,7 +1071,10 @@ class Issue(AbstractLastModifiedModel):
         unique_together = ("journal", "code")
 
 class IssueType(models.Model):
-    journal = models.ForeignKey(Journal)
+    journal = models.ForeignKey(
+        Journal,
+        on_delete=models.CASCADE,
+    )
     code = models.CharField(max_length=255)
 
     pretty_name = models.CharField(max_length=255)
@@ -1084,9 +1099,16 @@ class IssueType(models.Model):
 class IssueGalley(models.Model):
     FILES_PATH = 'issues'
 
-    file = models.ForeignKey('core.File')
+    file = models.ForeignKey(
+        'core.File',
+        on_delete=models.CASCADE,
+    )
     # An Issue can only have one galley at this time (PDF)
-    issue = models.OneToOneField('journal.Issue', related_name='galley')
+    issue = models.OneToOneField(
+        'journal.Issue',
+        related_name='galley',
+        on_delete=models.CASCADE,
+    )
 
     @transaction.atomic
     def replace_file(self, other):
@@ -1110,9 +1132,25 @@ class IssueGalley(models.Model):
 
 
 class IssueEditor(models.Model):
-    account = models.ForeignKey('core.Account')
-    issue = models.ForeignKey(Issue)
-    role = models.CharField(max_length=255, default='Guest Editor')
+    account = models.ForeignKey(
+        'core.Account',
+        on_delete=models.CASCADE,
+    )
+    issue = models.ForeignKey(
+        Issue,
+        on_delete=models.CASCADE,
+    )
+    role = models.CharField(
+        max_length=255,
+        default='Guest Editor',
+    )
+    sequence = models.PositiveIntegerField(
+        default=1,
+        help_text='Provides for ordering of the Issue Editors.'
+    )
+
+    class Meta:
+        ordering = ('sequence', 'account')
 
     def __str__(self):
         return "{user} {role}".format(
@@ -1122,8 +1160,14 @@ class IssueEditor(models.Model):
 
 
 class SectionOrdering(models.Model):
-    section = models.ForeignKey('submission.Section')
-    issue = models.ForeignKey(Issue)
+    section = models.ForeignKey(
+        'submission.Section',
+        on_delete=models.CASCADE,
+    )
+    issue = models.ForeignKey(
+        Issue,
+        on_delete=models.CASCADE,
+    )
     order = models.PositiveIntegerField(default=1)
 
     def __str__(self):
@@ -1134,9 +1178,18 @@ class SectionOrdering(models.Model):
 
 
 class ArticleOrdering(models.Model):
-    article = models.ForeignKey('submission.Article')
-    issue = models.ForeignKey(Issue)
-    section = models.ForeignKey('submission.Section')
+    article = models.ForeignKey(
+        'submission.Article',
+        on_delete=models.CASCADE,
+    )
+    issue = models.ForeignKey(
+        Issue,
+        on_delete=models.CASCADE,
+    )
+    section = models.ForeignKey(
+        'submission.Section',
+        on_delete=models.CASCADE,
+    )
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
@@ -1148,7 +1201,10 @@ class ArticleOrdering(models.Model):
 
 
 class FixedPubCheckItems(models.Model):
-    article = models.OneToOneField('submission.Article')
+    article = models.OneToOneField(
+        'submission.Article',
+        on_delete=models.CASCADE,
+    )
 
     metadata = models.BooleanField(default=False)
     verify_doi = models.BooleanField(default=False)
@@ -1159,9 +1215,15 @@ class FixedPubCheckItems(models.Model):
     select_article_image = models.BooleanField(default=False)
     select_open_reviews = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name_plural = 'Fixed pub check items'
+
 
 class PresetPublicationCheckItem(models.Model):
-    journal = models.ForeignKey(Journal)
+    journal = models.ForeignKey(
+        Journal,
+        on_delete=models.CASCADE,
+    )
 
     title = models.TextField()
     text = models.TextField()
@@ -1169,10 +1231,18 @@ class PresetPublicationCheckItem(models.Model):
 
 
 class PrePublicationChecklistItem(models.Model):
-    article = models.ForeignKey('submission.Article')
+    article = models.ForeignKey(
+        'submission.Article',
+        on_delete=models.CASCADE,
+    )
 
     completed = models.BooleanField(default=False)
-    completed_by = models.ForeignKey('core.Account', blank=True, null=True)
+    completed_by = models.ForeignKey(
+        'core.Account',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     completed_on = models.DateTimeField(blank=True, null=True)
 
     title = models.TextField()
@@ -1198,14 +1268,23 @@ def notification_type():
 
 
 class Notifications(models.Model):
-    journal = models.ForeignKey(Journal)
-    user = models.ForeignKey('core.Account')
+    journal = models.ForeignKey(
+        Journal,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        'core.Account',
+        on_delete=models.CASCADE,
+    )
     domain = models.CharField(max_length=100)
     type = models.CharField(max_length=10, choices=notification_type())
     active = models.BooleanField(default=False)
 
     def __str__(self):
         return '{0}, {1}: {2}'.format(self.journal, self.user, self.domain)
+
+    class Meta:
+        verbose_name_plural = 'notifications'
 
 
 # Signals
@@ -1276,7 +1355,7 @@ def setup_default_form(sender, instance, created, **kwargs):
                 required=True,
                 order=1,
                 width='large-12 columns',
-                help_text=ugettext('Please add as much detail as you can.'),
+                help_text=gettext('Please add as much detail as you can.'),
             )
 
             default_review_form.elements.add(main_element)

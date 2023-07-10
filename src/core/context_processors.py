@@ -4,13 +4,10 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 
-from journal import models as journal_models
-from press import models as press_models
 from cms import models as cms_models
 from core import logic
+from utils.logic import get_janeway_version
 
 
 def journal(request):
@@ -78,3 +75,13 @@ def navigation(request):
         .filter(Q(language=None) | Q(language=request.LANGUAGE_CODE)).order_by('sequence')
 
     return {'navigation_items': top_nav_items}
+
+
+def version(request):
+    """
+    This context processor injects the Janeway version into the context for use in the sidebar.
+
+    :param request: an HttpRequest object
+    :return: a dictionary containing the current version.
+    """
+    return {'version': get_janeway_version()}

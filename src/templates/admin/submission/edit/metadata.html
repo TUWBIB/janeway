@@ -1,13 +1,11 @@
 {% extends "admin/core/base.html" %}}
 {% load foundation %}
-{% load static from staticfiles %}
+{% load static %}
 {% load i18n %}
 {% load field %}
-
 {% load bool_fa %}
 
 {% block title %}Edit Metadata - {{ article.pk }}{% endblock title %}
-
 
 {% block breadcrumbs %}
     {{ block.super }}
@@ -237,6 +235,7 @@
                         <h2>Current Funders</h2>
                     </div>
 
+<<<<<<< HEAD
                     <div class="row expanded">
                         <div class="large-12 columns">
                             <table class="scroll">
@@ -283,6 +282,30 @@
                 <div class="large-12 columns">
                     <table class="scroll">
                         <thead>
+=======
+        <div class="row expanded">
+            <div class="large-12 columns">
+                <table class="scroll">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>FundRef ID</th>
+                        <th>Grant Number</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="sortable">
+                    {% for funder in article.funders.all %}
+                        <tr id="funder-{{ funder.pk }}">
+                            <td>{{ funder.name|default_if_none:"" }}</td>
+                            <td>{{ funder.fundref_id|default_if_none:"" }}</td>
+                            <td>{{ funder.funding_id|default_if_none:"" }}</td>
+                            <td><a href="{% url 'delete_funder' article.pk funder.pk %}?return={{ request.path|urlencode }}"><i
+                                    class="fa fa-trash">
+                                &nbsp;</i></a></td>
+                        </tr>
+                        {% empty %}
+>>>>>>> v1.5.0
                         <tr>
                             <th>Text</th>
                             <th></th>
@@ -357,6 +380,30 @@
                             <button type="button" data-close="" class="close-button">&times;</button>
                         </form>
                     </div>
+                <div class="card-section">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="large-12 columns">
+                                <input type="text" id="funder_name" name="funder_name"/>
+                                <p class="help-text">{% trans funder_form.fields.name.help_text %}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="large-12 columns">
+                                <input type="text" id="funder_doi" name="funder_doi"/>
+                                <p class="help-text">{% trans funder_form.fields.fundref_id.help_text %}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="large-12 columns">
+                                <input type="text" name="grant_number" id="grant_number"/>
+                                <p class="help-text">{% trans funder_form.fields.funding_id.help_text %}</p>
+                            </div>
+                        </div>
+                        <button type="submit" name="add_funder" class="success button">Add funder</button>
+                        <button type="button" data-close="" class="close-button">&times;</button>
+                    </form>
                 </div>
             </div>
 
@@ -410,6 +457,6 @@
             }
         }
     </script>
-    {% include "elements/jqte.html" %}
-    {% include 'elements/fundref/fundref.html' %}
+    {% include "admin/elements/jqte.html" %}
+    {% include 'admin/elements/fundref/fundref.html' with funder_form=funder_form %}
 {% endblock js %}
