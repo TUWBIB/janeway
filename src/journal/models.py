@@ -750,7 +750,6 @@ class Issue(AbstractLastModifiedModel):
         return mark_safe(" &bull; ".join((filter(None, title_list))))
 
     @property
-    @cached_property
     def display_title(self):
         return mark_safe(
             self.cached_display_title
