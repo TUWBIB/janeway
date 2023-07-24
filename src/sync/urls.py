@@ -1,7 +1,9 @@
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 from sync import views
 
 urlpatterns = [
-    url(r'^manage/articles/sync/$', views.sync, name='sync'),
+    re_path(r'^manage/articles/sync/$',
+        views.sync,
+        name='sync'),
 ]

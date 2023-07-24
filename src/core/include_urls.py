@@ -47,7 +47,9 @@ urlpatterns = [
     path('workflow/', include('workflow.urls')),
     path('discussion/', include('discussion.urls')),
     path('oidc/', include('mozilla_django_oidc.urls')),
-
+    # TUW
+    path('', include(sync_urls)),
+    
     # Root Site URLS
     re_path(r'^$', press_views.index, name='website_index'),
     re_path(r'^journals/$', press_views.journals, name='press_journals'),
