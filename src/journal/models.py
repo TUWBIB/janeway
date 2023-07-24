@@ -1066,7 +1066,7 @@ class Issue(AbstractLastModifiedModel):
         )
 
     class Meta:
-#        ordering = ('order', 'year', 'volume', 'issue', 'title')
+        ordering = ("order", "-date")        
         unique_together = ("journal", "code")
 
 class IssueType(models.Model):
