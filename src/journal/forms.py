@@ -14,6 +14,9 @@ from django_summernote.widgets import SummernoteWidget
 from core import models as core_models
 from journal import models as journal_models, logic
 from utils.forms import CaptchaForm, LeftBooleanField
+from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV3
+from simplemathcaptcha.fields import MathCaptchaField
 
 SEARCH_SORT_OPTIONS = [
         # Translators: Search order options
@@ -49,7 +52,7 @@ class ContactForm(forms.ModelForm, CaptchaForm):
             question_template = _('What is %(num1)i %(operator)s %(num2)i? ')
             are_you_a_robot = MathCaptchaField(label=_('Answer this question: '))
         elif settings.CAPTCHA_TYPE == 'recaptcha':
-            are_you_a_robot = ReCaptchaField(widget=ReCaptchaWidget())
+            are_you_a_robot = ReCaptchaField(widget=ReCaptchaV3())
         else:
             are_you_a_robot = forms.CharField(widget=forms.HiddenInput(), required=False)
         self.fields["are_you_a_robot"] = are_you_a_robot        
