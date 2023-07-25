@@ -172,7 +172,7 @@ urlpatterns = [
     re_path(r'^manage/articles/schedule/$',
         views.publication_schedule, name='publication_schedule'),
 
-    # back-content plugini
+    # back-content plugin
     re_path(r'^manage/articles/backcontent/$',
         views.backcontent, name='backcontent'),
 
