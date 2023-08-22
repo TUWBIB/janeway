@@ -117,6 +117,8 @@
                             {% for subnav in sub_nav_items %}
                             <a href="{{ subnav.url }}" class="dropdown-item">{{ subnav.link_name }}</a>
                             {% endfor %}
+
+                            {% comment %}
                             {% if request.journal.code == "OES" or request.journal.code == "OEST" %}
                             {% if LANGUAGE_CODE == "de" and item.link_name == "Über diese Zeitschrift" %}
                                 <a href="{% url 'newsletter' %}" class="dropdown-item">{% trans "Newsletter" %}</a>
@@ -125,6 +127,7 @@
                             {% else %}
                             {% endif %}
                             {% endif %}
+                            {% endcomment %}
                         </div>
                     </li>
                 {% else %}
