@@ -205,7 +205,7 @@ h1, h2, h3 {
     color: #274E90;
 }
 
-h1 {
+h1.mainheader {
     font-size: 120%;
     max-width: 55em;
     font-weight: bold;
