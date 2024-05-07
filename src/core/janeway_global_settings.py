@@ -257,10 +257,10 @@ def gettext(s):
 LANGUAGES = (
     ('en', gettext('English')),
     ('en-us', gettext('English (US)')),
-#    ('fr', gettext('French')),
+    ('fr', gettext('French')),
     ('de', gettext('German')),
-#    ('nl', gettext('Dutch')),
-    #('cy', gettext('Welsh')),
+    ('nl', gettext('Dutch')),
+    ('cy', gettext('Welsh')),
 )
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
