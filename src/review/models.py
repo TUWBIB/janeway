@@ -10,7 +10,13 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext as _
 
-from review.const import EditorialDecisions as ED, ReviewerDecisions as RD
+from core import model_utils
+
+from review.const import (
+    EditorialDecisions as ED,
+    ReviewerDecisions as RD,
+    VisibilityOptions as VO
+)
 from utils import shared
 
 
@@ -66,9 +72,9 @@ def review_type():
 
 def review_visibilty():
     return (
-        ('open', 'Open'),
-        ('blind', 'Single Anonymous'),
-        ('double-blind', 'Double Anonymous')
+        (VO.OPEN.value, 'Open'),
+        (VO.SINGLE_ANON.value, 'Single Anonymous'),
+        (VO.DOUBLE_ANON.value, 'Double Anonymous')
     )
 
 
@@ -180,7 +186,7 @@ class ReviewAssignment(models.Model):
         choices=all_review_decisions(),
         verbose_name='Recommendation',
     )
-    competing_interests = models.TextField(blank=True, null=True,
+    competing_interests = model_utils.JanewayBleachField(blank=True, null=True,
                                            help_text="If any of the authors or editors "
                                                      "have any competing interests please add them here. "
                                                      "EG. 'This study was paid for by corp xyz.'.")
@@ -189,7 +195,7 @@ class ReviewAssignment(models.Model):
     visibility = models.CharField(
         max_length=20, choices=review_visibilty(),
         default='double-blind',
-        verbose_name=_("Anonimity"),
+        verbose_name=_("Anonymity"),
     )
     form = models.ForeignKey('ReviewForm', null=True, on_delete=models.SET_NULL)
     access_code = models.CharField(max_length=100, blank=True, null=True)
@@ -206,7 +212,7 @@ class ReviewAssignment(models.Model):
     for_author_consumption = models.BooleanField(default=False)
 
     suggested_reviewers = models.TextField(blank=True, null=True)
-    comments_for_editor = models.TextField(blank=True, null=True,
+    comments_for_editor = model_utils.JanewayBleachField(blank=True, null=True,
                                            help_text="If you have any comments for the Editor you can add them here; \
                                            these will not be shared with the Author.",
                                            verbose_name="Comments for the Editor")
@@ -351,16 +357,19 @@ class ReviewForm(models.Model):
     )
 
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
 
-    intro = models.TextField(help_text="Message displayed at the start of the review form.")
-    thanks = models.TextField(help_text="Message displayed after the reviewer is finished.")
+    intro = model_utils.JanewayBleachField(
+        help_text="Message displayed at the start of the review form.",
+    )
+    thanks = model_utils.JanewayBleachField(
+        help_text="Message displayed after the reviewer is finished.",
+    )
 
     elements = models.ManyToManyField('ReviewFormElement')
     deleted = models.BooleanField(default=False)
 
     def __str__(self):
-        return u'{0} - {1}'.format(self.id, self.name)
+        return self.name
 
 
 def element_kind_choices():
@@ -391,7 +400,7 @@ class BaseReviewFormElement(models.Model):
     required = models.BooleanField(default=True)
     order = models.IntegerField()
     width = models.CharField(max_length=20, choices=element_width_choices())
-    help_text = models.TextField(blank=True, null=True)
+    help_text = model_utils.JanewayBleachField(blank=True, null=True)
 
     default_visibility = models.BooleanField(default=True, help_text='If true, this setting will be available '
                                                                      'to the author automatically, if false it will'
@@ -441,8 +450,8 @@ class ReviewAssignmentAnswer(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    answer = models.TextField(blank=True, null=True)
-    edited_answer = models.TextField(null=True, blank=True)
+    answer = model_utils.JanewayBleachField(blank=True, null=True)
+    edited_answer = model_utils.JanewayBleachField(null=True, blank=True)
     author_can_see = models.BooleanField(default=True)
 
     def __str__(self):
@@ -488,7 +497,7 @@ class ReviewFormAnswer(models.Model):
         ReviewFormElement,
         on_delete=models.CASCADE,
     )
-    answer = models.TextField()
+    answer = model_utils.JanewayBleachField()
 
 
 class ReviewerRating(models.Model):
@@ -511,7 +520,7 @@ class ReviewerRating(models.Model):
 
 
 class RevisionAction(models.Model):
-    text = models.TextField()
+    text = model_utils.JanewayBleachField()
     logged = models.DateTimeField(default=None, null=True, blank=True)
     user = models.ForeignKey(
         'core.Account',
@@ -540,16 +549,38 @@ class RevisionRequest(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    editor_note = models.TextField()  # Note from Editor to Author
-    author_note = models.TextField(
+    editor_note = model_utils.JanewayBleachField(
         blank=True,
         null=True,
-        verbose_name="Covering Letter",
-        help_text="You can add an optional covering letter to the editor with details of the "
-                  "changes that you have made to your revised manuscript."
+        help_text="You can use this optional field to provide the author with "
+                  "any information that may help them when evaluating the "
+                  "article reviews and integrating changes into their "
+                  "manuscript. This text will be displayed to the author on  "
+                  "the revision page, above the reviews.",
+    )
+    author_note = model_utils.JanewayBleachField(
+        blank=True,
+        null=True,
+        verbose_name="Covering Letter to Editor",
+        help_text="If you would like to include a cover letter for the editor "
+                  "providing changes you made to your revised manuscript, "
+                  "please add this above'"
     )  # Note from Author to Editor
     actions = models.ManyToManyField(RevisionAction)  # List of actions Author took during Revision Request
-    type = models.CharField(max_length=20, choices=revision_type(), default='minor_revisions')
+    type = models.CharField(
+        max_length=20,
+        choices=revision_type(),
+        default='minor_revisions',
+    )
+
+    response_letter = model_utils.JanewayBleachField(
+        blank=True,
+        null=True,
+        verbose_name="Response Letter to Reviewers",
+        help_text='You have the option to include a response letter for the '
+                  'reviewers, providing details about the changes you made '
+                  'to your manuscript or counter arguments.',
+    )
 
     date_requested = models.DateTimeField(default=timezone.now)
     date_due = models.DateField()
@@ -593,17 +624,17 @@ class DecisionDraft(models.Model):
     )
     decision = models.CharField(
         max_length=100,
-        choices=all_review_decisions(),
+        choices=review_decision(),
         verbose_name='Draft Decision',
     )
-    message_to_editor = models.TextField(
+    message_to_editor = model_utils.JanewayBleachField(
         null=True,
         blank=True,
         help_text='This is the email that will be sent to the editor notifying them that you are '
                   'logging your draft decision.',
         verbose_name='Email to Editor',
     )
-    email_message = models.TextField(
+    email_message = model_utils.JanewayBleachField(
         null=True,
         blank=True,
         help_text='This is a draft of the email that will be sent to the author. Your editor will check this.',
@@ -622,7 +653,7 @@ class DecisionDraft(models.Model):
         null=True,
         help_text="Stores a due date for a Drafted Revision Request.",
     )
-    editor_decline_rationale = models.TextField(
+    editor_decline_rationale = model_utils.JanewayBleachField(
         null=True,
         blank=True,
         help_text="Provide the section editor with a rationale for declining their drafted decision.",

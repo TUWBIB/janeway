@@ -18,6 +18,9 @@ from production import models
 from core import files, models as core_models
 from copyediting import models as copyediting_models
 from utils import render_template
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_production_managers(article):
@@ -69,6 +72,29 @@ def save_source_file(article, request, uploaded_file):
     article.source_files.add(new_file)
 
 
+def get_galley_label_and_type(file):
+    """
+    Returns tuple with label and type calculated based on mime for a given
+    file eg ('HTML', 'html') or ('XML', 'xml') where a file mime doesn't match
+    a supported Janeway file type it returns ('Other', 'other').
+    """
+    label = 'Other'
+    type_ = 'other'
+    if file.mime_type in files.HTML_MIMETYPES:
+        type_ = 'html'
+        label = 'HTML'
+    elif file.mime_type in files.XML_MIMETYPES:
+        type_ = 'xml'
+        label = 'XML'
+    elif file.mime_type in files.PDF_MIMETYPES:
+        type_ = 'pdf'
+        label = 'PDF'
+    elif file.mime_type in files.IMAGE_MIMETYPES:
+        type_ = 'image'
+        label = 'Image'
+    return label, type_
+
+
 def save_galley(article, request, uploaded_file, is_galley, label=None, save_to_disk=True, public=True):
     if isinstance(uploaded_file, str):
         mime = files.file_path_mime(uploaded_file)
@@ -90,13 +116,11 @@ def save_galley(article, request, uploaded_file, is_galley, label=None, save_to_
     new_file.save()
     article.save()
 
-    type_ = None
+    galley_label, galley_type = get_galley_label_and_type(new_file)
+    if label:
+        galley_label = label
 
     if new_file.mime_type in files.HTML_MIMETYPES:
-        type_ = 'html'
-        if not label:
-            label = 'HTML'
-
         with open(new_file.self_article_path(), 'r+', encoding="utf-8") as f:
             html_contents = f.read()
             f.seek(0)
@@ -104,30 +128,11 @@ def save_galley(article, request, uploaded_file, is_galley, label=None, save_to_
             f.write(cleaned_html)
             f.truncate()
 
-    elif new_file.mime_type in files.XML_MIMETYPES:
-        type_ = 'xml'
-        if not label:
-            label = 'XML'
-    elif new_file.mime_type in files.PDF_MIMETYPES:
-        type_ = 'pdf'
-        if not label:
-            label = 'PDF'
-
-    elif new_file.mime_type in files.IMAGE_MIMETYPES:
-        type_ = 'image'
-        if not label:
-            label = 'Image'
-
-    if not label:
-        label = 'Other'
-    if not type_:
-        type_ = 'other'
-
     new_galley = core_models.Galley.objects.create(
         article=article,
         file=new_file,
-        label=label,
-        type=type_,
+        label=galley_label,
+        type=galley_type,
         sequence=article.get_next_galley_sequence(),
         public=public,
     )
@@ -157,12 +162,11 @@ def remove_css_from_html(source_html):
     for tag in soup():
           del tag["style"]
 
-    return soup.prettify()
+    return str(soup)
 
 
 def replace_galley_file(article, request, galley, uploaded_file):
     if uploaded_file:
-
         files.overwrite_file(
             uploaded_file,
             galley.file,
@@ -172,26 +176,79 @@ def replace_galley_file(article, request, galley, uploaded_file):
         messages.add_message(request, messages.WARNING, 'No file was selected.')
 
 
-def save_galley_image(galley, request, uploaded_file, label="Galley Image", fixed=False):
+def save_galley_image(
+        galley,
+        request,
+        uploaded_file,
+        label="Galley Image",
+        fixed=False,
+        check_for_existing_images=False,
+):
+    filename = uploaded_file.name
+    # Check if an image with this name already exists for this galley.
+    if galley.images.filter(
+        original_filename=filename,
+    ).exists():
+        # First, if check_for_existing_images is set, we check and warn the
+        # user, no overwriting takes place. Currently all workflow changes set
+        # this to True.
+        if check_for_existing_images:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f'An image called {filename} already exists. Use the '
+                f'replace file function to upload a new version.',
+            )
+            return
+        else:
+            if galley.article:
+                image_to_overwrite = galley.images.filter(
+                    original_filename=filename,
+                ).first()
+                replacement_file = files.overwrite_file(
+                    uploaded_file,
+                    image_to_overwrite,
+                    ('articles', galley.article.pk),
+                )
+                messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'An image called {filename} already exists. It has been '
+                    f'overwritten with your uploaded file.'
+                )
+                return replacement_file
+            else:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"Galley {galley.pk} is not linked to an article. "
+                    f"Please contact your Janeway administrator.",
+                )
+                logger.warning(
+                    f"Galley {galley.pk} is not linked to an article.",
+                )
+                return
 
     if fixed:
-        filename = request.POST.get('file_name')
         uploaded_file_mime = files.check_in_memory_mime(uploaded_file)
-        expected_mime = files.guess_mime(filename)
+        new_file_mime = files.guess_mime(filename)
 
-        if not uploaded_file_mime == expected_mime:
-            messages.add_message(request, messages.WARNING, 'The file you uploaded does not match the mime of the '
-                                                            'file expected.')
+        if not uploaded_file_mime == new_file_mime:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f'The file you uploaded does not have the expected '
+                f'type: {new_file_mime}.'
+            )
 
     new_file = files.save_file_to_article(uploaded_file, galley.article, request.user)
     new_file.is_galley = False
     new_file.label = label
 
     if fixed:
-        new_file.original_filename = request.POST.get('file_name')
+        new_file.original_filename = filename
 
     new_file.save()
-
     galley.images.add(new_file)
 
     return new_file

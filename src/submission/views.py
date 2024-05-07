@@ -383,22 +383,6 @@ def delete_funder(request, article_id, funder_id):
 
     return redirect(reverse('submit_funding', kwargs={'article_id': article_id}))
 
-@login_required
-@article_edit_user_required
-def delete_citref(request, article_id, citref_id):
-    citref = get_object_or_404(
-        models.CitedReference,
-        pk=citref_id
-    )
-
-    citref.delete()
-
-    if request.GET.get('return'):
-        return redirect(request.GET['return'])
-
-#    return redirect(reverse('submit_funding', kwargs={'article_id': article_id}))
-
-
 
 @login_required
 @article_edit_user_required
@@ -515,7 +499,7 @@ def submit_files(request, article_id):
                     return redirect(reverse(
                         'submit_review', kwargs={'article_id': article_id}))
             else:
-                error = "You must upload a manuscript file."
+                error = _("You must upload a manuscript file.")
 
     template = "admin/submission/submit_files.html"
 
@@ -551,43 +535,53 @@ def submit_review(request, article_id):
                 kwargs={'article_id': article_id},
             )
         )
+    form = forms.SubmissionCommentsForm(
+        instance=article,
+    )
 
     if request.POST and 'next_step' in request.POST:
-        article.date_submitted = timezone.now()
-        article.stage = models.STAGE_UNASSIGNED
-        article.current_step = 5
-        article.snapshot_authors(article)
-        article.save()
-
-        event_logic.Events.raise_event(
-            event_logic.Events.ON_WORKFLOW_ELEMENT_COMPLETE,
-            **{'handshake_url': 'submit_review',
-               'request': request,
-               'article': article,
-               'switch_stage': False}
+        form = forms.SubmissionCommentsForm(
+            request.POST,
+            instance=article,
         )
+        if form.is_valid():
+            form.save()
+            article.date_submitted = timezone.now()
+            article.stage = models.STAGE_UNASSIGNED
+            article.current_step = 5
+            article.snapshot_authors(article)
+            article.save()
 
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            _('Article {title} submitted').format(
-                title=article.title,
-            ),
-        )
+            event_logic.Events.raise_event(
+                event_logic.Events.ON_WORKFLOW_ELEMENT_COMPLETE,
+                **{'handshake_url': 'submit_review',
+                   'request': request,
+                   'article': article,
+                   'switch_stage': False}
+            )
 
-        kwargs = {'article': article,
-                  'request': request}
-        event_logic.Events.raise_event(
-            event_logic.Events.ON_ARTICLE_SUBMITTED,
-            task_object=article,
-            **kwargs
-        )
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Article {title} submitted').format(
+                    title=article.title,
+                ),
+            )
 
-        return redirect(reverse('core_dashboard'))
+            kwargs = {'article': article,
+                      'request': request}
+            event_logic.Events.raise_event(
+                event_logic.Events.ON_ARTICLE_SUBMITTED,
+                task_object=article,
+                **kwargs
+            )
+
+            return redirect(reverse('core_dashboard'))
 
     template = "admin/submission//submit_review.html"
     context = {
         'article': article,
+        'form': form,
         'additional_fields': additional_fields,
     }
 
@@ -605,20 +599,24 @@ def edit_metadata(request, article_id):
     """
     with translation.override(request.override_language):
         article = get_object_or_404(models.Article, pk=article_id)
-        additional_fields = models.Field.objects.filter(journal=request.journal)
+        additional_fields = models.Field.objects.filter(
+            journal=request.journal,
+        )
         submission_summary = setting_handler.get_setting(
             'general',
             'submission_summary',
             request.journal,
         ).processed_value
         funder_form = forms.FunderForm()
+
         info_form = forms.ArticleInfo(
             instance=article,
             submission_summary=submission_summary,
             pop_disabled_fields=False,
+            editor_view=True,
             additional_fields=additional_fields,
         )
-        frozen_author, modal = None, None
+
         return_param = request.GET.get('return')
         reverse_url = create_language_override_redirect(
             request,
@@ -627,11 +625,12 @@ def edit_metadata(request, article_id):
             query_strings={'return': return_param}
         )
 
+        frozen_author, modal, author_form = None, None, forms.EditFrozenAuthor()
         if request.GET.get('author'):
             frozen_author, modal = logic.get_author(request, article)
             author_form = forms.EditFrozenAuthor(instance=frozen_author)
-        else:
-            author_form = forms.EditFrozenAuthor()
+        elif request.GET.get('modal') == 'author':
+            modal = 'author'
 
         if request.POST:
             if 'add_funder' in request.POST:
@@ -663,6 +662,7 @@ def edit_metadata(request, article_id):
                     instance=article,
                     submission_summary=submission_summary,
                     pop_disabled_fields=False,
+                    editor_view=True,
                     additional_fields=additional_fields
                 )
 

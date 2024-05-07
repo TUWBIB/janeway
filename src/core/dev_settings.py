@@ -7,8 +7,8 @@ SECRET_KEY = 'uxprsdhk^gzd-r=_287byolxn)$k6tsd8_cepl^s^tms2w1qrv'
 # This is the default redirect if no other sites are found.
 DEFAULT_HOST = 'https://www.example.org'
 EMAIL_BACKEND = os.environ.get(
-    'JANEWAY_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend',
-)
+    'JANEWAY_EMAIL_BACKEND',
+) or 'django.core.mail.backends.console.EmailBackend'
 
 URL_CONFIG = 'path'  # path or domain
 
@@ -20,6 +20,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_nose',
 ]
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = os.path.dirname(BASE_DIR)
 
 
 def show_toolbar(request):
@@ -41,7 +43,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'root': {
         'level': 'DEBUG',
-        'handlers': ['console'],
+        'handlers': ['console', 'log_file'],
     },
     'formatters': {
         'default': {
@@ -66,12 +68,21 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'coloured',
             'stream': 'ext://sys.stdout',
-        }
+        },
+        'log_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 1024*1024*50,  # 50 MB
+            'backupCount': 1,
+            'filename': os.path.join(PROJECT_DIR , 'logs/janeway.log'),
+            'formatter': 'default'
+        },
     },
     'loggers': {
         'django.db.backends': {
+            #'level': 'DEBUG',
             'level': 'WARNING',
-            'handlers': ['console'],
+            'handlers': ['console', 'log_file'],
             'propagate': False,
         },
     },

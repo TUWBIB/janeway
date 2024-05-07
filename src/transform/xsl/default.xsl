@@ -21,6 +21,10 @@
 
         <!-- and handle TEI -->
         <xsl:apply-templates select="/tei:TEI/tei:text/tei:body"/>
+	<xsl:if test="not(//back/fn-group)">
+	  <!-- Handle the dubious case where the footnotes are inserted immediately when referenced rather than at the fn-group section (ScienceOpen) -->
+	  <xsl:call-template name="body-footnotes" />
+	</xsl:if>
     </xsl:template>
 
     <xsl:template match="//body/@*">
@@ -422,14 +426,56 @@
         </section>
     </xsl:template>
 
-    <xsl:template match="fn-group">
+  <xsl:template name="body-footnotes">
+    <!-- Handle footnotes scattered around the body inside p tags, rather than fn-group -->
+    <xsl:if test="//article/body/p/fn">
+      <h2>Footnotes</h2>
+        <ol class="footnotes">
+          <xsl:for-each select="//article/body/p/fn">
+	    <xsl:call-template name="referenced-footnote" />
+          </xsl:for-each>
+        </ol>
+    </xsl:if>
+  </xsl:template>
+
+    <xsl:template match="back/fn-group">
+      <xsl:if test="name(*[1]) != 'title'">
+         <!-- Adds a header for footnotes when there the first child is not a title tag
+           *( See 'back/fn-group/title[1]' for heading implementation)
+         -->
         <h2>Notes</h2>
+      </xsl:if>
         <ol class="footnotes">
             <xsl:apply-templates/>
         </ol>
     </xsl:template>
 
+  <xsl:template match="back/notes/title[1]">
+    <!-- Render the first title of the notes as a top level article header -->
+    <xsl:element name="h2">
+      <xsl:value-of select="node()"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="back/fn-group/title[1]">
+    <!-- Render the first title of the fn-group as a top level article header -->
+    <xsl:element name="h2">
+      <xsl:value-of select="node()"/>
+    </xsl:element>
+  </xsl:template>
+
+    <xsl:template match="table-wrap-foot/fn-group">
+      <ol class="table-footnotes">
+        <xsl:apply-templates/>
+      </ol>
+    </xsl:template>
+
+
     <xsl:template match="fn-group/fn">
+      <xsl:call-template name="referenced-footnote" />
+    </xsl:template>
+
+    <xsl:template name="referenced-footnote">
         <xsl:variable name="fn-id">
             <xsl:value-of select="@id"/>
         </xsl:variable>
@@ -440,7 +486,7 @@
               <xsl:apply-templates/>
             <xsl:for-each select="//xref[@rid=$fn-id]">
               <xsl:variable name="i"><xsl:value-of select="string(position())"></xsl:value-of></xsl:variable>
-              [<a class="footnotemarker"  href="#{$fn-id}-nm{$i}"><sup>^</sup></a>]
+              <a class="footnotemarker"  href="#{$fn-id}-nm{$i}"> ⮭</a>
             </xsl:for-each>
           </li>
     </xsl:template>
@@ -818,7 +864,10 @@
 
     <!-- No need to proceed sec-type="additional-information", sec-type="supplementary-material" and sec-type="datasets"-->
     <xsl:template match="sec[not(@sec-type='additional-information')][not(@sec-type='datasets')][not(@sec-type='supplementary-material')]">
-        <div class="article-section">
+        <xsl:variable name="id">
+            <xsl:value-of select="@id"/>
+        </xsl:variable>
+        <div class="article-section" id="{$id}">
             <xsl:if test="@sec-type">
                 <xsl:attribute name="class">
                     <xsl:value-of select="concat('section ', ./@sec-type)"/>
@@ -827,9 +876,12 @@
             <xsl:apply-templates select="*[name()!='sec'] | node()"/>
         </div>
     </xsl:template>
+  
+  <xsl:template match="sec/label"/>
 
     <xsl:template match="sec[not(@sec-type='datasets')]/title | boxed-text/caption/title">
         <xsl:if test="node() != ''">
+            <!-- Janeway's article headers always start at <h2>, so the calculation has to be h1 + 1 + (count of parent sec) -->
             <xsl:element name="h{count(ancestor::sec) + 1}">
               <xsl:if test="preceding-sibling::label">
                 <xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
@@ -838,11 +890,102 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="app//sec/title">
-        <xsl:element name="h{count(ancestor::sec) + 3}">
-            <xsl:apply-templates select="@* | node()"/>
-        </xsl:element>
+    <xsl:template match="back/notes/sec/title">
+        <xsl:if test="node() != ''">
+            <!-- When a section is inside a notes block, we are rendering an h2 with "Notes", so we start counting sec header levels from h1 + 2 -->
+            <xsl:element name="h{count(ancestor::sec) + 2}">
+                <xsl:if test="preceding-sibling::label">
+                    <xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
+                <xsl:apply-templates select="@* | node()"/>
+            </xsl:element>
+        </xsl:if>
     </xsl:template>
+
+  <xsl:template match="app/title">
+    <xsl:choose>
+      <xsl:when test="name(parent::*) = 'caption'" >
+        <strong><xsl:value-of select="node()"/></strong>
+      </xsl:when>
+      <xsl:otherwise>
+        <h2>
+          <xsl:if test="@id">
+            <xsl:attribute name="id">
+              <xsl:value-of select="@id"/>
+            </xsl:attribute>
+          </xsl:if>
+          <!-- If there is a label preceding this node, add it as part of the same header-->
+          <xsl:if test="preceding-sibling::label">
+            <xsl:value-of select="preceding-sibling::label"/>&#160;
+          </xsl:if>
+          <xsl:value-of select="node()"/>
+        </h2>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="app/label">
+    <xsl:choose>
+      <xsl:when test="name(parent::*) = 'caption'" >
+        <strong><xsl:value-of select="node()"/> </strong>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:choose>
+          <xsl:when test="following-sibling::title">
+            <!-- If there is a title following the label, stop processing, since the title will handle the label...-->
+          </xsl:when>
+          <xsl:otherwise>
+            <h2>
+              <xsl:if test="@id">
+                <xsl:attribute name="id">
+                  <xsl:value-of select="@id"/>
+                </xsl:attribute>
+              </xsl:if>
+              <xsl:value-of select="node()"/>
+            </h2>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="app//sec/title">
+    <!-- h1 is top level and not used, h2 are article headers,
+        h2 + n are app section headers so below we add 2 to the number of <sec> levels
+      -->
+    <xsl:element name="h{count(ancestor::sec) + 2}">
+      <xsl:if test="@id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:if test="preceding-sibling::label">
+        <xsl:value-of select="preceding-sibling::label"/>&#160;
+      </xsl:if>
+      <xsl:value-of select="node()"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="app//sec/label">
+    <!-- h1 is top level and not used, h2 are article headers,
+        h2 + n are app section headers so below we add 2 to the number of <sec> levels
+      -->
+      <xsl:choose>
+        <xsl:when test="following-sibling::title">
+          <!-- If there is a title following the label, stop processing, since the title will handle the label...-->
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:element name="h{count(ancestor::sec) + 2}">
+            <xsl:if test="@id">
+              <xsl:attribute name="id">
+                <xsl:value-of select="@id"/>
+              </xsl:attribute>
+            </xsl:if>
+            <xsl:value-of select="node()"/>
+          </xsl:element>
+        </xsl:otherwise>
+      </xsl:choose>
+  </xsl:template>
+
     <!-- END transforming sections to heading levels -->
 
     <xsl:template match="p">
@@ -982,8 +1125,8 @@
                     <xsl:variable name="caption" select="parent::table-wrap/label/text()"/>
                     <xsl:variable name="graphics" select="following-sibling::graphic/@xlink:href"/>
                     <div class="fig-inline-img-set">
-                        <a href="{$graphics}" class="figure-expand-popup" title="{$caption}">
-                            <img data-img="{$graphics}" src="{$graphics}" alt="{$caption}" class="responsive-img" />
+                        <a href="{$graphics}" title="{$caption}" data-lightbox="article-figures" data-title="{$caption}">
+                            <img data-img="{$graphics}" src="{$graphics}" alt="{$caption}" class="responsive-img img-fluid" />
                         </a>
                     </div>
                 </xsl:if>
@@ -1000,7 +1143,7 @@
 
     <xsl:template match="table-wrap/table">
       <xsl:variable name="graphics" select="./@xlink:href"/>
-        <table>
+        <table class="table">
          <xsl:choose>
           <xsl:when test="./@content-type = 'example'">
             <xsl:attribute name="content-type">
@@ -1390,8 +1533,8 @@
             <div class="acta-fig-image-caption-wrapper">
                 <div class="fig-expansion">
                     <div class="fig-inline-img">
-                        <a href="{$graphics}" class="figure-expand-popup" title="{$caption}">
-                            <img data-img="{$graphics}" src="{$graphics}" alt="{$caption}"/>
+                        <a href="{$graphics}" class="figure-expand-popup" title="{$caption}" data-lightbox="article-figures" data-title="{$caption}">
+                            <img data-img="{$graphics}" src="{$graphics}" alt="{$caption}" class="img-fluid"/>
                         </a>
                     </div>
                     <xsl:apply-templates/>
@@ -1417,13 +1560,24 @@
             </xsl:choose>
         </xsl:variable>
         <xsl:variable name="graphics" select="graphic/@xlink:href"/>
+
         <div id="{$id}" class="fig-inline-img-set">
-	  <xsl:for-each select="graphic">
+      <xsl:for-each select="graphic">
+          <xsl:variable name="alt">
+              <xsl:choose>
+                  <xsl:when test="../alt-text">
+                      <xsl:value-of select="../alt-text/text()"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                      <xsl:value-of select="../label/text()"/>
+                  </xsl:otherwise>
+              </xsl:choose>
+          </xsl:variable>
             <div class="acta-fig-image-caption-wrapper">
                 <div class="fig-expansion">
                     <div class="fig-inline-img">
-                        <a href="{@xlink:href}" class="figure-expand-popup" title="{$caption}">
-				<img data-img="{$graphics}" src="{@xlink:href}" alt="{$caption}" class="responsive-img" />
+                        <a href="{@xlink:href}" class="figure-expand-popup" title="{$caption}" data-lightbox="article-figures" data-title="{$caption}" data-alt="{$alt}">
+                            <img data-img="{$graphics}" src="{@xlink:href}" class="responsive-img img-fluid" alt="{$alt}" />
                         </a>
                     </div>
                 </div>
@@ -1505,6 +1659,21 @@
           <xsl:apply-templates/>
     </xsl:template>
 
+    <xsl:template match="media" mode="criticalcommons">
+      <div class="media video-content">
+        <div class="media-inline video-inline">
+          <div class="acta-inline-video">
+            <iframe
+              width="560" height="315"
+              src="{@xlink:href}" frameborder="0"
+              allowfullscreen="yes"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+          <xsl:apply-templates/>
+    </xsl:template>
+
     <xsl:template match="media" mode="soundcloud">
       <div class="media audio-content">
         <div class="media-inline audio-inline">
@@ -1566,11 +1735,20 @@
     <!-- Acknowledgement -->
 
     <xsl:template match="ack">
-        <h2>Acknowledgements</h2>
+        <xsl:if test="name(*[1]) != 'title'">
+          <h2>Acknowledgements</h2>
+        </xsl:if>
         <div id="ack-1">
             <xsl:apply-templates/>
         </div>
     </xsl:template>
+  <xsl:template match="ack/title">
+    <xsl:if test="node() != ''">
+      <xsl:element name="h2">
+        <xsl:apply-templates/>
+      </xsl:element>
+    </xsl:if>
+  </xsl:template>
 
     <xsl:template match="ref-list">
         <!-- We inject the references heading only when there is no title block -->
@@ -1600,7 +1778,10 @@
   <xsl:template match="ref">
     <xsl:choose>
       <xsl:when test="count(element-citation)=1">
-          <p id="{parent::*/@id}">
+          <p id="{@id}">
+              <xsl:if test="label">
+                  <xsl:apply-templates select="label"/>
+              </xsl:if>
             <xsl:apply-templates select="element-citation | nlm-citation"/>
           </p>
       </xsl:when>
@@ -1625,6 +1806,10 @@
         <xsl:text>. </xsl:text>
       </em>
     </strong>
+  </xsl:template>
+
+  <xsl:template match="element-citation//ext-link">
+    <xsl:apply-templates select="." mode="nscitation"/>
   </xsl:template>
 
   <xsl:template match="ref/label">
@@ -2602,7 +2787,7 @@
         <xsl:value-of select="given-names"/>
         <xsl:choose>
           <xsl:when test="not(following-sibling::name)">
-            <xsl:text> </xsl:text>
+            <xsl:text>.</xsl:text>
           </xsl:when>
           <xsl:otherwise>
             <xsl:text>; </xsl:text>
@@ -2719,14 +2904,17 @@
   </xsl:template>
 
   <xsl:template match="person-group" mode="none">
+    
+   <!-- 
+    MS: I'm removing this because I have no idea when it is useful, and has unintended consequences on formatting of certain citations.
+    I can see that it special cases given names that are in all caps, but the special case seems to format the name as "given name, surname" as opposed
+    to the "surname, given names" format applied below.
     <xsl:variable name="gnms" select="string(descendant::given-names)"/>
     <xsl:variable name="GNMS">
       <xsl:call-template name="capitalize">
         <xsl:with-param name="str" select="$gnms"/>
       </xsl:call-template>
     </xsl:variable>
-
-    <xsl:choose>
       <xsl:when test="$gnms=$GNMS">
         <xsl:apply-templates/>
             <xsl:if test="not(preceding-sibling::person-group)">
@@ -2735,37 +2923,28 @@
             <xsl:text>).</xsl:text>
             </xsl:if>
       </xsl:when>
-
+   -->
+    <xsl:choose>
+      <xsl:when test="self::person-group/@person-group-type='author'"> 
+          <xsl:apply-templates select="node()" mode="none"/>            
+        <xsl:if test="not(preceding-sibling::person-group)">
+        <xsl:text> (</xsl:text>
+        <xsl:value-of select="..//year"/>
+        <xsl:text>).</xsl:text>
+        </xsl:if>
+      </xsl:when>
+      <xsl:when test="self::person-group/@person-group-type='editor'">
+          <xsl:apply-templates select="node()" mode="none"/>
+        <xsl:if test="not(preceding-sibling::person-group)">
+        <xsl:text>. (</xsl:text>
+        <xsl:value-of select="..//year"/>
+        <xsl:text>).</xsl:text>
+        </xsl:if>
+      </xsl:when>
       <xsl:otherwise>
-        <xsl:choose>
-          <xsl:when test="self::person-group/@person-group-type='author'">
-            <strong>
-              <xsl:apply-templates select="node()" mode="none"/>
-            </strong>
-            <xsl:if test="not(preceding-sibling::person-group)">
-            <xsl:text>. (</xsl:text>
-            <xsl:value-of select="..//year"/>
-            <xsl:text>).</xsl:text>
-            </xsl:if>
-          </xsl:when>
-          <xsl:when test="self::person-group/@person-group-type='editor'">
-            <strong>
-              <xsl:apply-templates select="node()" mode="none"/>
-            </strong>
-            <xsl:if test="not(preceding-sibling::person-group)">
-            <xsl:text>. (</xsl:text>
-            <xsl:value-of select="..//year"/>
-            <xsl:text>).</xsl:text>
-            </xsl:if>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:apply-templates select="node()" mode="none"/>
-          </xsl:otherwise>
-        </xsl:choose>
+        <xsl:apply-templates select="node()" mode="none"/>
       </xsl:otherwise>
     </xsl:choose>
-
-
     <xsl:text>&#160;</xsl:text>
     <xsl:choose>
       <xsl:when test="self::person-group/@person-group-type='author'">
@@ -2778,10 +2957,7 @@
   </xsl:template>
 
   <xsl:template match="collab" mode="none">
-    <strong>
-
       <xsl:apply-templates/>
-    </strong>
     <xsl:if test="@collab-type">
       <xsl:text>, </xsl:text>
       <xsl:value-of select="@collab-type"/>
@@ -2812,7 +2988,6 @@
         </em>
       </xsl:otherwise>
     </xsl:choose>
-
     <xsl:choose>
       <xsl:when test="following-sibling::edition">
         <xsl:text>. </xsl:text>
@@ -3131,6 +3306,11 @@
                     <xsl:apply-templates select="." mode="youtube"/>
                   </div>
                 </xsl:when>
+                <xsl:when test="contains(./@xlink:href, 'criticalcommons.org')">
+                  <div class="media" data-doi="{$data-doi}">
+                    <xsl:apply-templates select="." mode="criticalcommons"/>
+                  </div>
+                </xsl:when>
                 <xsl:otherwise>
                   <a href="{@xlink:href}">Video URL</a>
                   <xsl:apply-templates/>
@@ -3355,30 +3535,6 @@
         </div>
     </xsl:template>
 
-
-    <xsl:template match="app//title">
-      <xsl:choose>
-        <xsl:when test="name(parent::*) = 'caption'" >
-          <strong><xsl:value-of select="node()"/></strong>
-        </xsl:when>
-        <xsl:otherwise>
-          <h2 id="{@id}">
-            <xsl:if test="preceding-sibling::label">
-              <xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
-              <xsl:value-of select="node()"/>
-          </h2>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:template>
-
-    <xsl:template match="app//sec//title">
-        <h3>
-            <xsl:if test="preceding-sibling::label"><xsl:value-of select="preceding-sibling::label"/>&#160;</xsl:if>
-
-        </h3>
-    </xsl:template>
-
-
     <!-- START - general format -->
 
     <!-- list elements start-->
@@ -3409,8 +3565,9 @@
                             </xsl:attribute>
 
                             <xsl:if test="@continued-from">
+                                <xsl:variable name="continued-from-id" select="@continued-from"/>
                                 <xsl:variable name="count-list-items">
-                                  <xsl:number count="list-item"  from="list[@id=@continued-from]" level="any"/>
+                                  <xsl:number count="list-item[ancestor::list[@id=$continued-from-id]]"  level="any"/>
                                 </xsl:variable>
                                 <xsl:attribute name="start">
                                   <xsl:value-of select="$count-list-items + 1"/>
@@ -3454,6 +3611,15 @@
                             <xsl:attribute name="class">
                                 <xsl:value-of select="'list-romanlower'"/>
                             </xsl:attribute>
+                            <xsl:if test="@continued-from">
+                                <xsl:variable name="continued-from-id" select="@continued-from"/>
+                                <xsl:variable name="count-list-items">
+                                  <xsl:number count="list-item[ancestor::list[@id=$continued-from-id]]"  level="any"/>
+                                </xsl:variable>
+                                <xsl:attribute name="start">
+                                  <xsl:value-of select="$count-list-items + 1"/>
+                                </xsl:attribute>
+                            </xsl:if>
                             <xsl:apply-templates/>
                         </ol>
                     </xsl:when>
@@ -3462,6 +3628,15 @@
                             <xsl:attribute name="class">
                                 <xsl:value-of select="'list-romanupper'"/>
                             </xsl:attribute>
+                            <xsl:if test="@continued-from">
+                                <xsl:variable name="continued-from-id" select="@continued-from"/>
+                                <xsl:variable name="count-list-items">
+                                  <xsl:number count="list-item[ancestor::list[@id=$continued-from-id]]"  level="any"/>
+                                </xsl:variable>
+                                <xsl:attribute name="start">
+                                  <xsl:value-of select="$count-list-items + 1"/>
+                                </xsl:attribute>
+                            </xsl:if>
                             <xsl:apply-templates/>
                         </ol>
                     </xsl:when>
@@ -3470,6 +3645,15 @@
                             <xsl:attribute name="class">
                                 <xsl:value-of select="'list-alphalower'"/>
                             </xsl:attribute>
+                          <xsl:if test="@continued-from">
+                            <xsl:variable name="continued-from-id" select="@continued-from"/>
+                            <xsl:variable name="count-list-items">
+                              <xsl:number count="list-item[ancestor::list[@id=$continued-from-id]]"  level="any"/>
+                            </xsl:variable>
+                            <xsl:attribute name="start">
+                              <xsl:value-of select="$count-list-items + 1"/>
+                            </xsl:attribute>
+                          </xsl:if>
                             <xsl:apply-templates/>
                         </ol>
                     </xsl:when>
@@ -3478,9 +3662,23 @@
                             <xsl:attribute name="class">
                                 <xsl:value-of select="'list-alphaupper'"/>
                             </xsl:attribute>
+                          <xsl:if test="@continued-from">
+                            <xsl:variable name="continued-from-id" select="@continued-from"/>
+                            <xsl:variable name="count-list-items">
+                              <xsl:number count="list-item[ancestor::list[@id=$continued-from-id]]"  level="any"/>
+                            </xsl:variable>
+                            <xsl:attribute name="start">
+                              <xsl:value-of select="$count-list-items + 1"/>
+                            </xsl:attribute>
+                          </xsl:if>
                             <xsl:apply-templates/>
                         </ol>
                     </xsl:when>
+                    <xsl:otherwise>
+                      <ul>
+                        <xsl:apply-templates/>
+                      </ul>
+                    </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
@@ -3491,10 +3689,10 @@
     <xsl:template match="list-item">
         <xsl:choose>
             <xsl:when test="not(parent::list[@list-type='gloss']) and not(parent::list[@list-type='sentence-gloss'])">
-                <!-- Target list-items that have a title so we can use the title as the list-item-type -->
-                <!-- See also match="title" where we handle wrapping the title in a span -->
+                <!-- Target list-items that have a label so we can use the title as the list-item-type -->
+                <!-- See also match="label" where we handle wrapping the label in a span -->
                 <xsl:choose>
-                    <xsl:when test="name(*[1]) = 'title'">
+                    <xsl:when test="name(*[1]) = 'label'">
                         <li class="no-list-type">
                             <xsl:apply-templates/>
                         </li>
@@ -3560,6 +3758,11 @@
                     <xsl:value-of select="@style"/>
                 </xsl:attribute>
             </xsl:if>
+            <xsl:if test="@class">
+                <xsl:attribute name="class">
+                    <xsl:text>styled-content </xsl:text><xsl:value-of select="@class"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:apply-templates/>
         </span>
     </xsl:template>
@@ -3591,18 +3794,15 @@
       </xsl:template>
 
     <xsl:template match="title">
-        <xsl:choose>
-            <xsl:when test="name(parent::*) = 'list-item'">
-                <span class="jats-list-type">
-                    <xsl:value-of select="node()" />
-                </span>
-            </xsl:when>
-            <xsl:otherwise>
-                <strong>
-                    <xsl:apply-templates/>
-                </strong>
-            </xsl:otherwise>
-        </xsl:choose>
+      <strong>
+          <xsl:apply-templates/>
+      </strong>
+    </xsl:template>
+
+    <xsl:template match="list-item/label">
+      <span class="jats-list-type">
+          <xsl:value-of select="node()" />
+      </span>
     </xsl:template>
 
     <xsl:template match="disp-quote">
@@ -3674,9 +3874,7 @@
 
     <!-- nodes to remove -->
     <xsl:template match="aff/label"/>
-    <xsl:template match="app/label"/>
     <xsl:template match="fn/label"/>
-    <xsl:template match="sec/label"/>
     <xsl:template match="disp-formula/label"/>
     <xsl:template match="fn-group[@content-type='competing-interest']/title"/>
     <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
@@ -3686,9 +3884,9 @@
     <xsl:template match="author-notes/corresp/label"/>
     <xsl:template match="abstract/title"/>
     <xsl:template match="fig/graphic"/>
-    <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
-    <xsl:template match="ack/title"/>
-    <xsl:template match="ref//year | ref//article-title | ref//fpage | ref//volume | ref//source | ref//pub-id | ref//lpage | ref//comment | ref//supplement | ref//person-group[@person-group-type='editor'] | ref//edition | ref//publisher-loc | ref//publisher-name | ref//ext-link"/>
+    <xsl:template match="fig/alt-text"/>
+    <xsl:template match="fig-group//object-id | fig-group//graphic"/>
+    <xsl:template match="ref//year | ref//article-title | ref//fpage | ref//volume | ref//source | ref//pub-id | ref//lpage | ref//comment | ref//supplement | ref//person-group[@person-group-type='editor'] | ref//edition | ref//publisher-loc | ref//publisher-name"/>
     <xsl:template match="person-group[@person-group-type='author']"/>
     <xsl:template match="media/label"/>
     <xsl:template match="sub-article//article-title"/>
@@ -3696,6 +3894,7 @@
     <xsl:template match="object-id | table-wrap/label"/>
     <xsl:template match="funding-group//institution-wrap/institution-id"/>
     <xsl:template match="table-wrap/graphic"/>
+    <xsl:template match="article/body/p/fn"/>
     <xsl:template match="author-notes/fn[@fn-type='present-address']/label"/>
     <xsl:template match="author-notes/fn[@fn-type='deceased']/label"/>
 
@@ -4831,8 +5030,8 @@
             </xsl:variable>
             <!-- Output -->
             <li id="fn{$fnnumfull}">
-                <xsl:apply-templates/><xsl:text> [</xsl:text>
-              <a href="#fnLink{$fnnumfull}" >^</a><xsl:text>]</xsl:text>
+                <xsl:apply-templates/>
+              <a href="#fnLink{$fnnumfull}" > ⮭</a>
             </li>
           </xsl:for-each>
           <!-- END model for each footnote -->

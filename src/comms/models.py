@@ -5,8 +5,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.http import Http404
 from django.utils.translation import gettext as _
+from simple_history.models import HistoricalRecords
 
 from core import files
+from core.model_utils import JanewayBleachField
 
 __copyright__ = "Copyright 2017 Birkbeck, University of London"
 __author__ = "Martin Paul Eve & Andy Byers"
@@ -20,7 +22,7 @@ class NewsItem(models.Model):
     object = GenericForeignKey('content_type', 'object_id')
 
     title = models.CharField(max_length=500)
-    body = models.TextField()
+    body = JanewayBleachField()
     posted = models.DateTimeField(default=timezone.now)
     posted_by = models.ForeignKey('core.Account', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -38,6 +40,7 @@ class NewsItem(models.Model):
         help_text="If you want a custom byline add it here. This will overwrite the display of the user who created "
                   "the news item with whatever text is added here.",
     )
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ('-posted', 'title')

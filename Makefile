@@ -5,6 +5,7 @@ endif
 # Exposed ports
 JANEWAY_PORT ?= 8000
 PGADMIN_PORT ?= 8001
+SNAKEVIZ_PORT ?= 8002
 
 unexport NO_DEPS
 DB_NAME ?= janeway
@@ -46,17 +47,13 @@ ifdef VERBOSE
 endif
 
 # Email
-JANEWAY_EMAIL_BACKEND=''
-JANEWAY_EMAIL_HOST=''
-JANEWAY_EMAIL_PORT=''
-JANEWAY_EMAIL_USE_TLS=0
-
 ifdef DEBUG_SMTP
 	JANEWAY_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 	JANEWAY_EMAIL_HOST=janeway-debug-smtp
 	JANEWAY_EMAIL_PORT=1025
 	JANEWAY_EMAIL_USE_TLS=
 endif
+LOCALES_DIR = ./src/core/locales
 
 export DB_VENDOR
 export DB_HOST
@@ -76,6 +73,7 @@ SUFFIX ?= $(shell date +%s)
 SUFFIX := ${SUFFIX}
 DATE := `date +"%y-%m-%d"`
 
+.PHONY: janeway
 all: help
 run: janeway
 help:		## Show this help.
@@ -119,7 +117,22 @@ migrate:		## Runs Django's migrate command
 	bash -c "make command CMD=migrate"
 makemigrations:		## Runs Django's makemigrations command
 	bash -c "make command CMD=makemigrations"
+makemessages:
+	#$(foreach file, $(wildcard $(LOCALES_DIR)/*), make command CMD="makemessages --locale=$(file) --ignore=src/plugins/*";)
+	#@for f in $(shell ls ${LOCALES_DIR}); make command CMD='makemessages --locale=$${f} --ignore=src/plugins/*';)
+	bash -c "make command CMD='makemessages \
+		--locale=de \
+		--locale=cy \
+		--locale=fr \
+		--locale=it \
+		--locale=nl \
+		--locale=en-us \
+		--ignore=src/plugins/* \
+	'"
+
 build_assets:		## Runs Janeway's build_assets command
 	bash -c "make command CMD=build_assets"
 basebuild:		## Builds the base docker image
-	bash -c "docker build --no-cache -t janeway:`git rev-parse --abbrev-ref HEAD` ."
+	bash -c "docker build --no-cache -t janeway-base:latest -f dockerfiles/Dockerfile.base ."
+snakeviz:
+	docker-compose run --publish $(SNAKEVIZ_PORT):$(SNAKEVIZ_PORT) $(NO_DEPS) --rm --entrypoint=snakeviz janeway-web $(FILE) --server -H 0.0.0.0 -p $(SNAKEVIZ_PORT)

@@ -15,7 +15,7 @@
     <div class="row preprint-content">
         <div class="col m12">
             <div class="card">
-                <div class="card-image preprint-card waves-effect waves-block waves-light">
+                <div class="card-image preprint-card">
                     <img class="orbit-image" alt="{{ preprint.title|striptags }}"
                          src="{% if request.repository.hero_background %}{{ request.repository.hero_background.url }}{% else %}{% static "common/img/repository_background.jpg" %}{% endif %}">
                     <span class="card-title">
@@ -51,19 +51,91 @@
                             webkitallowfullscreen></iframe>
                 {% else %}
                     <div class="preprint-content">
-                        <p>This {{ request.repository.object_name }} has no visible version.</p>
-                        <a href="{% url 'repository_file_download' preprint.id preprint.current_version.file.id %}" class="waves-effect waves-light btn"><span class="fa fa-download"></span> Download {{ request.repository.object_name }}</a>
+                        {% if preprint.current_version.file %}
+                            <p>This {{ request.repository.object_name }} has no
+                                visible version.</p>
+                            <a href="{% url 'repository_file_download' preprint.id preprint.current_version.file.id %}"
+                               class="waves-effect waves-light btn"><span
+                                    class="fa fa-download"></span>
+                                Download {{ request.repository.object_name }}
+                            </a>
+                        {% else %}
+                            <p>This {{ request.repository.object_name }} does
+                                not have any files associated with it.</p>
+                        {% endif %}
                     </div>
                 {% endif %}
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">{% trans 'Add a Comment' %}</span>
+                        {% if request.user.is_authenticated %}
+                            <div>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    {% bootstrap_form form %}
+                                    <button type="submit" class="btn btn-success">Add Comment</button>
+                                </form>
+                            </div>
+                            <br/>
+                        {% else %}
+                            <p>You must <a href="{% url 'core_login' %}">log in</a> to post a comment.</p>
+
+                        {% endif %}
+                        <div class="divider"></div>
+                        <br />
+                        <div class="comment-scroll">
+                            <span class="card-title">{% trans 'Comments' %}</span>
+                            {% for comment in comments %}
+                                <div class="row" id="comment-{{ comment.pk }}">
+                                    <div class="col m2">
+                                        {% if comment.author.profile_image and not comment.review.anonymous %}
+                                            <img src="{{ comment.author.profile_image.url }}"
+                                                 class="responsive-img circle">
+                                        {% else %}
+                                            <img src="{% static "common/img/icons/users.png" %}"
+                                                 class="responsive-img circle">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col m10">
+                                        {% if comment.review %}
+                                            <p>
+                                            <small><strong>Invited Review Comment #{{ comment.pk }} {% if comment.review.anonymous %}Anonymous{% else %}{{ comment.author.full_name }}{% endif %}
+                                                @ {{ comment.date_time }}</strong></small>
+                                        </p>
+                                            {{ comment.body|safe }}
+                                        {% else %}
+                                        <p>
+                                            <small>Comment #{{ comment.pk }} {{ comment.author.full_name }}
+                                                @ {{ comment.date_time }}</small>
+                                        </p>
+                                        <p>
+                                            {{ comment.body|linebreaksbr }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="callout">
+                                    <p>There are no comments or no comments have been made public for this article.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="col m5">
             <div class="card">
                 <div class="card-content preprint-content">
-                    <h5>{% trans "Downloads" %}</h5>
-                    <p><a href="{% url 'repository_file_download' preprint.id preprint.current_version.file.id %}"><span class="fa fa-download"></span> Download {{ request.repository.object_name }}
-                    </a></p>
+                    {% if preprint.current_version.file %}
+                        <h5>{% trans "Downloads" %}</h5>
+                        <p>
+                            <a href="{% url 'repository_file_download' preprint.id preprint.current_version.file.id %}"><span
+                                    class="fa fa-download"></span>
+                                Download {{ request.repository.object_name }}
+                            </a></p>
+                    {% endif %}
                     {% if preprint.supplementaryfiles %}
                         <h5>{% trans "Supplementary Files" %}</h5>
                         <ul>
@@ -94,7 +166,7 @@
 
                     {% if preprint.subject.all %}
                     <h5>{% trans 'Subjects' %}</h5>
-                    <p>{% include "repository/elements/subject_display.html" %}</p>
+                    <p>{% include "common/repository/subject_display.html" %}</p>
                     {% endif %}
 
                     <h5>{% trans 'Keywords' %}</h5>
@@ -125,63 +197,6 @@
                     {% endfor %}
                     {% endif %}
 
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">{% trans 'Add a Comment' %}</span>
-                    {% if request.user.is_authenticated %}
-                        <div>
-                            <form method="POST">
-                                {% csrf_token %}
-                                {% bootstrap_form form %}
-                                <button type="submit" class="btn btn-success">Add Comment</button>
-                            </form>
-                        </div>
-                        <br/>
-                    {% else %}
-                        <p>You must <a href="{% url 'core_login' %}">log in</a> to post a comment.</p>
-
-                    {% endif %}
-                    <div class="divider"></div>
-                    <br />
-                    <div class="comment-scroll">
-                        <span class="card-title">{% trans 'Comments' %}</span>
-                        {% for comment in comments %}
-                            <div class="row" id="comment-{{ comment.pk }}">
-                                <div class="col m2">
-                                    {% if comment.author.profile_image and not comment.review.anonymous %}
-                                        <img src="{{ comment.author.profile_image.url }}"
-                                             class="responsive-img circle">
-                                    {% else %}
-                                        <img src="{% static "common/img/icons/users.png" %}"
-                                             class="responsive-img circle">
-                                    {% endif %}
-                                </div>
-                                <div class="col m10">
-                                    {% if comment.review %}
-                                        <p>
-                                        <small><strong>Invited Review Comment #{{ comment.pk }} {% if comment.review.anonymous %}Anonymous{% else %}{{ comment.author.full_name }}{% endif %}
-                                            @ {{ comment.date_time }}</strong></small>
-                                    </p>
-                                        {{ comment.body|safe }}
-                                    {% else %}
-                                    <p>
-                                        <small>Comment #{{ comment.pk }} {{ comment.author.full_name }}
-                                            @ {{ comment.date_time }}</small>
-                                    </p>
-                                    <p>
-                                        {{ comment.body|linebreaksbr }}
-                                    </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% empty %}
-                            <div class="callout">
-                                <p>There are no comments or no comments have been made public for this article.</p>
-                            </div>
-                        {% endfor %}
-                    </div>
                 </div>
             </div>
         </div>

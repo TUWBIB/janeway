@@ -5,12 +5,13 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django.contrib import admin
 from django.template.defaultfilters import truncatewords_html
+from simple_history.admin import SimpleHistoryAdmin
 
 from repository import models
 from utils import admin_utils
 
 
-class RepositoryAdmin(admin.ModelAdmin):
+class RepositoryAdmin(SimpleHistoryAdmin):
     list_display = ('pk', 'short_name', 'name', 'live')
     list_display_links = ('short_name', 'name')
     list_filter = ('live',)
@@ -189,6 +190,14 @@ class ReviewAdmin(admin_utils.PreprintFKModelAdmin):
     date_hierarchy = ('date_assigned')
 
 
+class ReviewRecommendationAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'repository')
+    list_display_links = ('pk', 'name',)
+    list_filter = ('repository',)
+    raw_id_fields = ('repository',)
+    search_fields = ('name',)
+
+
 admin_list = [
     (models.Repository, RepositoryAdmin),
     (models.RepositoryRole, RepositoryRoleAdmin),
@@ -205,7 +214,7 @@ admin_list = [
     (models.Subject, SubjectAdmin),
     (models.VersionQueue, VersionQueueAdmin),
     (models.Review, ReviewAdmin),
-
+    (models.ReviewRecommendation, ReviewRecommendationAdmin),
 ]
 
 [admin.site.register(*t) for t in admin_list]

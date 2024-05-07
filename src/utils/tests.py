@@ -10,11 +10,9 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.core import mail
 from django.core.management import call_command
-from django.contrib import admin
 from django.contrib.admin.sites import site
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 from django.template.engine import Engine
 
 import mock
@@ -23,8 +21,7 @@ from utils import (
     models,
     oidc,
     template_override_middleware,
-    setting_handler,
-    notify,
+    logic,
 )
 
 from utils import install
@@ -32,14 +29,17 @@ from utils.transactional_emails import *
 from utils.forms import FakeModelForm, KeywordModelForm
 from utils.logic import generate_sitemap
 from utils.testing import helpers
-from utils.install import update_xsl_files
 from utils.shared import clear_cache
 from utils.notify_plugins import notify_email
 
 from journal import models as journal_models
 from review import models as review_models
 from submission import models as submission_models
-from core import models as core_models, include_urls # include_urls so that notify modules load
+from core import (
+    email as core_email,
+    models as core_models,
+    forms as core_forms
+)
 from copyediting import models as copyediting_models
 
 
@@ -79,7 +79,7 @@ class UtilsTests(TestCase):
         cls.submitted_article.authors.add(cls.author)
         cls.submitted_article.correspondence_author = cls.author
 
-        cls.review_form = review_models.ReviewForm.objects.create(name="A Form", slug="A Slug", intro="i", thanks="t",
+        cls.review_form = review_models.ReviewForm.objects.create(name="A Form", intro="i", thanks="t",
                                                                   journal=cls.journal_one)
 
 
@@ -256,12 +256,18 @@ class TransactionalReviewEmailTests(UtilsTests):
         }
 
         expected_recipient = self.review_assignment.reviewer.email
+        subject_setting_name = 'subject_review_withdrawl'
+        subject_setting = self.get_default_email_subject(subject_setting_name)
+        email_data = core_email.EmailData(
+            subject=subject_setting,
+            body=self.test_message,
+        )
+        kwargs["email_data"] = email_data
 
         send_reviewer_withdrawl_notice(**kwargs)
 
         self.assertEqual(expected_recipient, mail.outbox[0].to[0])
 
-        subject_setting_name = 'subject_review_withdrawl'
         subject_setting = self.get_default_email_subject(subject_setting_name)
         expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
         self.assertEqual(expected_subject, mail.outbox[0].subject)
@@ -269,39 +275,50 @@ class TransactionalReviewEmailTests(UtilsTests):
 
     def test_send_editor_unassigned_notice(self):
         expected_recipient_one = self.review_assignment.editor.email
+        subject_setting_name = 'subject_unassign_editor'
+        subject_setting = self.get_default_email_subject(
+                subject_setting_name,
+                journal=self.review_assignment.article.journal,
+            )
+        expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
+
+        email_data = core_email.EmailData(
+            subject=subject_setting,
+            body=self.test_message,
+        )
         send_editor_unassigned_notice(
             request=self.request,
-            message=self.test_message,
+            email_data=email_data,
             assignment=self.review_assignment,
         )
 
         self.assertEqual(expected_recipient_one, mail.outbox[0].to[0])
 
-        subject_setting_name = 'subject_unassign_editor'
-        subject_setting = self.get_default_email_subject(subject_setting_name)
-        expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
         self.assertEqual(expected_subject, mail.outbox[0].subject)
 
-
     def test_send_editor_assigned_acknowledgements(self):
-
         editor_assignment = helpers.create_editor_assignment(
             article=self.article_under_review,
             editor=self.editor_two,
         )
+        subject_setting_name = 'subject_editor_assignment'
+        subject_setting = self.get_default_email_subject(subject_setting_name)
+        email_data = core_email.EmailData(
+            subject=subject_setting,
+            body=self.test_message,
+        )
+
         expected_recipient_one = editor_assignment.editor.email
         kwargs = dict(**self.base_kwargs)
         kwargs['editor_assignment'] = editor_assignment
         kwargs['acknowledgment'] = True
+        kwargs['email_data'] = email_data
         send_editor_assigned_acknowledgements(**kwargs)
 
         self.assertEqual(expected_recipient_one, mail.outbox[0].to[0])
 
-        subject_setting_name = 'subject_editor_assignment'
-        subject_setting = self.get_default_email_subject(subject_setting_name)
         expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
         self.assertEqual(expected_subject, mail.outbox[0].subject)
-
 
     def test_send_reviewer_requested_acknowledgements(self):
         kwargs = dict(**self.base_kwargs)
@@ -424,13 +441,18 @@ class TransactionalReviewEmailTests(UtilsTests):
 
         for i, decision in enumerate(['accept', 'decline']): # to be added: 'undecline'
             kwargs['decision'] = decision
+            subject_setting_name = f'subject_review_decision_{decision}'
+            subject_setting = self.get_default_email_subject(subject_setting_name)
+            email_data = core_email.EmailData(
+                subject=subject_setting,
+                body=self.test_message,
+            )
+            kwargs["email_data"] = email_data
 
             send_article_decision(**kwargs)
 
             self.assertEqual(expected_recipient_one, mail.outbox[i].to[0])
 
-            subject_setting_name = f'subject_review_decision_{decision}'
-            subject_setting = self.get_default_email_subject(subject_setting_name)
             expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
             self.assertEqual(expected_subject, mail.outbox[i].subject)
 
@@ -508,7 +530,18 @@ class CopyeditingEmailSubjectTests(UtilsTests):
             (send_copyedit_reopen, 'subject_copyeditor_reopen_task' ),
             (send_author_copyedit_complete, 'subject_author_copyedit_complete'),
        ):
+            subject_setting = self.get_default_email_subject(
+                    subject_setting_name,
+                    journal=self.article_under_review.journal,
+                )
+
+            email_data = core_email.EmailData(
+                subject=subject_setting,
+                body=self.test_message,
+            )
             kwargs = dict(**self.base_kwargs)
+            kwargs["email_data"] = email_data
+            expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
             kwargs['copyedit_assignment'] = helpers.create_copyedit_assignment(
                 article = self.article_under_review,
                 copyeditor = self.copyeditor,
@@ -522,8 +555,11 @@ class CopyeditingEmailSubjectTests(UtilsTests):
                 assignment=kwargs['copyedit'],
                 notified=True
             )
+            email_data = core_email.EmailData(
+                subject=subject_setting,
+                body=self.test_message,
+            )
             email_function(**kwargs)
-            subject_setting = self.get_default_email_subject(subject_setting_name)
             expected_subject = "[{0}] {1}".format(self.journal_one.code, subject_setting)
             self.assertEqual(expected_subject, mail.outbox[-1].subject)
 
@@ -964,21 +1000,29 @@ class AdminTestMeta(type):
     def build_test_case(cls, model, admin_class):
         raise NotImplementedError()
 
+
 class AdminSearchTestMeta(AdminTestMeta):
     def build_test_case(model, admin_class):
         app_label = model._meta.app_label
         model_name = model._meta.model_name
         url_name = f'admin:{app_label}_{model_name}_changelist'
-        url = reverse(url_name)
+        url = reverse(url_name) + '?q=test'
+
         def test_case(instance):
-            response = instance.client.get(url, SERVER_NAME=instance.press.domain)
+            response = instance.client.get(
+                url,
+                SERVER_NAME=instance.press.domain,
+            )
             instance.assertEqual(response.status_code, 200)
         test_name = f'test_admin_view_{app_label}_{model_name}'
         return test_name, test_case
 
+
 class TestAdmin(TestCase, metaclass=AdminSearchTestMeta):
+
     @classmethod
-    def setUpTestData(cls):
+    def setUpClass(cls):
+        super().setUpClass()
         user_model = get_user_model()
         cls.superuser = user_model.objects.create_superuser(
             username='super',
@@ -987,5 +1031,75 @@ class TestAdmin(TestCase, metaclass=AdminSearchTestMeta):
         )
         cls.press = helpers.create_press()
 
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.press.delete()
+        cls.superuser.delete()
+
     def setUp(self):
         self.client.force_login(self.superuser)
+
+
+class TestBounceEmailRoutes(UtilsTests):
+
+    def test_send_bounce_notification_actor_is_editor(self):
+        """
+        Tests that when an email sent by an editor bounces the bounce
+        notification is sent to that editor.
+        """
+        fake_log_entry = util_models.LogEntry.add_entry(
+            'Test Log Entry',
+            'This is a fake log entry',
+            level='Info',
+            actor=self.editor,
+            target=self.submitted_article,
+            is_email=True,
+            to='tuvix@security.voyager.fed',
+            message_id='12324343432',
+            subject='This is all just a test',
+        )
+        logic.send_bounce_notification_to_event_actor(fake_log_entry)
+        self.assertEqual(self.editor.email, mail.outbox[0].to[0])
+
+    def test_send_bounce_notification_actor_is_author(self):
+        """
+        Tests that bounce emails are not sent to authors. They are instead
+        directed to the press' primary contact.
+        """
+        fake_log_entry = util_models.LogEntry.add_entry(
+            'Test Log Entry',
+            'This is a fake log entry',
+            level='Info',
+            actor=self.author,
+            target=self.submitted_article,
+            is_email=True,
+            to='tuvix@security.voyager.fed',
+            message_id='12324343432',
+            subject='This is all just a test',
+        )
+        logic.send_bounce_notification_to_event_actor(fake_log_entry)
+        self.assertEqual(self.press.main_contact, mail.outbox[0].to[0])
+
+    def test_mailgun_webhook(self):
+        message_id = '12324343432'
+        fake_log_entry = util_models.LogEntry.add_entry(
+            'Test Log Entry',
+            'This is a fake log entry',
+            level='Info',
+            actor=self.editor,
+            target=self.submitted_article,
+            is_email=True,
+            to='tuvix@security.voyager.fed',
+            message_id=message_id,
+            subject='This is all just a test',
+        )
+        fake_mailgun_post = {
+            'Message-Id': message_id,
+            'token': '122112',
+            'timestamp': timezone.now(),
+            'signature': 'dsfsfsdfsdfsdfds',
+            'event': 'dropped',
+        }
+        logic.parse_mailgun_webhook(fake_mailgun_post)
+        self.assertEqual(self.editor.email, mail.outbox[0].to[0])

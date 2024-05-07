@@ -14,13 +14,14 @@ from utils import notify
 
 SANITIZE_FROM_RE = re.compile("\r|\n|\t|\"|<|>|,")
 
-
 def sanitize_from(from_):
     return re.sub(SANITIZE_FROM_RE, "", from_)
 
 
-def send_email(subject, to, html, journal, request, bcc=None, cc=None, attachment=None, replyto=None):
-
+def send_email(
+    subject, to, html, journal, request,
+    bcc=None, cc=None, attachment=None, replyto=None,
+):
     if journal:
         from_email = setting_handler.get_setting('general', 'from_address', journal).value
         html = "{0}<br />{1}".format(html, journal.name)
@@ -41,13 +42,14 @@ def send_email(subject, to, html, journal, request, bcc=None, cc=None, attachmen
 
     if request and request.user and not request.user.is_anonymous and request.user.email not in to:
         reply_to = [request.user.email]
-        full_from_string = "{0} <{1}>".format(request.user.full_name(), from_email)
-
-
+        full_from_string = "\"{0}\" <{1}>".format(
+            sanitize_from(request.user.full_name()),
+            from_email,
+        )
     else:
         reply_to = []
         if request:
-            full_from_string = "{0} <{1}>".format(
+            full_from_string = "\"{0}\" <{1}>".format(
                     sanitize_from(request.site_type.name),
                     from_email
             )
@@ -62,13 +64,12 @@ def send_email(subject, to, html, journal, request, bcc=None, cc=None, attachmen
         full_from_string, settings.DEFAULT_CHARSET,
     )
 
-
     # if a replyto is passed to this function, use that.
     if replyto:
         reply_to = replyto
 
-    # if there is no reply_to set yet, check if the journal has a custom replyto_address and
-    # use that.
+    # if there is no reply_to set yet, check if the journal has a custom
+    # replyto_address and use that.
     if not reply_to:
         custom_reply_to = setting_handler.get_setting(
             'general', 'replyto_address', journal,
@@ -91,7 +92,13 @@ def send_email(subject, to, html, journal, request, bcc=None, cc=None, attachmen
     msg = EmailMultiAlternatives(subject, strip_tags(html), full_from_string, to, **kwargs)
     msg.attach_alternative(html, "text/html")
 
-    if request and request.FILES and request.FILES.getlist('attachment'):
+    if attachment:
+        for file_ in attachment:
+            file_.open()
+            msg.attach(file_.name, file_.read(), file_.content_type)
+            file_.close()
+
+    elif request and request.FILES and request.FILES.getlist('attachment'):
         for file in request.FILES.getlist('attachment'):
             file.open()
             msg.attach(file.name, file.read(), file.content_type)

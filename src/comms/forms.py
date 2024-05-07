@@ -7,6 +7,7 @@ from comms import models
 
 class NewsItemForm(forms.ModelForm):
 
+
     image_file = forms.FileField(required=False)
     tags = forms.CharField(required=False)
 
@@ -21,7 +22,3 @@ class NewsItemForm(forms.ModelForm):
     class Meta:
         model = models.NewsItem
         exclude = ('content_type', 'object_id', 'posted', 'posted_by', 'large_image_file', 'tags')
-
-        widgets = {
-            'body': SummernoteWidget(),
-        }

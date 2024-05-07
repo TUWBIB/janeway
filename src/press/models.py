@@ -14,10 +14,15 @@ from django.db import models
 
 from core import models as core_models
 from core.file_system import JanewayFileSystemStorage
-from core.model_utils import AbstractSiteModel
+from core.model_utils import (
+    AbstractSiteModel,
+    JanewayBleachField,
+    SVGImageField,
+)
 from utils import logic
 from utils.function_cache import cache
 from utils.logger import get_logger
+from press import utils
 
 
 logger = get_logger(__name__)
@@ -67,10 +72,35 @@ class Press(AbstractSiteModel):
         verbose_name='Press Logo',
         on_delete=models.SET_NULL,
     )
-    footer_description = models.TextField(
+    description = JanewayBleachField(
+        blank=True,
+        verbose_name='Publisher description',
+        help_text='This will appear in web search results and on social media when the press URL is shared',
+    )
+    footer_description = JanewayBleachField(
+        blank=True,
+        verbose_name='Footer text',
+        help_text='Additional HTML for the press footer.',
+    )
+    journal_footer_text = JanewayBleachField(
+        blank=True,
+        verbose_name='Journal footer text',
+        help_text='Text that will appear in the footer '
+                  'of every journal, to display publisher '
+                  'address or other essential info. ',
+    )
+    secondary_image = SVGImageField(
+        upload_to=cover_images_upload_path,
         null=True,
         blank=True,
-        help_text='Additional HTML for the press footer.',
+        storage=fs,
+        help_text='Optional secondary logo for footer. '
+                  'Not implemented in all themes.',
+    )
+    secondary_image_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text='Turns secondary image into a link.',
     )
     main_contact = models.EmailField(default='janeway@voyager.com', blank=False, null=False)
     theme = models.CharField(max_length=255, default='OLH', blank=False, null=False)
@@ -95,9 +125,8 @@ class Press(AbstractSiteModel):
         help_text="URL to an external privacy-policy, linked from the page"
         " footer. If blank, it links to the Janeway CMS page: /site/privacy.",
     )
-
-    password_reset_text = models.TextField(blank=True, null=True, default=press_text('reset'))
-    registration_text = models.TextField(blank=True, null=True, default=press_text('registration'))
+    password_reset_text = JanewayBleachField(blank=True, null=True, default=press_text('reset'))
+    registration_text = JanewayBleachField(blank=True, null=True, default=press_text('registration'))
 
     password_number = models.BooleanField(default=False, help_text='If set, passwords must include one number.')
     password_upper = models.BooleanField(default=False, help_text='If set, passwords must include one upper case.')
@@ -112,12 +141,12 @@ class Press(AbstractSiteModel):
         help_text='Enables the repository system for this press.',
         verbose_name='Enable repository system',
     )
-    preprints_about = models.TextField(blank=True, null=True)
-    preprint_start = models.TextField(blank=True, null=True)
+    preprints_about = JanewayBleachField(blank=True, null=True)
+    preprint_start = JanewayBleachField(blank=True, null=True)
     preprint_pdf_only = models.BooleanField(default=True, help_text='Forces manuscript files to be PDFs for Preprints.')
-    preprint_submission = models.TextField(blank=True, null=True, default=press_text('submission'))
-    preprint_publication = models.TextField(blank=True, null=True, default=press_text('publication'))
-    preprint_decline = models.TextField(blank=True, null=True, default=press_text('decline'))
+    preprint_submission = JanewayBleachField(blank=True, null=True, default=press_text('submission'))
+    preprint_publication = JanewayBleachField(blank=True, null=True, default=press_text('publication'))
+    preprint_decline = JanewayBleachField(blank=True, null=True, default=press_text('decline'))
 
     random_homepage_preprints = models.BooleanField(default=False)
     homepage_preprints = models.ManyToManyField('submission.Article', blank=True)
@@ -190,7 +219,7 @@ class Press(AbstractSiteModel):
 
         return logic.build_url(
             netloc=self.domain,
-            scheme=self.SCHEMES[self.is_secure],
+            scheme=self._get_scheme(),
             port=port,
             path=_path,
         )
@@ -307,6 +336,10 @@ class Press(AbstractSiteModel):
             return False
 
         return True
+
+    @cache(600)
+    def navigation_items(self):
+        return utils.get_navigation_items(self)
 
     @property
     def code(self):

@@ -25,6 +25,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.management import call_command
@@ -32,11 +33,14 @@ from django.template import RequestContext, loader
 
 from cms import models as cms_models
 from core import (
+    email as core_email,
     files,
+    forms as core_forms,
     models as core_models,
     plugin_loader,
     logic as core_logic,
     forms as core_forms,
+    views as core_views,
 )
 
 from identifiers import models as id_models
@@ -185,7 +189,9 @@ def funder_articles(request, funder_id):
 @has_journal
 @decorators.frontend_enabled
 def articles(request):
-    """ Renders the list of articles in the journal.
+    """
+    Deprecated in version 1.5.1. Use PublishedArticlesListView.
+    Renders the list of articles in the journal.
 
     :param request: the request associated with this call
     :return: a rendered template of all articles
@@ -193,8 +199,10 @@ def articles(request):
     if request.POST and 'clear' in request.POST:
         return logic.unset_article_session_variables(request)
 
-    sections = submission_models.Section.objects.filter(journal=request.journal,
-                                                                                   is_filterable=True)
+    sections = submission_models.Section.objects.filter(
+        journal=request.journal,
+        is_filterable=True,
+    )
     page, show, filters, sort, redirect, active_filters = logic.handle_article_controls(request, sections)
 
     if redirect:
@@ -949,7 +957,16 @@ def identifier_figure(request, identifier_type, identifier, file_name):
     if not galley:
         raise Http404
 
-    figure = get_object_or_404(galley.images, original_filename=file_name)
+    # Use a filter with .first() here to avoid an error when two images with
+    # the same name are present.
+    figure = galley.images.filter(
+        original_filename=file_name
+    ).order_by(
+        '-last_modified',
+    ).first()
+
+    if not figure:
+        raise Http404
 
     return files.serve_file(request, figure, figure_article)
 
@@ -963,9 +980,25 @@ def article_figure(request, article_id, galley_id, file_name):
     :param file_name: an File object name
     :return: a streaming file response or a 404 if not found
     """
-    figure_article = get_object_or_404(submission_models.Article, pk=article_id)
-    galley = get_object_or_404(core_models.Galley, pk=galley_id, article=figure_article)
-    figure = get_object_or_404(galley.images, original_filename=file_name)
+    figure_article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+    )
+    galley = get_object_or_404(
+        core_models.Galley,
+        pk=galley_id,
+        article=figure_article,
+    )
+    # Use a filter with .first() here to avoid an error when two images with
+    # the same name are present.
+    figure = galley.images.filter(
+        original_filename=file_name
+    ).order_by(
+        '-last_modified',
+    ).first()
+
+    if not figure:
+        raise Http404
 
     return files.serve_file(request, figure, figure_article)
 
@@ -1478,10 +1511,10 @@ def issue_add_article(request, issue_id):
     """
 
     issue = get_object_or_404(models.Issue, pk=issue_id, journal=request.journal)
-    articles = submission_models.Article.objects.filter(
+    articles = submission_models.Article.active_objects.filter(
         journal=request.journal,
     ).exclude(
-        Q(pk__in=issue.article_pks) | Q(stage=submission_models.STAGE_REJECTED)
+        pk__in=issue.article_pks
     )
 
     if request.POST.get('article'):
@@ -2228,12 +2261,15 @@ def send_user_email(request, user_id, article_id=None):
         )
 
     if request.POST and 'send' in request.POST:
-        form = core_forms.EmailForm(request.POST)
+        form = core_forms.EmailForm(
+            request.POST,
+            request.FILES,
+        )
 
         if form.is_valid():
-            core_logic.send_email(
+            core_email.send_email(
                 user,
-                form,
+                form.as_dataclass(),
                 request,
                 article=article,
             )
@@ -2529,7 +2565,7 @@ def serve_article_xml(request, identifier_type, identifier):
         identifier,
     )
 
-    if not article_object:
+    if not article_object and not article_object.is_published:
         raise Http404
 
     xml_galleys = article_object.galley_set.filter(
@@ -2597,7 +2633,7 @@ def serve_article_pdf(request, identifier_type, identifier):
         identifier,
     )
 
-    if not article_object:
+    if not article_object and not article_object.is_published:
         raise Http404
 
     pdf = article_object.pdfs.first()
@@ -2671,6 +2707,76 @@ def manage_languages(request):
         context,
     )
 
+
+@method_decorator(has_journal, name='dispatch')
+@method_decorator(decorators.frontend_enabled, name='dispatch')
+class PublishedArticlesListView(core_views.FilteredArticlesListView):
+
+    """
+    A list of published articles that can be searched,
+    sorted, and filtered
+    """
+    template_name = 'journal/article_list.html'
+
+    def get_queryset(self, params_querydict=None):
+        self.queryset = super().get_queryset(params_querydict)
+        return self.queryset.filter(
+            date_published__lte=timezone.now(),
+            stage=submission_models.STAGE_PUBLISHED,
+        )
+
+    def get_facets(self):
+        facets = {
+            'date_published__date__gte': {
+                'type': 'date',
+                'field_label': _('Published after'),
+            },
+            'date_published__date__lte': {
+                'type': 'date',
+                'field_label': _('Published before'),
+            },
+            'section__pk': {
+                'type': 'foreign_key',
+                'model': submission_models.Section,
+                'field_label': _('Section'),
+                'choice_label_field': 'name',
+            },
+        }
+        return self.filter_facets_if_journal(facets)
+
+    def get_facet_queryset(self):
+        queryset = super().get_facet_queryset()
+        return queryset.filter(
+            date_published__lte=timezone.now(),
+            stage=submission_models.STAGE_PUBLISHED,
+        )
+
+    def get_order_by_choices(self):
+        return [
+            ('-date_published', _('Newest')),
+            ('date_published', _('Oldest')),
+            ('title', _('Titles A-Z')),
+            ('-title', _('Titles Z-A')),
+            ('correspondence_author__last_name', _('Author Name')),
+            ('primary_issue__volume', _('Volume')),
+        ]
+
+    def get_order_by(self):
+        order_by = self.request.GET.get('order_by', '-date_published')
+        order_by_choices = self.get_order_by_choices()
+        return order_by if order_by in dict(order_by_choices) else ''
+
+    def order_queryset(self, queryset):
+        order_by = self.get_order_by()
+        if order_by:
+            return queryset.order_by('pinnedarticle__sequence', order_by)
+        else:
+            return queryset.order_by('pinnedarticle__sequence')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = forms.SearchForm()
+        return context
 
 
 ## added TUW

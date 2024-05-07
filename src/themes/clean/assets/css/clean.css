@@ -218,6 +218,10 @@ main a:hover {
     margin-bottom: 15px !important;
 }
 
+.full-width-card {
+    min-width: 100%;
+}
+
 .card img {
     max-height: 250px;
     object-fit: cover;
@@ -357,10 +361,16 @@ footer svg {
 
 .article-table {
   display: block;
-  overflow-x: scroll;}
+  overflow-x: scroll;
+}
 
 .table-caption {
     margin-bottom: 8px;
+}
+
+.math-formulae {
+    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
 .journal-card-title {
@@ -435,3 +445,11 @@ header svg {
     margin-top: 30px;
 }
 
+.page-link,
+.page-link:hover {
+  color: #4F637D;
+}
+
+.page-item.active .page-link {
+  background-color: #4F637D;
+}

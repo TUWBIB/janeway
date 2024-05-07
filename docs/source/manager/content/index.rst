@@ -63,6 +63,29 @@ To add a new custom nav item, from the content manager page, select "Edit Nav" a
 
     Editing a custom nav item in the content management system
 
+Footer Navigation
+-----------------
+With some themes, you can put a navigation link in the footer rather than the top navigation bar.
+
+Use **For footer** to switch the link to the footer. At the press level, only the path theme support this feature so far.
+
+.. figure:: ../../nstatic/footer-path-custom-links.png
+   :alt: Custom footer links in the path them
+   :class: screenshot
+
+   Custom footer links in the path theme
+
+Press managers can also create custom footer links that extend to all journal websites, such as for publisher policies.
+
+To do so, create a navigation item and check **Is external**, **For footer**, and **Extend to journals**.
+
+.. figure:: ../../nstatic/footer-olh.png
+   :alt: Custom footer links on a journal website set by a press manager
+   :class: screenshot
+
+   Custom footer links on a journal website set by a press manager
+
+
 News Manager
 ------------
 The news manager allows you to create news items, assign display and take down dates and upload images to display alongside them.
@@ -231,3 +254,18 @@ Once a file is uploaded a link is provided that you can then insert into CMS pag
 .. figure:: ../../nstatic/media_files.gif
 
     Upload and deletion of a media file.
+
+
+Copy-Paste and Rich Text Fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When working on webpages, news items, and other fields such as abstracts,
+many people copy and paste from a word processor into Janeway. As of
+version 1.5.1, Janeway handles this better than before: When a user attempts
+to paste text that carries over styling from another application, Janeway
+will prompt the user to ask if they want to retain the formatting or paste as
+plain text.
+
+Additionally, Janeway will always remove any potentially harmful markup being
+pasted in or typed using the code view across rich-text fields, such as scripts
+that could lead to `Cross Site Scripting <https://owasp.org/www-community/attacks/xss/>`_ attacks.

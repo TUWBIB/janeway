@@ -4,9 +4,10 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from django import forms
-from django_summernote.widgets import SummernoteWidget
+
 from cms import models
 from core import models as core_models
+from core.model_utils import JanewayBleachField
 from utils.forms import JanewayTranslationModelForm
 
 from cms import models
@@ -14,20 +15,23 @@ from cms import models
 class PageForm(JanewayTranslationModelForm):
     class Meta:
         model = models.Page
-        fields = ('display_name', 'name', 'content')
         exclude = ('journal', 'is_markdown', 'content_type', 'object_id')
-
-    def __init__(self, *args, **kwargs):
-        super(PageForm, self).__init__(*args, **kwargs)
-
-        self.fields['content'].widget = SummernoteWidget()
 
 
 class NavForm(JanewayTranslationModelForm):
 
     class Meta:
         model = models.NavigationItem
-        fields = ('link_name', 'is_external', 'sequence', 'has_sub_nav', 'top_level_nav', 'language')
+        fields = (
+            'link_name',
+            'link',
+            'is_external',
+            'sequence',
+            'has_sub_nav',
+            'top_level_nav',
+            'for_footer',
+            'extend_to_journals',
+            'language')
         exclude = ('page', 'content_type', 'object_id')
 
     def __init__(self, *args, **kwargs):
@@ -43,6 +47,13 @@ class NavForm(JanewayTranslationModelForm):
             top_level_nav_items = top_level_nav_items.exclude(pk=self.instance.pk)
 
         self.fields['top_level_nav'].queryset = top_level_nav_items
+
+        if request.journal:
+            # Remove this until it can be implemented at the journal level
+            self.fields.pop('for_footer')
+            # Remove this at the journal level
+            self.fields.pop('extend_to_journals')
+
 
     def clean_top_level_nav(self):
         top_level_nav = self.cleaned_data.get('top_level_nav')
@@ -61,9 +72,8 @@ class SubmissionItemForm(JanewayTranslationModelForm):
         model = models.SubmissionItem
         fields = ('title', 'text', 'order', 'existing_setting')
         exclude = ('journal',)
-        widgets = {
-            'text': SummernoteWidget(),
-        }
+
+
 
     def __init__(self, *args, **kwargs):
         self.journal = kwargs.pop('journal')

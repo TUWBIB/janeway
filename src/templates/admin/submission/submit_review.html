@@ -1,13 +1,10 @@
 {% extends "admin/core/base.html" %}
-{% load static %}
-{% load i18n %}
-{% load hooks %}
-{% load text %}
+{% load static i18n hooks text foundation %}
 
 {% block css %}
     <link href="{% static "admin/css/timeline.css" %}" rel="stylesheet"/>{% endblock %}
 
-{% block title-section %}{% trans "Review" %}{% endblock %}
+{% block title-section %}{% trans "Review your submission" %}{% endblock %}
 
 {% block body %}
     <div class="box">
@@ -21,34 +18,28 @@
             <div class="row expanded">
                 <div class="large-12 columns">
 
-                    <p>{% blocktrans %}Please review your submission use the details below. If you need to make changes use the links above to move back along the submission steps. You must click the Complete Submission button at the foot of this page to complete the submission process, you will then receive a receipt email. {% endblocktrans %}</p>
+                    <p>{% blocktrans %}Please review your submission use the details below. If you need to make changes use the links above to move back along the submission steps. You must click the <strong>Complete Submission</strong> button at the foot of this page to complete the submission process, you will then receive a receipt email. {% endblocktrans %}</p>
 
                     {% if request.journal.submissionconfiguration.publication_fees or request.journal.submissionconfiguration.submission_check or request.journal.submissionconfiguration.copyright_notice %}
                         <div class="title-area">
-                            <h2>Agreements</h2>
+                            <h2>{% trans 'Agreements' %}</h2>
                         </div>
                         <p>
                         {% if request.journal.submissionconfiguration.publication_fees %}
-                            <i class="fa fa-check-circle green"></i> Agreed to Publication Fees statement.<br />
+                            <i class="fa fa-check-circle green"></i> {% trans "Agreed to Publication Fees statement" %} .<br />
                         {% endif %}
 
                         {% if request.journal.submissionconfiguration.submission_check %}
-                            <i class="fa fa-check-circle green"></i> Agreed to Submission Checklist.<br />
+                            <i class="fa fa-check-circle green"></i> {% trans "Agreed to Submission Checklist" %} .<br />
                         {% endif %}
 
                         {% if request.journal.submissionconfiguration.copyright_notice %}
-                            <i class="fa fa-check-circle green"></i> Agreed to Copyright statement.<br />
+                        <i class="fa fa-check-circle green"></i> {% trans "Agreed to Copyright statement" %}.<br />
                         {% endif %}
                         </p>
 
                     {% endif %}
 
-                    {% if article.comments_editor %}
-                        <div class="title-area"><h2>{% trans "Comments to Editor" %}</h2></div>
-                        <div class="content">
-                            <p>{{ article.comments_editor|linebreaksbr }}</p>
-                        </div>
-                    {% endif %}
                     <div class="title-area"><h2>{% trans "Article Info" %}</h2></div>
                     <table class="scroll small">
                         <tr>
@@ -58,7 +49,7 @@
                         </tr>
 
                         <tr>
-                            <td colspan="{% if request.journal.submissionconfiguration.subtitle %}2{% else %}3{% endif %}">{{ article.title }}</td>
+                            <td colspan="{% if request.journal.submissionconfiguration.subtitle %}2{% else %}3{% endif %}">{{ article.safe_title }}</td>
                             {% if request.journal.submissionconfiguration.subtitle %}
                                 <td>{{ article.subtitle }}</td>{% endif %}
                         </tr>
@@ -156,12 +147,12 @@
                     <div class="title-area"><h2>{% trans "Author Info" %}</h2></div>
                     <table class="table small">
                         <tr>
-                            <th>First Name</th>
-                            <th>Middle Name</th>
-                            <th>Last Name</th>
-                            <th>Email Address</th>
-                            <th>ORCID</th>
-                            <th>Affiliation</th>
+                            <th>{% trans 'First Name' %}</th>
+                            <th>{% trans 'Middle Name' %}</th>
+                            <th>{% trans 'Last Name' %}</th>
+                            <th>{% trans 'Email Address' %}</th>
+                            <th>{% trans 'ORCID' %}</th>
+                            <th>{% trans 'Affiliation' %}</th>
                         </tr>
                         {% for order in article.articleauthororder_set.all %}
                             <tr>
@@ -169,7 +160,7 @@
                                 <td>{{ order.author.middle_name|default_if_none:"--" }}</td>
                                 <td>{{ order.author.last_name }}</td>
                                 <td>{{ order.author.email }}</td>
-                                <td>{{ order.author.orcid|default_if_none:"No ORCID supplied" }}</td>
+                                <td>{{ order.author.orcid|default_if_none:_("No ORCID supplied") }}</td>
                                 <td>{{ order.author.affiliation }}</td>
                             </tr>
                         {% endfor %}
@@ -181,13 +172,13 @@
                         <tr>
                             <th>{% trans "Label" %}</th>
                             <th>{% trans "File Name" %}</th>
-                            <th>File Type</th>
+                            <th>{% trans 'File Type' %}</th>
                         </tr>
                         {% for file in article.manuscript_files.all %}
                             <tr>
                                 <td>{{ file.label }}</td>
                                 <td>{{ file }}</td>
-                                <td>Manuscript</td>
+                                <td>{% trans 'Manuscript' %}</td>
                             </tr>
                         {% endfor %}
                         {% if request.journal.submissionconfiguration.figures_data %}
@@ -195,13 +186,23 @@
                                 <tr>
                                     <td>{{ file.label }}</td>
                                     <td>{{ file }}</td>
-                                    <td>Figure/Data</td>
+                                    <td>{% trans 'Figure/Data' %}</td>
                                 </tr>
                             {% endfor %}
                         {% endif %}
                     </table>
 
                     {% hook 'submission_review' %}
+
+                    {% if request.journal.submissionconfiguration.comments_to_the_editor %}
+                        <div class="title-area">
+                            <h2>{% trans "Comments to the Editor" %}</h2>
+                        </div>
+                        <div class="content submission-content">
+                            <p>{% trans 'Before submitting you have the option to add additional comments for the editor using the field below. Only the editor will see anything you add here.' %}</p>
+                            {{ form.comments_editor|foundation }}
+                        </div>
+                    {% endif %}
 
                     <div class="large-12 columns">
                         <button class="success button pull-right" type="submit" name="next_step"><i class="fa fa-check">&nbsp;</i>{% trans "Complete" %} {% trans "Submission" %}

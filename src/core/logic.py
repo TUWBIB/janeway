@@ -131,6 +131,54 @@ def resize_and_crop(img_path, size, crop_type='middle'):
         # Could be an SVG
         return
 
+    # Get current and desired ratio for the images
+    img_ratio = img.size[0] / float(img.size[1])
+    ratio = size[0] / float(size[1])
+    # The image is scaled/cropped vertically or horizontally depending on the ratio
+    if ratio > img_ratio:
+        img = img.resize(
+            (size[0], int(size[0] * img.size[1] // img.size[0])),
+            Image.LANCZOS,
+        )
+        # Crop in the top, middle or bottom
+        if crop_type == 'top':
+            box = (0, 0, img.size[0], size[1])
+        elif crop_type == 'middle':
+            box = (0, (img.size[1] - size[1]) // 2, img.size[0], (img.size[1] + size[1]) // 2)
+        elif crop_type == 'bottom':
+            box = (0, img.size[1] - size[1], img.size[0], img.size[1])
+        else:
+            raise ValueError('ERROR: invalid value for crop_type')
+        img = img.crop(box)
+
+    elif ratio < img_ratio:
+        img = img.resize(
+            (size[0], int(size[0] * img.size[1] // img.size[0])),
+            Image.LANCZOS,
+        )
+        # Crop in the top, middle or bottom
+        if crop_type == 'top':
+            box = (0, 0, size[0], img.size[1])
+        elif crop_type == 'middle':
+            horizontal_padding = (size[0] - img.size[0]) // 2
+            vertical_padding = (size[1] - img.size[1]) // 2
+
+            offset_tuple = (horizontal_padding, vertical_padding)
+
+            final_thumb = Image.new(mode='RGBA', size=size, color=(255, 255, 255, 0))
+            final_thumb.paste(img, offset_tuple)  # paste the thumbnail into the full sized image
+
+            final_thumb.save(img_path, "png")
+            return
+        elif crop_type == 'bottom':
+            box = (img.size[0] - size[0], 0, img.size[0], img.size[1])
+        else:
+            raise ValueError('ERROR: invalid value for crop_type')
+
+        img = img.crop(box)
+    else:
+        img = img.resize((size[0], size[1]), Image.LANCZOS)
+
     if img.mode == "CMYK":
         img = img.convert("RGB")
 
@@ -295,9 +343,6 @@ def get_settings_to_edit(display_group, journal, user):
             {'name': 'user_automatically_author',
              'object': setting_handler.get_setting('general', 'user_automatically_author', journal),
              },
-            {'name': 'submission_competing_interests',
-             'object': setting_handler.get_setting('general', 'submission_competing_interests', journal),
-             },
             {'name': 'submission_summary',
              'object': setting_handler.get_setting('general', 'submission_summary', journal),
              },
@@ -404,6 +449,10 @@ def get_settings_to_edit(display_group, journal, user):
                 'object': setting_handler.get_setting('general', 'enable_suggested_reviewers', journal),
             },
             {
+                'name': 'display_past_reviewers',
+                'object': setting_handler.get_setting('general', 'display_past_reviewers', journal),
+            },
+            {
                 'name': 'enable_peer_review_data_on_review_page',
                 'object': setting_handler.get_setting('general', 'enable_peer_review_data_on_review_page', journal),
             },
@@ -422,6 +471,22 @@ def get_settings_to_edit(display_group, journal, user):
             {
                 'name': 'disable_reviewer_recommendation',
                 'object': setting_handler.get_setting('general', 'disable_reviewer_recommendation', journal),
+            },
+            {
+                'name': 'enable_share_reviews_decision',
+                'object': setting_handler.get_setting('general', 'enable_share_reviews_decision', journal),
+            },
+            {
+                'name': 'display_completed_reviews_in_additional_rounds',
+                'object': setting_handler.get_setting('general', 'display_completed_reviews_in_additional_rounds', journal),
+            },
+            {
+                'name': 'share_author_response_letters',
+                'object': setting_handler.get_setting('general', 'share_author_response_letters', journal),
+            },
+            {
+                'name': 'display_completed_reviews_in_additional_rounds_text',
+                'object': setting_handler.get_setting('general', 'display_completed_reviews_in_additional_rounds_text', journal),
             },
         ]
         setting_group = 'general'
@@ -616,7 +681,7 @@ def handle_article_thumb_image_file(uploaded_file, article, request):
     else:
         new_file = files.overwrite_file(
                 uploaded_file,
-                article.large_image_file,
+                article.thumbnail_image_file,
                 ('articles', article.pk)
         )
         article.thumbnail_image_file = new_file

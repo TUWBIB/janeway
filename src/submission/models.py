@@ -41,9 +41,11 @@ from core.file_system import JanewayFileSystemStorage
 from core.model_utils import(
     AbstractLastModifiedModel,
     BaseSearchManagerMixin,
+    JanewayBleachField,
+    JanewayBleachCharField,
     M2MOrderedThroughField,
 )
-from core import workflow, model_utils, files
+from core import workflow, model_utils, files, models as core_models
 from core.templatetags.truncate import truncatesmart
 from identifiers import logic as id_logic
 from identifiers import models as identifier_models
@@ -51,7 +53,11 @@ from metrics.logic import ArticleMetrics
 from review import models as review_models
 from utils.function_cache import cache
 from utils.logger import get_logger
-from utils import setting_handler
+from journal import models as journal_models
+from review.const import (
+    ReviewerDecisions as RD,
+    VisibilityOptions as VO,
+)
 
 logger = get_logger(__name__)
 
@@ -256,6 +262,13 @@ REVIEW_STAGES = {
     STAGE_ACCEPTED,
 }
 
+# Stages used to determine if a review assignment is open
+REVIEW_ACCESSIBLE_STAGES = {
+    STAGE_ASSIGNED,
+    STAGE_UNDER_REVIEW,
+    STAGE_UNDER_REVISION
+}
+
 COPYEDITING_STAGES = {
     STAGE_EDITOR_COPYEDITING,
     STAGE_AUTHOR_COPYEDITING,
@@ -359,7 +372,7 @@ class ArticleStageLog(models.Model):
 
 
 class PublisherNote(AbstractLastModifiedModel):
-    text = models.TextField(max_length=4000, blank=False, null=False)
+    text = JanewayBleachField(max_length=4000, blank=False, null=False)
     sequence = models.PositiveIntegerField(default=999)
     creator = models.ForeignKey(
         'core.Account',
@@ -632,7 +645,10 @@ class Article(AbstractLastModifiedModel):
         null=True,
         on_delete=models.SET_NULL,
     )
-    title = models.CharField(max_length=999, help_text=_('Your article title'))
+    title = JanewayBleachCharField(
+        max_length=999,
+        help_text=_('Your article title'),
+    )
     subtitle = models.CharField(
         # Note: subtitle is deprecated as of version 1.4.2
         max_length=999,
@@ -640,16 +656,14 @@ class Article(AbstractLastModifiedModel):
         null=True,
         help_text=_('Do not use--deprecated in version 1.4.1 and later.')
     )
-    abstract = models.TextField(
+    abstract = JanewayBleachField(
         blank=True,
         null=True,
-        help_text=_('Please avoid pasting content from word processors as they can add '
-                    'unwanted styling to the abstract. You can retype the abstract '
-                    'here or copy and paste it into notepad/a plain text editor before '
-                    'pasting here.')
     )
-    non_specialist_summary = models.TextField(blank=True, null=True, help_text='A summary of the article for'
-                                                                               ' non specialists.')
+    non_specialist_summary = JanewayBleachField(
+        blank=True, null=True,
+        help_text='A summary of the article for non specialists.'
+    )
     keywords = M2MOrderedThroughField(
         Keyword,
         blank=True, null=True, through='submission.KeywordArticle',
@@ -680,10 +694,13 @@ class Article(AbstractLastModifiedModel):
                                               null=True, on_delete=models.SET_NULL)
 
     competing_interests_bool = models.BooleanField(default=False)
-    competing_interests = models.TextField(blank=True, null=True, help_text="If you have any conflict "
-                                                                            "of interests in the publication of this "
-                                                                            "article please state them here.")
-    rights = models.TextField(
+    competing_interests = JanewayBleachField(
+        blank=True, null=True,
+        help_text="If you have any conflict "
+            "of interests in the publication of this "
+            "article please state them here.",
+    )
+    rights = JanewayBleachField(
         blank=True, null=True,
         help_text="A custom statement on the usage rights for this article"
             " and associated materials, to be rendered in the article page"
@@ -745,8 +762,8 @@ class Article(AbstractLastModifiedModel):
     publication_fees = models.BooleanField(default=False)
     submission_requirements = models.BooleanField(default=False)
     copyright_notice = models.BooleanField(default=False)
-    comments_editor = models.TextField(blank=True, null=True, verbose_name="Comments to the Editor",
-                                       help_text="Add any comments you'd like the editor to consider here.")
+    comments_editor = JanewayBleachField(blank=True, null=True, verbose_name="Comments to the Editor",
+                                       help_text=_("Add any comments you'd like the editor to consider here."))
 
     # an image of recommended size: 750 x 324
     large_image_file = models.ForeignKey('core.File', null=True, blank=True, related_name='image_file',
@@ -765,12 +782,12 @@ class Article(AbstractLastModifiedModel):
     metric_stats = None
 
     # Agreement, this field records the submission checklist that was present when this article was submitted.
-    article_agreement = models.TextField(default='')
+    article_agreement = JanewayBleachField(default='')
 
-    custom_how_to_cite = models.TextField(
+    custom_how_to_cite = JanewayBleachField(
         blank=True, null=True,
-        help_text="Custom 'how to cite' text. To be used only if the block"
-            " generated by Janeway is not suitable.",
+        help_text=_("Custom 'how to cite' text. To be used only if the block"
+            " generated by Janeway is not suitable."),
     )
 
     publisher_name = models.CharField(
@@ -803,8 +820,10 @@ class Article(AbstractLastModifiedModel):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        help_text='You can only assign an Issue that this Article is part of.'
-                  'You can add this article to and Issue from the Issue Manager.'
+        help_text='You can only assign an issue '
+                  'that this article is part of. '
+                  'You can add this article to an '
+                  'issue from the Issue Manager.',
     )
     projected_issue = models.ForeignKey(
         'journal.Issue',
@@ -812,6 +831,10 @@ class Article(AbstractLastModifiedModel):
         null=True,
         on_delete=models.SET_NULL,
         related_name='projected_issue',
+        help_text='This field is for internal purposes only '
+                  'before publication. You can use it to '
+                  'track likely issue assignment before formally '
+                  'assigning an issue.',
     )
 
     # Meta
@@ -830,11 +853,24 @@ class Article(AbstractLastModifiedModel):
     # funding
     funders = models.ManyToManyField('Funder', blank=True)
 
+    reviews_shared = models.BooleanField(
+        default=False,
+        help_text="Marked true when an editor manually shares reviews with "
+                  "other reviewers using the decision helper page.",
+    )
+
     objects = ArticleSearchManager()
     active_objects = ActiveArticleManager()
 
     class Meta:
         ordering = ('-date_published', 'title')
+
+    @property
+    def safe_title(self):
+        if self.title:
+            return mark_safe(self.title)
+        else:
+            return "[Untitled]"
 
     @property
     def how_to_cite(self):
@@ -843,7 +879,14 @@ class Article(AbstractLastModifiedModel):
 
         template = "common/elements/how_to_cite.html"
         authors = self.frozenauthor_set.all()
-        author_str = " & ".join(a.citation_name() for a in authors)
+        author_str = ''
+        for author in authors:
+            if author == authors.first():
+                author_str = author.citation_name()
+            elif not author == authors.last():
+                author_str = author_str + f", {author.citation_name()}"
+            else:
+                author_str = author_str + f" & {author.citation_name()}"
         if author_str:
             author_str += ","
         year_str = ""
@@ -877,7 +920,7 @@ class Article(AbstractLastModifiedModel):
         context = {
             "author_str": author_str,
             "year_str": year_str,
-            "title": mark_safe(self.title),
+            "title": self.safe_title,
             "journal_str": journal_str,
             "issue_str": issue_str,
             "doi_str": doi_str,
@@ -959,7 +1002,7 @@ class Article(AbstractLastModifiedModel):
 
     @property
     def carousel_title(self):
-        return self.title
+        return self.safe_title
 
     @property
     def carousel_image_resolver(self):
@@ -1021,8 +1064,6 @@ class Article(AbstractLastModifiedModel):
                 'graphic': 'xlink:href'
             }
 
-            from core import models as core_models
-
             # iterate over all found elements
             for element, attribute in elements.items():
                 images = souped_xml.findAll(element)
@@ -1045,7 +1086,6 @@ class Article(AbstractLastModifiedModel):
                         return False
 
         return True
-
 
     def index_full_text(self):
         """ Indexes the render galley for full text search
@@ -1141,7 +1181,6 @@ class Article(AbstractLastModifiedModel):
         return self.get_identifier('ac')
 
     def is_accepted(self):
-        from core import models as core_models
         if self.date_published:
             return True
 
@@ -1488,10 +1527,20 @@ class Article(AbstractLastModifiedModel):
             decision__isnull=False,
         ).exclude(decision='withdrawn')
 
+    @property
+    def completed_reviews_with_decision_previous_rounds(self):
+        completed_reviews = self.completed_reviews_with_decision
+        return completed_reviews.filter(
+            review_round__round_number__lt=self.current_review_round(),
+        )
+
     def active_review_request_for_user(self, user):
         try:
-            return self.reviewassignment_set.filter(is_complete=False, date_declined__isnull=True,
-                                                    reviewer=user).first()
+            return self.reviewassignment_set.filter(
+                is_complete=False,
+                date_declined__isnull=True,
+                reviewer=user
+            ).first()
         except review_models.ReviewAssignment.DoesNotExist:
             return None
 
@@ -1502,6 +1551,11 @@ class Article(AbstractLastModifiedModel):
         return self.reviewassignment_set.filter(decision='withdrawn').count()
 
     def accept_article(self, stage=None):
+
+        # Frozen author records should be updated at acceptance,
+        # so we fire the default force_update=True on snapshot_authors
+        self.snapshot_authors()
+
         self.date_accepted = timezone.now()
         self.date_declined = None
 
@@ -1541,6 +1595,10 @@ class Article(AbstractLastModifiedModel):
         self.date_declined = None
         self.stage = STAGE_PREPRINT_PUBLISHED
         self.date_published = dateparser.parse('{date} {time}'.format(date=date, time=time))
+        self.save()
+
+    def mark_reviews_shared(self):
+        self.reviews_shared = True
         self.save()
 
     def user_is_author(self, user):
@@ -1602,6 +1660,9 @@ class Article(AbstractLastModifiedModel):
 
     def active_revision_requests(self):
         return self.revisionrequest_set.filter(date_completed__isnull=True)
+
+    def completed_revision_requests(self):
+        return self.revisionrequest_set.filter(date_completed__isnull=False)
 
     def active_author_copyedits(self):
         author_copyedits = []
@@ -1700,12 +1761,10 @@ class Article(AbstractLastModifiedModel):
 
     @cache(600)
     def workflow_stages(self):
-        from core import models as core_models
         return core_models.WorkflowLog.objects.filter(article=self)
 
     @property
     def current_workflow_element(self):
-        from core import models as core_models
         try:
             workflow_element_name = workflow.STAGES_ELEMENTS.get(
                 self.stage,
@@ -1753,7 +1812,7 @@ class Article(AbstractLastModifiedModel):
             journal_elements = list(self.journal.workflow().elements.all())
             i = journal_elements.index(current_workflow_element)
             return journal_elements[i+1]
-        except IndexError:
+        except (IndexError, ValueError):
             return 'No next workflow stage found'
 
     @cache(600)
@@ -1855,6 +1914,54 @@ class Article(AbstractLastModifiedModel):
     def ms_and_figure_files(self):
         return chain(self.manuscript_files.all(), self.data_figure_files.all())
 
+    def fast_last_modified_date(self):
+        """ A faster way of calculating an approximate last modified date
+        While not as accurate as `best_last_modified_date` this calculation
+        covers most of the relevant relations when determining when an article
+        has been last modified. Depending on the numner of related nodes, this
+        function can be about 6 times faster than `best_last_modified_date`
+        """
+        last_mod_date = self.last_modified
+
+        try:
+            latest = self.galley_set.latest("last_modified").last_modified
+            if latest > last_mod_date:
+                    last_mod_date = latest
+        except core_models.Galley.DoesNotExist:
+            pass
+
+        try:
+            latest = self.frozenauthor_set.latest("last_modified").last_modified
+            if latest > last_mod_date:
+                    last_mod_date = latest
+        except FrozenAuthor.DoesNotExist:
+            pass
+
+        try:
+            latest = core_models.File.objects.filter(
+                article_id=self.pk).latest("last_modified").last_modified
+            if latest > last_mod_date:
+                    last_mod_date = latest
+        except core_models.File.DoesNotExist:
+            pass
+
+        try:
+            latest = self.issues.latest("last_modified").last_modified
+            if latest > last_mod_date:
+                    last_mod_date = latest
+        except journal_models.Journal.DoesNotExist:
+            pass
+
+        return last_mod_date
+
+    @cache(600)
+    def pinned(self):
+        if journal_models.PinnedArticle.objects.filter(
+            journal=self.journal,
+            article=self,
+        ):
+            return True
+
     def keywords_lang_en(self):
         return self.keywords.filter(language='en')
 
@@ -1890,7 +1997,7 @@ class FrozenAuthor(AbstractLastModifiedModel):
 
     institution = models.CharField(max_length=1000, null=True, blank=True)
     department = models.CharField(max_length=300, null=True, blank=True)
-    frozen_biography = models.TextField(
+    frozen_biography = JanewayBleachField(
         null=True,
         blank=True,
         verbose_name=_('Frozen Biography'),
@@ -2106,10 +2213,22 @@ class Section(AbstractLastModifiedModel):
         ordering = ('sequence',)
 
     def __str__(self):
-        return "{} - {}".format(
-            self.pk,
-            self.name,
-        )
+        if self.name:
+            return self.name
+        return f"Unnamed Section {self.pk}"
+
+    def display_name_public_submission(self):
+        """
+        Returns a display name that informs the user if the section is
+        close for submission.
+        """
+        name = f"Unnamed Section {self.pk}"
+        if self.name:
+            name = self.name
+        if not self.public_submissions:
+            name = f"{name} (Public Submission Closed)"
+
+        return name
 
     def published_articles(self):
         return Article.objects.filter(section=self, stage=STAGE_PUBLISHED)
@@ -2139,7 +2258,7 @@ class Licence(AbstractLastModifiedModel):
     name = models.CharField(max_length=300)
     short_name = models.CharField(max_length=15)
     url = models.URLField(max_length=1000)
-    text = models.TextField(null=True, blank=True)
+    text = JanewayBleachField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
 
     available_for_submission = models.BooleanField(default=True)
@@ -2182,7 +2301,7 @@ class Note(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    text = models.TextField()
+    text = JanewayBleachField()
     date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -2254,7 +2373,7 @@ class FieldAnswer(models.Model):
         Article,
         on_delete=models.CASCADE,
     )
-    answer = models.TextField()
+    answer = JanewayBleachField()
 
 
 class ArticleAuthorOrder(models.Model):

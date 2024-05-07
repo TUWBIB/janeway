@@ -37,9 +37,9 @@
                             <b>{{ answer.element.name }}</b>
                             <br/>
                             {% if answer.edited_answer %}
-                            {{ answer.edited_answer|linebreaksbr }}
+                            {{ answer.edited_answer|safe|linebreaksbr }}
                             {% else %}
-                            {{ answer.answer|linebreaksbr }}
+                            {{ answer.answer|safe|linebreaksbr }}
                             {% endif %}
                             <br/>
                         </div>
@@ -52,6 +52,16 @@
                     <a href="?file_id={{ review.review_file.id }}"><i
                             class="fa fa-download">&nbsp;</i>{{ review.review_file.original_filename }}</a>
                 </div>
+                {% endif %}
+                {% if journal_settings.general.display_completed_reviews_in_additional_rounds or shared_reviews %}
+                    {% if review.review_file %}
+                        <div class="large-12 columns">
+                            <p><strong>Review File</strong></p>
+                            <p><a href="{% url 'reviewer_shared_review_download' review.article.pk review.pk %}">
+                                <span class="fa fa-download">&nbsp;</span>{{ review.review_file.original_filename }}
+                            </a></p>
+                        </div>
+                    {% endif %}
                 {% endif %}
 
             </div>

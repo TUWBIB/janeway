@@ -6,15 +6,15 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 from datetime import timedelta
 from uuid import uuid4
 
-from django_summernote.widgets import SummernoteWidget
-
 from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.template.defaultfilters import linebreaksbr
+from tinymce.widgets import TinyMCE
 
 from review import models, logic
 from core import models as core_models, forms as core_forms
+from core.widgets import JanewayFileInput
 from utils import setting_handler
 from utils.forms import FakeModelForm, HTMLDateInput, HTMLSwitchInput
 
@@ -38,6 +38,8 @@ class DraftDecisionForm(forms.ModelForm):
         self.fields['revision_request_due_date'].widget.attrs['onchange'] = 'decision_change()'
         self.fields['decision'].widget.attrs[
             'onchange'] = 'decision_change()'
+        self.fields['decision'].widget.attrs[
+            'onfocus'] = 'store_previous_decision()'
         self.fields['editor'].queryset = editors
         if not newly_created:
             self.fields['message_to_editor'].widget = forms.HiddenInput()
@@ -129,7 +131,7 @@ class ReviewAssignmentForm(forms.ModelForm, core_forms.ConfirmableIfErrorsForm):
 
 class BulkReviewAssignmentForm(forms.ModelForm):
     template = forms.CharField(
-        widget=SummernoteWidget,
+        widget=TinyMCE,
         label='Email Template',
     )
     reviewer_csv = forms.FileField(
@@ -175,25 +177,21 @@ class ReviewerDecisionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         decision_required = kwargs.pop("decision_required", False)
         open_review_initial = kwargs.pop("open_review_initial", False)
+        self.recommendation_disabled = kwargs.pop("recommendation_disabled", False)
         super().__init__(*args, **kwargs)
         self.fields['decision'].required = decision_required
         self.fields['decision'].choices = models.reviewer_decision_choices()
         self.fields['permission_to_make_public'].widget.attrs['checked'] = open_review_initial
 
         if self.instance:
-            self.disable_reviewer_decision = setting_handler.get_setting(
-                'general',
-                'disable_reviewer_recommendation',
-                self.instance.article.journal,
-            ).processed_value
-            if self.disable_reviewer_decision:
+            if self.recommendation_disabled:
                 del self.fields['decision']
 
     def save(self, commit=True):
         review_assignment = super().save(commit=False)
 
         # sets the decision to none, if decisions are disabled.
-        if self.disable_reviewer_decision:
+        if self.recommendation_disabled:
             review_assignment.decision = models.RD.DECISION_NO_RECOMMENDATION.value
 
         if commit:
@@ -210,7 +208,11 @@ class FakeReviewerDecisionForm(FakeModelForm, ReviewerDecisionForm):
 
     def __init__(self, *args, **kwargs):
         kwargs["disable_fields"] = True
+        open_peer_review = kwargs.pop('open_peer_review', None)
         super().__init__(*args, **kwargs)
+
+        if not (open_peer_review and open_peer_review.value):
+            del self.fields['permission_to_make_public']
 
 
 class ReplacementFileDetails(forms.ModelForm):
@@ -281,10 +283,8 @@ class DoRevisions(forms.ModelForm, core_forms.ConfirmableForm):
         model = models.RevisionRequest
         fields = (
             'author_note',
+            'response_letter',
         )
-        widgets = {
-            'author_note': SummernoteWidget(),
-        }
 
     def check_for_potential_errors(self):
         # This customizes the confirmable form method
@@ -292,6 +292,10 @@ class DoRevisions(forms.ModelForm, core_forms.ConfirmableForm):
 
         if not self.cleaned_data.get('author_note', None):
             message = 'The Covering Letter field is empty.'
+            potential_errors.append(_(message))
+
+        if not self.cleaned_data.get('response_letter', None):
+            message = 'The Response Letter field is empty.'
             potential_errors.append(_(message))
 
         ms_files = self.instance.article.manuscript_files.all()
@@ -334,8 +338,10 @@ class GeneratedForm(forms.Form):
                     widget=forms.TextInput(attrs={'div_class': element.width}),
                     required=element.required if fields_required else False)
             elif element.kind == 'textarea':
-                self.fields[str(element.pk)] = forms.CharField(widget=forms.Textarea,
-                                                            required=element.required if fields_required else False)
+                self.fields[str(element.pk)] = forms.CharField(
+                    widget=TinyMCE,
+                    required=element.required if fields_required else False
+                )
             elif element.kind == 'date':
                 self.fields[str(element.pk)] = forms.CharField(
                     widget=forms.DateInput(attrs={'class': 'datepicker', 'div_class': element.width}),
@@ -433,3 +439,16 @@ class AnswerVisibilityForm(forms.Form):
                 answer.save()
 
         return self.review_assignment.review_form_answers()
+
+
+class ShareReviewsForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        reviews = kwargs.pop('reviews', None)
+        super(ShareReviewsForm, self).__init__(*args, **kwargs)
+
+        for review in reviews:
+            self.fields[f'{ review.pk }'] = forms.CharField(
+                widget=SummernoteWidget,
+                label=f'Email for {review.reviewer.full_name()}',
+                initial=review.email_content,
+            )

@@ -1,10 +1,11 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django_summernote.widgets import SummernoteWidget
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.utils.text import slugify
 from django.contrib import messages
+from tinymce.widgets import TinyMCE
+
 
 from submission import models as submission_models
 from repository import models
@@ -296,11 +297,11 @@ class SettingsForm(forms.ModelForm):
             'preprint_pdf_only',
         )
         widgets = {
-            'preprints_about': SummernoteWidget,
-            'preprint_start': SummernoteWidget,
-            'preprint_submission': SummernoteWidget,
-            'preprint_publication': SummernoteWidget,
-            'preprint_decline': SummernoteWidget,
+            'preprints_about': TinyMCE,
+            'preprint_start': TinyMCE,
+            'preprint_submission': TinyMCE,
+            'preprint_publication': TinyMCE,
+            'preprint_decline': TinyMCE,
         }
 
     def __init__(self, *args, **kwargs):
@@ -454,6 +455,7 @@ class RepositoryInitial(RepositoryBase):
             'domain',
             'object_name',
             'object_name_plural',
+            'theme',
             'publisher',
         )
         help_texts = {
@@ -472,6 +474,7 @@ class RepositoryInitial(RepositoryBase):
 
 
 class RepositorySite(RepositoryBase):
+
     class Meta:
         model = models.Repository
         fields = (
@@ -488,11 +491,11 @@ class RepositorySite(RepositoryBase):
             'review_helper',
         )
         widgets = {
-            'about': SummernoteWidget,
-            'footer': SummernoteWidget,
-            'login_text': SummernoteWidget,
-            'submission_access_request_text': SummernoteWidget,
-            'review_helper': SummernoteWidget,
+            'about': TinyMCE,
+            'footer': TinyMCE,
+            'login_text': TinyMCE,
+            'submission_access_request_text': TinyMCE,
+            'review_helper': TinyMCE,
         }
 
 
@@ -501,14 +504,17 @@ class RepositorySubmission(RepositoryBase):
         model = models.Repository
         fields = (
             'start',
+            'file_upload_help',
             'submission_agreement',
             'limit_upload_to_pdf',
+            'require_pdf_help',
             'managers',
         )
 
         widgets = {
-            'start': SummernoteWidget,
-            'submission_agreement': SummernoteWidget,
+            'start': TinyMCE,
+            'submission_agreement': TinyMCE,
+            'file_upload_help': TinyMCE,
             'managers': FilteredSelectMultiple(
                 "Accounts",
                 False,
@@ -534,15 +540,15 @@ class RepositoryEmails(RepositoryBase):
         )
 
         widgets = {
-            'submission': SummernoteWidget,
-            'publication': SummernoteWidget,
-            'decline': SummernoteWidget,
-            'accept_version': SummernoteWidget,
-            'decline_version': SummernoteWidget,
-            'new_comment': SummernoteWidget,
-            'review_invitation': SummernoteWidget,
-            'manager_review_status_change': SummernoteWidget,
-            'reviewer_review_status_change': SummernoteWidget,
+            'submission': TinyMCE,
+            'publication': TinyMCE,
+            'decline': TinyMCE,
+            'accept_version': TinyMCE,
+            'decline_version': TinyMCE,
+            'new_comment': TinyMCE,
+            'review_invitation': TinyMCE,
+            'manager_review_status_change': TinyMCE,
+            'reviewer_review_status_change': TinyMCE,
             'submission_notification_recipients': TableMultiSelectUser()
         }
 
@@ -654,8 +660,11 @@ class ReviewDueDateForm(forms.ModelForm):
 
 class ReviewCommentForm(forms.Form):
     body = forms.CharField(
-        widget=SummernoteWidget(),
+        widget=TinyMCE(),
         label="Comments",
+    )
+    recommendation = forms.ModelChoiceField(
+        queryset=models.ReviewRecommendation.objects.none(),
     )
     anonymous = forms.BooleanField(
         help_text='Check if you want your comments to be displayed anonymously.',
@@ -669,6 +678,12 @@ class ReviewCommentForm(forms.Form):
         if self.review.comment:
             self.fields['body'].initial = self.review.comment.body
             self.fields['anonymous'].initial = self.review.anonymous
+            self.fields['recommendation'].initial = self.review.recommendation.pk
+
+        self.fields['recommendation'].queryset = models.ReviewRecommendation.objects.filter(
+            repository=self.review.preprint.repository,
+            active=True,
+        )
 
     def save(self):
         if self.cleaned_data:
@@ -684,77 +699,27 @@ class ReviewCommentForm(forms.Form):
 
             self.review.anonymous = self.cleaned_data.get('anonymous', False)
             self.review.comment = comment
+            self.review.recommendation = self.cleaned_data.get('recommendation')
             self.review.save()
 
 
-class ReviewForm(forms.ModelForm):
+class RecommendationForm(forms.ModelForm):
     class Meta:
-        model = models.Review
+        model = models.ReviewRecommendation
         fields = (
-            'reviewer',
-            'date_due',
+            'name',
+            'active',
         )
-        widgets = {
-            'date_due': utils_forms.HTMLDateInput(),
-        }
 
     def __init__(self, *args, **kwargs):
-        self.preprint = kwargs.pop('preprint')
-        self.manager = kwargs.pop('manager')
-        super(ReviewForm, self).__init__(*args, **kwargs)
-        self.fields['reviewer'].queryset = self.preprint.repository.reviewer_accounts()
+        self.repository = kwargs.pop('repository')
+        super(RecommendationForm, self).__init__(*args, **kwargs)
 
     def save(self, commit=True):
-        review = super(ReviewForm, self).save(commit=False)
-        review.preprint = self.preprint
-        review.manager = self.manager
-        review.status = 'new'
+        recommendation = super(RecommendationForm, self).save(commit=False)
+        recommendation.repository = self.repository
 
         if commit:
-            review.save()
+            recommendation.save()
 
-        return review
-
-
-class ReviewDueDateForm(forms.ModelForm):
-    class Meta:
-        model = models.Review
-        fields = ('date_due',)
-        widgets = {
-            'date_due': utils_forms.HTMLDateInput(),
-        }
-
-
-class ReviewCommentForm(forms.Form):
-    body = forms.CharField(
-        widget=SummernoteWidget(),
-        label="Comments",
-    )
-    anonymous = forms.BooleanField(
-        help_text='Check if you want your comments to be displayed anonymously.',
-        label="Comment Anonymously",
-        required=False,
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.review = kwargs.pop('review')
-        super(ReviewCommentForm, self).__init__(*args, **kwargs)
-        if self.review.comment:
-            self.fields['body'].initial = self.review.comment.body
-            self.fields['anonymous'].initial = self.review.anonymous
-
-    def save(self):
-        if self.cleaned_data:
-            if self.review.comment:
-                comment = self.review.comment
-            else:
-                comment = models.Comment()
-
-            comment.author = self.review.reviewer
-            comment.preprint = self.review.preprint
-            comment.body = self.cleaned_data.get('body')
-            comment.save()
-
-            self.review.anonymous = self.cleaned_data.get('anonymous', False)
-            self.review.comment = comment
-            self.review.save()
+        return recommendation

@@ -13,7 +13,10 @@ from utils import (
     setting_handler,
     render_template,
 )
-from core import models as core_models
+from core import (
+    email as core_email,
+    models as core_models,
+)
 from review import logic as review_logic
 from review.const import EditorialDecisions as ED
 
@@ -21,50 +24,55 @@ from review.const import EditorialDecisions as ED
 def send_reviewer_withdrawl_notice(**kwargs):
     review_assignment = kwargs['review_assignment']
     request = kwargs['request']
-    user_message_content = kwargs['user_message_content']
+    email_data = kwargs['email_data']
+    article = review_assignment.article
+    skip = kwargs.get('skip', True)
 
-    if 'skip' not in kwargs:
-        kwargs['skip'] = True
+    description = '{0}\'s review of "{1}" has been withdrawn by {2}'.format(
+        review_assignment.reviewer.full_name(),
+        review_assignment.article.title,
+        request.user.full_name(),
+    )
+    log_dict = {
+            'level': 'Info', 'action_text': description,
+            'types': 'Review Withdrawl', 'target': review_assignment.article,
+    }
 
-    skip = kwargs['skip']
-
-    description = '{0}\'s review of "{1}" has been withdrawn by {2}'.format(review_assignment.reviewer.full_name(),
-                                                                            review_assignment.article.title,
-                                                                            request.user.full_name())
     if not skip:
-        log_dict = {'level': 'Info', 'action_text': description, 'types': 'Review Withdrawl',
-                    'target': review_assignment.article}
-        notify_helpers.send_email_with_body_from_user(
+        core_email.send_email(
+            review_assignment.reviewer,
+            email_data,
             request,
-            'subject_review_withdrawl',
-            review_assignment.reviewer.email,
-            user_message_content,
-            log_dict=log_dict
+            article=article,
+            log_dict=log_dict,
         )
-        notify_helpers.send_slack(request, description, ['slack_editors'])
+
+    notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
-def send_editor_unassigned_notice(request, message, assignment, skip=False):
+def send_editor_unassigned_notice(request, email_data, assignment, skip=False):
     description = "{a.editor} unassigned from {a.article} by {r.user}".format(
             a=assignment,
             r=request,
     )
+    article = assignment.article
 
     if not skip:
 
         log_dict = {
                 'level': 'Info', 'action_text': description,
                 'types': 'Editor Unassigned',
-                'target': assignment.article
+                'target': article,
         }
 
-        notify_helpers.send_email_with_body_from_user(
-                request,
-                'subject_unassign_editor',
-                assignment.editor.email,
-                message,
-                log_dict=log_dict,
+        core_email.send_email(
+            request.user,
+            email_data,
+            request,
+            article=article,
+            log_dict=log_dict,
         )
+
     notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
@@ -73,29 +81,21 @@ def send_editor_assigned_acknowledgements_mandatory(**kwargs):
     This function is called via the event handling framework and it notifies that an editor has been assigned.
     It is wired up in core/urls.py. It is different to the below function in that this is called when an editor is
     assigned, whereas the below is only called when the user opts to send a message to the editor.
-    :param kwargs: a list of kwargs that includes editor_assignment, user_message_content, skip (boolean) and request
+    :param kwargs: a list of kwargs that includes email_data, editor_assignment, skip (boolean) and request
     :return: None
     """
 
+    email_data = kwargs['email_data']
     editor_assignment = kwargs['editor_assignment']
     article = editor_assignment.article
     request = kwargs['request']
-    user_message_content = kwargs['user_message_content']
-
-    if 'skip' not in kwargs:
-        kwargs['skip'] = True
-
-    skip = kwargs['skip']
+    skip = kwargs.get('skip', True)
     acknowledgement = kwargs['acknowledgement']
 
-    description = '{0} was assigned as the editor for "{1}"'.format(editor_assignment.editor.full_name(),
-                                                                    article.title)
-
-    context = {
-        'article': article,
-        'request': request,
-        'editor_assignment': editor_assignment
-    }
+    description = '{0} was assigned as the editor for "{1}"'.format(
+        editor_assignment.editor.full_name(),
+        article.title
+    )
 
     log_dict = {'level': 'Info',
                 'action_text': description,
@@ -104,21 +104,29 @@ def send_editor_assigned_acknowledgements_mandatory(**kwargs):
 
     # send to assigned editor
     if not skip:
-        notify_helpers.send_email_with_body_from_user(
+        core_email.send_email(
+            editor_assignment.editor,
+            email_data,
             request,
-            'subject_editor_assignment',
-            editor_assignment.editor.email,
-            user_message_content,
-            log_dict=log_dict
+            article=article,
+            log_dict=log_dict,
         )
 
     # send to editor
     if not acknowledgement:
-        notify_helpers.send_slack(request, description, ['slack_editors'])
-        notify_helpers.send_email_with_body_from_setting_template(request, 'editor_assignment',
-                                                                  'subject_editor_assignment',
-                                                                  request.user.email, context,
-                                                                  log_dict=log_dict)
+        notify_helpers.send_slack(
+            request,
+            description,
+            ['slack_editors']
+        )
+
+        core_email.send_email(
+            request.user.email,
+            email_data,
+            request,
+            article=article,
+            log_dict=log_dict,
+        )
 
 
 def send_editor_assigned_acknowledgements(**kwargs):
@@ -132,6 +140,70 @@ def send_editor_assigned_acknowledgements(**kwargs):
 
     send_editor_assigned_acknowledgements_mandatory(**kwargs)
 
+
+def send_editor_manually_assigned(**kwargs):
+    """
+    Event handler that sends notifications on manual editor assignemnt
+    :param kwargs: a list of kwargs that includes editor_assignment,
+        email_data, skip (boolean) and request
+    :return: None
+    """
+    email_data = kwargs["email_data"]
+    editor_assignment = kwargs['editor_assignment']
+    article = editor_assignment.article
+    request = kwargs['request']
+    skip = kwargs.get("skip", True)
+
+    # send to assigned editor
+    if not skip:
+        core_email.send_email(
+            editor_assignment.editor,
+            email_data,
+            request,
+            article=article,
+        )
+
+    description = '{0} was assigned as the editor for "{1}"'.format(
+        editor_assignment.editor.full_name(),
+        article.title,
+    )
+
+    notify_helpers.send_slack(request, description, ['slack_editors'])
+
+
+def send_reviewer_requested(**kwargs):
+    """
+    This function is called via the event handling framework and it notifies that a reviewer has been requested.
+    It is wired up in core/urls.py.
+    :param kwargs: a list of kwargs that includes review_assignment, email_data, skip (boolean) and request
+    :return: None
+    """
+    email_data = kwargs["email_data"]
+    review_assignment = kwargs['review_assignment']
+    article = review_assignment.article
+    request = kwargs['request']
+    skip = kwargs.get("skip", True)
+
+    description = 'A review request was added to "{0}" for user {1}'.format(
+        article.title,
+        review_assignment.reviewer.full_name(),
+    )
+
+    log_dict = {'level': 'Info',
+                'action_text': description,
+                'types': 'Review Request',
+                'target': article}
+
+    if not skip:
+        core_email.send_email(
+            review_assignment.reviewer,
+            kwargs["email_data"],
+            request,
+            article=article,
+            log_dict=log_dict,
+        )
+
+    notify_helpers.send_slack(request, description, ['slack_editors'])
 
 def send_reviewer_requested_acknowledgements(**kwargs):
     """
@@ -419,40 +491,33 @@ def send_article_decision(**kwargs):
     article = kwargs['article']
     request = kwargs['request']
     decision = kwargs['decision']
-    subject = ""
-    user_message_content = kwargs['user_message_content']
 
     if 'skip' not in kwargs:
         kwargs['skip'] = True
 
     skip = kwargs['skip']
 
-    description = '{0}\'s article "{1}" has been {2}ed by {3}'.format(article.correspondence_author.full_name(),
-                                                                      article.title,
-                                                                      decision,
-                                                                      request.user.full_name())
+    description = '{0}\'s article "{1}" has been {2}ed by {3}'.format(
+        article.correspondence_author.full_name(),
+        article.title,
+        decision,
+        request.user.full_name()
+    )
 
     log_dict = {'level': 'Info',
                 'action_text': description,
                 'types': 'Article Decision',
                 'target': article}
 
-    if decision == ED.ACCEPT.value:
-        subject = 'subject_review_decision_accept'
-    elif decision == ED.DECLINE.value:
-        subject = 'subject_review_decision_decline'
-    elif decision == ED.UNDECLINE.value:
-        subject = 'subject_review_decision_undecline'
-
-
     if not skip:
-        notify_helpers.send_email_with_body_from_user(
+        core_email.send_email(
+            article.correspondence_author,
+            kwargs["email_data"],
             request,
-            subject,
-            article.correspondence_author.email,
-            user_message_content,
-            log_dict=log_dict
+            article=article,
+            log_dict=log_dict,
         )
+
         notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
@@ -496,26 +561,42 @@ def send_revisions_request(**kwargs):
 def send_revisions_complete(**kwargs):
     request = kwargs['request']
     revision = kwargs['revision']
+    article = revision.article
 
     action_text = ''
     for action in revision.actions.all():
         action_text = "{0}<br><br>{1} - {2}".format(action_text, action.logged, action.text)
 
     description = ('<p>{0} has completed revisions for {1}</p> Actions:<br>{2}'
-        ''.format(request.user.full_name(), revision.article.title, action_text)
+        ''.format(request.user.full_name(), article.title, action_text)
     )
-    notify_helpers.send_email_with_body_from_user(
-        request,
-        'subject_revisions_complete_receipt',
-        {editor.email for editor in get_assignment_editors(revision)},
-        description,
+    url = request.journal.site_url(
+        path=reverse(
+            'view_revision',
+            kwargs={
+                'article_id': article.pk,
+                'revision_id': revision.pk,
+            },
+        )
+    )
+    notify_helpers.send_email_with_body_from_setting_template(
+        request=request,
+        template='revisions_complete_editor_notification',
+        subject='subject_revisions_complete_editor_notification',
+        to={editor.email for editor in get_assignment_editors(revision)},
+        context={
+            'request': request,
+            'revision': revision,
+            'url': url,
+        },
+        log_dict={
+            'level': 'Info',
+            'action_text': description,
+            'types': 'Revisions Complete',
+            'target': article,
+        }
     )
     notify_helpers.send_slack(request, description, ['slack_editors'])
-
-    util_models.LogEntry.add_entry(
-        types='Revisions Complete', description=action_text, level='Info',
-        request=request, target=revision.article,
-    )
 
 
 def send_revisions_author_receipt(**kwargs):
@@ -553,7 +634,8 @@ def send_revisions_author_receipt(**kwargs):
 def send_copyedit_assignment(**kwargs):
     request = kwargs['request']
     copyedit_assignment = kwargs['copyedit_assignment']
-    user_message_content = kwargs['user_message_content']
+    article = kwargs['article']
+    email_data = kwargs["email_data"]
     skip = kwargs.get('skip', False)
 
     description = '{0} has requested copyediting for {1} due on {2}'.format(
@@ -568,11 +650,14 @@ def send_copyedit_assignment(**kwargs):
             'types': 'Copyedit Assignment',
             'target': copyedit_assignment.article,
         }
-        response = notify_helpers.send_email_with_body_from_user(
-            request, 'subject_copyeditor_assignment_notification',
-            copyedit_assignment.copyeditor.email,
-            user_message_content, log_dict,
+        core_email.send_email(
+            copyedit_assignment.copyeditor,
+            email_data,
+            request,
+            article=article,
+            log_dict=log_dict,
         )
+
         notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
@@ -651,7 +736,8 @@ def send_copyedit_decision(**kwargs):
 def send_copyedit_author_review(**kwargs):
     request = kwargs['request']
     copyedit_assignment = kwargs['copyedit_assignment']
-    user_message_content = kwargs['user_message_content']
+    author_review = kwargs['author_review']
+    email_data = kwargs['email_data']
     skip = kwargs.get('skip', False)
 
     description = '{0} has requested copyedit review for {1} from {2}'.format(
@@ -660,12 +746,22 @@ def send_copyedit_author_review(**kwargs):
         copyedit_assignment.article.correspondence_author.full_name())
 
     if not skip:
-        log_dict = {'level': 'Info', 'action_text': description, 'types': 'Copyedit Author Review',
-                    'target': copyedit_assignment.article}
+        log_dict = {
+            'level': 'Info',
+            'action_text': description,
+            'types': 'Copyedit Author Review',
+            'target': copyedit_assignment.article,
+        }
 
-        notify_helpers.send_email_with_body_from_user(request, 'subject_copyeditor_notify_author',
-                                                      copyedit_assignment.article.correspondence_author.email,
-                                                      user_message_content, log_dict=log_dict)
+        core_email.send_email(
+            copyedit_assignment.article.correspondence_author,
+            email_data,
+            request,
+            article=copyedit_assignment.article,
+            log_dict=log_dict,
+        )
+        author_review.notified = True
+        author_review.save()
         notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
@@ -707,8 +803,8 @@ def send_copyedit_complete(**kwargs):
 def send_author_copyedit_deleted(**kwargs):
     request = kwargs.get('request')
     author_review = kwargs.get('author_review')
-    subject = kwargs.get('subject')
-    user_message_content = kwargs.get('user_message_content')
+    article = kwargs["article"]
+    email_data = kwargs.get('email_data')
     skip = kwargs.get('skip', False)
 
     description = '{0} has deleted a copyedit review for {1} from {2}'.format(
@@ -720,26 +816,27 @@ def send_author_copyedit_deleted(**kwargs):
         'level': 'Info',
         'action_text': description,
         'types': 'Author Copyedit Review Deleted',
-        'target': author_review.assignment.article,
     }
 
     if not skip:
-        notify_helpers.send_email_with_body_from_user(
+        core_email.send_email(
+            author_review.author,
+            email_data,
             request,
-            subject,
-            author_review.assignment.article.correspondence_author.email,
-            user_message_content,
+            article=article,
             log_dict=log_dict,
         )
-    else:
-        util_models.LogEntry.add_entry(
-            'Author Copyedit Review Deleted',
-            description,
-            'Info',
-            request.user,
-            request,
-            author_review.assignment.article,
-        )
+
+    util_models.LogEntry.add_entry(
+        'Author Copyedit Review Deleted',
+        description,
+        'Info',
+        request.user,
+        request,
+        article,
+    )
+
+    notify_helpers.send_slack(request, description, ['slack_editors'])
 
 
 def send_copyedit_ack(**kwargs):

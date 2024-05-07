@@ -5,16 +5,19 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import os
 import uuid
+import json
 from dateutil import parser as dateparser
 
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
+from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.dispatch import receiver
 from django.shortcuts import reverse
 from django.http.request import split_domain_port
+from simple_history.models import HistoricalRecords
 
 from core.file_system import JanewayFileSystemStorage
 from core import model_utils, files, models as core_models
@@ -54,6 +57,12 @@ def width_choices():
         (6, '6'),
         (9, '9'),
         (12, '12'),
+    )
+
+
+def theme_choices():
+    return(
+        (theme, theme) for theme in settings.REPOSITORY_THEMES
     )
 
 
@@ -141,35 +150,51 @@ class Repository(model_utils.AbstractSiteModel):
         help_text=_('If set to True, this will require all file uploads from'
                     'authors to be PDF files.')
     )
-    about = models.TextField(blank=True, null=True)
-    start = models.TextField(
+    about = model_utils.JanewayBleachField(blank=True, null=True)
+    start = model_utils.JanewayBleachField(
         blank=True,
         null=True,
         verbose_name='Submission Start Text',
     )
-    submission = models.TextField(blank=True, null=True)
-    publication = models.TextField(blank=True, null=True)
-    decline = models.TextField(blank=True, null=True)
-    accept_version = models.TextField(blank=True, null=True)
-    decline_version = models.TextField(blank=True, null=True)
-    new_comment = models.TextField(blank=True, null=True)
-    review_invitation = models.TextField(blank=True, null=True)
-    review_helper = models.TextField(blank=True, null=True)
-    manager_review_status_change = models.TextField(blank=True, null=True)
-    reviewer_review_status_change = models.TextField(blank=True, null=True)
-    footer = models.TextField(
+    file_upload_help = model_utils.JanewayBleachField(
+        null=True,
+        blank=True,
+        help_text="Add any information that the author may need to know as "
+                  "part of the file upload process.",
+        verbose_name="File Upload Help",
+    )
+    require_pdf_help = model_utils.JanewayBleachField(
+        default='requires that all author uploads be PDF files.',
+        help_text='When a repository requires that all manuscripts be PDF this text is combined with the repository '
+                  'name and displayed with the default text it would diplay: RepositoryName requires that all author '
+                  'uploads be PDF files.',
+        verbose_name="Limit Upload to PDF Help",
+        null=True,
+        blank=True,
+    )
+    submission = model_utils.JanewayBleachField(blank=True, null=True)
+    publication = model_utils.JanewayBleachField(blank=True, null=True)
+    decline = model_utils.JanewayBleachField(blank=True, null=True)
+    accept_version = model_utils.JanewayBleachField(blank=True, null=True)
+    decline_version = model_utils.JanewayBleachField(blank=True, null=True)
+    new_comment = model_utils.JanewayBleachField(blank=True, null=True)
+    review_invitation = model_utils.JanewayBleachField(blank=True, null=True)
+    review_helper = model_utils.JanewayBleachField(blank=True, null=True)
+    manager_review_status_change = model_utils.JanewayBleachField(blank=True, null=True)
+    reviewer_review_status_change = model_utils.JanewayBleachField(blank=True, null=True)
+    footer = model_utils.JanewayBleachField(
         blank=True,
         null=True,
         default='<p>Powered by Janeway</p>',
     )
-    login_text = models.TextField(
+    login_text = model_utils.JanewayBleachField(
         blank=True,
         null=True,
         help_text='If text is added it will display on the login '
                   'and register pages.',
         verbose_name='Account Page Text'
     )
-    submission_agreement = models.TextField(
+    submission_agreement = model_utils.JanewayBleachField(
         null=True,
         help_text="Add any information that the author may need to know as "
                   "part of their submission, eg. Copyright transfer etc.'",
@@ -187,7 +212,7 @@ class Repository(model_utils.AbstractSiteModel):
         default=False,
         help_text='If enabled, users need to request access to submit preprints.',
     )
-    submission_access_request_text = models.TextField(
+    submission_access_request_text = model_utils.JanewayBleachField(
         blank=True,
         null=True,
         help_text='Describe any supporting information you want users to supply when requesting'
@@ -201,6 +226,13 @@ class Repository(model_utils.AbstractSiteModel):
     active_licenses = models.ManyToManyField(
         'submission.Licence',
         blank=True,
+    )
+    history = HistoricalRecords()
+    theme = models.CharField(
+        max_length=20,
+        blank=False,
+        default='OLH',
+        choices=theme_choices(),
     )
 
     class Meta:
@@ -242,7 +274,7 @@ class Repository(model_utils.AbstractSiteModel):
         if self.domain and not settings.URL_CONFIG == 'path':
             return logic.build_url(
                     netloc=self.domain,
-                    scheme=self.SCHEMES[self.is_secure],
+                    scheme=self._get_scheme(),
                     port=None,
                     path=path,
             )
@@ -303,7 +335,7 @@ class RepositoryField(models.Model):
     )
     required = models.BooleanField(default=True)
     order = models.IntegerField()
-    help_text = models.TextField(blank=True, null=True)
+    help_text = model_utils.JanewayBleachField(blank=True, null=True)
     display = models.BooleanField(
         default=False,
         help_text='Whether or not display this field in the article page',
@@ -359,16 +391,9 @@ class Preprint(models.Model):
         max_length=300,
         help_text=_('Your article title'),
     )
-    abstract = models.TextField(
+    abstract = model_utils.JanewayBleachField(
         blank=True,
         null=True,
-        help_text=_(
-            'Please avoid pasting content from word processors as they can add '
-            'unwanted styling to the abstract. You can retype the abstract '
-            'here or copy and paste it into notepad/a plain text editor before '
-            'pasting here.',
-        )
-
     )
     submission_file = models.ForeignKey(
         'PreprintFile',
@@ -419,7 +444,7 @@ class Preprint(models.Model):
         verbose_name='Preprint DOI',
         help_text='System supplied DOI. '
     )
-    preprint_decline_note = models.TextField(
+    preprint_decline_note = model_utils.JanewayBleachField(
         blank=True,
         null=True,
     )
@@ -504,7 +529,14 @@ class Preprint(models.Model):
             preprint=self,
         ).select_related('account')
 
-        return [pa.account for pa in preprint_authors]
+        return [pa.account for pa in preprint_authors if pa.account]
+
+    @property
+    def safe_title(self):
+        if self.title:
+            return mark_safe(self.title)
+        else:
+            return "[Untitled]"
 
     @property
     def supplementaryfiles(self):
@@ -940,16 +972,11 @@ class PreprintVersion(models.Model):
     title = models.CharField(
         max_length=300,
         help_text=_('Your article title'),
+        blank=True,
     )
-    abstract = models.TextField(
+    abstract = model_utils.JanewayBleachField(
         blank=True,
         null=True,
-        help_text=_(
-            'Please avoid pasting content from word processors as they can add '
-            'unwanted styling to the abstract. You can retype the abstract '
-            'here or copy and paste it into notepad/a plain text editor before '
-            'pasting here.',
-        )
 
     )
     published_doi = models.URLField(
@@ -968,6 +995,13 @@ class PreprintVersion(models.Model):
             return self.file.contents()
         else:
             return ''
+
+    @property
+    def safe_title(self):
+        if self.title:
+            return mark_safe(self.title)
+        else:
+            return "[Untitled]"
 
     def __str__(self):
         return f'{self.preprint} (version {self.version})'
@@ -991,7 +1025,7 @@ class Comment(models.Model):
         on_delete=models.SET_NULL,
     )
     date_time = models.DateTimeField(default=timezone.now)
-    body = models.TextField(verbose_name='Write your comment:')
+    body = model_utils.JanewayBleachField(verbose_name='Write your comment:')
     is_reviewed = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
 
@@ -1090,16 +1124,9 @@ class VersionQueue(models.Model):
         max_length=300,
         help_text=_('Your article title'),
     )
-    abstract = models.TextField(
+    abstract = model_utils.JanewayBleachField(
         blank=True,
         null=True,
-        help_text=_(
-            'Please avoid pasting content from word processors as they can add '
-            'unwanted styling to the abstract. You can retype the abstract '
-            'here or copy and paste it into notepad/a plain text editor before '
-            'pasting here.',
-        )
-
     )
 
     def approve(self):
@@ -1163,6 +1190,13 @@ class VersionQueue(models.Model):
         else:
             return _('Declined')
 
+    @property
+    def safe_title(self):
+        if self.title:
+            return mark_safe(self.title)
+        else:
+            return "[Untitled]"
+
 
 def review_status_choices():
     return (
@@ -1172,6 +1206,22 @@ def review_status_choices():
         ('complete', 'Complete'),
         ('withdrawn', 'Withdrawn'),
     )
+
+
+class ReviewRecommendation(models.Model):
+    repository = models.ForeignKey(
+        'Repository',
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        max_length=255,
+    )
+    active = models.BooleanField(
+        default=True,
+    )
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
@@ -1226,7 +1276,7 @@ class Review(models.Model):
     anonymous = models.BooleanField(
         default=False,
     )
-    status_reason = models.TextField(
+    status_reason = model_utils.JanewayBleachField(
         blank=True,
         null=True,
         help_text='Information supplied by a reviewer when declining or completing '
@@ -1234,6 +1284,11 @@ class Review(models.Model):
     )
     notification_sent = models.BooleanField(
         default=False,
+    )
+    recommendation = models.ForeignKey(
+        'ReviewRecommendation',
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     def accept(self, request):
@@ -1383,3 +1438,19 @@ def add_email_setting_defaults(sender, instance, **kwargs):
     """
     if instance._state.adding:
         install.load_settings(instance)
+
+        with open(
+            os.path.join(
+                settings.BASE_DIR,
+                'utils',
+                'install',
+                'default_repository_review_recommendations.json',
+            )
+        ) as defaults_file:
+            defaults = json.load(defaults_file)
+            for repo in Repository.objects.all():
+                for default in defaults:
+                    ReviewRecommendation.objects.get_or_create(
+                        repository=repo,
+                        name=default,
+                    )

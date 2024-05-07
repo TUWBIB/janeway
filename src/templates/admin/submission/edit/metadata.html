@@ -10,9 +10,13 @@
 {% block breadcrumbs %}
     {{ block.super }}
     <li>Edit</li>
-    <li>{{ article.title|safe }}</li>
+    <li>{{ article.safe_title }}</li>
     <li>Metadata</li>
 {% endblock breadcrumbs %}
+{% block head %}
+    {{ block.super }}
+    {{ info_form.media }}
+{% endblock %}
 
 {% block body %}
     <div class="large-12 columns box">
@@ -46,7 +50,7 @@
                             {{ info_form.abstract_de_tuw|foundation }}
                         </div>
                         {% if journal_settings.general.submission_summary %}
-                        <div class="large-10 columns end">
+                        <div class="large-12 columns end">
                             {{ info_form.non_specialist_summary|foundation }}
                         </div>
                         {% endif %}
@@ -99,7 +103,7 @@
                             {{ info_form.primary_issue|foundation }}
                         </div>
                     </div>
-                    {% if journal_settings.general.submission_competing_interests %}
+                    {% if request.journal.submissionconfiguration.competing_interests %}
                         <div class="large-10 columns">
                             {{ info_form.competing_interests|foundation }}
                         </div>
@@ -457,6 +461,5 @@
             }
         }
     </script>
-    {% include "admin/elements/jqte.html" %}
     {% include 'admin/elements/fundref/fundref.html' with funder_form=funder_form %}
 {% endblock js %}

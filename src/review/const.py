@@ -10,6 +10,7 @@ class EditorialDecisions(EnumContains):
     UNDECLINE = 'undecline'
     MINOR_REVISIONS = 'minor_revisions'
     MAJOR_REVISIONS = 'major_revisions'
+    REVIEW = 'review'
 
 
 class ReviewerDecisions(EnumContains):
@@ -19,3 +20,9 @@ class ReviewerDecisions(EnumContains):
     DECISION_REJECT = 'reject'
     DECISION_NO_RECOMMENDATION = 'none'
     DECISION_WITHDRAWN = 'withdrawn'
+
+
+class VisibilityOptions(EnumContains):
+    OPEN = 'open'
+    SINGLE_ANON = 'blind'
+    DOUBLE_ANON = 'double-blind'

@@ -92,15 +92,19 @@ INSTALLED_APPS = [
 
     # 3rd Party
     'mozilla_django_oidc',
+    'django_countries',
     'django_summernote',
+    'tinymce',
     'bootstrap4',
     'rest_framework',
     'foundationform',
-    'materialize',
+    'materializecssform',
     'captcha',
     'simplemathcaptcha',
+    'simple_history',
     'hijack',
     'hcaptcha',
+    'django_bleach',
 
     # Forms
     'django.forms',
@@ -128,6 +132,7 @@ MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
     'journal.middleware.LanguageMiddleware',
     'hijack.middleware.HijackUserMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 # DEBUG = True
@@ -293,12 +298,58 @@ STATIC_URL = '/static/'
 if ENABLE_TEXTURE:
     STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'texture'))
 
+# Django bleach settings
+# Base case is to allow all tags except for <script>. Individual form instances
+# can further reduce the set of allowed tags
+BLEACH_ALLOWED_TAGS = [
+    "html", "head", "title", "meta", "link", "style",
+    "body", "article", "section", "nav", "aside",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "header", "footer", "address", "main", "p", "hr", "pre",
+    "blockquote", "ol", "ul", "li", "dl", "dt", "dd",
+    "figure", "figcaption", "div", "a", "em", "strong", "small",
+    "s", "cite", "q", "dfn", "abbr", "data", "time",
+    "code", "var", "samp", "kbd", "sub", "sup", "i",
+    "b", "u", "mark", "ruby", "rt", "rp", "bdi",
+    "bdo", "span", "br", "wbr", "ins", "del", "picture",
+    "source", "img", "iframe", "embed", "object", "param", "video",
+    "audio", "track", "map", "area", "table", "caption", "colgroup",
+    "col", "tbody", "thead", "tfoot", "tr", "td", "th",
+    "form", "fieldset", "legend", "label", "input", "button", "select",
+    "datalist", "optgroup", "option", "textarea", "output", "progress", "meter",
+    "details", "summary", "menu", "menuitem", "dialog", "slot", "canvas"
+]
+
+# Which HTML attributes are allowed
+BLEACH_ALLOWED_ATTRIBUTES = [
+    "id", "class", "style",
+    "src", "href", # These are sanitized by scheme to avoid XSS
+    "alt", "title", "width", "height", "type",
+    "name", "value", "placeholder", "disabled", "readonly",
+    "required", "target", "checked", "selected"
+]
+
+BLEACH_ALLOWED_PROTOCOLS = ["http", "https", "mailto"]
+
+
+# Which CSS properties are allowed in 'style' attributes (assuming
+# style is an allowed attribute)
+# BLEACH_ALLOWED_STYLES = []
+
+# Strip unknown tags if True, replace with HTML escaped characters if
+# False
+BLEACH_STRIP_TAGS = True
+
+# Strip comments, or leave them in.
+BLEACH_STRIP_COMMENTS = False
+
+# Which widget to use for bleached HTML fields
+BLEACH_DEFAULT_WIDGET = 'tinymce.widgets.TinyMCE'
+
+# Summernote settings
 SUMMERNOTE_CONFIG = {
     # Using SummernoteWidget - iframe mode
     'iframe': True,  # or set False to use SummernoteInplaceWidget - no iframe mode
-
-    # Using Summernote Air-mode
-    'airMode': False,
 
     # Use native HTML tags (`<b>`, `<i>`, ...) instead of style attributes
     # (Firefox, Chrome only)
@@ -307,13 +358,58 @@ SUMMERNOTE_CONFIG = {
     # Set text direction : 'left to right' is default.
     'direction': 'ltr',
 
-    # Change editor size
-    'width': '100%',
-    'height': '350',
-
     # Need authentication while uploading attachments.
     'attachment_require_authentication': True,
     'attachment_filesize_limit': 2056 * 2056,
+
+    'css': (
+        '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0/theme/monokai.min.css',
+    ),
+
+    # You can put custom Summernote settings
+    'summernote': {
+        # Using Summernote Air-mode
+        'airMode': False,
+
+        # Change editor size
+        'width': '100%',
+        # 'height': '480',
+
+        # Toolbar customization
+        # https://summernote.org/deep-dive/#custom-toolbar-popover
+        'toolbar': [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            # ['fontname', ['fontname']],
+            # ['color', ['color']],
+            ['para', ['ul', 'ol']],  # , 'paragraph'
+            ['table', ['table']],
+            ['insert', ['link', 'picture']],   # , 'video'
+            ['misc', ['undo', 'redo', 'help']],
+            ['view', ['fullscreen', 'codeview']],
+        ],
+
+        'popover': {
+          'image': [
+            ['remove', ['removeMedia']]
+          ],
+          'link': [
+            ['link', ['linkDialogShow', 'unlink']]
+          ],
+          'table': [
+            ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']],
+            ['delete', ['deleteRow', 'deleteCol', 'deleteTable']],
+          ],
+        },
+
+        'codemirror': {
+            'mode': 'htmlmixed',
+            'lineNumbers': 'true',
+            'lineWrapping': 'true',
+            # You have to include theme file in 'css' or 'css_for_inplace' before using it.
+            'theme': 'monokai',
+        },
+    },
 }
 
 # 1.9 appears confused about where null and blank are required for many to
@@ -391,8 +487,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 
 EMAIL_BACKEND = os.environ.get(
-    'JANEWAY_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend',
-)
+    'JANEWAY_EMAIL_BACKEND',
+) or 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get("JANEWAY_EMAIL_HOST", '')
 EMAIL_PORT = os.environ.get("JANEWAY_EMAIL_PORT", '')
 EMAIL_HOST_USER = os.environ.get("JANEWAY_EMAIL_HOST_USER", '')
@@ -423,7 +519,7 @@ ORCID_TOKEN_URL = 'https://pub.orcid.org/oauth/token'
 ORCID_CLIENT_SECRET = ''
 ORCID_CLIENT_ID = ''
 
-
+SESSION_ENGINE = 'utils.sessions.janeway_db'
 SESSION_COOKIE_NAME = 'JANEWAYSESSID'
 
 S3_ACCESS_KEY = ''
@@ -461,7 +557,7 @@ HTTP_TIMEOUT_SECONDS = 5
 
 # New XML galleys will be associated with this stylesheet by default when they
 # are first uploaded
-DEFAULT_XSL_FILE_LABEL = 'Janeway default (1.4.3)'
+DEFAULT_XSL_FILE_LABEL = 'Janeway default (1.5.1)'
 
 # Skip migrations by default on sqlite for faster execution
 if (
@@ -530,7 +626,6 @@ if ENABLE_OIDC:
         'django.contrib.auth.backends.ModelBackend',
     )
 
-    
 CORE_FILETEXT_MODEL = "core.FileText"
 if os.environ.get("DB_VENDOR") == "postgres":
     CORE_FILETEXT_MODEL = "core.PGFileText"
@@ -543,6 +638,14 @@ CORE_THEMES = [
     'material',
     'clean',
 ]
+
+# Repository theme setting determines which themes currently
+# support repositories.
+REPOSITORY_THEMES = [
+    'OLH',
+    'material',
+]
+
 INSTALLATION_BASE_THEME = 'OLH'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -550,5 +653,54 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Use pagination for all of our APIs based on Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
+    'PAGE_SIZE': 100,
+}
+TINYMCE_CLIPBOARD_CLEANER = {
+    # Settings required to optionally clean formatting from a paste event
+    # Install a callback to capture the original input from clipboard
+    "setup": """
+        function (editor) {
+            editor.on('paste', function (e) {
+                editor.cachedClipboardContent = e.clipboardData.getData("text/html");
+            });
+        }
+    """,
+    # Configure TinyMCE to always clean to text
+    "paste_as_text": True,
+    # Intercept paste if the input has been cleaned and confirm with user
+    "paste_preprocess": """
+        function (editor, args) {
+            if (
+                editor.cachedClipboardContent
+                && editor.cachedClipboardContent != args.content
+            ){
+                const doClean = confirm("Formatted paste detected. Click 'OK' to paste as text or 'Cancel' to keep the formatting.");
+                if (!doClean){
+                    args.content = editor.cachedClipboardContent;
+                }
+            }
+        }
+    """,
+}
+TINYMCE_JS_URL = STATIC_URL + "/common/js/tinymce/tinymce.min.js"
+TINYMCE_COMPRESSOR = False
+TINYMCE_DEFAULT_CONFIG = {
+    "width": "100%",
+    "min-height": "300px",
+    "resize": True,
+    "fullscreen_native": True,
+    "promotion": False,
+    "branding": False,
+    "menubar": "edit view insert format tools table help",
+    "content_css": STATIC_URL + "/admin/css/admin.css",
+    "plugins": "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code"
+        " fullscreen insertdatetime media table code help wordcount spellchecker help",
+    "toolbar": "help removeformat | undo redo | bold italic underline strikethrough "
+        "| fontsizeselect formatselect "
+        "| outdent indent | formatselect | numlist bullist checklist "
+        "| forecolor backcolor permanentpen formatpainter | pagebreak "
+        "| charmap emoticons "
+        "| fullscreen | image media template link anchor codesample "
+        "| a11ycheck ltr rtl | code",
+    **TINYMCE_CLIPBOARD_CLEANER,
 }

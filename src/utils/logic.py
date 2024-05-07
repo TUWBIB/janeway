@@ -2,6 +2,7 @@ import os
 import hashlib
 import hmac
 from urllib.parse import SplitResult, quote_plus, urlencode
+from tqdm import tqdm
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -16,6 +17,7 @@ from janeway import __version__ as janeway_version
 from journal import models as journal_models
 from repository import models as repo_models
 from press import models as press_models
+from submission import models as submission_models
 
 logger = get_logger(__name__)
 
@@ -35,7 +37,7 @@ def parse_mailgun_webhook(post):
     if event and (mailgun_event == 'dropped' or mailgun_event == 'bounced'):
         event.message_status = 'failed'
         event.save()
-        attempt_actor_email(event)
+        send_bounce_notification_to_event_actor(event)
         return 'Message dropped, actor notified.'
     elif event and mailgun_event == 'delivered':
         event.message_status = 'delivered'
@@ -56,42 +58,62 @@ def verify_webhook(token, timestamp, signature):
     return hmac.compare_digest(signature, hmac_digest.encode('utf-8'))
 
 
-def attempt_actor_email(event):
-
+def send_bounce_notification_to_event_actor(event):
+    """
+    Attempts to send a notification email to an actor when a message bounces.
+    Messages are only send to staff, editors and repository managers.
+    """
     actor = event.actor
-    article = event.target
+    target = event.target
 
-    # Set To to the main contact, and then attempt to find a better match.
-    from press import models as pm
-    press = pm.Press.objects.all()[0]
+    # set to the main contact, and then attempt to find a better match
+    press = press_models.Press.objects.all()[0]
     to = press.main_contact
 
-    if actor and article:
-        if actor.is_staff or actor.is_superuser:
-            # Send an email to this actor
-            to = actor.email
-            pass
-        elif actor and article.journal and actor in article.journal.editors():
-            # Send email to this actor
-            to = actor.email
-        elif actor and not article.journal and actor in press.preprint_editors():
-            to = actor.email
-
-    # Fake a request object
+    # fake a request object
     request = Request()
     request.press = press
-    request.site_type = press
+    request.META = {}
+    request.model_content_type = None
+    request.user = None
 
-    body = """
-        <p>A message sent to {0} from article {1} (ID: {2}) has been marked as failed.<p>
-        <p>Regards,</p>
-        <p>Janeway</p>
-    """.format(event.to, article.title, article.pk)
-    notify_helpers.send_email_with_body_from_user(request,
-                                                  'Email Bounced',
-                                                  to,
-                                                  body,
-                                                  log_dict=None)
+    if actor and target:
+        if actor.is_staff or actor.is_superuser:
+            to = actor.email
+
+        # target could be an article or a preprint, lets find out
+        if isinstance(target, submission_models.Article):
+            # check if the actor is an editor for the article's journal
+            if actor in target.journal.editors():
+                to = actor.email
+            request.site_type = target.journal
+            request.journal = target.journal
+        elif isinstance(target, repo_models.Preprint):
+            # check if the actor is a manager for the preprint's repo
+            if actor in target.repository.managers.all():
+                to = actor.email
+            request.site_type = target.repository
+            request.repository = target.repository
+
+    # Setup log dict
+    log_dict = {
+        'level': 'Info',
+        'action_text': 'Email Delivery Failed ',
+        'types': 'Email Delivery',
+        'target': target,
+    }
+
+    notify_helpers.send_email_with_body_from_setting_template(
+        request=request,
+        template='bounced_email_notification',
+        subject='subject_bounced_email_notification',
+        to=to,
+        context={
+            'target': target,
+            'event': event,
+        },
+        log_dict=log_dict,
+    )
 
 
 def build_url_for_request(request=None, path="", query=None, fragment=""):
@@ -272,52 +294,15 @@ def write_subject_sitemap(subject):
         file.close()
 
 
-def write_all_sitemaps(cli=False):
-    """
-    Utility function that generates and writes all sitemaps to disk in one go.
-    """
-    storage_path = os.path.join(
-        settings.BASE_DIR,
-        'files',
-        'sitemaps',
-    )
-    if not os.path.exists(storage_path):
-        os.makedirs(storage_path)
-
-    # Generate the press level sitemap
+def write_press_sitemap():
     press = press_models.Press.objects.all().first()
-    journals = journal_models.Journal.objects.all()
-    repos = repo_models.Repository.objects.all()
-    file_path = os.path.join(
-        storage_path,
-        'sitemap.xml'
+    press_sitemap_path = get_sitemap_path(
+        path_parts=[],
+        file_name='sitemap.xml',
     )
-    with open(file_path, 'w') as file:
+    with open(press_sitemap_path, 'w') as file:
         generate_sitemap(file, press=press)
         file.close()
-
-    # Generate Journal Sitemaps
-    for journal in journals:
-        if cli:
-            print("Generating sitemaps for {}".format(journal.name))
-        write_journal_sitemap(journal)
-
-        # Generate Issue Sitemap
-        for issue in journal.published_issues:
-            if cli:
-                print("Generating sitemap for issue {}".format(issue))
-            write_issue_sitemap(issue)
-
-    # Generate Repo Sitemap
-    for repo in repos:
-        if cli:
-            print("Generating sitemaps for {}".format(repo.name))
-        write_repository_sitemap(repo)
-
-        for subject in repo.subject_set.all():
-            if cli:
-                print("Generating sitemap for subject {}".format(subject.name))
-            write_subject_sitemap(subject)
 
 
 def get_aware_datetime(unparsed_string, use_noon_if_no_time=True):
@@ -344,3 +329,7 @@ def get_aware_datetime(unparsed_string, use_noon_if_no_time=True):
         return parsed_datetime
     else:
         return make_aware(parsed_datetime)
+
+def get_janeway_patch_version():
+    from janeway import __version__
+    return f"{__version__.major}.{__version__.minor}.{__version__.patch}"

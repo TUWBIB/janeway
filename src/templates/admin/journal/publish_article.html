@@ -6,7 +6,7 @@
 
 {% block title %}Pre Publication - {{ article.pk }}{% endblock title %}
 {% block title-section %}Pre Publication Checklist{% endblock %}
-{% block title-sub %}#{{ article.pk }} / {{ article.correspondence_author.last_name }} / {{ article.title }}{% endblock %}
+{% block title-sub %}#{{ article.pk }} / {{ article.correspondence_author.last_name }} / {{ article.safe_title }}{% endblock %}
 
 {% block breadcrumbs %}
 {{ block.super }}
@@ -259,7 +259,6 @@
     {% if modal %}
     {% include "admin/elements/open_modal.html" with target=modal %}
     {% endif %}
-    {% include "elements/jqte.html" %}
     {% include "elements/datepicker.html" with target="#date" %}
     {% include "elements/timepicker.html" with target="#time" %}
 {% endblock js %}
