@@ -1792,23 +1792,22 @@ def manage_archive_article(request, article_id):
                             "Galleys must be uploaded individually, not zipped",
                         )
 
-                    if index == 0:
-                        if 'create_title_page' in request.POST:
-                            if files.check_in_memory_mime_with_types(in_memory_file=uploaded_file, mime_types=files.PDF_MIMETYPES):
-                                try:
-                                    core_logic.create_article_file_from_galley(article, request, galley)
-                                except:
-                                    messages.add_message(
-                                        request,
-                                        messages.ERROR,
-                                        'Error creating tile page from pdf file.',
-                                    )
-                            else:
+                    if index == 0 and 'create_title_page' in request.POST:
+                        if galley.type == 'pdf':
+                            try:
+                                core_logic.create_article_file_from_galley(article, request, galley)
+                            except:
                                 messages.add_message(
                                     request,
-                                    messages.WARNING,
-                                    'No pdf file. Cannot create title page.',
+                                    messages.ERROR,
+                                    'Error creating title page from pdf file.',
                                 )
+                        else:
+                            messages.add_message(
+                                request,
+                                messages.WARNING,
+                                'No pdf file. Cannot create title page.',
+                            )
             else:
                 messages.add_message(
                     request,
