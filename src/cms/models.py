@@ -38,6 +38,8 @@ class Page(models.Model):
     )
     display_name = models.CharField(
         max_length=100,
+        null=True,
+        blank=True,
         help_text='Name of the page, in 100 characters or fewer, '
                   'displayed in the nav and in the top-level heading '
                   'on the page (e.g. “Research Integrity”).',
@@ -71,14 +73,16 @@ class NavigationItem(models.Model):
 
     link_name = models.CharField(
         max_length=100,
+        null=True,
+        blank=True,
         help_text='The text that will appear in the nav bar '
                   '(e.g. “About” or “Research Integrity”)',
         verbose_name='Display name',
     )
     link = models.CharField(
         max_length=100,
-        blank=True,
         null=True,
+        blank=True,
         help_text='In most cases, this should be the the '
                   'relative URL path to the page. The '
                   'relative path is formed from 1) the '
