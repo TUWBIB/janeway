@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0011_auto_20230317_1534'),
+        ('cms', '0011_TUW_repair_models'),
     ]
 
     operations = [
