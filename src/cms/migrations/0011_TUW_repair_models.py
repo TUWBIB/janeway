@@ -18,4 +18,116 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL('UPDATE cms_page SET content = content_xxx'),
         migrations.RunSQL('ALTER TABLE cms_page DROP COLUMN content_xxx'),
+
+        migrations.RunSQL('ALTER TABLE cms_page RENAME COLUMN display_name TO display_name_xxx'),
+        migrations.AddField(
+            model_name='page',
+            name='display_name',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.RunSQL('UPDATE cms_page SET display_name = display_name_xxx'),
+        migrations.RunSQL('ALTER TABLE cms_page DROP COLUMN display_name_xxx'),
+
+        migrations.RunSQL('ALTER TABLE cms_navigationitem RENAME COLUMN link_name TO link_name_xxx'),
+        migrations.AddField(
+            model_name='navigationitem',
+            name='link_name',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.RunSQL('UPDATE cms_navigationitem SET link_name = link_name_xxx'),
+        migrations.RunSQL('ALTER TABLE cms_navigationitem DROP COLUMN link_name_xxx'),
+
+        migrations.AlterUniqueTogether(
+            name='pagetranslation',
+            unique_together=None,
+        ),
+        migrations.RemoveField(
+            model_name='pagetranslation',
+            name='master',
+        ),
+        migrations.AlterModelOptions(
+            name='page',
+            options={},
+        ),
+        migrations.AlterModelManagers(
+            name='navigationitem',
+            managers=[
+            ],
+        ),
+        migrations.AlterModelManagers(
+            name='page',
+            managers=[
+            ],
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='language',
+            field=models.CharField(blank=True, choices=[('en', 'English'), ('de', 'German'), ('fr', 'French'), ('hide', '<Hide>')], help_text='Language for which this nav item is displayed, leave empty if item is to be shown regardless of language', max_length=200, null=True),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_cy',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_de',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_en',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_en_us',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_fr',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='navigationitem',
+            name='link_name_nl',
+            field=models.CharField(blank=True, help_text='The text that will appear in the nav bar (e.g. “About” or “Research Integrity”)', max_length=100, null=True, verbose_name='Display name'),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_cy',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_de',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_en',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_en_us',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_fr',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='display_name_nl',
+            field=models.CharField(blank=True, help_text='Name of the page, in 100 characters or fewer, displayed in the nav and in the top-level heading on the page (e.g. “Research Integrity”).', max_length=100, null=True),
+        ),
+        migrations.DeleteModel(
+            name='NavigationItemTranslation',
+        ),
+        migrations.DeleteModel(
+            name='PageTranslation',
+        ),
     ]
