@@ -131,54 +131,6 @@ def resize_and_crop(img_path, size, crop_type='middle'):
         # Could be an SVG
         return
 
-    # Get current and desired ratio for the images
-    img_ratio = img.size[0] / float(img.size[1])
-    ratio = size[0] / float(size[1])
-    # The image is scaled/cropped vertically or horizontally depending on the ratio
-    if ratio > img_ratio:
-        img = img.resize(
-            (size[0], int(size[0] * img.size[1] // img.size[0])),
-            Image.LANCZOS,
-        )
-        # Crop in the top, middle or bottom
-        if crop_type == 'top':
-            box = (0, 0, img.size[0], size[1])
-        elif crop_type == 'middle':
-            box = (0, (img.size[1] - size[1]) // 2, img.size[0], (img.size[1] + size[1]) // 2)
-        elif crop_type == 'bottom':
-            box = (0, img.size[1] - size[1], img.size[0], img.size[1])
-        else:
-            raise ValueError('ERROR: invalid value for crop_type')
-        img = img.crop(box)
-
-    elif ratio < img_ratio:
-        img = img.resize(
-            (size[0], int(size[0] * img.size[1] // img.size[0])),
-            Image.LANCZOS,
-        )
-        # Crop in the top, middle or bottom
-        if crop_type == 'top':
-            box = (0, 0, size[0], img.size[1])
-        elif crop_type == 'middle':
-            horizontal_padding = (size[0] - img.size[0]) // 2
-            vertical_padding = (size[1] - img.size[1]) // 2
-
-            offset_tuple = (horizontal_padding, vertical_padding)
-
-            final_thumb = Image.new(mode='RGBA', size=size, color=(255, 255, 255, 0))
-            final_thumb.paste(img, offset_tuple)  # paste the thumbnail into the full sized image
-
-            final_thumb.save(img_path, "png")
-            return
-        elif crop_type == 'bottom':
-            box = (img.size[0] - size[0], 0, img.size[0], img.size[1])
-        else:
-            raise ValueError('ERROR: invalid value for crop_type')
-
-        img = img.crop(box)
-    else:
-        img = img.resize((size[0], size[1]), Image.LANCZOS)
-
     if img.mode == "CMYK":
         img = img.convert("RGB")
 
