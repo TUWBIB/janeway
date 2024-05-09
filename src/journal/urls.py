@@ -59,11 +59,18 @@ urlpatterns = [
         views.identifier_figure,
         name='article_figure'),
 
-    re_path(
-        r'^articles/$',
-        views.PublishedArticlesListView.as_view(),
-        name='journal_articles',
-    ),
+    re_path(r'^articles/$', views.articles, name='journal_articles'),
+
+    # TUW todo: templates needed
+
+#    re_path(
+#        r'^articles/$',
+#        views.PublishedArticlesListView.as_view(),
+#        name='journal_articles',
+#    ),
+
+
+
 
     re_path(r'^funder_articles/(?P<funder_id>.+)$', views.funder_articles, name='funder_articles'),
 
