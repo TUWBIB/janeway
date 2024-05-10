@@ -45,6 +45,7 @@ from production import models as production_models
 from journal import models as journal_models
 from proofing import logic as proofing_logic
 from proofing import models as proofing_models
+from press import forms as press_forms
 from utils import models as util_models, setting_handler, orcid
 from utils.logger import get_logger
 from utils.decorators import GET_language_override
@@ -351,9 +352,9 @@ def register(request):
             logic.send_confirmation_link(request, new_user)
 
             messages.add_message(
-                    request, messages.SUCCESS,
-                    _('Your account has been created, please follow the'
-                    'instructions in the email that has been sent to you.'),
+                request, messages.SUCCESS,
+                _('Your account has been created, please follow the'
+                'instructions in the email that has been sent to you.'),
             )
             return redirect(reverse('core_login'))
 
@@ -427,6 +428,13 @@ def edit_profile(request):
             request.journal
         ).value
 
+    if user.staffgroupmember_set.first():
+        staff_group_membership_form = press_forms.StaffGroupMemberForm(
+            instance=user.staffgroupmember_set.first()
+        )
+    else:
+        staff_group_membership_form = None
+
     if request.POST:
         if 'email' in request.POST:
             email_address = request.POST.get('email_address')
@@ -499,12 +507,24 @@ def edit_profile(request):
                 messages.add_message(request, messages.SUCCESS, 'Profile updated.')
                 return redirect(reverse('core_edit_profile'))
 
+        elif 'edit_staff_member_info' in request.POST:
+            form = press_forms.StaffGroupMemberForm(
+                request.POST,
+                instance=user.staffgroupmember_set.first()
+            )
+
+            if form.is_valid():
+                form.save()
+                messages.add_message(request, messages.SUCCESS, 'Staff member info updated.')
+                return redirect(reverse('core_edit_profile'))
+
         elif 'export' in request.POST:
             return logic.export_gdpr_user_profile(user)
 
     template = 'core/accounts/edit_profile.html'
     context = {
         'form': form,
+        'staff_group_membership_form': staff_group_membership_form,
         'user_to_edit': user,
         'send_reader_notifications': send_reader_notifications,
     }
@@ -526,16 +546,28 @@ def public_profile(request, uuid):
         is_active=True,
         enable_public_profile=True,
     )
-    roles = models.AccountRole.objects.filter(
-        user=user,
-        journal=request.journal,
-    )
-
     template = 'core/accounts/public_profile.html'
     context = {
         'user': user,
-        'roles': roles,
     }
+
+    if request.journal:
+        context['editorial_groups'] = user.editorialgroupmember_set.filter(
+            group__journal=request.journal
+        )
+        context['roles'] = models.AccountRole.objects.filter(
+            user=user,
+            journal=request.journal,
+        )
+        if not context['roles']:
+            raise Http404()
+
+    elif request.press:
+        context['editorial_groups'] = user.editorialgroupmember_set.filter(
+            group__press=request.press,
+            group__journal__isnull=True,
+        )
+        context['staff_groups'] = user.staffgroupmember_set.all()
 
     return render(request, template, context)
 
@@ -1607,14 +1639,23 @@ def edit_editorial_group(request, group_id=None):
     """
     with translation.override(request.override_language):
         if group_id:
-            group = get_object_or_404(models.EditorialGroup, pk=group_id, journal=request.journal)
+            group = get_object_or_404(
+                models.EditorialGroup,
+                pk=group_id,
+                journal=request.journal,
+                press=request.press,
+            )
             form = forms.EditorialGroupForm(
                 instance=group,
             )
         else:
             group = None
+            try:
+                next_sequence = request.journal.next_group_order()
+            except AttributeError:
+                next_sequence = request.press.next_group_order()
             form = forms.EditorialGroupForm(
-                next_sequence=request.journal.next_group_order(),
+                next_sequence=next_sequence
             )
 
         if request.POST:
@@ -1625,6 +1666,7 @@ def edit_editorial_group(request, group_id=None):
                 else:
                     group = form.save(commit=False)
                     group.journal = request.journal
+                    group.press = request.press
                     group.save()
 
                 return language_override_redirect(
@@ -1645,7 +1687,8 @@ def edit_editorial_group(request, group_id=None):
 @editor_user_required
 def add_member_to_group(request, group_id, user_id=None):
     """
-    Displays a list of users that are eligible to be added to an Editorial Group and displays those already in said
+    Displays a list of users that are eligible to be added to an Editorial
+    Group and displays those already in said
     group. Members can also be removed from Groups.
     :param request: HttpRequest object
     :param group_id: EditorialGroup object PK

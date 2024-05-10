@@ -41,6 +41,7 @@ from core.model_utils import (
     JanewayBleachField,
     PGCaseInsensitiveEmailField,
     SearchLookup,
+    default_press_id,
 )
 from review import models as review_models
 from copyediting import models as copyediting_models
@@ -209,6 +210,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     email = PGCaseInsensitiveEmailField(unique=True, verbose_name=_('Email'))
     username = models.CharField(max_length=254, unique=True, verbose_name=_('Username'))
 
+    name_prefix = models.CharField(max_length=10, blank=True)
     first_name = models.CharField(max_length=300, null=True, blank=False, verbose_name=_('First name'))
     middle_name = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Middle name'))
     last_name = models.CharField(max_length=300, null=True, blank=False, verbose_name=_('Last name'))
@@ -220,7 +222,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         max_length=300,
         null=True,
         blank=True,
-        help_text=_('Name suffix eg. jr'),
+        verbose_name=_('Name suffix'),
     )
     biography = JanewayBleachField(null=True, blank=True, verbose_name=_('Biography'))
     orcid = models.CharField(max_length=40, null=True, blank=True, verbose_name=_('ORCiD'))
@@ -314,8 +316,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return str(self.id)
 
     def get_full_name(self):
-        return '{0} {1}{2}{3}'.format(self.first_name, self.middle_name, ' ' if self.middle_name != "" else "",
-                                      self.last_name)
+        """Deprecated in 1.5.2"""
+        return self.full_name()
 
     def get_short_name(self):
         return self.first_name
@@ -327,9 +329,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def full_name(self):
         name_elements = [
+            self.name_prefix,
             self.first_name,
             self.middle_name,
-            self.last_name
+            self.last_name,
+            self.suffix,
         ]
         return " ".join([name for name in name_elements if name])
 
@@ -480,13 +484,14 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def snapshot_self(self, article, force_update=True, reorder=True):
         frozen_dict = {
+            'name_prefix': self.name_prefix,
             'first_name': self.first_name,
             'middle_name': self.middle_name,
             'last_name': self.last_name,
+            'name_suffix': self.suffix,
             'institution': self.institution,
             'department': self.department,
             'display_email': True if self == article.correspondence_author else False,
-            'name_suffix': self.suffix,
         }
 
         frozen_author = self.frozen_author(article)
@@ -1434,10 +1439,17 @@ class TaskCompleteEvents(models.Model):
 
 class EditorialGroup(models.Model):
     name = models.CharField(max_length=500)
+    press = models.ForeignKey(
+        'press.Press',
+        on_delete=models.CASCADE,
+        default=default_press_id,
+    )
     description = JanewayBleachField(blank=True, null=True)
     journal = models.ForeignKey(
         'journal.Journal',
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
     sequence = models.PositiveIntegerField()
 
@@ -1449,10 +1461,13 @@ class EditorialGroup(models.Model):
         return max(orderings) + 1 if orderings else 0
 
     def members(self):
-        return [member for member in self.editorialgroupmember_set.all()]
+        return self.editorialgroupmember_set.all()
 
     def __str__(self):
-        return f'{self.name} ({self.journal.code})'
+        if self.journal:
+            return f'{self.name} ({self.journal.code})'
+        else:
+            return f'{self.name} ({self.press})'
 
 
 class EditorialGroupMember(models.Model):
@@ -1465,6 +1480,10 @@ class EditorialGroupMember(models.Model):
         on_delete=models.CASCADE,
     )
     sequence = models.PositiveIntegerField()
+    statement = models.TextField(
+        blank=True,
+        help_text='A statement of interest or purpose',
+    )
 
     class Meta:
         ordering = ('sequence',)

@@ -44,6 +44,11 @@ class Page(models.Model):
                   'displayed in the nav and in the top-level heading '
                   'on the page (e.g. “Research Integrity”).',
     )
+    template = models.CharField(
+        blank=True,
+        max_length=100,
+        help_text='The custom template to use instead of the content field.',
+    )
     content = JanewayBleachField(
         null=True,
         blank=True,
@@ -307,3 +312,6 @@ class MediaFile(models.Model):
         return build_url_for_request(
             path=self.file.url,
         )
+
+    def __str__(self):
+        return self.file.path

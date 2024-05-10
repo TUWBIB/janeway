@@ -11,14 +11,18 @@ import uuid
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
+from django.apps import apps
 
 from core import models as core_models
 from core.file_system import JanewayFileSystemStorage
 from core.model_utils import (
     AbstractSiteModel,
+    default_press_id,
     JanewayBleachField,
     SVGImageField,
 )
+from submission import models as submission_models
 from utils import logic
 from utils.function_cache import cache
 from utils.logger import get_logger
@@ -345,6 +349,26 @@ class Press(AbstractSiteModel):
     def code(self):
         return 'press'
 
+    @property
+    def public_journals(self):
+        Journal = apps.get_model('journal.Journal')
+        return Journal.objects.filter(
+            hide_from_press=False,
+            is_conference=False,
+        ).order_by('sequence')
+
+    @property
+    def published_articles(self):
+        Article = apps.get_model('submission.Article')
+        return Article.objects.filter(
+            stage=submission_models.STAGE_PUBLISHED,
+            date_published__lte=timezone.now(),
+        )
+
+    def next_group_order(self):
+        orderings = [group.sequence for group in self.editorialgroup_set.all()]
+        return max(orderings) + 1 if orderings else 0
+
     class Meta:
         verbose_name_plural = 'presses'
 
@@ -360,3 +384,44 @@ class PressSetting(models.Model):
 
     def __str__(self):
         return '{name} - {press}'.format(name=self.name, press=self.press.name)
+
+
+class StaffGroup(models.Model):
+    name = models.CharField(max_length=500)
+    description = models.TextField(blank=True)
+    press = models.ForeignKey(
+        Press,
+        on_delete=models.CASCADE,
+        default=default_press_id,
+    )
+    sequence = models.PositiveIntegerField()
+
+    def members(self):
+        return self.staffgroupmember_set.all()
+
+    class Meta:
+        ordering = ('sequence',)
+
+    def __str__(self):
+        return f'{self.name}, {self.press.name}'
+
+
+class StaffGroupMember(models.Model):
+    group = models.ForeignKey(
+        StaffGroup,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        'core.Account',
+        on_delete=models.CASCADE,
+    )
+    job_title = models.CharField(max_length=300, blank=True)
+    alternate_title = models.CharField(max_length=300, blank=True)
+    publications = models.TextField(blank=True)
+    sequence = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ('sequence',)
+
+    def __str__(self):
+        return f'{self.user} in {self.group}'

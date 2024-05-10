@@ -89,22 +89,15 @@ src/media/profile_images/*
 *.swp
 .vim/
 
-# gulp
-/src/static/OLH/*
-
 src/urls\.txt
 
 src/files/styling/
-src/static/OLH
 src/utils/management/commands/import_news\.py
 src/core/settings/
 src/utils/management/commands/redirects\.py
 .vscode/**
-src/static/mater
 ial/
 src/texture/**
-/src/static/material/**
-/src/static/admin/hypothesis/**
 
 *.ipynb
 
@@ -143,6 +136,18 @@ dockerfiles/lando_local.env
 
 # docker env
 \.env
+
+# Themes and subthemes
+/src/themes/*
+!/src/themes/clean/
+!/src/themes/material/
+!/src/themes/OLH/
+
+# Static files
+/src/static/*
+!/src/static/common/
+!/src/static/admin/
+/src/static/admin/hypothesis/**
 
 
 # TUW stuff

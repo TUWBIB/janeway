@@ -11,6 +11,7 @@ import re
 import sys
 
 from django import forms
+from django.apps import apps
 from django.contrib.postgres.lookups import SearchLookup as PGSearchLookup
 from django.contrib.postgres.search import (
     SearchVector as DjangoSearchVector,
@@ -22,6 +23,7 @@ from django.db import(
     connection,
     IntegrityError,
     models,
+    ProgrammingError,
     transaction,
 )
 from django.db.models import fields, Q, Manager
@@ -594,3 +596,19 @@ class JanewayBleachCharField(JanewayBleachField):
     def formfield(self, **kwargs):
         kwargs["widget"] = forms.TextInput()
         return super().formfield(**kwargs)
+
+
+def default_press():
+    try:
+        Press = apps.get_model("press", "Press")
+        return Press.objects.first()
+    except ProgrammingError:
+        # Initial migration will attempt to call this,
+        # even when no EditorialGroups are created
+        return
+
+
+def default_press_id():
+    default_press_obj = default_press()
+    if default_press_obj:
+        return default_press_obj.pk

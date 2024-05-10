@@ -632,6 +632,13 @@ if os.environ.get("DB_VENDOR") == "postgres":
 
 ENABLE_FULL_TEXT_SEARCH = False
 
+# Press website search using MiniSearch
+# (does not search articles, issues, preprints, or books).
+# Expects a tuple or None. Tuple examples: (23, 'daily')
+# (12, 'hourly')  (30, 'mins')
+SITE_SEARCH_INDEXING_FREQUENCY = None
+SITE_SEARCH_DIR = 'site_search_test' if IN_TEST_RUNNER else 'site_search'
+
 # A core theme must include ALL templates.
 CORE_THEMES = [
     'OLH',
@@ -691,6 +698,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "fullscreen_native": True,
     "promotion": False,
     "branding": False,
+    "convert_urls": False,
     "menubar": "edit view insert format tools table help",
     "content_css": STATIC_URL + "/admin/css/admin.css",
     "plugins": "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code"

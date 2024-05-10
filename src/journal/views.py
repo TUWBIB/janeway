@@ -39,7 +39,6 @@ from core import (
     models as core_models,
     plugin_loader,
     logic as core_logic,
-    forms as core_forms,
     views as core_views,
 )
 
@@ -1043,6 +1042,12 @@ def publish_article(request, article_id):
     doi_data, doi = logic.get_doi_data(article)
     issues = request.journal.issues
     new_issue_form = issue_forms.NewIssue(journal=article.journal)
+    notify_author_email_form = core_forms.SimpleTinyMCEForm(
+        'email_to_author',
+        initial = {
+            'email_to_author': logic.get_notify_author_text(request, article)
+        }
+    )
     modal = request.GET.get('m', None)
     pubdate_errors = []
 
@@ -1211,7 +1216,7 @@ def publish_article(request, article_id):
         'new_issue_form': new_issue_form,
         'modal': modal,
         'pubdate_errors': pubdate_errors,
-        'notify_author_text': logic.get_notify_author_text(request, article)
+        'notify_author_email_form': notify_author_email_form,
     }
 
     return render(request, template, context)
@@ -1957,8 +1962,10 @@ def contact(request):
 
     if request.journal and request.journal.disable_front_end:
         template = 'admin/journal/contact.html'
-    else:
+    elif request.journal:
         template = 'journal/contact.html'
+    else:
+        template = 'press/journal/contact.html'
     context = {
         'contact_form': contact_form,
         'contacts': contacts,
@@ -1970,17 +1977,26 @@ def contact(request):
 @decorators.frontend_enabled
 def editorial_team(request, group_id=None):
     """
-    Displays a list of Editorial team members, an optional ID can be supplied to limit the display to a group only.
+    Displays a list of editorial team members at the journal level,
+    or governance groups or boards at the press level.
+    An optional ID can be supplied to limit the display to a group only.
     :param request: HttpRequest object
     :param group_id: EditorailGroup object PK
     :return: HttpResponse object
     """
+    kwargs = {
+        'journal': request.journal,
+        'press': request.press,
+    }
     if group_id:
-        editorial_groups = core_models.EditorialGroup.objects.filter(journal=request.journal, pk=group_id)
-    else:
-        editorial_groups = core_models.EditorialGroup.objects.filter(journal=request.journal)
+        kwargs['pk'] = group_id
 
-    template = 'journal/editorial_team.html'
+    editorial_groups = core_models.EditorialGroup.objects.filter(**kwargs)
+
+    if request.journal:
+        template = 'journal/editorial_team.html'
+    else:
+        template = 'press/editorial_team.html'
     context = {
         'editorial_groups': editorial_groups,
         'group_id': group_id,

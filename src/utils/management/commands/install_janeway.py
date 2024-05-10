@@ -100,8 +100,8 @@ class Command(BaseCommand):
         print("Please answer the following questions.\n")
         translation.activate('en')
         with transaction.atomic():
-            test_one = press_models.Press.objects.all()
-            if not test_one:
+            press = press_models.Press.objects.first()
+            if not press:
                 press = press_models.Press()
                 if use_defaults:
                     press.name = options['press_name']

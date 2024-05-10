@@ -97,13 +97,13 @@ class EditorialGroupForm(JanewayTranslationModelForm):
     class Meta:
         model = models.EditorialGroup
         fields = ('name', 'description', 'sequence',)
-        exclude = ('journal',)
+        exclude = ('journal', 'press')
 
 
 class PasswordResetForm(forms.Form):
 
-    password_1 = forms.CharField(widget=forms.PasswordInput, label=_('Password 1'))
-    password_2 = forms.CharField(widget=forms.PasswordInput, label=_('Password 2'))
+    password_1 = forms.CharField(widget=forms.PasswordInput, label=_('Password'))
+    password_2 = forms.CharField(widget=forms.PasswordInput, label=_('Repeat Password'))
 
     def clean_password_2(self):
         password_1 = self.cleaned_data.get("password_1")
@@ -191,11 +191,10 @@ class EditAccountForm(forms.ModelForm):
                    'is_staff', 'is_admin', 'date_joined', 'password',
                    'is_superuser',)
 
-#['last_login', 'groups', 'user_permissions', 
-#'first_name', 'middle_name', 'last_name', 'salutation', 'biography', 
-#'orcid', 'institution', 'department', 'twitter', 'facebook', 'linkedin',
-# 'website', 'github', 'profile_image', 'signature', 'interest', 'country', 
-# 'preferred_timezone', 'enable_public_profile', 'gndid')
+        widgets = {
+            'biography': TinyMCE(),
+            'signature': TinyMCE(),
+        }
 
 
     def save(self, commit=True):
@@ -235,7 +234,7 @@ class AdminUserForm(forms.ModelForm):
 
         if active == 'add':
             self.fields['password_1'] = forms.CharField(widget=forms.PasswordInput, label="Password")
-            self.fields['password_2'] = forms.CharField(widget=forms.PasswordInput, label="Repeat password")
+            self.fields['password_2'] = forms.CharField(widget=forms.PasswordInput, label="Repeat Password")
 
         if request and not request.user.is_admin:
             self.fields.pop('is_staff', None)
@@ -815,3 +814,11 @@ class SettingEmailForm(EmailForm):
             email_context,
             setting_name,
         )
+
+class SimpleTinyMCEForm(forms.Form):
+    """ A one-field form for populating a TinyMCE textarea
+    """
+
+    def __init__(self, field_name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields[field_name] = forms.CharField(widget=TinyMCE)
