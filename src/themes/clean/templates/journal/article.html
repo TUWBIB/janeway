@@ -3,7 +3,7 @@
 {% load hooks %}
 {% load i18n %}
 
-{% block title %}{{ article.authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
+{% block title %}{{ article.frozen_authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
 
 {% block head %}
@@ -121,22 +121,24 @@
                 {% endif %}
                 {% if article.funders.all %}
                     <strong>{% trans "Funding" %}</strong>
-                    <ul>
-                        {% for funder in article.funders.all %}
-                            <li>
-                                {% if funder.fundref_id %}
-                                    <a href="{% url "funder_articles" funder.fundref_id %}">{{ funder.name }}</a>
-                                {% else %}
-                                    {{ funder.name }}
-                                {% endif %}
-                                {% if funder.funding_id %}
-                                    {% blocktranslate with id=funder.funding_id %}
-                                        (grant {{ id }})
-                                    {% endblocktranslate %}
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for funder in article.funders.all %}
+                        <p>
+                            {% if funder.fundref_id %}
+                                <a href="{% url "funder_articles" funder.fundref_id %}">{{ funder.name }}</a>
+                            {% else %}
+                                {{ funder.name }}
+                            {% endif %}
+                            {% if funder.funding_id %}
+                                {% blocktranslate with id=funder.funding_id %}
+                                    ({{ id }})
+                                {% endblocktranslate %}
+                            {% endif %}
+                            {% if funder.funding_statement %}
+                                <br/>
+                                {{ funder.funding_statement|safe|linebreaksbr }}
+                            {% endif %}
+                        </p>
+                    {% endfor %}
                 {% endif %}
                 {% if article.publisher_notes.all %}
                     <div class="callout primary">
@@ -216,12 +218,20 @@
                 {% endif %}
                 <h2>{% trans "Information" %}</h2>
                 <ul>
+                    {% if journal_settings.article.display_date_submitted and article.date_submitted %}
+                        <li>
+                            {% trans "Submitted on" %} {{ article.date_submitted|date:"Y-m-d" }}
+                        </li>
+                    {% endif %}
+                    {% if journal_settings.article.display_date_accepted and  article.date_accepted %}
+                        <li>
+                            {% trans "Accepted on" %} {{ article.date_accepted|date:"Y-m-d" }}
+                        </li>
+                    {% endif %}
                     {% if article.is_published or proofing %}
                         <li id="article_date_published">
-                            {% trans "Published on" %} {{ article.date_published|date:"d M Y" }}
+                            {% trans "Published on" %} {{ article.date_published|date:"Y-m-d" }}
                         </li>
-                    {% else %}
-                    <li>{% trans "Accepted on" %} {{ article.date_accepted|date:"d M Y" }}</li>
                     {% endif %}
                     {% if article.page_range %}
                     <li>{% trans "Pages" %}: {{ article.page_range }}</li>

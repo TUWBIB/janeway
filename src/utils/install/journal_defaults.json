@@ -1519,25 +1519,6 @@
     },
     {
         "group": {
-            "name": "styling"
-        },
-        "setting": {
-            "description": "If checked, Editorial Team images will display.",
-            "is_translatable": false,
-            "name": "enable_editorial_images",
-            "pretty_name": "Enable Editorial Team Image Display",
-            "type": "boolean"
-        },
-        "value": {
-            "default": null
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
             "name": "general"
         },
         "setting": {
@@ -4015,25 +3996,6 @@
             "is_translatable": false,
             "name": "enable_suggested_reviewers",
             "pretty_name": "Enable Suggested Reviewers",
-            "type": "boolean"
-        },
-        "value": {
-            "default": ""
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
-            "name": "general"
-        },
-        "setting": {
-            "description": "When this setting is enabled the review assignment page will show a table of reviewers who have completed a review in past review rounds.",
-            "is_translatable": false,
-            "name": "display_past_reviewers",
-            "pretty_name": "Display List of Reviewers from Past Review Rounds",
             "type": "boolean"
         },
         "value": {

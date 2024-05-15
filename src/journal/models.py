@@ -22,7 +22,6 @@ from django.dispatch import receiver
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils import timezone, translation
-from django.utils.translation import ugettext
 from django.utils.translation import pgettext
 from django.utils.translation import gettext
 from django.utils.functional import cached_property
@@ -146,6 +145,15 @@ class Journal(AbstractSiteModel):
         help_text=gettext('The tiny round or square image appearing in browser '
                            'tabs before the webpage title'),
     )
+    default_profile_image = SVGImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=gettext('A default image displayed on the profile and '
+                          'editorial team pages when the user has no set '
+                          'profile image.'),
+    )
     # DEPRECATED "description" in favour of "journal_description" setting
     description = JanewayBleachField(null=True, blank=True, verbose_name="Journal Description")
     contact_info = JanewayBleachField(null=True, blank=True, verbose_name="Contact Information")
@@ -237,6 +245,11 @@ class Journal(AbstractSiteModel):
     )
     display_article_page_numbers = models.BooleanField(default=True)
     display_issue_doi = models.BooleanField(default=True)
+    display_issues_grouped_by_decade = models.BooleanField(
+        default=False,
+        help_text='When enabled the issue page will group and display issues '
+                  'by decade.',
+    )
 
     disable_front_end = models.BooleanField(default=False)
 
@@ -388,6 +401,33 @@ class Journal(AbstractSiteModel):
             journal=self,
             date__lte=timezone.now(),
         )
+
+    def issues_by_decade(self, issues_to_sort=None):
+        issue_decade_dict = {}
+
+        if not issues_to_sort:
+            issues_to_sort = Issue.objects.filter(
+                journal=self,
+                date__lte=timezone.now(),
+                issue_type__code='issue',
+            )
+        for issue in issues_to_sort:
+            issue_year = issue.date_published.year
+            decade_start = issue_year - (issue_year % 10)
+            decade_end = decade_start + 9
+
+            # if the decade is greater than the current year, cap at the
+            # current year.
+            date = timezone.now().date()
+            if decade_end > date.year:
+                decade_end = date.year
+
+            decade_span = f"{decade_start} - {decade_end}"
+            if issue_decade_dict.get(decade_span):
+                issue_decade_dict[decade_span].append(issue)
+            else:
+                issue_decade_dict[decade_span] = [issue]
+        return issue_decade_dict
 
     def editors(self):
         """ Returns all users enrolled as editors for the journal
@@ -731,7 +771,7 @@ class Issue(AbstractLastModifiedModel):
 
 
 
-        volume = ugettext("Volume")
+        volume = gettext("Volume")
         volume += " {}"
         volume = volume.format(
             self.volume) if journal.display_issue_volume else ""
@@ -741,14 +781,14 @@ class Issue(AbstractLastModifiedModel):
                 if journal.code=='OES':
                     issuestr = pgettext("fe_oes","Issue")
                 else:
-                    issuestr = ugettext("Issue")
+                    issuestr = gettext("Issue")
                 issuestr += " {}"
                 issuestr = issuestr.format(self.tuw_issue_str)
             elif self.issue is not None:
                 if journal.code=='OES':
                     issuestr = pgettext("fe_oes","Issue")
                 else:
-                    issuestr = ugettext("Issue")
+                    issuestr = gettext("Issue")
                 issuestr += " {}"
                 issuestr = issuestr.format(self.issue)
         issue=issuestr
@@ -807,15 +847,15 @@ class Issue(AbstractLastModifiedModel):
         volume = issue = year = issue_title = article_number = page_numbers = ''
 
         if journal.display_issue_volume and self.volume:
-            volume = ugettext("Volume") + " {}".format(self.volume)
+            volume = gettext("Volume") + " {}".format(self.volume)
         if journal.display_issue_number and self.issue and self.issue != "0":
-            issue = ugettext("Issue") + " {}".format(self.issue)
+            issue = gettext("Issue") + " {}".format(self.issue)
         if journal.display_issue_year and self.date:
             year = "{}".format(self.date.year)
         if journal.display_issue_title:
             issue_title = self.issue_title
         if journal.display_article_number and article and article.article_number:
-            article_number = ugettext("Article") + " {}".format(article.article_number)
+            article_number = gettext("Article") + " {}".format(article.article_number)
         if journal.display_article_page_numbers and article:
             if article.page_range:
                 page_numbers = article.page_range

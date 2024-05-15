@@ -53,7 +53,7 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 INSTALLED_APPS = [
     'modeltranslation',
-    'django.contrib.admin',
+    'apps.JanewayAdminConfig',
     'django.contrib.auth',
 
     'django.contrib.sessions',
@@ -92,7 +92,6 @@ INSTALLED_APPS = [
 
     # 3rd Party
     'mozilla_django_oidc',
-    'django_countries',
     'django_summernote',
     'tinymce',
     'bootstrap4',

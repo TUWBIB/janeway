@@ -3790,7 +3790,18 @@
       </xsl:template>
 
       <xsl:template match="verse-line">
-        <xsl:apply-templates/>
+        <xsl:choose>
+            <xsl:when test="@style">
+                <!-- Provide support for the verse-line/@style attribute -->
+                <xsl:element name="span">
+                    <xsl:attribute name="style"><xsl:value-of select="@style"/></xsl:attribute>
+                    <xsl:apply-templates/>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates/>
+            </xsl:otherwise>
+        </xsl:choose>
       </xsl:template>
 
     <xsl:template match="title">
@@ -3860,6 +3871,15 @@
            <xsl:apply-templates/>
          </code>
        </pre>
+    </xsl:template>
+
+    <!-- Add support for email links in all contexts. -->
+    <xsl:template match="email">
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="concat('mailto:',.)"/></xsl:attribute>
+            <xsl:attribute name="class"><xsl:value-of select="'email'"/></xsl:attribute>
+            <xsl:apply-templates/>
+        </xsl:element>
     </xsl:template>
 
     <!-- END - general format -->

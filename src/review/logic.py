@@ -18,6 +18,10 @@ from django.db.models import (
     OuterRef,
     Prefetch,
     Subquery,
+    Case,
+    When,
+    BooleanField,
+    Value,
 )
 from django.shortcuts import redirect, reverse
 from django.utils import timezone
@@ -63,6 +67,11 @@ def get_reviewers(article, candidate_queryset, exclude_pks):
         rating_average=Avg("rating"),
     ).values("rating_average")
 
+    completed_reviewer_pks_subquery = article.completed_reviews_with_decision.values_list(
+        'reviewer__pk',
+        flat=True,
+    )
+
     # TODO swap the below subqueries with filtered annotations on Django 2.0+
     reviewers = candidate_queryset.exclude(
         pk__in=exclude_pks,
@@ -76,7 +85,25 @@ def get_reviewers(article, candidate_queryset, exclude_pks):
         )
     ).annotate(
         rating_average=Subquery(rating_average, output_field=IntegerField()),
+        is_past_reviewer=Case(
+            When(pk__in=Subquery(completed_reviewer_pks_subquery),
+                 then=True),
+            default=False,
+            output_field=BooleanField(),
+        ),
     )
+
+    if article.journal.get_setting('general', 'enable_suggested_reviewers'):
+        article_keywords = [keyword.word for keyword in article.keywords.all()]
+        reviewers = reviewers.annotate(
+            is_suggested_reviewer=Case(
+                When(interest__name__in=article_keywords,
+                     then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+
     return reviewers
 
 
@@ -86,8 +113,11 @@ def get_reviewer_candidates(article, user=None, reviewers_to_exclude=None):
     :param user: The user requesting candidates who would be filtered out
     :param reviewers_to_exclude: queryset of Account objects
     """
-    review_assignments = article.reviewassignment_set.filter(review_round=article.current_review_round_object())
-    reviewer_pks_to_exclude = [review.reviewer.pk for review in review_assignments]
+    reviewer_pks_to_exclude = [
+        review.reviewer.pk for review in article.reviewassignment_set.filter(
+            review_round=article.current_review_round_object(),
+        )
+    ]
     if user:
         reviewer_pks_to_exclude.append(user.pk)
 
@@ -115,6 +145,7 @@ def get_suggested_reviewers(article, reviewers):
                 break
 
     return suggested_reviewers
+
 
 def get_previous_round_reviewers(article):
     """

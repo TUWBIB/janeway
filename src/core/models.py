@@ -25,6 +25,8 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -38,6 +40,7 @@ from core.file_system import JanewayFileSystemStorage
 from core.model_utils import (
     AbstractLastModifiedModel,
     AbstractSiteModel,
+    DynamicChoiceField,
     JanewayBleachField,
     PGCaseInsensitiveEmailField,
     SearchLookup,
@@ -177,12 +180,29 @@ class AccountQuerySet(models.query.QuerySet):
 
 
 class AccountManager(BaseUserManager):
-    def create_user(self, email, password=None, **kwargs):
-        if not email:
-            raise ValueError('Users must have a valid email address.')
+    def create_user(self, username=None, password=None, email=None, **kwargs):
+        """ Creates a user from the given username or email
+        In Janeway, users rely on email addresses to log in. For compatibility
+        with 3rd party libraries, we allow a username argument, however only a
+        email address will be accepted as the username and email.
+        """
+        if not email and username:
+            email = username
+            if "username" in kwargs:
+                del kwargs["username"]
+        try:
+            validate_email(email)
+            email = self.normalize_email(email)
+        except(ValidationError, TypeError, ValueError):
+            raise ValueError(f'{email} not a valid email address.')
 
         account = self.model(
-            email=self.normalize_email(email),
+            # The original case of the email is preserved
+            # in the email field
+            email=email,
+            # The email is lowercased in the username field
+            # so that we can perform case-insensitive checking
+            # and avoid creating duplicate accounts
             username=email.lower(),
         )
 
@@ -192,7 +212,9 @@ class AccountManager(BaseUserManager):
         return account
 
     def create_superuser(self, email, password, **kwargs):
-        account = self.create_user(email, password, **kwargs)
+        kwargs["email"] = email
+        kwargs["password"] = password
+        account = self.create_user(**kwargs)
 
         account.is_staff = True
         account.is_admin = True
@@ -246,7 +268,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name=_('Country'),
         on_delete=models.SET_NULL,
     )
-    preferred_timezone = models.CharField(max_length=300, null=True, blank=True, choices=TIMEZONE_CHOICES, verbose_name=_("Preferred Timezone"))
+    preferred_timezone = DynamicChoiceField(
+            max_length=300, null=True, blank=True,
+            choices=tuple(),
+            dynamic_choices=TIMEZONE_CHOICES,
+            verbose_name=_("Preferred Timezone")
+        )
 
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -273,8 +300,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     objects = AccountManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
 
     class Meta:
         ordering = ('first_name', 'last_name', 'username')
@@ -1452,6 +1478,10 @@ class EditorialGroup(models.Model):
         null=True,
     )
     sequence = models.PositiveIntegerField()
+    display_profile_images = models.BooleanField(
+        default=False,
+        help_text="Enable to display profile images for this group.",
+    )
 
     class Meta:
         ordering = ('sequence',)
@@ -1515,7 +1545,7 @@ class Contacts(models.Model):
 
 
 class Contact(models.Model):
-    recipient = models.EmailField(max_length=200, verbose_name=_('Who would you like to contact'))
+    recipient = models.EmailField(max_length=200, verbose_name=_('Who would you like to contact?'))
     sender = models.EmailField(max_length=200, verbose_name=_('Your contact email address'))
     subject = models.CharField(max_length=300, verbose_name=_('Subject'))
     body = JanewayBleachField(verbose_name=_('Your message'))

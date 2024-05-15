@@ -40,6 +40,7 @@ import swapper
 from core.file_system import JanewayFileSystemStorage
 from core.model_utils import(
     AbstractLastModifiedModel,
+    DynamicChoiceField,
     BaseSearchManagerMixin,
     JanewayBleachField,
     JanewayBleachCharField,
@@ -320,10 +321,15 @@ DATACITE_STATE_CHOICES = [
 PLUGIN_WORKFLOW_STAGES = []
 
 
-class Funder(models.Model):
+class ArticleFunding(models.Model):
     class Meta:
         ordering = ('name',)
 
+    article = models.ForeignKey(
+        'submission.Article',
+        on_delete=models.CASCADE,
+        null=True,
+    )
     name = models.CharField(
         max_length=500,
         blank=False,
@@ -336,7 +342,7 @@ class Funder(models.Model):
         null=True,
         help_text='Funder DOI (optional). Enter as a full Uniform '
                   'Resource Identifier (URI), such as '
-                  'http://dx.doi.org/10.13039/501100021082',
+                  'https://dx.doi.org/10.13039/501100021082',
     )
     funding_id = models.CharField(
         max_length=500,
@@ -344,6 +350,14 @@ class Funder(models.Model):
         null=True,
         help_text="The grant ID (optional). Enter the ID by itself",
     )
+
+    funding_statement = models.TextField(
+        blank=True,
+        help_text=_("Additional information regarding this funding entry")
+    )
+
+    def __str__(self):
+        return f"Article funding entry {self.pk}: {self.name}"
 
 class CitedReference(models.Model):
     article =  models.ForeignKey(
@@ -422,34 +436,6 @@ class ArticleManager(models.Manager):
 
     def get_queryset(self):
         return super(ArticleManager, self).get_queryset().all()
-
-
-class DynamicChoiceField(models.CharField):
-    def __init__(self, dynamic_choices=(), *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.dynamic_choices = dynamic_choices
-
-    def formfield(self, *args, **kwargs):
-        form_element = super().formfield(**kwargs)
-        for choice in self.dynamic_choices:
-            form_element.choices.append(choice)
-        return form_element
-
-    def validate(self, value, model_instance):
-        """
-        Validates value and throws ValidationError.
-        """
-        try:
-            super().validate(value, model_instance)
-        except exceptions.ValidationError as e:
-            # If the raised exception is for invalid choice we check if the
-            # choice is in dynamic choices.
-            if e.code == 'invalid_choice':
-                potential_values = set(
-                    item[0] for item in self.dynamic_choices
-                )
-                if value not in potential_values:
-                    raise
 
 
 class ArticleSearchManager(BaseSearchManagerMixin):
@@ -1207,6 +1193,11 @@ class Article(AbstractLastModifiedModel):
             for_author_consumption=True,
         )
 
+    @property
+    def funders(self):
+        """Method replaces the funders m2m model for backwards compat."""
+        return ArticleFunding.objects.filter(article=self)
+
     def __str__(self):
         return u'%s - %s' % (self.pk, truncatesmart(self.title))
 
@@ -1478,8 +1469,8 @@ class Article(AbstractLastModifiedModel):
         elif user in self.section_editors():
             return True
         elif not user.is_anonymous and user.is_editor(
-                request=None,
-                journal=self.journal,
+            request=None,
+            journal=self.journal,
         ):
             return True
         else:
@@ -1762,6 +1753,11 @@ class Article(AbstractLastModifiedModel):
     @cache(600)
     def workflow_stages(self):
         return core_models.WorkflowLog.objects.filter(article=self)
+
+    def distinct_workflow_elements(self):
+        return core_models.WorkflowElement.objects.filter(
+            pk__in=self.workflowlog_set.values_list("element").distinct()
+        )
 
     @property
     def current_workflow_element(self):

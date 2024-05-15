@@ -150,18 +150,18 @@ def funder_articles(request, funder_id):
     if redirect:
         return redirect
 
-    pinned_articles = [pin.article for pin in models.PinnedArticle.objects.filter(
-        journal=request.journal)]
-    pinned_article_pks = [article.pk for article in pinned_articles]
+    article_funding_objects = submission_models.ArticleFunding.objects.filter(
+        fundref_id=funder_id,
+        article__journal=request.journal,
+        article__date_published__lte=timezone.now(),
+        article__stage=submission_models.STAGE_PUBLISHED,
+        article__section__pk__in=filters,
+    )
 
-    article_objects = submission_models.Article.objects.filter(
-        journal=request.journal,
-        funders__fundref_id=funder_id,
-        date_published__lte=timezone.now(),
-        section__pk__in=filters,
-    ).prefetch_related(
-        'frozenauthor_set').order_by(sort).exclude(
-        pk__in=pinned_article_pks)
+    article_objects = []
+    for article_funding_object in article_funding_objects:
+        if article_funding_object.article not in article_objects:
+            article_objects.append(article_funding_object.article)
 
     paginator = Paginator(article_objects, show)
 
@@ -174,7 +174,6 @@ def funder_articles(request, funder_id):
 
     template = 'journal/articles.html'
     context = {
-        'pinned_articles': pinned_articles,
         'articles': articles,
         'sections': sections,
         'filters': filters,
@@ -273,6 +272,10 @@ def issues(request):
         'issues': issue_objects,
         'issue_type': issue_type,
     }
+    if request.journal.display_issues_grouped_by_decade:
+        context['issues_by_decade'] = request.journal.issues_by_decade(
+            issues_to_sort=issue_objects,
+        )
     return render(request, template, context)
 
 

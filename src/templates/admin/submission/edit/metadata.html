@@ -111,29 +111,15 @@
                     <div class="large-10 columns">
                         {{ info_form.custom_how_to_cite|foundation }}
                     </div>
+                    <div class="large-10 columns">
+                        {{ info_form.rights|foundation }}
+                    </div>
                     <div class="large-12 columns">
                         <label for="id_keywords">Keywords</label>
                         <input type="text" id="id_keywords" name="keywords" value="
                                 {% if form.cleaned_data.keywords %}{{ form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords_lang_en %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
                         {% trans "Hit Enter to add a new keyword." %}
-                    <div class="large-12 columns">
-                        <div class="row expanded">
-                            <div class="large-12 columns">
-                                <label for="id_keywords">Keywords</label>
-                                <input type="text" id="id_keywords" name="keywords" value="
-
-
-                                        {% if info_form.cleaned_data.keywords %}{{ info_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                                <p>Hit Enter to add a new keyword.</p>
-                            </div>
-                        </div>
                     </div>
-
-                    <div class="large-10 columns">
-                        {{ info_form.rights|foundation }}
-                    </div>
-
-                    {% include "admin/elements/submission/additional_fields.html" with form=info_form additional_fields=additional_fields %}
 
                     <div class="large-12 columns">
                         <label for="id_keywords_de">{% trans "Keywords (German)" %}</label>
@@ -141,152 +127,116 @@
                                 {% if form.cleaned_data.keywords_de %}{{ form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_lang_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
                         {% trans "Hit Enter to add a new keyword." %}
                     </div>
-                </div>
 
-                {% if additional_fields %}
-                    <div class="title-area">
-                        <h2>{% trans "Additional Fields"%}</h2>
-                    </div>
-                    <div class="content">
-                    {% for additional_field in additional_fields %}
-                        {% get_form_field info_form additional_field.name as field %}
-                        <div class="{{ field.field.widget.attrs.div_class }} columns">
-                            {{ field|foundation }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endif %}
+                    {% include "admin/elements/submission/additional_fields.html" with form=info_form additional_fields=additional_fields %}
 
-                <div class="title-area">
-                    <h2>{% trans "Authors" %}</h2>
-                    <a href="#" class="button" data-open="author">{% trans "Add Author" %}</a>
-                </div>
-                <div class="content">
-                    <table class="small scroll">
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>{% trans "Full Name" %}</th>
-                            <th>{% trans "First Name" %}</th>
-                            <th>{% trans "Middle Name" %}</th>
-                            <th>{% trans "Last Name" %}</th>
-                            <th>{% trans "Email" %}</th>
-                            <th>{% trans "Institution" %}</th>
-                            <th>{% trans "Departement" %}</th>
-                            <th>{% trans "Country" %}</th>
-                            <th>{% trans "Correspondence Author" %}</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody id="sortable">
-                        {% for f_author in article.frozen_authors %}
-                            <tr id="authors-{{ f_author.pk }}">
-                                <td><i class="fa fa-sort"></i></td>
-                                <td>{{ f_author.full_name }}</td>
-                                <td>{% if f_author.first_name %}{{ f_author.first_name }}{% endif %}</td>
-                                <td>{% if f_author.middle_name %}{{ f_author.middle_name }}{% endif %}</td>
-                                <td>{% if f_author.last_name %}{{ f_author.last_name }}{% endif %}</td>
-                                <td>{{ f_author.author.email }}</td>
-                                <td>{% if f_author.institution %}{{ f_author.institution }}{% endif %}</td>
-                                <td>{% if f_author.department %}{{ f_author.department }}{% endif %}</td>
-                                <td>{{ f_author.country.name }}</td>
-                                <td>{% if article.correspondence_author and f_author.author == article.correspondence_author %}
-                                    <i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}</td>
-                                <td><a href="?author={{ f_author.pk }}&return={{ return }}"><i
-                                        class="fa fa-edit">&nbsp;</i>Edit</a></td>
-                                <td>
-                                    <form method="POST">{% csrf_token %}
-                                        <button type="submit" name="delete" value="{{ f_author.pk }}"><i
-                                                class="fa fa-trash">&nbsp;</i>Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
                     <div class="large-12 columns">
                         <button type="submit" name="metadata" class="small success button">Update Metadata</button>
                     </div>
-                </form>
-             <div class="title-area">
-                        <h2>Funding</h2>
-                    </div>
-                    <div class="content submission-content">
-                        <div class="title-area">
-                            <h2>Add Funding Source</h2>
-                        </div>
-                        <div class="row expanded">
-                                <div class="large-8 columns">
-                                    <input type="text" name="funder_text" id="funder_text" />
-                                </div>
-                                <div class="large-2 columns">
-                                    <a class="button pull-right" onclick="javascript:search_fundref($('#funder_text').val())">Search for funder</a>
-                                </div>
-                                <div class="large-2 columns">
-                                    <input id="funder_name" type="hidden" value="use_raw"/><input id="funder_doi" type="hidden" value=""/>
-                                    <a class="warning button pull-right" data-open="add_funder_blank"><i class="fa fa-plus">&nbsp;</i>Add funder manually</a>
-                                </div>
-                        </div>
-                    <div class="row expanded">
-                        <div class="large-12 columns">
-                            <span name="funder_list" id="funder_list"></span>
-                        </div>
-                    </div>
-
-                    <div class="title-area">
-                        <h2>Current Funders</h2>
-                    </div>
-
-<<<<<<< HEAD
-                    <div class="row expanded">
-                        <div class="large-12 columns">
-                            <table class="scroll">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>FundRef ID</th>
-                                    <th>Grant Number</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody id="sortable">
-                                {% for funder in article.funders.all %}
-                                    <tr id="funder-{{ funder.pk }}">
-                                        <td>{{ funder.name }}</td>
-                                        <td>{{ funder.fundref_id }}</td>
-                                        <td>{{ funder.funding_id }}</td>
-                                        <td><a href="{% url 'delete_funder' article.pk funder.pk %}?return={{ request.path|urlencode }}"><i
-                                                class="fa fa-trash">
-                                            &nbsp;</i></a></td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="2">No funders added.</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                    </div>
-
-
-
-
 
                 </div>
-            </div>
+            </form>
+        </div>
 
-            <div class="title-area">
-                <h2>{% trans "Cited Reference" %}</h2>
-                <a href="#" class="button" data-open="add_citref">{% trans "Add Cited Reference" %}</a>
-            </div>
+        <div class="title-area">
+            <h2>{% trans "Authors" %}</h2>
+            <a href="#" class="button" data-open="author">{% trans "Add Author" %}</a>
+        </div>
+        <div class="content">
+            <table class="small scroll">
+            <thead>
+            <tr>
+                    <th></th>
+                    <th>{% trans "Full Name" %}</th>
+                    <th>{% trans "First Name" %}</th>
+                    <th>{% trans "Middle Name" %}</th>
+                    <th>{% trans "Last Name" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Institution" %}</th>
+                    <th>{% trans "Departement" %}</th>
+                    <th>{% trans "Country" %}</th>
+                    <th>{% trans "Correspondence Author" %}</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="sortable">
+                {% for f_author in article.frozen_authors %}
+                    <tr id="authors-{{ f_author.pk }}">
+                        <td><i class="fa fa-sort"></i></td>
+                        <td>{{ f_author.full_name }}</td>
+                        <td>{% if f_author.first_name %}{{ f_author.first_name }}{% endif %}</td>
+                        <td>{% if f_author.middle_name %}{{ f_author.middle_name }}{% endif %}</td>
+                        <td>{% if f_author.last_name %}{{ f_author.last_name }}{% endif %}</td>
+                        <td>{{ f_author.author.email }}</td>
+                        <td>{% if f_author.institution %}{{ f_author.institution }}{% endif %}</td>
+                        <td>{% if f_author.department %}{{ f_author.department }}{% endif %}</td>
+                        <td>{{ f_author.country.name }}</td>
+                        <td>{% if article.correspondence_author and f_author.author == article.correspondence_author %}
+                            <i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}</td>
+                        <td><a href="?author={{ f_author.pk }}&return={{ return }}"><i
+                                class="fa fa-edit">&nbsp;</i>Edit</a></td>
+                        <td>
+                            <form method="POST">{% csrf_token %}
+                                <button type="submit" name="delete" value="{{ f_author.pk }}"><i
+                                        class="fa fa-trash">&nbsp;</i>Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="title-area">
+            <h2>Funding</h2>
+       </div>
+       <div class="content submission-content">
+           <div class="row expanded">
+               <form method="GET" id="search_funder">
+                   <p>
+                       {% blocktrans %}
+                           You can search the <a href="https://www.crossref.org/services/funder-registry/">
+                           Crossref Funder Registry</a> to add known funders.
+                       {% endblocktrans %}
+                   </p>
+                   <div class="large-8 columns">
+                       <input
+                           type="text"
+                           name="funder_text"
+                           id="funder_text"
+                           onkeypress="javascript:onFunderTextEnterPress(event);"
+                       />
+                   </div>
+                   <div class="large-2 columns">
+                       <button type="button"
+                           class="button pull-right"
+                           onclick="javascript:search_fundref($('#funder_text').val())"
+                       >Search for funder</button>
+                   </div>
+                   <div class="large-2 columns">
+                       <input id="funder_name" type="hidden" value="use_raw"/>
+                       <input id="funder_doi" type="hidden" value=""/>
+                       <button
+                           type="button"
+                           class="warning button pull-right"
+                           data-open="add_funder"
+                       ><i class="fa fa-plus">&nbsp;</i>Add funder manually</button>
+                   </div>
+               </form>
+           </div>
+       </div>
+       <div class="row expanded">
+           <div class="large-12 columns">
+               <span name="funder_list" id="funder_list"></span>
+           </div>
+       </div>
 
-            <div class="row expanded">
-                <div class="large-12 columns">
-                    <table class="scroll">
-                        <thead>
-=======
+        <div class="title-area">
+            <h2>Current Funders</h2>
+        </div>
+
         <div class="row expanded">
             <div class="large-12 columns">
                 <table class="scroll">
@@ -295,7 +245,9 @@
                         <th>Name</th>
                         <th>FundRef ID</th>
                         <th>Grant Number</th>
-                        <th></th>
+                        <th>{% trans "Funding Statement" %}</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                     </tr>
                     </thead>
                     <tbody id="sortable">
@@ -304,107 +256,37 @@
                             <td>{{ funder.name|default_if_none:"" }}</td>
                             <td>{{ funder.fundref_id|default_if_none:"" }}</td>
                             <td>{{ funder.funding_id|default_if_none:"" }}</td>
-                            <td><a href="{% url 'delete_funder' article.pk funder.pk %}?return={{ request.path|urlencode }}"><i
-                                    class="fa fa-trash">
-                                &nbsp;</i></a></td>
+                            <td>{{ funder.funding_statement|safe }}</td>
+                            <td>
+                                <a href="{% url 'edit_funder' article.pk funder.pk %}?return={{ request.path|urlencode }}">
+                                    <span class="fa fa-edit" aria-hidden="true">&nbsp;</span>Edit
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'delete_funder' article.pk funder.pk %}?return={{ request.path|urlencode }}">
+                                    <span class="fa fa-trash" aria-hidden="true">&nbsp;</span>Delete
+                                </a>
+                            </td>
                         </tr>
                         {% empty %}
->>>>>>> v1.5.0
                         <tr>
-                            <th>Text</th>
-                            <th></th>
+                            <td colspan="2">No funders added.</td>
                         </tr>
-                        </thead>
-                        <tbody id="sortable">
-                        {% for citref in article.citedreference_set.all %}
-                            <tr id="citref-{{ citref.pk }}">
-                                <td>{{ citref.text }}</td>
-                                <td><a href="{% url 'delete_citref' article.pk citref.pk %}?return={{ request.path|urlencode }}"><i
-                                        class="fa fa-trash">
-                                    &nbsp;</i></a></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="2">No cited references.</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+                    {% endfor %}
+                </table>
             </div>
+        </div>
 
 
-            <div class="small reveal" id="add_funder_blank" data-reveal>
-                <div class="card">
-                    <div class="card-divider">
-                        <h5>Add funder</h5>
-                    </div>
-                    <div class="card-section">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="large-12 columns">
-                                    <input type="text" id="funder_name" name="funder_name"/>
-                                    <p class="help-text">Funder</p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="large-12 columns">
-                                    <input type="text" id="funder_doi" name="funder_doi"/>
-                                    <p class="help-text">Funder DOI (optional)</p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="large-12 columns">
-                                    <input type="text" name="grant_number" id="grant_number"/>
-                                    <p class="help-text">Funder grant number (optional)</p>
-                                </div>
-                            </div>
-                            <button type="submit" name="add_funder" class="success button">Add funder</button>
-                            <button type="button" data-close="" class="close-button">&times;</button>
-                        </form>
-                    </div>
+        <div class="small reveal" id="add_funder" data-reveal>
+            <div class="card">
+                <div class="card-divider">
+                    <h5>Add funder</h5>
                 </div>
-            </div>
-
-            <div class="small reveal" id="add_citref" data-reveal>
-                <div class="card">
-                    <div class="card-divider">
-                        <h5>Add cited reference</h5>
-                    </div>
-                    <div class="card-section">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="large-12 columns">
-                                    <input type="text" id="citref_text" name="citref_text"/>
-                                    <p class="help-text">Cited reference text</p>
-                                </div>
-                            </div>
-                            <button type="submit" name="add_citref" class="success button">Add cited reference</button>
-                            <button type="button" data-close="" class="close-button">&times;</button>
-                        </form>
-                    </div>
                 <div class="card-section">
                     <form method="POST">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="large-12 columns">
-                                <input type="text" id="funder_name" name="funder_name"/>
-                                <p class="help-text">{% trans funder_form.fields.name.help_text %}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="large-12 columns">
-                                <input type="text" id="funder_doi" name="funder_doi"/>
-                                <p class="help-text">{% trans funder_form.fields.fundref_id.help_text %}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="large-12 columns">
-                                <input type="text" name="grant_number" id="grant_number"/>
-                                <p class="help-text">{% trans funder_form.fields.funding_id.help_text %}</p>
-                            </div>
-                        </div>
+                        {{ funder_form|foundation }}
                         <button type="submit" name="add_funder" class="success button">Add funder</button>
                         <button type="button" data-close="" class="close-button">&times;</button>
                     </form>
@@ -461,5 +343,5 @@
             }
         }
     </script>
-    {% include 'admin/elements/fundref/fundref.html' with funder_form=funder_form %}
+    {% include 'admin/elements/fundref/fundref.html' %}
 {% endblock js %}

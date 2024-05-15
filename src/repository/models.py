@@ -172,6 +172,14 @@ class Repository(model_utils.AbstractSiteModel):
         null=True,
         blank=True,
     )
+    additional_version_help = model_utils.JanewayBleachField(
+        blank=True,
+        help_text='This text allows repository managers to provide additional '
+                  'information to authors when they are uploading an update '
+                  'to their submission.',
+        default='',
+        verbose_name="Additional version upload help text"
+    )
     submission = model_utils.JanewayBleachField(blank=True, null=True)
     publication = model_utils.JanewayBleachField(blank=True, null=True)
     decline = model_utils.JanewayBleachField(blank=True, null=True)
@@ -633,25 +641,15 @@ class Preprint(models.Model):
             version=self.next_version_number(),
         )
 
-    def update_date_published(self, date, time):
-        self.date_published = dateparser.parse(
-            '{date} {time}'.format(
-                date=date,
-                time=time,
-            )
-        )
+    def update_date_published(self, date_published):
+        self.date_published = date_published
         self.save()
 
-    def accept(self, date, time):
+    def accept(self, date_published):
         self.date_accepted = timezone.now()
         self.date_declined = None
         self.stage = STAGE_PREPRINT_PUBLISHED
-        self.date_published = dateparser.parse(
-            '{date} {time}'.format(
-                date=date,
-                time=time,
-            )
-        )
+        self.date_published = date_published
         self.save()
 
     def decline(self, note):
@@ -809,7 +807,7 @@ class PreprintFile(models.Model):
 
     def download_url(self):
         return reverse(
-            'repository_download_file',
+            'repository_file_download',
             kwargs=self.reverse_kwargs(),
         )
 
