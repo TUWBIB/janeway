@@ -14,6 +14,7 @@ urlpatterns = [
     re_path(r'^(?P<article_id>\d+)/authors/$', views.submit_authors, name='submit_authors'),
     re_path(r'^(?P<article_id>\d+)/authors/(?P<author_id>\d+)/delete/$', views.delete_author, name='delete_author'),
     re_path(r'^(?P<article_id>\d+)/funders/(?P<funder_id>\d+)/delete/$', views.delete_funder, name='delete_funder'),
+    re_path(r'^(?P<article_id>\d+)/citrefs/(?P<citref_id>\d+)/delete/$', views.delete_citref, name='delete_citref'),
     re_path(r'^(?P<article_id>\d+)/files/$', views.submit_files, name='submit_files'),
     re_path(r'^(?P<article_id>\d+)/funding/$', views.submit_funding, name='submit_funding'),
     re_path(r'^submissions/$', views.submit_submissions, name='submission_submissions'),

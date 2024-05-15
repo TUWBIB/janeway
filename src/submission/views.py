@@ -383,6 +383,20 @@ def delete_funder(request, article_id, funder_id):
 
     return redirect(reverse('submit_funding', kwargs={'article_id': article_id}))
 
+@login_required
+@article_edit_user_required
+def delete_citref(request, article_id, citref_id):
+    citref = get_object_or_404(
+        models.CitedReference,
+        pk=citref_id
+    )
+
+    citref.delete()
+
+    if request.GET.get('return'):
+        return redirect(request.GET['return'])
+
+
 
 @login_required
 @article_edit_user_required
