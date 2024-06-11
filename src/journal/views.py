@@ -830,7 +830,11 @@ def submit_files_info(request, article_id, file_id):
     :param file_id: the file ID for which to submit information
     :return: a rendered template to submit file information
     """
-    article_object = get_object_or_404(submission_models.Article, pk=article_id)
+    article_object = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     form = review_forms.ReplacementFileDetails(instance=file_object)
@@ -866,7 +870,11 @@ def file_history(request, article_id, file_id):
     if request.POST:
         return redirect(request.GET['return'])
 
-    article_object = get_object_or_404(submission_models.Article, pk=article_id)
+    article_object = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     template = "journal/file_history.html"
@@ -907,7 +915,11 @@ def file_delete(request, article_id, file_id):
     :param file_id: the file ID for which to view the history
     :return: a redirect to the URL at the GET parameter 'return'
     """
-    article_object = get_object_or_404(submission_models.Article, pk=article_id)
+    article_object = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     file_object = get_object_or_404(core_models.File, pk=file_id)
 
     file_object.delete()
@@ -925,7 +937,11 @@ def article_file_make_galley(request, article_id, file_id):
     :param file_id: the file ID for which to view the history
     :return: a redirect to the URL at the GET parameter 'return'
     """
-    article_object = get_object_or_404(submission_models.Article, pk=article_id)
+    article_object = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     janeway_file = get_object_or_404(core_models.File, pk=file_id)
     blob = janeway_file.get_file(article_object, as_bytes=True)
     content_file = ContentFile(blob)
@@ -994,6 +1010,7 @@ def article_figure(request, article_id, galley_id, file_name):
     figure_article = get_object_or_404(
         submission_models.Article,
         pk=article_id,
+        journal=request.journal,
     )
     galley = get_object_or_404(
         core_models.Galley,
@@ -1258,10 +1275,13 @@ def publish_article_check(request, article_id):
     :param article_id: Artcle object PK
     :return: HttpResponse object
     """
-    article = get_object_or_404(submission_models.Article,
-                                Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION) |
-                                Q(stage=submission_models.STAGE_PUBLISHED),
-                                pk=article_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION) |
+        Q(stage=submission_models.STAGE_PUBLISHED),
+        pk=article_id,
+        journal=request.journal,
+    )
 
     task_type = request.POST.get('task_type')
     id = request.POST.get('id')
@@ -1794,7 +1814,11 @@ def manage_archive_article(request, article_id):
     from submission import forms as submission_forms
     from core import logic as core_logic
 
-    article = get_object_or_404(submission_models.Article, pk=article_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     galleys = production_logic.get_all_galleys(article)
     identifiers = identifier_models.Identifier.objects.filter(article=article)
     galley_form = production_forms.GalleyForm()
@@ -2242,7 +2266,11 @@ def manage_article_log(request, article_id):
     :param article_id: Article object PK
     :return: HttpResponse object
     """
-    article = get_object_or_404(submission_models.Article, pk=article_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     content_type = ContentType.objects.get_for_model(article)
     log_entries = utils_models.LogEntry.objects.filter(content_type=content_type, object_id=article.pk)
 
@@ -2262,7 +2290,11 @@ def manage_article_log(request, article_id):
 
 @editor_user_required
 def resend_logged_email(request, article_id, log_id):
-    article = get_object_or_404(submission_models.Article, pk=article_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     log_entry = get_object_or_404(utils_models.LogEntry, pk=log_id)
     form = forms.ResendEmailForm(log_entry=log_entry)
     close = False
@@ -2299,7 +2331,8 @@ def send_user_email(request, user_id, article_id=None):
     if article_id:
         article = get_object_or_404(
             submission_models.Article,
-            pk=article_id
+            pk=article_id,
+            journal=request.journal,
         )
 
     if request.POST and 'send' in request.POST:
@@ -2336,7 +2369,11 @@ def new_note(request, article_id):
     :param article_id: Article object PK
     :return: HttpResponse object
     """
-    article = get_object_or_404(submission_models.Article, pk=article_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
 
     if request.POST:
 
@@ -2404,9 +2441,16 @@ def download_table(request, identifier_type, identifier, table_name):
 
 
 def download_supp_file(request, article_id, supp_file_id):
-    article = get_object_or_404(submission_models.Article, pk=article_id,
-                                stage=submission_models.STAGE_PUBLISHED)
-    supp_file = get_object_or_404(core_models.SupplementaryFile, pk=supp_file_id)
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+        stage=submission_models.STAGE_PUBLISHED,
+    )
+    supp_file = get_object_or_404(
+        core_models.SupplementaryFile,
+        pk=supp_file_id,
+    )
 
     return files.serve_file(request, supp_file.file, article, public=True)
 
@@ -2426,7 +2470,11 @@ def texture_edit(request, file_id):
 
 @editor_user_required
 def document_management(request, article_id):
-    document_article = get_object_or_404(submission_models.Article, pk=article_id)
+    document_article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
     article_files = core_models.File.objects.filter(article_id=document_article.pk)
     return_url = request.GET.get('return', '/dashboard/')
 
