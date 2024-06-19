@@ -142,6 +142,7 @@ dockerfiles/lando_local.env
 !/src/themes/clean/
 !/src/themes/material/
 !/src/themes/OLH/
+!/src/themes/TUWJFM/
 
 # Static files
 /src/static/*
