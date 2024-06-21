@@ -664,7 +664,8 @@ class Interest(models.Model):
 
 setting_types = (
     ('rich-text', 'Rich Text'),
-    ('text', 'Text'),
+    ('mini-html', 'Mini HTML'),
+    ('text', 'Plain Text'),
     ('char', 'Characters'),
     ('number', 'Number'),
     ('boolean', 'Boolean'),
@@ -756,7 +757,7 @@ class SettingValue(models.Model):
         Setting,
         models.CASCADE,
     )
-    value = JanewayBleachField(null=True, blank=True)
+    value = models.TextField(null=True, blank=True)
 
     class Meta:
         unique_together = (
