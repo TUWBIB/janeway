@@ -3,7 +3,7 @@
 {% load hooks %}
 {% load i18n %}
 
-{% block title %}{{ article.authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
+{% block title %}{{ article.frozen_authors.all.0.last_name | striptags }} | {{ article.title | striptags }} |
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
 
 {% block head %}
@@ -96,47 +96,51 @@
                         {{ article.rights | safe }} </p>
                 {% endif %}
                 {% if article.is_published or proofing %}
-                {% if galleys %}
                     <div class="d-lg-none d-xl-none d-md-none">
                         <p>
-                            <strong>{% trans 'Downloads' %}></strong><br/>
-                            {% for galley in galleys %}
-                                <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
-                                <br/>
-                                {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
-                                    <a target="_blank"
-                                       href="{% url 'article_view_galley' article.id galley.id %}">View
-                                        PDF</a><br/>
+                            <strong>{% trans 'Downloads' %}</strong><br/>
+                            {% if galleys %}
+                                {% for galley in galleys %}
+                                    <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
+                                    <br/>
+                                    {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
+                                        <a target="_blank"
+                                        href="{% url 'article_view_galley' article.id galley.id %}">View
+                                            PDF</a><br/>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if proofing %}
+                                    <p id="note_to_proofreader_1">
+                                        <i class="fa fa-info"></i>
+                                        Note to proofreader: Download links on this page begin to work when the article is published.
+                                    </p>
                                 {% endif %}
-                            {% endfor %}
+                            {% else %}
+                                <p> {% trans 'Downloads are not available for this article.' %}</p>
+                            {% endif %}
                         </p>
-                        {% if proofing %}
-                            <p id="note_to_proofreader_1">
-                                <i class="fa fa-info"></i>
-                                Note to proofreader: Download links on this page begin to work when the article is published.
-                            </p>
-                        {% endif %}
                     </div>
-                {% endif %}
                 {% endif %}
                 {% if article.funders.all %}
                     <strong>{% trans "Funding" %}</strong>
-                    <ul>
-                        {% for funder in article.funders.all %}
-                            <li>
-                                {% if funder.fundref_id %}
-                                    <a href="{% url "funder_articles" funder.fundref_id %}">{{ funder.name }}</a>
-                                {% else %}
-                                    {{ funder.name }}
-                                {% endif %}
-                                {% if funder.funding_id %}
-                                    {% blocktranslate with id=funder.funding_id %}
-                                        (grant {{ id }})
-                                    {% endblocktranslate %}
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for funder in article.funders.all %}
+                        <p>
+                            {% if funder.fundref_id %}
+                                <a href="{% url "funder_articles" funder.fundref_id %}">{{ funder.name }}</a>
+                            {% else %}
+                                {{ funder.name }}
+                            {% endif %}
+                            {% if funder.funding_id %}
+                                {% blocktranslate with id=funder.funding_id %}
+                                    ({{ id }})
+                                {% endblocktranslate %}
+                            {% endif %}
+                            {% if funder.funding_statement %}
+                                <br/>
+                                {{ funder.funding_statement|safe|linebreaksbr }}
+                            {% endif %}
+                        </p>
+                    {% endfor %}
                 {% endif %}
                 {% if article.publisher_notes.all %}
                     <div class="callout primary">
@@ -183,26 +187,42 @@
                 {% endif %}
 
                 {% if article.is_published or proofing %}
-                    <h2>{% trans "Download" %}</h2>
-                    <ul>
-                        {% for galley in galleys %}
-                            {% if not galley.label == 'HTML' or not galley.file.mime_type == 'text/html' %}
-                            <li>
-                                <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
-                                {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">{% trans "View" %} {{ galley.label }}</a>
+                    <h2>{% trans "Share" %}</h2>
+                    {% with article.get_doi_url as doi_url%}
+                        <a class="waves-effect waves-light btn btn-small social-share-btn facebook-bg"
+                            href="https://www.facebook.com/share.php?p[url]={% if doi_url %}{{ doi_url }}{% else %}{{ article.url }}{% endif %}" 
+                            target="_blank" aria-label="{% trans 'Share on Facebook' %}"><i class="fa fa-facebook"></i></a>
+                        <a class="waves-effect waves-light btn btn-small social-share-btn twitter-x" 
+                            href="https://twitter.com/intent/tweet?text={{ article.title }} {% if doi_url %}{{ doi_url }}{% else %}{{ article.url }}{% endif %}"
+                            target="_blank" aria-label="{% trans 'Share on X' %}">&#120143;</a>
+                        <a class="waves-effect waves-light btn btn-small social-share-btn linkedin-bg"
+                            href="https://www.linkedin.com/sharing/share-offsite?url={% if doi_url %}{{ doi_url }}{% else %}{{ article.url }}{% endif %}"
+                            target="_blank" aria-label="{% trans 'Share on LinkedIn' %}"><i class="fa fa-linkedin"></i></a></button>
+                    {% endwith %}
+                    <h2>{% trans "Downloads" %}</h2>
+                    {% if galleys %}
+                        <ul>
+                            {% for galley in galleys %}
+                                {% if not galley.label == 'HTML' or not galley.file.mime_type == 'text/html' %}
+                                <li>
+                                    <a href="{% url 'article_download_galley' article.id galley.id %}">{% trans "Download" %} {{ galley.label }}</a>
+                                    {% if galley.file.mime_type == 'application/pdf' and journal.view_pdf_button %}
+                                        </li>
+                                        <li>
+                                            <a target="_blank" href="{% url 'article_view_galley' article.id galley.id %}">{% trans "View" %} {{ galley.label }}</a>
+                                    {% endif %}
+                                </li>
                                 {% endif %}
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                    {% if proofing %}
-                        <p id="note_to_proofreader_2">
-                            <i class="fa fa-info"></i>
-                            Note to proofreader: Download links on this page begin to work when the article is published.
-                        </p>
+                            {% endfor %}
+                        </ul>
+                        {% if proofing %}
+                            <p id="note_to_proofreader_2">
+                                <i class="fa fa-info"></i>
+                                Note to proofreader: Download links on this page begin to work when the article is published.
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <p> {% trans 'Downloads are not available for this article.' %}</p>
                     {% endif %}
                 {% endif %}
                 {% if article.supplementary_files.all %}
@@ -216,12 +236,20 @@
                 {% endif %}
                 <h2>{% trans "Information" %}</h2>
                 <ul>
+                    {% if journal_settings.article.display_date_submitted and article.date_submitted %}
+                        <li>
+                            {% trans "Submitted on" %} {{ article.date_submitted|date:"Y-m-d" }}
+                        </li>
+                    {% endif %}
+                    {% if journal_settings.article.display_date_accepted and  article.date_accepted %}
+                        <li>
+                            {% trans "Accepted on" %} {{ article.date_accepted|date:"Y-m-d" }}
+                        </li>
+                    {% endif %}
                     {% if article.is_published or proofing %}
                         <li id="article_date_published">
-                            {% trans "Published on" %} {{ article.date_published|date:"d M Y" }}
+                            {% trans "Published on" %} {{ article.date_published|date:"Y-m-d" }}
                         </li>
-                    {% else %}
-                    <li>{% trans "Accepted on" %} {{ article.date_accepted|date:"d M Y" }}</li>
                     {% endif %}
                     {% if article.page_range %}
                     <li>{% trans "Pages" %}: {{ article.page_range }}</li>
@@ -303,21 +331,25 @@
                         <br/>
                     </div>
                     <h2>{% trans 'File Checksums' %}</h2> (MD5)
-                    <ul>
-                        {% for galley in galleys %}
-                            <li>
-                                <small>{{ galley.label }}: {{ galley.file.checksum }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% if galleys %}
+                        <ul>
+                            {% for galley in galleys %}
+                                <li>
+                                    <small>{{ galley.label }}: {{ galley.file.checksum }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p> {% trans 'File Checksums are not available for this article.' %}</p>
+                    {% endif %}
                 {% endif %}
             </div>
              {% if article_content %}
-            <div class="sticky-top">
-            <h2>{% trans "Table of Contents" %}</h2>
-            <ul id="toc" class="table-of-contents"></ul>
+                <div class="sticky-top" id="toc-section">
+                    <h2>{% trans "Table of Contents" %}</h2>
+                    <ul id="toc" class="table-of-contents"></ul>
+                </div>
              {% endif %}
-        </div>
         </div>
     </div>
 

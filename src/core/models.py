@@ -8,6 +8,7 @@ import uuid
 import statistics
 import json
 from datetime import timedelta
+from django.utils.html import format_html
 import pytz
 from hijack.signals import hijack_started, hijack_ended
 import warnings
@@ -25,12 +26,14 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.template.defaultfilters import linebreaksbr
+from django.template.defaultfilters import date
 import swapper
 
 from core import files, validators
@@ -38,7 +41,9 @@ from core.file_system import JanewayFileSystemStorage
 from core.model_utils import (
     AbstractLastModifiedModel,
     AbstractSiteModel,
+    DynamicChoiceField,
     JanewayBleachField,
+    JanewayBleachCharField,
     PGCaseInsensitiveEmailField,
     SearchLookup,
     default_press_id,
@@ -177,12 +182,29 @@ class AccountQuerySet(models.query.QuerySet):
 
 
 class AccountManager(BaseUserManager):
-    def create_user(self, email, password=None, **kwargs):
-        if not email:
-            raise ValueError('Users must have a valid email address.')
+    def create_user(self, username=None, password=None, email=None, **kwargs):
+        """ Creates a user from the given username or email
+        In Janeway, users rely on email addresses to log in. For compatibility
+        with 3rd party libraries, we allow a username argument, however only a
+        email address will be accepted as the username and email.
+        """
+        if not email and username:
+            email = username
+            if "username" in kwargs:
+                del kwargs["username"]
+        try:
+            validate_email(email)
+            email = self.normalize_email(email)
+        except(ValidationError, TypeError, ValueError):
+            raise ValueError(f'{email} not a valid email address.')
 
         account = self.model(
-            email=self.normalize_email(email),
+            # The original case of the email is preserved
+            # in the email field
+            email=email,
+            # The email is lowercased in the username field
+            # so that we can perform case-insensitive checking
+            # and avoid creating duplicate accounts
             username=email.lower(),
         )
 
@@ -192,7 +214,9 @@ class AccountManager(BaseUserManager):
         return account
 
     def create_superuser(self, email, password, **kwargs):
-        account = self.create_user(email, password, **kwargs)
+        kwargs["email"] = email
+        kwargs["password"] = password
+        account = self.create_user(**kwargs)
 
         account.is_staff = True
         account.is_admin = True
@@ -211,23 +235,49 @@ class Account(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=254, unique=True, verbose_name=_('Username'))
 
     name_prefix = models.CharField(max_length=10, blank=True)
-    first_name = models.CharField(max_length=300, null=True, blank=False, verbose_name=_('First name'))
-    middle_name = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Middle name'))
-    last_name = models.CharField(max_length=300, null=True, blank=False, verbose_name=_('Last name'))
+    first_name = JanewayBleachCharField(
+        max_length=300,
+        blank=False,
+        verbose_name=_('First name'),
+    )
+    middle_name = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
+        verbose_name=_('Middle name'),
+    )
+    last_name = JanewayBleachCharField(
+        max_length=300,
+        blank=False,
+        verbose_name=_('Last name'),
+    )
 
     activation_code = models.CharField(max_length=100, null=True, blank=True)
-    salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, null=True, blank=True,
-                                  verbose_name=_('Salutation'))
-    suffix = models.CharField(
+    salutation = JanewayBleachCharField(
+        max_length=10,
+        choices=SALUTATION_CHOICES,
+        blank=True,
+        verbose_name=_('Salutation'),
+    )
+    suffix = JanewayBleachCharField(
         max_length=300,
-        null=True,
         blank=True,
         verbose_name=_('Name suffix'),
     )
-    biography = JanewayBleachField(null=True, blank=True, verbose_name=_('Biography'))
+    biography = JanewayBleachField(
+        blank=True,
+        verbose_name=_('Biography'),
+    )
     orcid = models.CharField(max_length=40, null=True, blank=True, verbose_name=_('ORCiD'))
-    institution = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('Institution'))
-    department = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Department'))
+    institution = JanewayBleachCharField(
+        max_length=1000,
+        blank=True,
+        verbose_name=_('Institution'),
+    )
+    department = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
+        verbose_name=_('Department'),
+    )
     twitter = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Twitter Handle'))
     facebook = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Facebook Handle'))
     linkedin = models.CharField(max_length=300, null=True, blank=True, verbose_name=_('Linkedin Profile'))
@@ -237,7 +287,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
     email_sent = models.DateTimeField(blank=True, null=True)
     date_confirmed = models.DateTimeField(blank=True, null=True)
     confirmation_code = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Confirmation Code"))
-    signature = JanewayBleachField(null=True, blank=True, verbose_name=_("Signature"))
+    signature = JanewayBleachField(
+        blank=True,
+        verbose_name=_("Signature"),
+    )
     interest = models.ManyToManyField('Interest', null=True, blank=True)
     country = models.ForeignKey(
         Country,
@@ -246,7 +299,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name=_('Country'),
         on_delete=models.SET_NULL,
     )
-    preferred_timezone = models.CharField(max_length=300, null=True, blank=True, choices=TIMEZONE_CHOICES, verbose_name=_("Preferred Timezone"))
+    preferred_timezone = DynamicChoiceField(
+            max_length=300, null=True, blank=True,
+            choices=tuple(),
+            dynamic_choices=TIMEZONE_CHOICES,
+            verbose_name=_("Preferred Timezone")
+        )
 
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -273,8 +331,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     objects = AccountManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
 
     class Meta:
         ordering = ('first_name', 'last_name', 'username')
@@ -324,8 +381,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     @property
     def first_names(self):
-        return '{0}{1}{2}'.format(self.first_name, ' ' if self.middle_name is not None else '',
-                                  self.middle_name if self.middle_name is not None else '')
+        return ' '.join([self.first_name, self.middle_name])
 
     def full_name(self):
         name_elements = [
@@ -647,6 +703,7 @@ class AccountRole(models.Model):
 
     class Meta:
         unique_together = ('journal', 'user', 'role')
+        ordering = ('journal', 'role')
 
     def __str__(self):
         return "{0} {1} {2}".format(self.user, self.journal, self.role.name)
@@ -1205,6 +1262,15 @@ class Galley(AbstractLastModifiedModel):
     def __str__(self):
         return "{0} ({1})".format(self.id, self.label)
 
+    def detail(self):
+        return format_html(
+            '{} galley linked to <a href="#file_{}">file {}: {}</a>',
+            self.label,
+            self.file.pk,
+            self.file.pk,
+            self.file.original_filename,
+        )
+
     def render(self, recover=False):
         return files.render_xml(
             self.file, self.article,
@@ -1453,6 +1519,10 @@ class EditorialGroup(models.Model):
         null=True,
     )
     sequence = models.PositiveIntegerField()
+    display_profile_images = models.BooleanField(
+        default=False,
+        help_text="Enable to display profile images for this group.",
+    )
 
     class Meta:
         ordering = ('sequence',)
@@ -1516,7 +1586,7 @@ class Contacts(models.Model):
 
 
 class Contact(models.Model):
-    recipient = models.EmailField(max_length=200, verbose_name=_('Who would you like to contact'))
+    recipient = models.EmailField(max_length=200, verbose_name=_('Who would you like to contact?'))
     sender = models.EmailField(max_length=200, verbose_name=_('Your contact email address'))
     subject = models.CharField(max_length=300, verbose_name=_('Subject'))
     body = JanewayBleachField(verbose_name=_('Your message'))

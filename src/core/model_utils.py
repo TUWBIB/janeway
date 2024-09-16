@@ -13,6 +13,7 @@ from bleach import clean
 
 from django import forms
 from django.apps import apps
+from django.contrib import admin
 from django.contrib.postgres.lookups import SearchLookup as PGSearchLookup
 from django.contrib.postgres.search import (
     SearchVector as DjangoSearchVector,
@@ -104,14 +105,16 @@ class AbstractSiteModel(models.Model):
             obj = cls.objects.get(domain=domain)
         return obj
 
-    def site_url(self, path=None):
+    def site_url(self, path=None, query=''):
         # This is here to avoid circular imports
         from utils import logic
         return logic.build_url(
             netloc=self.domain,
             scheme=self._get_scheme(),
             path=path or "",
+            query=query,
         )
+
     def _get_scheme(self):
         scheme = self.SCHEMES[self.is_secure]
         if settings.DEBUG is True:
@@ -579,6 +582,24 @@ class SearchVector(DjangoSearchVector):
     template = '%(expressions)s'
 
 
+def search_model_admin(request, model, q=None, queryset=None):
+    """
+    A simple search using the admin search functionality,
+    for use in class-based views where our methods for
+    article search do not suit.
+    :param request: A Django request object
+    :param model: Any model that has search_fields specified in its admin
+    :param q: the search term
+    :param queryset: a pre-existing queryset to filter by the search term
+    """
+    if not q:
+        q = request.POST['q'] if request.POST else request.GET['q']
+    if not queryset:
+        queryset = model.objects.all()
+    registered_admin = admin.site._registry[model]
+    return registered_admin.get_search_results(request, queryset, q)
+
+
 class JanewayBleachField(BleachField):
     """ An override of BleachField to avoid casting SafeString from db
     Bleachfield automatically casts the default return type (string) into
@@ -673,6 +694,34 @@ def default_press_id():
         return default_press_obj.pk
 
 
+class DynamicChoiceField(models.CharField):
+    def __init__(self, dynamic_choices=(), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dynamic_choices = dynamic_choices
+
+    def formfield(self, *args, **kwargs):
+        form_element = super().formfield(**kwargs)
+        for choice in self.dynamic_choices:
+            form_element.choices.append(choice)
+        return form_element
+
+    def validate(self, value, model_instance):
+        """
+        Validates value and throws ValidationError.
+        """
+        try:
+            super().validate(value, model_instance)
+        except ValidationError as e:
+            # If the raised exception is for invalid choice we check if the
+            # choice is in dynamic choices.
+            if e.code == 'invalid_choice':
+                potential_values = set(
+                    item[0] for item in self.dynamic_choices
+                )
+                if value not in potential_values:
+                    raise
+
+
 class DateTimePickerInput(forms.DateTimeInput):
     format_key = 'DATETIME_INPUT_FORMATS'
     template_name = 'admin/core/widgets/datetimepicker.html'
@@ -686,3 +735,7 @@ class DateTimePickerModelField(models.DateTimeField):
     def formfield(self, **kwargs):
         kwargs['form_class'] = DateTimePickerFormField
         return super().formfield(**kwargs)
+
+@property
+def NotImplementedField(self):
+    raise NotImplementedError

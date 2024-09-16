@@ -3,7 +3,7 @@
 Janeway is a web-based platform for publishing journals, preprints, conference proceedings, and books. It is developed and maintained by a team of developers at the Open Library of Humanities, part of Birkbeck, University of London.
 
 # Technology
-Janeway is written in Python (3.9+) and utilises the Django framework (3.2).
+Janeway is written in Python (3.10+) and utilises the Django framework (4.2).
 
 
 # Installation instructions
@@ -12,7 +12,7 @@ Developer installation [instructions are available in our documentation site](ht
 A guide for installing on the live environment with [apache and mod_wsgi](https://github.com/BirkbeckCTP/janeway/wiki/Janeway%2C-Apache-and-WSGI) is also available.
 
 ## Running Janeway with docker
-Janeway's development server can be run within a docker container, avoiding the need to install and run its dependencies from your machine. A docker-compose file as well as a Makefile can be found at the root of the project wrapping the most common operations.
+Janeway's development server can be run within a docker container, avoiding the need to install and run its dependencies from your machine. A docker compose file as well as a Makefile can be found at the root of the project wrapping the most common operations.
 Docker is compatible with multiple architectures and Operating systems, if you need help installing docker, have a look at the [docker documentation](https://docs.docker.com/install/).
 
 Simarly to the native installation, Janeway can be installed in a docker environment by running ``make install`` and following the installation steps described [above](https://github.com/BirkbeckCTP/janeway/wiki/Installation). As a result, a database volume will be populated under janeway/db/postgres-data
@@ -61,7 +61,7 @@ In order to more easily associate changes to their respective github issues, ple
 # Contacts
 If you wish to get in touch about Janeway, contact information is provided below.
 
-Andy Byers, Senior Publishing Technologies Developer - a.byers@bbk.ac.uk
+Andy Byers, Director of Publishing Technology - a.byers@bbk.ac.uk
 
 # Major Releases
 Major releases are listed below. Between v1.3 & v1.4 there were a large number of minor releases. You can find more information on the [releases](https://github.com/BirkbeckCTP/janeway/releases) page.
@@ -73,6 +73,7 @@ Major releases are listed below. Between v1.3 & v1.4 there were a large number o
 | v1.2    | 06/11/2017 | Tuvok     |
 | v1.3    | 10/08/2018 | Doctor    |
 | v1.4    | 25/10/2021 | Kes       |
+| v1.5    | 07/05/2023 | Torres    |
 
 # Geolocation
 Janeway includes GeoLite2 data created by MaxMind, available from [https://www.maxmind.com](https://www.maxmind.com)

@@ -12,6 +12,11 @@
     {{ block.super }}
 {% endblock %}
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li>Submit an Article</li>
+{% endblock %}
+
 {% block body %}
     <article>
         <div class="box">
@@ -128,7 +133,7 @@
                 <h2 id="licensetitle">{% trans 'License Information' %}</h2>
             </div>
             <div class="card-section">
-                <p>{{ request.journal.name }} {% trans "allows the following licenses for submission" %}:</p>
+                <p>{% trans "The following licences are allowed:" %}</p>
                 {% include "elements/license_block.html" %}
             </div>
         </div>
@@ -156,6 +161,4 @@
             {allowSpaces: true});
         });
     </script>
-    {% include 'elements/fundref/fundref.html' %}
-
 {% endblock %}

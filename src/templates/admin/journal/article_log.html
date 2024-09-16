@@ -5,6 +5,12 @@
 {% block title-section %}Article {{ article.pk }} Log{% endblock %}
 {% block title-sub %}{{ article.safe_title }}{% endblock %}
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li> Log </li>
+    <li> {{article.safe_title}}</li>
+{% endblock %}
+
 {% block body %}
     <div class="box">
         <div class="title-area">
@@ -17,7 +23,7 @@
                 <thead>
                     <tr>
                         <th>Entry Type</th>
-                        <th>To (if email)</th>
+                        <th>Addressees (if email)</th>
                         <th>Subject (if email)</th>
                         <th>Date</th>
                         <th>Actor</th>
@@ -30,7 +36,13 @@
                     {% for entry in log_entries %}
                         <tr>
                             <td>{{ entry.types }}</td>
-                            <td>{% if entry.is_email %}{% for email in entry.to %}{{ email }}{% if not forloop.last %}; {% endif %}{% endfor %}{% else %}---{% endif %}</td>
+                            <td>
+                                {% if entry.is_email %}
+                                    {% include 'admin/elements/core/addressee_display.html' with entry=entry %}
+                                {% else %}
+                                    ---
+                                {% endif %}
+                            </td>
                             <td>{{ entry.email_subject }}</td>
                             <td>{{ entry.date|date:"Y-m-d H:i:s" }}</td>
                             <td>{% if entry.actor %}{{ entry.actor.full_name }}{% else %}Janeway System{% endif %}</td>

@@ -24,10 +24,9 @@ copyright = '2018, Andy Byers, Mauro Sanchez & Martin Paul Eve'
 author = 'Andy Byers, Mauro Sanchez & Martin Paul Eve'
 
 # The short X.Y version
-version = '1.5.6'
+version = '1.7.0'
 # The full version, including alpha/beta/rc tags
-release = '1.5.6'
-
+release = '1.7.0-RC-1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -61,7 +60,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en-GB'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -183,4 +182,4 @@ epub_exclude_files = ['search.html']
 # -- Extension configuration -------------------------------------------------
 
 def setup(app):
-    app.add_stylesheet('_static/css/custom.css')
+    app.add_css_file('_static/css/custom.css')

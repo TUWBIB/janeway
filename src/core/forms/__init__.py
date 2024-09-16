@@ -1,5 +1,6 @@
 from core.forms.forms import (
     AccessRequestForm,
+    AccountRoleForm,
     AdminUserForm,
     ArticleMetaImageForm,
     CBVFacetForm,
@@ -10,8 +11,11 @@ from core.forms.forms import (
     EditorialGroupForm,
     EmailForm,
     FileUploadForm,
+    FullEmailForm,
+    FullSettingEmailForm,
     GeneratedPluginSettingForm,
     GeneratedSettingForm,
+    GetResetTokenForm,
     JournalArticleForm,
     JournalAttributeForm,
     JournalContactForm,

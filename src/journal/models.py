@@ -15,14 +15,22 @@ import re
 
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import OuterRef, Subquery, Value
+from django.db.models import (
+    OuterRef,
+    Subquery,
+    Value,
+    TextField,
+    F,
+    ExpressionWrapper,
+    DateTimeField
+)
+from django.db.models.functions import Concat, Coalesce
 from django.db.models.signals import post_save, m2m_changed
 from django.utils.safestring import mark_safe
 from django.dispatch import receiver
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils import timezone, translation
-from django.utils.translation import ugettext
 from django.utils.translation import pgettext
 from django.utils.translation import gettext
 from django.utils.functional import cached_property
@@ -38,13 +46,20 @@ from core.model_utils import (
     SVGImageField,
     AbstractLastModifiedModel,
     JanewayBleachField,
+    JanewayBleachCharField,
 )
 from press import models as press_models
 from submission import models as submission_models
-from utils import setting_handler, logic, install
+from utils import (
+    setting_handler,
+    logic,
+    install,
+    db_functions,
+)
 from utils.function_cache import cache, mutable_cached_property
 from utils.logger import get_logger
 from review import models as review_models
+from identifiers import models as identifier_models
 
 logger = get_logger(__name__)
 
@@ -146,6 +161,15 @@ class Journal(AbstractSiteModel):
         help_text=gettext('The tiny round or square image appearing in browser '
                            'tabs before the webpage title'),
     )
+    default_profile_image = SVGImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=gettext('A default image displayed on the profile and '
+                          'editorial team pages when the user has no set '
+                          'profile image.'),
+    )
     # DEPRECATED "description" in favour of "journal_description" setting
     description = JanewayBleachField(null=True, blank=True, verbose_name="Journal Description")
     contact_info = JanewayBleachField(null=True, blank=True, verbose_name="Contact Information")
@@ -237,6 +261,11 @@ class Journal(AbstractSiteModel):
     )
     display_article_page_numbers = models.BooleanField(default=True)
     display_issue_doi = models.BooleanField(default=True)
+    display_issues_grouped_by_decade = models.BooleanField(
+        default=False,
+        help_text='When enabled the issue page will group and display issues '
+                  'by decade.',
+    )
 
     disable_front_end = models.BooleanField(default=False)
 
@@ -347,7 +376,7 @@ class Journal(AbstractSiteModel):
                 pass
         return obj, path
 
-    def site_url(self, path=""):
+    def site_url(self, path="", query=''):
         if self.domain and not settings.URL_CONFIG == 'path':
 
             # Handle domain journal being browsed in path mode
@@ -359,9 +388,10 @@ class Journal(AbstractSiteModel):
                     scheme=self._get_scheme(),
                     port=None,
                     path=path,
+                    query=query,
             )
         else:
-            return self.press.site_path_url(self, path)
+            return self.press.site_path_url(self, path, query=query)
 
     def next_issue_order(self):
         issue_orders = [issue.order for issue in Issue.objects.filter(journal=self)]
@@ -388,6 +418,33 @@ class Journal(AbstractSiteModel):
             journal=self,
             date__lte=timezone.now(),
         )
+
+    def issues_by_decade(self, issues_to_sort=None):
+        issue_decade_dict = {}
+
+        if not issues_to_sort:
+            issues_to_sort = Issue.objects.filter(
+                journal=self,
+                date__lte=timezone.now(),
+                issue_type__code='issue',
+            )
+        for issue in issues_to_sort:
+            issue_year = issue.date_published.year
+            decade_start = issue_year - (issue_year % 10)
+            decade_end = decade_start + 9
+
+            # if the decade is greater than the current year, cap at the
+            # current year.
+            date = timezone.now().date()
+            if decade_end > date.year:
+                decade_end = date.year
+
+            decade_span = f"{decade_start} - {decade_end}"
+            if issue_decade_dict.get(decade_span):
+                issue_decade_dict[decade_span].append(issue)
+            else:
+                issue_decade_dict[decade_span] = [issue]
+        return issue_decade_dict
 
     def editors(self):
         """ Returns all users enrolled as editors for the journal
@@ -554,6 +611,89 @@ class Journal(AbstractSiteModel):
 
             default_review_form.elements.add(main_element)
 
+    def archive_published_articles(self):
+        # Subquery will attempt to grab a DOI for this article.
+        doi_subquery = identifier_models.Identifier.objects.filter(
+            article=OuterRef('pk'),
+            id_type="doi",
+            enabled=True
+        ).annotate(
+            identifier_with_type=Concat(Value('DOI: '), 'identifier',
+                                        output_field=TextField())
+        ).values('identifier_with_type')[:1]
+
+        # Subquery will attempt to grab a Pub ID for this article.
+        pubid_subquery = identifier_models.Identifier.objects.filter(
+            article=OuterRef('pk'),
+            id_type="pubid",
+            enabled=True
+        ).annotate(
+            identifier_with_type=Concat(Value('Pub ID: '), 'identifier',
+                                        output_field=TextField())
+        ).values('identifier_with_type')[:1]
+
+        # Fetch published articles with either DOI, Pub ID or a warning.
+        # Additionally, a subquery is run to get frozen authors without
+        # running additional queries.
+        articles_with_identifiers = submission_models.Article.objects.filter(
+            journal=self,
+            stage=submission_models.STAGE_PUBLISHED
+        ).annotate(
+            preferred_identifier=Coalesce(
+                Subquery(doi_subquery, output_field=TextField()),
+                Subquery(pubid_subquery, output_field=TextField()),
+                Value('No DOI or Pub ID Registered', output_field=TextField())
+            ),
+            frozen_authors=ExpressionWrapper(
+                db_functions.GroupConcat(
+                    Concat(
+                        Coalesce(F('frozenauthor__first_name'), Value('')),
+                        Value(' '),
+                        Coalesce(F('frozenauthor__middle_name'), Value('')),
+                        Value(' '),
+                        Coalesce(F('frozenauthor__last_name'), Value(''))
+                    ),
+                ),
+                output_field=TextField()
+            )
+        ).order_by(
+            '-date_published'
+        )
+
+        return articles_with_identifiers
+
+    def rejected_and_archived_articles(self):
+        date_archived_subquery = submission_models.ArticleStageLog.objects.filter(
+            article=OuterRef('pk'),
+            stage_to='Archived'
+        ).order_by('date_time').values('date_time')[:1]
+
+        return submission_models.Article.objects.filter(
+            journal=self,
+            stage__in=[
+                submission_models.STAGE_REJECTED,
+                submission_models.STAGE_ARCHIVED,
+            ],
+        ).annotate(
+            frozen_authors=ExpressionWrapper(
+                db_functions.GroupConcat(
+                    Concat(
+                        Coalesce(F('frozenauthor__first_name'), Value('')),
+                        Value(' '),
+                        Coalesce(F('frozenauthor__middle_name'), Value('')),
+                        Value(' '),
+                        Coalesce(F('frozenauthor__last_name'), Value(''))
+                    ),
+                ),
+                output_field=TextField()
+            ),
+            date_archived=Subquery(
+                date_archived_subquery,
+                output_field=DateTimeField(),
+            )
+        ).order_by(
+            '-date_declined'
+        )
 
 class PinnedArticle(models.Model):
     journal = models.ForeignKey(
@@ -731,7 +871,7 @@ class Issue(AbstractLastModifiedModel):
 
 
 
-        volume = ugettext("Volume")
+        volume = gettext("Volume")
         volume += " {}"
         volume = volume.format(
             self.volume) if journal.display_issue_volume else ""
@@ -741,14 +881,14 @@ class Issue(AbstractLastModifiedModel):
                 if journal.code=='OES':
                     issuestr = pgettext("fe_oes","Issue")
                 else:
-                    issuestr = ugettext("Issue")
+                    issuestr = gettext("Issue")
                 issuestr += " {}"
                 issuestr = issuestr.format(self.tuw_issue_str)
             elif self.issue is not None:
                 if journal.code=='OES':
                     issuestr = pgettext("fe_oes","Issue")
                 else:
-                    issuestr = ugettext("Issue")
+                    issuestr = gettext("Issue")
                 issuestr += " {}"
                 issuestr = issuestr.format(self.issue)
         issue=issuestr
@@ -807,15 +947,15 @@ class Issue(AbstractLastModifiedModel):
         volume = issue = year = issue_title = article_number = page_numbers = ''
 
         if journal.display_issue_volume and self.volume:
-            volume = ugettext("Volume") + " {}".format(self.volume)
+            volume = gettext("Volume") + " {}".format(self.volume)
         if journal.display_issue_number and self.issue and self.issue != "0":
-            issue = ugettext("Issue") + " {}".format(self.issue)
+            issue = gettext("Issue") + " {}".format(self.issue)
         if journal.display_issue_year and self.date:
             year = "{}".format(self.date.year)
         if journal.display_issue_title:
             issue_title = self.issue_title
         if journal.display_article_number and article and article.article_number:
-            article_number = ugettext("Article") + " {}".format(article.article_number)
+            article_number = gettext("Article") + " {}".format(article.article_number)
         if journal.display_article_page_numbers and article:
             if article.page_range:
                 page_numbers = article.page_range
@@ -1117,8 +1257,8 @@ class IssueType(models.Model):
     )
     code = models.CharField(max_length=255)
 
-    pretty_name = models.CharField(max_length=255)
-    custom_plural = models.CharField(max_length=255, blank=True, null=True)
+    pretty_name = JanewayBleachCharField(max_length=255)
+    custom_plural = JanewayBleachCharField(max_length=255, blank=True)
 
     def __str__(self):
         return (
@@ -1250,7 +1390,7 @@ class FixedPubCheckItems(models.Model):
     verify_doi = models.BooleanField(default=False)
     select_issue = models.BooleanField(default=False)
     set_pub_date = models.BooleanField(default=False)
-    notify_the_author = models.BooleanField(default=False)
+    send_notifications = models.BooleanField(default=False)
     select_render_galley = models.BooleanField(default=False)
     select_article_image = models.BooleanField(default=False)
     select_open_reviews = models.BooleanField(default=False)

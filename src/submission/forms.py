@@ -12,7 +12,11 @@ from submission import models
 from core import models as core_models
 from identifiers import models as ident_models
 from review.logic import render_choices
-from utils.forms import KeywordModelForm, JanewayTranslationModelForm
+from utils.forms import (
+    KeywordModelForm,
+    JanewayTranslationModelForm,
+    HTMLDateInput,
+)
 from utils import setting_handler
 
 from tinymce.widgets import TinyMCE
@@ -175,7 +179,9 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
                         )
                     elif element.kind == 'date':
                         self.fields[element.name] = forms.CharField(
-                            widget=forms.DateInput(attrs={'class': 'datepicker', 'div_class': element.width}),
+                            widget=HTMLDateInput(
+                                attrs={'div_class': element.width},
+                            ),
                             required=element.required)
 
                     elif element.kind == 'select':
@@ -360,7 +366,6 @@ class FileDetails(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FileDetails, self).__init__(*args, **kwargs)
         self.fields['label'].required = True
-        self.fields['label'].inital = 'Manuscript'
 
 
 class EditFrozenAuthor(forms.ModelForm):
@@ -525,11 +530,14 @@ class ProjectedIssueForm(forms.ModelForm):
         fields = ('projected_issue',)
 
 
-class FunderForm(forms.ModelForm):
+class ArticleFundingForm(forms.ModelForm):
 
     class Meta:
-        model = models.Funder
-        fields = ('name', 'fundref_id', 'funding_id')
+        model = models.ArticleFunding
+        fields = ('name', 'fundref_id', 'funding_id', 'funding_statement')
+        widgets = {
+            'funding_statement': TinyMCE(),
+        }
 
     def __init__(self, *args, **kwargs):
         self.article = kwargs.pop('article', None)
@@ -538,8 +546,9 @@ class FunderForm(forms.ModelForm):
     def save(self, commit=True, *args, **kwargs):
         funder = super().save(commit=commit, *args, **kwargs)
         if self.article:
-            self.article.funders.add(funder)
-            self.article.save()
+            funder.article = self.article
+        if commit:
+            funder.save()
         return funder
 
 

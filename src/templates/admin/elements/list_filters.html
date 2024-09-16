@@ -1,0 +1,38 @@
+{% load foundation %}
+
+{% if facet_form.fields %}
+  <aside aria-labelledby="search-and-filter" class="rummage-filters">
+    <div class="box">
+      <div class="title-area">
+        <h2 id="search-and-filter">{% trans 'Search and filter' %}</h2>
+      </div>
+      <form method="GET" id={{ facet_form.id }}>
+        <div class="no-bullet">
+          {% for field in facet_form %}
+            {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
+              <fieldset>
+                <legend>{{ field.label }}</legend>
+                {% if field.widget_type == "checkboxselectmultiple" and not field.0 %}
+                  <p>None to display.</p>
+                {% else %}
+                  {{ field }}
+                {% endif %}
+              </fieldset>
+            {% else %}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+          {% endfor %}
+          <button class="button" type="submit">
+            <span class="fa fa-filter"></span>
+            {% trans 'Apply' %}
+          </button>
+          <a href="{{ request.path }}" class="button warning">
+            <span class="fa fa-times"></span>
+            {% trans 'Clear all' %}
+          </a>
+        </div>
+      </form>
+    </div>
+  </aside>
+{% endif %}

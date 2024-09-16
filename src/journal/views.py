@@ -6,6 +6,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 import json
 import os
 import re
+from importlib import import_module
 from shutil import copyfile
 from uuid import uuid4
 
@@ -61,6 +62,7 @@ from identifiers import models as identifier_models
 from utils import models as utils_models, shared, setting_handler
 from utils.logger import get_logger
 from events import logic as event_logic
+from repository import models as repo_models
 from production import logic as prod_logic
 
 
@@ -151,18 +153,18 @@ def funder_articles(request, funder_id):
     if redirect:
         return redirect
 
-    pinned_articles = [pin.article for pin in models.PinnedArticle.objects.filter(
-        journal=request.journal)]
-    pinned_article_pks = [article.pk for article in pinned_articles]
+    article_funding_objects = submission_models.ArticleFunding.objects.filter(
+        fundref_id=funder_id,
+        article__journal=request.journal,
+        article__date_published__lte=timezone.now(),
+        article__stage=submission_models.STAGE_PUBLISHED,
+        article__section__pk__in=filters,
+    )
 
-    article_objects = submission_models.Article.objects.filter(
-        journal=request.journal,
-        funders__fundref_id=funder_id,
-        date_published__lte=timezone.now(),
-        section__pk__in=filters,
-    ).prefetch_related(
-        'frozenauthor_set').order_by(sort).exclude(
-        pk__in=pinned_article_pks)
+    article_objects = []
+    for article_funding_object in article_funding_objects:
+        if article_funding_object.article not in article_objects:
+            article_objects.append(article_funding_object.article)
 
     paginator = Paginator(article_objects, show)
 
@@ -175,7 +177,6 @@ def funder_articles(request, funder_id):
 
     template = 'journal/articles.html'
     context = {
-        'pinned_articles': pinned_articles,
         'articles': articles,
         'sections': sections,
         'filters': filters,
@@ -274,6 +275,10 @@ def issues(request):
         'issues': issue_objects,
         'issue_type': issue_type,
     }
+    if request.journal.display_issues_grouped_by_decade:
+        context['issues_by_decade'] = request.journal.issues_by_decade(
+            issues_to_sort=issue_objects,
+        )
     return render(request, template, context)
 
 
@@ -1073,11 +1078,19 @@ def publish_article(request, article_id):
     issues = request.journal.issues
     new_issue_form = issue_forms.NewIssue(journal=article.journal)
     pub_date_form = submission_forms.PubDateForm(instance=article)
-    notify_author_email_form = core_forms.SimpleTinyMCEForm(
-        'email_to_author',
-        initial = {
-            'email_to_author': logic.get_notify_author_text(request, article)
-        }
+    notification_form_kwargs = {
+        'email_context': {
+            'article': article,
+        },
+        'request': request,
+    }
+    notification_initial = logic.get_initial_for_prepub_notifications(
+        request,
+        article,
+    )
+    notification_formset = forms.PrepubNotificationFormSet(
+        form_kwargs=notification_form_kwargs,
+        initial=notification_initial,
     )
     modal = request.GET.get('m', None)
 
@@ -1155,14 +1168,24 @@ def publish_article(request, article_id):
                     )
                 )
 
-        if 'author' in request.POST:
-            logic.notify_author(request, article)
-            return redirect(
-                reverse(
-                    'publish_article',
-                    kwargs={'article_id': article.pk},
-                )
+        if 'notifications' in request.POST:
+            notification_formset = forms.PrepubNotificationFormSet(
+                request.POST,
+                form_kwargs=notification_form_kwargs,
+                initial=notification_initial,
             )
+            if notification_formset.is_valid():
+                logic.handle_prepub_notifications(
+                    request,
+                    article,
+                    notification_formset,
+                )
+            else:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Something went wrong. Please try again.',
+                )
 
         if 'galley' in request.POST:
             logic.set_render_galley(request, article)
@@ -1260,7 +1283,7 @@ def publish_article(request, article_id):
         'new_issue_form': new_issue_form,
         'modal': modal,
         'pub_date_form': pub_date_form,
-        'notify_author_email_form': notify_author_email_form,
+        'notification_formset': notification_formset,
     }
 
     return render(request, template, context)
@@ -1770,35 +1793,38 @@ def issue_article_order(request, issue_id=None):
 
 
 @editor_user_required
-def manage_archive(request):
+def published_article_archive(request):
     """
     Allows the editor to view information about an article that has been published already.
     :param request: request object
     :return: contextualised django template
     """
-    published_articles = submission_models.Article.objects.filter(
-        journal=request.journal,
-        stage=submission_models.STAGE_PUBLISHED
-    ).order_by(
-        '-date_published'
-    )
-    rejected_articles = submission_models.Article.objects.filter(
-        journal=request.journal,
-        stage__in=[
-            submission_models.STAGE_REJECTED,
-            submission_models.STAGE_ARCHIVED,
-        ],
-    ).order_by(
-        '-date_declined'
-    )
-
-    template = 'journal/manage/archive.html'
+    template = 'journal/manage/published_article_archive.html'
     context = {
-        'published_articles': published_articles,
-        'rejected_articles': rejected_articles,
+        'published_articles': request.journal.archive_published_articles(),
     }
 
-    return render(request, template, context)
+    return render(
+        request,
+        template,
+        context,
+    )
+
+
+@editor_user_required
+def rejected_archived_article_archive(request):
+    """
+    Allows an editor to view rejected and archived articles.
+    """
+    template = 'journal/manage/rejected_archived_article_archive.html'
+    context = {
+        'articles': request.journal.rejected_and_archived_articles(),
+    }
+    return render(
+        request,
+        template,
+        context,
+    )
 
 
 @editor_user_required
@@ -2073,38 +2099,33 @@ def author_list(request):
     return render(request, template, context)
 
 
+@has_journal
 def sitemap(request, issue_id=None):
     """
     Renders an XML sitemap based on articles and pages available to the journal.
     :param request: HttpRequest object
+    :param issue_id: Int, primary key of an Issue object
     :return: HttpResponse object
     """
-    articles = submission_models.Article.objects.filter(date_published__lte=timezone.now(), journal=request.journal)
-    cms_pages = cms_models.Page.objects.filter(object_id=request.site_type.id, content_type=request.model_content_type)
-    try:
-        path_parts = None
-        if issue_id:
-            issue = get_object_or_404(
-                models.Issue,
-                pk=issue_id,
-                journal=request.journal,
-            )
-            path_parts = [
-                request.journal.code,
-                '{}_sitemap.xml'.format(issue.pk),
-            ]
-        else:
-            path_parts = [
-                request.journal.code,
-                'sitemap.xml',
-            ]
+    if issue_id:
+        issue = models.Issue.objects.get(
+            pk=issue_id,
+            journal=request.journal,
+        )
+        path_parts = [
+            request.journal.code,
+            '{}_sitemap.xml'.format(issue.pk),
+        ]
+    else:
+        path_parts = [
+            request.journal.code,
+            'sitemap.xml',
+        ]
+    return core_views.sitemap(
+        request,
+        path_parts,
+    )
 
-        if path_parts:
-            return files.serve_sitemap_file(path_parts)
-    except FileNotFoundError:
-        logger.warning('Sitemap for {} not found.'.format(request.journal.name))
-
-    raise Http404()
 
 @decorators.frontend_enabled
 def search(request):
@@ -2340,13 +2361,19 @@ def send_user_email(request, user_id, article_id=None):
             request.POST,
             request.FILES,
         )
-
         if form.is_valid():
+            log_dict = {
+                'level': 'Info',
+                'action_text': f'{request.user} sent an email to {user.full_name}',
+                'types': 'Email',
+                'target': article if article else user,
+            }
             core_email.send_email(
                 user,
                 form.as_dataclass(),
                 request,
                 article=article,
+                log_dict=log_dict,
             )
             close = True
 
@@ -2480,18 +2507,23 @@ def document_management(request, article_id):
 
     if request.POST and request.FILES:
 
-        label = request.POST.get('label') if request.POST.get('label') else 'File'
+        label = request.POST.get('label') if request.POST.get('label') else '[Unlabeled]'
 
         if 'manu' in request.POST:
             from core import files as core_files
             file = request.FILES.get('manu-file')
-            new_file = core_files.save_file_to_article(file, document_article,
-                                                       request.user, label=label, is_galley=False)
+            new_file = core_files.save_file_to_article(
+                file,
+                document_article,
+                request.user,
+                label=label,
+                is_galley=False,
+            )
             document_article.manuscript_files.add(new_file)
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Production file uploaded.'),
+                _('Manuscript file uploaded.'),
             )
 
         if 'fig' in request.POST:
@@ -2508,10 +2540,11 @@ def document_management(request, article_id):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Production file uploaded.'),
+                _('Data/figure file uploaded.'),
             )
 
         if 'prod' in request.POST:
+            # Deprecated. Use manuscript file instead.
             from production import logic as prod_logic
             file = request.FILES.get('prod-file')
             prod_logic.save_prod_file(document_article, request, file, label)
@@ -2521,14 +2554,76 @@ def document_management(request, article_id):
                 _('Production file uploaded.'),
             )
 
-        if 'proof' in request.POST:
+        if 'galley' in request.POST:
             from production import logic as prod_logic
-            file = request.FILES.get('proof-file')
+            file = request.FILES.get('galley-file')
             prod_logic.save_galley(document_article, request, file, True, label)
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Proofing file uploaded.'),
+                _('Galley file uploaded.'),
+            )
+
+        if 'proofing' in request.POST:
+            from core import files as core_files
+            file = request.FILES.get('proofing-file')
+            new_file = core_files.save_file_to_article(
+                file,
+                document_article,
+                request.user,
+                label=label,
+            )
+            try:
+                typesetting_models = import_module('plugins.typesetting.models')
+                rounds = typesetting_models.TypesettingRound.objects.filter(
+                    article=document_article,
+                )
+                if rounds:
+                    current_round = rounds.first()
+                else:
+                    current_round = typesetting_models.TypesettingRound.objects.create(
+                        article=document_article,
+                    )
+                request.user.add_account_role('proofreader', request.journal)
+                proofing = typesetting_models.GalleyProofing.objects.create(
+                    round=current_round,
+                    manager=request.user,
+                    proofreader=request.user,
+                    due=timezone.now(),
+                    accepted=timezone.now(),
+                    completed=timezone.now(),
+                )
+                proofing.annotated_files.add(new_file)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    _('Proofing file uploaded.'),
+                )
+            except ModuleNotFoundError:
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    _('Saved file.'),
+                )
+
+        if 'supp' in request.POST:
+            from production import logic as prod_logic
+            file = request.FILES.get('supp-file')
+            prod_logic.save_supp_file(document_article, request, file, label)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Supplementary file uploaded.'),
+            )
+
+        if 'source' in request.POST:
+            from production import logic as prod_logic
+            file = request.FILES.get('source-file')
+            prod_logic.save_source_file(document_article, request, file, label)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Typesetting source file uploaded.'),
             )
 
         return redirect(
@@ -2723,7 +2818,7 @@ def serve_article_pdf(request, identifier_type, identifier):
         identifier,
     )
 
-    if not article_object and not article_object.is_published:
+    if not article_object or not article_object.is_published:
         raise Http404
 
     pdf = article_object.pdfs.first()
@@ -2798,9 +2893,33 @@ def manage_languages(request):
     )
 
 
+class FacetedArticlesListView(core_views.GenericFacetedListView):
+    """
+    This is a base class for article list views.
+    It does not have access controls applied because some public views use it.
+    For staff views, be sure to filter to published articles in get_queryset.
+    Do not use this view directly.
+    This view can also be subclassed and modified for use with other models.
+    """
+    model = submission_models.Article
+    template_name = 'core/manager/article_list.html'
+
+    def get_queryset(self, params_querydict=None):
+        self.queryset = super().get_queryset(params_querydict=params_querydict)
+        return self.queryset.exclude(
+            stage=submission_models.STAGE_UNSUBMITTED
+        )
+
+    def get_facet_queryset(self, **kwargs):
+        queryset = super().get_facet_queryset(**kwargs)
+        return queryset.exclude(
+            stage=submission_models.STAGE_UNSUBMITTED
+        )
+
+
 @method_decorator(has_journal, name='dispatch')
 @method_decorator(decorators.frontend_enabled, name='dispatch')
-class PublishedArticlesListView(core_views.FilteredArticlesListView):
+class PublishedArticlesListView(FacetedArticlesListView):
 
     """
     A list of published articles that can be searched,
@@ -2867,6 +2986,11 @@ class PublishedArticlesListView(core_views.FilteredArticlesListView):
         context = super().get_context_data(**kwargs)
         context['search_form'] = forms.SearchForm()
         return context
+
+
+@method_decorator(editor_user_required, name='dispatch')
+class JournalUsers(core_views.BaseUserList):
+    pass
 
 
 ## added TUW

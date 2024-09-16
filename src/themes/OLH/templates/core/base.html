@@ -16,7 +16,7 @@
     {% block head %}{% endblock head %}
     <link rel="sitemap" type="application/xml" title="Sitemap" href="{% url 'website_sitemap' %}">
     <link href="{% static "OLH/css/app.css" %}" rel="stylesheet">
-    <link href="{% static "common/css/common.css" %}" rel="stylesheet">
+    <link href="{% static "common/css/index.css" %}" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 
     {% if request.journal %}
@@ -51,6 +51,7 @@
 
 </head>
 <body>
+{% include "common/elements/skip_to_main_content.html" %}
 <div class="wrapper">
     <header class="main-header" role="banner">
         <div class="main top-bar">
@@ -171,7 +172,7 @@
         {% endblock navbar %}
     </header>
 
-    <main>
+    <main id="main-content">
         {% block body %}{% endblock body %}
     </main>
 </div>
@@ -218,18 +219,18 @@
         "hideMethod": "fadeOut"
     }
     {% for message in messages %}
-        {% ifequal message.tags "warning" %}
+        {% if message.tags == "warning" %}
             toastr.warning("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "info" %}
+        {% endif %}
+        {% if message.tags == "info" %}
             toastr.info("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "danger" %}
+        {% endif %}
+        {% if message.tags == "danger" %}
             toastr.error("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "success" %}
+        {% endif %}
+        {% if message.tags == "success" %}
             toastr.success("{{ message|linebreaksbr }}")
-        {% endifequal%}
+        {% endif %}
     {% endfor %}
 
 </script>

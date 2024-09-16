@@ -6,6 +6,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 import operator
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+from dateutil import tz
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -24,11 +25,11 @@ from repository import forms, logic as repository_logic, models
 from core import (
     email as core_email,
     files,
-    forms as core_forms,
     models as core_models,
+    forms as core_forms,
+    views as core_views,
 )
 from journal import models as journal_models
-from submission import models as submission_models
 
 
 from utils import (
@@ -76,34 +77,32 @@ def repository_home(request):
     return render(request, template, context)
 
 
-def repository_sitemap(request, subject_id=None):
+def sitemap(request, subject_id=None):
     """
     :param request: HttpRequest object
+    :param subject_id: Int, primary key of a Subject object
     :return: HttpResponse
     """
-    try:
-        if subject_id:
-            subject = get_object_or_404(
-                models.Subject,
-                pk=subject_id,
-                repository=request.repository,
-            )
-            path_parts = [
-                request.repository.code,
-                '{}_sitemap.xml'.format(subject.pk),
-            ]
-        else:
-            path_parts = [
-                request.repository.code,
-                'sitemap.xml',
-            ]
+    if subject_id:
+        subject = get_object_or_404(
+            models.Subject,
+            pk=subject_id,
+            repository=request.repository,
+        )
+        path_parts = [
+            request.repository.code,
+            '{}_sitemap.xml'.format(subject.pk),
+        ]
+    else:
+        path_parts = [
+            request.repository.code,
+            'sitemap.xml',
+        ]
 
-        if path_parts:
-            return files.serve_sitemap_file(path_parts)
-    except FileNotFoundError:
-        logger.warning('Sitemap for {} not found.'.format(request.repository.name))
-
-    raise Http404()
+    return core_views.sitemap(
+        request,
+        path_parts,
+    )
 
 
 @login_required
@@ -361,7 +360,10 @@ def repository_search(request, search_term=None):
     )
 
     if search_term:
-        split_search_term = search_term.split(' ')
+        search_term = search_term.strip()
+        split_search_term = [
+            term.strip() for term in search_term.split(' ') if term
+        ]
 
         # Initial filter on Title, Abstract and Keywords.
         preprint_search = preprints.filter(
@@ -743,21 +745,6 @@ def repository_files(request, preprint_id):
 
         if 'complete' in request.POST:
             if preprint.submission_file:
-                preprint.submit_preprint()
-                kwargs = {'request': request, 'preprint': preprint}
-                event_logic.Events.raise_event(
-                    event_logic.Events.ON_PREPRINT_SUBMISSION,
-                    **kwargs,
-                )
-
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    '{object} {title} submitted.'.format(
-                        object=request.repository.object_name,
-                        title=preprint.title
-                    )
-                )
                 return redirect(
                     reverse(
                         'repository_review',
@@ -794,12 +781,24 @@ def repository_review(request, preprint_id):
         models.Preprint,
         pk=preprint_id,
         owner=request.user,
-        date_submitted__isnull=False,
         repository=request.repository,
     )
 
     if request.POST and 'complete' in request.POST:
-
+        preprint.submit_preprint()
+        kwargs = {'request': request, 'preprint': preprint}
+        event_logic.Events.raise_event(
+            event_logic.Events.ON_PREPRINT_SUBMISSION,
+            **kwargs,
+        )
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            '{object} {title} submitted.'.format(
+                object=request.repository.object_name,
+                title=preprint.title
+            )
+        )
         return redirect(reverse('repository_dashboard'))
 
     template = 'admin/repository/submit/review.html'
@@ -884,30 +883,46 @@ def repository_manager_article(request, preprint_id):
                     messages.WARNING,
                     'You must assign at least one galley file.',
                 )
+                redirect_request = False
             else:
-                date_kwargs = {
-                    'date': request.POST.get('date', timezone.now().date()),
-                    'time': request.POST.get('time', timezone.now().time()),
-                }
-                if preprint.date_published:
-                    preprint.update_date_published(**date_kwargs)
-                else:
-                    preprint.accept(**date_kwargs)
-                    event_logic.Events.raise_event(
-                        event_logic.Events.ON_PREPRINT_PUBLICATION,
-                        **{
-                            'request': request,
-                            'preprint': preprint,
-                        },
-                    )
-                    return redirect(
-                        reverse(
-                            'repository_notification',
-                            kwargs={'preprint_id': preprint.pk},
+                try:
+                    d = datetime.fromisoformat(request.POST.get('datetime', timezone.now().strftime("%Y-%m-%d %H:%M")))
+                    t = tz.gettz(request.POST.get('timezone', str(timezone.get_current_timezone())))
+
+                    date_published = datetime(d.year, d.month, d.day, d.hour, d.minute, tzinfo=t)
+                    date_kwargs = {
+                        'date_published': date_published
+                    }
+                    if preprint.date_published:
+                        preprint.update_date_published(**date_kwargs)
+                    else:
+                        preprint.accept(**date_kwargs)
+                        event_logic.Events.raise_event(
+                            event_logic.Events.ON_PREPRINT_PUBLICATION,
+                            **{
+                                'request': request,
+                                'preprint': preprint,
+                            },
                         )
+                        return redirect(
+                            reverse(
+                                'repository_notification',
+                                kwargs={'preprint_id': preprint.pk},
+                            )
+                        )
+                    redirect_request = True
+                except ValueError:
+                    # This is unlikely to happen because the form widget
+                    # does not accept invalid dates. If we somehow get a bad
+                    # date just send the user back to the accept_preprint modal
+                    redirect_request = False
+                    modal = "accept_preprint"
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'Invalid publication date selected',
                     )
 
-            redirect_request = True
 
         if 'decline' in request.POST:
             note = request.POST.get('decline_note')

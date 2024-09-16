@@ -61,6 +61,7 @@ src/core/settings.py
 *.sqlite*
 *.db
 *tar.gz
+/db/postgres-data
 /src/files/articles
 /src/files/journals
 /src/files/journal
@@ -84,6 +85,7 @@ src/media/profile_images/*
 
 # PyCharm
 .idea
+*.iml
 
 # vim
 *.swp
@@ -150,6 +152,7 @@ dockerfiles/lando_local.env
 !/src/static/admin/
 /src/static/admin/hypothesis/**
 
+jenkins/test-results
 
 # TUW stuff
 src/vl2janeway

@@ -14,9 +14,8 @@
     {% endif %}{% endblock title %}</title>
 
     {% block head %}{% endblock head %}
-    <link href="{% static "admin/css/app.css" %}" rel="stylesheet">
-    <link href="{% static "admin/css/admin.css" %}" rel="stylesheet">
-    <link href="{% static "common/css/font-awesome.css" %}" rel="stylesheet">
+    <link href="{% static "admin/css/index.css" %}" rel="stylesheet">
+    <link href="{% static "common/css/index.css" %}" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
     <script src="https://use.typekit.net/lff8ikn.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
@@ -103,18 +102,18 @@
         "hideMethod": "fadeOut"
     }
     {% for message in messages %}
-        {% ifequal message.tags "warning" %}
+        {% if message.tags == "warning" %}
             toastr.warning("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "info" %}
+        {% endif %}
+        {% if message.tags == "info" %}
             toastr.info("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "danger" %}
+        {% endif %}
+        {% if message.tags == "danger" %}
             toastr.error("{{ message|linebreaksbr }}");
-        {% endifequal%}
-        {% ifequal message.tags "success" %}
+        {% endif %}
+        {% if message.tags == "success" %}
             toastr.success("{{ message|linebreaksbr }}")
-        {% endifequal%}
+        {% endif %}
     {% endfor %}
 </script>
 

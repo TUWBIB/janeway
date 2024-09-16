@@ -54,7 +54,7 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 INSTALLED_APPS = [
     'modeltranslation',
-    'django.contrib.admin',
+    'apps.JanewayAdminConfig',
     'django.contrib.auth',
 
     'django.contrib.sessions',
@@ -93,7 +93,6 @@ INSTALLED_APPS = [
 
     # 3rd Party
     'mozilla_django_oidc',
-    'django_countries',
     'django_summernote',
     'tinymce',
     'bootstrap4',
@@ -539,7 +538,7 @@ HTTP_TIMEOUT_SECONDS = 5
 
 # New XML galleys will be associated with this stylesheet by default when they
 # are first uploaded
-DEFAULT_XSL_FILE_LABEL = 'Janeway default (1.5.1)'
+DEFAULT_XSL_FILE_LABEL = 'Janeway default (1.6.0)'
 
 # Skip migrations by default on sqlite for faster execution
 if (

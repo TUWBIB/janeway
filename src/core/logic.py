@@ -336,6 +336,13 @@ def get_settings_to_edit(display_group, journal, user):
                     'general',
                     'data_figure_file_submission_instructions', journal
                 ),
+            },
+            {
+                'name': 'hide_editors_from_authors',
+                'object': setting_handler.get_setting(
+                    'general',
+                    'hide_editors_from_authors', journal
+                ),
             }
         ]
         setting_group = 'general'
@@ -399,10 +406,6 @@ def get_settings_to_edit(display_group, journal, user):
             {
                 'name': 'enable_suggested_reviewers',
                 'object': setting_handler.get_setting('general', 'enable_suggested_reviewers', journal),
-            },
-            {
-                'name': 'display_past_reviewers',
-                'object': setting_handler.get_setting('general', 'display_past_reviewers', journal),
             },
             {
                 'name': 'enable_peer_review_data_on_review_page',
@@ -470,6 +473,7 @@ def get_settings_to_edit(display_group, journal, user):
             'switch_language', 'enable_language_text', 'google_analytics_code',
             'use_ga_four', 'display_login_page_notice', 'login_page_notice', 
             'display_register_page_notice', 'register_page_notice',
+            'support_email', 'support_contact_message_for_staff',
             'from_address', 'replyto_address',
         ]
 
@@ -504,15 +508,33 @@ def get_settings_to_edit(display_group, journal, user):
             'display_altmetric_badge',
             'altmetric_badge_type',
             'hide_author_email_links',
+            'display_date_submitted',
+            'display_date_accepted',
         ]
         group_of_settings = process_setting_list(article_settings, 'article', journal)
         setting_group = 'article'
     elif display_group == 'styling':
         group_of_settings = [
             {
-                'name': 'enable_editorial_images',
+                'name': 'display_journal_title',
                 'object': setting_handler.get_setting('styling',
-                                                      'enable_editorial_images',
+                                                      'display_journal_title',
+                                                      journal),
+            },
+        ]
+        setting_group = 'styling'
+    elif display_group == 'editorial':
+        group_of_settings = [
+            {
+                'name': 'editorial_group_page_name',
+                'object': setting_handler.get_setting('styling',
+                                                      'editorial_group_page_name',
+                                                      journal),
+            },
+            {
+                'name': 'hide_editorial_group_names',
+                'object': setting_handler.get_setting('styling',
+                                                      'hide_editorial_group_names',
                                                       journal),
             },
             {
@@ -522,13 +544,14 @@ def get_settings_to_edit(display_group, journal, user):
                                                       journal),
             },
             {
-                'name': 'display_journal_title',
+                'name': 'display_countries_editorial_team',
                 'object': setting_handler.get_setting('styling',
-                                                      'display_journal_title',
+                                                      'display_countries_editorial_team',
                                                       journal),
             }
         ]
         setting_group = 'styling'
+
     elif display_group == 'news':
         group_of_settings = [
             {

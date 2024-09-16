@@ -351,7 +351,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "Dear {{ review_assignment.editor.full_name }}, <br><br>This is a notification that the reviewer status on \"{{ article.safe_title }}\" in {{ article.journal.name }} has been updated.  You can view more information on the journal site: {{ review_in_review_url }}  <br><br>Regards,</br></br></br></br>"
+            "default": "<p>Dear {{ review_assignment.editor.full_name }},</p><p>{{ review_assignment.reviewer.full_name }} has completed their review of \"{{ review_assignment.article.title }}\"{% if review_assignment.decision %} with this recommendation: {{ review_assignment.get_decision_display }}{% endif %}.</p><p>You can view more information on the journal site: {% journal_url 'review_view_review' review_assignment.article.pk review_assignment.pk %}</p><p>Regards,</p>"
         },
         "editable_by": [
             "editor",
@@ -1377,7 +1377,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "<p>Dear {{ article.correspondence_author.full_name }}<br><br>We are pleased to say that your article, \"{{ article.safe_title }}\", is set for publication on {{ article.date_published|date:'Y-m-d' }} at {{ article.date_published|date:'H:i' }}.</p><p>You may want to consider one or more of the following in order to promote your research:</p><ul><li>Email a link to your paper to colleagues</li><li>Write a blog post about your paper</li><li>Upload it to your institutional repository or a subject repository.</li><li>Add to Wikipedia <a href=\"https://en.wikipedia.org/wiki/Wikipedia:Research_help/Scholars_and_experts\">where appropriate</a></li></ul><p>Regards,<br></p><p>{{ request.user.signature|safe }}</p>"
+            "default": "<p>Dear {{ article.correspondence_author.full_name }}<br><br>We are pleased to say that your article, \"{{ article.safe_title }}\", is set for publication on {{ article.date_published|date:'Y-m-d' }} at {{ article.date_published|date:'H:i' }} {{ article.date_published.tzinfo.zone }}.</p><p>You may want to consider one or more of the following in order to promote your research:</p><ul><li>Email a link to your paper to colleagues</li><li>Write a blog post about your paper</li><li>Upload it to your institutional repository or a subject repository.</li><li>Add to Wikipedia <a href=\"https://en.wikipedia.org/wiki/Wikipedia:Research_help/Scholars_and_experts\">where appropriate</a></li></ul><p>Regards,<br></p><p>{{ request.user.signature|safe }}</p>"
         },
         "editable_by": [
             "editor",
@@ -1511,25 +1511,6 @@
         },
         "value": {
             "default": "This server has been set to Maintenance Mode. It will be back shortly."
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
-            "name": "styling"
-        },
-        "setting": {
-            "description": "If checked, Editorial Team images will display.",
-            "is_translatable": false,
-            "name": "enable_editorial_images",
-            "pretty_name": "Enable Editorial Team Image Display",
-            "type": "boolean"
-        },
-        "value": {
-            "default": null
         },
         "editable_by": [
             "editor",
@@ -1788,7 +1769,7 @@
             "name": "email"
         },
         "setting": {
-            "description": "Email sent to the Section Editor when article is published.",
+            "description": "NOTE: This setting is deprecated--please use Notify Section Editors of Publication instead. Email sent to the Section Editor when article is published.",
             "is_translatable": true,
             "name": "section_editor_pub_notification",
             "pretty_name": "Section Editor Publication Notification",
@@ -1814,7 +1795,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "<p>Dear {{reviewer.full_name}}</p><p>An article that you served as peer reviewer for, \"{{ article.safe_title }}\", has been set for publication.<br><br>The article will be published on {{ article.date_published }}.<br><br>Regards,"
+            "default": "<p>Dear reviewers,</p><p>An article that you served as peer reviewer for, \"{{ article.safe_title }}\", has been set for publication.<br><br>The article will be published on {{ article.date_published }}.<br><br>Regards,"
         },
         "editable_by": [
             "editor",
@@ -2137,26 +2118,7 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "<p>Dear {{ notification.user.full_name }},<br><br>This email is to notify you that {{ article.correspondence_author.full_name }} has submitted article \"{{ article.safe_title }}\" to  {{ article.journal.name }}.</br></br></p><p>You can review the metadata in the journal site: {{ review_unassigned_url }} </p><p>Regards,</p>"
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
-            "name": "email"
-        },
-        "setting": {
-            "description": "Send to a user specified in notification manager.",
-            "is_translatable": true,
-            "name": "notification_acceptance",
-            "pretty_name": "Acceptance Notification",
-            "type": "rich-text"
-        },
-        "value": {
-            "default": "<p>Dear {{ notification.user.full_name }},<br><br>This email is to notify you that article \"{{ article.safe_title }}\" with corresponding author&nbsp;{{ article.correspondence_author.full_name }} in {{ article.journal.name }} has been accepted for publication.</p>"
+            "default": "<p>Dear {{ notification.user.full_name }},<br/><br/>This email is to notify you that {{ article.correspondence_author.full_name }} has submitted article \"{{ article.safe_title }}\" to  {{ article.journal.name }}.</p><p>You can review the metadata in the journal site: {{ review_unassigned_url }} </p><p>Regards,</p>"
         },
         "editable_by": [
             "editor",
@@ -2513,7 +2475,7 @@
             "type": "char",
             "pretty_name": "Article Publication",
             "is_translatable": true,
-            "description": "Subject for Notify the proofing manager that corrections are complete.",
+            "description": "Subject for notifying the author that the article is published.",
             "name": "subject_author_publication"
         },
         "group": {
@@ -2762,25 +2724,6 @@
             "is_translatable": true,
             "description": "Subject for Email sent when user registers.",
             "name": "subject_new_user_registration"
-        },
-        "group": {
-            "name": "email_subject"
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "value": {
-            "default": null
-        },
-        "setting": {
-            "type": "char",
-            "pretty_name": "Acceptance Notification",
-            "is_translatable": true,
-            "description": "Subject for Send to a user specified in notification manager.",
-            "name": "subject_notification_acceptance"
         },
         "group": {
             "name": "email_subject"
@@ -4030,25 +3973,6 @@
             "name": "general"
         },
         "setting": {
-            "description": "When this setting is enabled the review assignment page will show a table of reviewers who have completed a review in past review rounds.",
-            "is_translatable": false,
-            "name": "display_past_reviewers",
-            "pretty_name": "Display List of Reviewers from Past Review Rounds",
-            "type": "boolean"
-        },
-        "value": {
-            "default": ""
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
-            "name": "general"
-        },
-        "setting": {
             "description": "If enabled, authors will see the requested, due, and complete date for their article's review assignments on review pages.",
             "is_translatable": false,
             "name": "enable_peer_review_data_on_review_page",
@@ -5051,5 +4975,154 @@
         "editable_by": [
             "journal-manager"
         ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Removes the editor section from the author's article status page. This does not stop editors from identifying themselves when, for example, rejecting an article if using an account with their name associated.",
+            "is_translatable": false,
+            "name": "hide_editors_from_authors",
+            "pretty_name": "Hide Assigned Editor Details",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "article"
+        },
+        "setting": {
+            "description": "When enabled the date an article was submitted will be displayed on the article page.",
+            "is_translatable": false,
+            "name": "display_date_submitted",
+            "pretty_name": "Display Date Submitted",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "article"
+        },
+        "setting": {
+            "description": "When enabled the date an article was accepted will be displayed on the article page.",
+            "is_translatable": false,
+            "name": "display_date_accepted",
+            "pretty_name": "Display Date Accepted",
+            "type": "boolean"
+        },
+        "value": {
+            "default": "on"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Display name for the page displaying editorial groups.",
+            "is_translatable": true,
+            "name": "editorial_group_page_name",
+            "pretty_name": "Editorial Group Page Name",
+            "type": "char"
+        },
+        "value": {
+            "default": "Editorial Team"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "When enabled no group names are displayed on the editorial group page.",
+            "is_translatable": false,
+            "name": "hide_editorial_group_names",
+            "pretty_name": "Hide Editorial Group Names",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "name": "notify_section_editors_of_publication",
+            "pretty_name": "Notify Section Editors of Publication",
+            "type": "boolean",
+            "description": "When this setting is enabled, section editors will be copied on publication notification emails sent to authors.",
+            "is_translatable": false
+        },
+        "value": {
+            "default": "on"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "name": "notify_peer_reviewers_of_publication",
+            "pretty_name": "Notify Peer Reviewers of Publication",
+            "type": "boolean",
+            "description": "When enabled this will populate an email from the Peer Reviewer Publication Notification setting to be edited and sent out during the prepublication process.",
+            "is_translatable": false
+        },
+        "value": {
+            "default": "on"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "When this setting is enabled, and a group member has their country set, the editorial team will display the group member's country.",
+            "is_translatable": false,
+            "name": "display_countries_editorial_team",
+            "pretty_name": "Display Country on Editorial Team Page",
+            "type": "boolean"
+        },
+        "value": {
+            "default": ""
+        }
+
     }
 ]

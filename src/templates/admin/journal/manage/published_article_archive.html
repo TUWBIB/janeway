@@ -1,0 +1,55 @@
+{% extends "admin/core/base.html" %}}
+{% load securitytags %}
+{% load files %}
+{% load static %}
+{% load foundation %}
+
+{% block title %}Published Articles{% endblock title %}
+{% block title-section %}Published Articles{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li>Published Articles</li>
+{% endblock breadcrumbs %}
+
+
+{% block body %}
+    <div class="large-12 columns">
+        <div class="box">
+            <div class="content">
+                <table class="small article_list scroll">
+                    <thead>
+                    <tr>
+                        <td>{{ ID }}</td>
+                        <td>Title</td>
+                        <td>Published</td>
+                        <td>Identifier</td>
+                        <td>Authors</td>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for article in published_articles %}
+                        <tr>
+                            <td>{{ article.pk }}</td>
+                            <td><a href="{% url 'manage_archive_article' article.pk %}">{{ article.safe_title }}</a></td>
+                            <td>{{ article.date_published }}</td>
+                            <td>
+                              {{ article.preferred_identifier }}
+                            </td>
+                            <td>
+                              {{ article.frozen_authors }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}
+
+{% block js %}
+{% include "elements/datatables.html" with target=".article_list" %}
+{% endblock %}

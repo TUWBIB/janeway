@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.http import QueryDict
 from django.template.loader import render_to_string
 
 from core.middleware import GlobalRequestMiddleware
@@ -95,25 +96,28 @@ def send_bounce_notification_to_event_actor(event):
             request.site_type = target.repository
             request.repository = target.repository
 
-    # Setup log dict
-    log_dict = {
-        'level': 'Info',
-        'action_text': 'Email Delivery Failed ',
-        'types': 'Email Delivery',
-        'target': target,
-    }
-
-    notify_helpers.send_email_with_body_from_setting_template(
-        request=request,
-        template='bounced_email_notification',
-        subject='subject_bounced_email_notification',
-        to=to,
-        context={
+    # currently this feature is set up for article and preprint emails.
+    # if no site type is set, we shouldn't try to send a bounce email.
+    if request.site_type:
+        # Setup log dict
+        log_dict = {
+            'level': 'Info',
+            'action_text': 'Email Delivery Failed ',
+            'types': 'Email Delivery',
             'target': target,
-            'event': event,
-        },
-        log_dict=log_dict,
-    )
+        }
+
+        notify_helpers.send_email_with_body_from_setting_template(
+            request=request,
+            template='bounced_email_notification',
+            subject='subject_bounced_email_notification',
+            to=to,
+            context={
+                'target': target,
+                'event': event,
+            },
+            log_dict=log_dict,
+        )
 
 
 def build_url_for_request(request=None, path="", query=None, fragment=""):
@@ -146,12 +150,19 @@ def build_url(netloc, port=None, scheme=None, path="", query=None, fragment=""):
     :port: int
     :scheme: string
     :path: string
-    :query: A dictionary with any GET parameters
+    :query: A dict or QueryDict with any GET parameters, or a query string with
+        percent-encoded paramater values
     :fragment: string
     :return: URL string
     """
-    if query:
-        query = quote_plus(urlencode(query))
+
+    # Percent-encode values inside query parameters.
+    # Allow '/' to match Django template filter |urlencode default behavior.
+    if query and isinstance(query, QueryDict):
+        # Support multiple values for the same key
+        query = query.urlencode(safe='/')
+    elif query and isinstance(query, dict):
+        query = urlencode(query, safe='/')
 
     if scheme is None:
         scheme = GlobalRequestMiddleware.get_current_request().scheme

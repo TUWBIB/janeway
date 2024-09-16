@@ -61,10 +61,8 @@ msgid "Password"
 msgstr "Mot de passe"
 
 #: src/core/forms/forms.py:130
-#, fuzzy
-#| msgid "Reset Password"
 msgid "Repeat Password"
-msgstr "Mot de passe"
+msgstr "Répéter le mot de passe"
 
 #: src/core/forms/forms.py:133
 msgid ""
@@ -344,12 +342,6 @@ msgstr ""
 #: src/core/models.py:1151
 msgid "Image"
 msgstr ""
-
-#: src/core/models.py:1492
-#, fuzzy
-#| msgid "Who would you like to contact?"
-msgid "Who would you like to contact"
-msgstr "Qui souhaitez-vous contacter?"
 
 #: src/core/models.py:1493
 msgid "Your contact email address"
@@ -1668,6 +1660,7 @@ msgstr "Renseignements sur l'article"
 msgid "Contact"
 msgstr "Contacter"
 
+#: src/core/models.py:1492
 #: src/templates/admin/journal/contact.html:38
 #: src/themes/OLH/templates/journal/contact.html:30
 #: src/themes/OLH/templates/press/journal/contact.html:22
@@ -3069,8 +3062,6 @@ msgstr ""
 #: src/themes/clean/templates/core/accounts/reset_password.html:17
 #: src/themes/material/templates/core/accounts/register.html:20
 #: src/themes/material/templates/core/accounts/reset_password.html:17
-#, fuzzy
-#| msgid "Password 1"
 msgid "Password Rules"
 msgstr "Mot de passe"
 

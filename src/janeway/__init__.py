@@ -1,2 +1,2 @@
 from packaging import version
-__version__ = version.parse("1.5.6")
+__version__ = version.parse("1.7.0-RC-1")

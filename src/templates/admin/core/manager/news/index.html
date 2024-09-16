@@ -8,7 +8,7 @@
 {% block breadcrumbs %}
     {{ block.super }}
     <li><a href="{% url 'core_manager_index' %}">Manager</a></li>
-    <li><a href="{% url 'core_manager_news' %}">News Manager</a></li>
+    <li>News Manager</li>
 {% endblock %}
 
 {% block body %}
@@ -32,7 +32,7 @@
                                         <i class="fa fa-trash"></i></button>
                                 </div>
 
-                                {{ item.title }}<br/>
+                                {{ item.title|safe }}<br/>
                                 <small>
                                     Posted on {{ item.posted }}{% if item.posted_by %} by {{ item.posted_by.full_name }}
                                     <br/>{% endif %}

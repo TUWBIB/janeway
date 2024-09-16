@@ -40,6 +40,7 @@ import swapper
 from core.file_system import JanewayFileSystemStorage
 from core.model_utils import(
     AbstractLastModifiedModel,
+    DynamicChoiceField,
     BaseSearchManagerMixin,
     JanewayBleachField,
     JanewayBleachCharField,
@@ -321,10 +322,15 @@ DATACITE_STATE_CHOICES = [
 PLUGIN_WORKFLOW_STAGES = []
 
 
-class Funder(models.Model):
+class ArticleFunding(models.Model):
     class Meta:
         ordering = ('name',)
 
+    article = models.ForeignKey(
+        'submission.Article',
+        on_delete=models.CASCADE,
+        null=True,
+    )
     name = models.CharField(
         max_length=500,
         blank=False,
@@ -337,7 +343,7 @@ class Funder(models.Model):
         null=True,
         help_text='Funder DOI (optional). Enter as a full Uniform '
                   'Resource Identifier (URI), such as '
-                  'http://dx.doi.org/10.13039/501100021082',
+                  'https://dx.doi.org/10.13039/501100021082',
     )
     funding_id = models.CharField(
         max_length=500,
@@ -345,6 +351,13 @@ class Funder(models.Model):
         null=True,
         help_text="The grant ID (optional). Enter the ID by itself",
     )
+    funding_statement = models.TextField(
+        blank=True,
+        help_text=_("Additional information regarding this funding entry")
+    )
+
+    def __str__(self):
+        return f"Article funding entry {self.pk}: {self.name}"
 
 class CitedReference(models.Model):
     article =  models.ForeignKey(
@@ -423,34 +436,6 @@ class ArticleManager(models.Manager):
 
     def get_queryset(self):
         return super(ArticleManager, self).get_queryset().all()
-
-
-class DynamicChoiceField(models.CharField):
-    def __init__(self, dynamic_choices=(), *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.dynamic_choices = dynamic_choices
-
-    def formfield(self, *args, **kwargs):
-        form_element = super().formfield(**kwargs)
-        for choice in self.dynamic_choices:
-            form_element.choices.append(choice)
-        return form_element
-
-    def validate(self, value, model_instance):
-        """
-        Validates value and throws ValidationError.
-        """
-        try:
-            super().validate(value, model_instance)
-        except exceptions.ValidationError as e:
-            # If the raised exception is for invalid choice we check if the
-            # choice is in dynamic choices.
-            if e.code == 'invalid_choice':
-                potential_values = set(
-                    item[0] for item in self.dynamic_choices
-                )
-                if value not in potential_values:
-                    raise
 
 
 class ArticleSearchManager(BaseSearchManagerMixin):
@@ -1175,6 +1160,12 @@ class Article(AbstractLastModifiedModel):
     def get_pubid(self):
         return self.get_identifier('pubid')
 
+    def non_correspondence_authors(self):
+        if self.correspondence_author:
+            return self.authors.exclude(pk=self.correspondence_author.pk)
+        else:
+            return self.authors
+
     def get_mmsid(self):
         return self.get_identifier('mmsid')
 
@@ -1207,6 +1198,11 @@ class Article(AbstractLastModifiedModel):
         return self.reviewassignment_set.filter(
             for_author_consumption=True,
         )
+
+    @property
+    def funders(self):
+        """Method replaces the funders m2m model for backwards compat."""
+        return ArticleFunding.objects.filter(article=self)
 
     def __str__(self):
         return u'%s - %s' % (self.pk, truncatesmart(self.title))
@@ -1393,13 +1389,15 @@ class Article(AbstractLastModifiedModel):
         emails.append(self.owner.email)
         return set(emails)
 
-    def peer_reviewers(self, emails=False):
-        reviewers = [assignment.reviewer for assignment in self.reviewassignment_set.all()]
-
+    def peer_reviewers(self, emails=False, completed=False):
+        if completed:
+            assignments = self.completed_reviews_with_decision
+        else:
+            assignments = self.reviewassignment_set.all()
         if emails:
-            return set([reviewer.email for reviewer in reviewers])
-
-        return set(reviewers)
+            return set(assignment.reviewer.email for assignment in assignments)
+        else:
+            return set(assignment.reviewer for assignment in assignments)
 
     def issues_list(self):
         from journal import models as journal_models
@@ -1463,6 +1461,11 @@ class Article(AbstractLastModifiedModel):
         else:
             return ", ".join([author.full_name() for author in self.authors.all()])
 
+    def bibtex_author_list(self):
+        return " AND ".join(
+            [author.full_name() for author in self.frozen_authors()],
+        )
+
     def keyword_list_str(self, separator=","):
         if self.keywords.exists():
             return separator.join(kw.word for kw in self.keywords.all())
@@ -1479,8 +1482,8 @@ class Article(AbstractLastModifiedModel):
         elif user in self.section_editors():
             return True
         elif not user.is_anonymous and user.is_editor(
-                request=None,
-                journal=self.journal,
+            request=None,
+            journal=self.journal,
         ):
             return True
         else:
@@ -1578,6 +1581,10 @@ class Article(AbstractLastModifiedModel):
         self.date_declined = timezone.now()
         self.date_accepted = None
         self.stage = STAGE_REJECTED
+
+        self.incomplete_reviews().update(decision=RD.DECISION_WITHDRAWN.value,
+                                         date_complete=timezone.now(),
+                                         is_complete=True,)
         self.save()
 
     def undo_review_decision(self):
@@ -1764,6 +1771,11 @@ class Article(AbstractLastModifiedModel):
     def workflow_stages(self):
         return core_models.WorkflowLog.objects.filter(article=self)
 
+    def distinct_workflow_elements(self):
+        return core_models.WorkflowElement.objects.filter(
+            pk__in=self.workflowlog_set.values_list("element").distinct()
+        )
+
     @property
     def current_workflow_element(self):
         try:
@@ -1912,6 +1924,11 @@ class Article(AbstractLastModifiedModel):
             decision='withdrawn',
         )
 
+    def incomplete_reviews(self):
+        return self.reviewassignment_set.filter(is_complete=False,
+                                                date_declined__isnull=True,
+                                                decision__isnull=True)
+
     def ms_and_figure_files(self):
         return chain(self.manuscript_files.all(), self.data_figure_files.all())
 
@@ -1983,23 +2000,24 @@ class FrozenAuthor(AbstractLastModifiedModel):
         on_delete=models.SET_NULL,
     )
 
-    name_prefix = models.CharField(
-        max_length=300, null=True, blank=True,
+    name_prefix = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
         help_text=_("Optional name prefix (e.g: Prof or Dr)")
 
         )
-    name_suffix = models.CharField(
-        max_length=300, null=True, blank=True,
+    name_suffix = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
         help_text=_("Optional name suffix (e.g.: Jr or III)")
     )
-    first_name = models.CharField(max_length=300, null=True, blank=True)
-    middle_name = models.CharField(max_length=300, null=True, blank=True)
-    last_name = models.CharField(max_length=300, null=True, blank=True)
+    first_name = JanewayBleachCharField(max_length=300, blank=True)
+    middle_name = JanewayBleachCharField(max_length=300, blank=True)
+    last_name = JanewayBleachCharField(max_length=300, blank=True)
 
-    institution = models.CharField(max_length=1000, null=True, blank=True)
-    department = models.CharField(max_length=300, null=True, blank=True)
+    institution = JanewayBleachCharField(max_length=1000, blank=True)
+    department = JanewayBleachCharField(max_length=300, blank=True)
     frozen_biography = JanewayBleachField(
-        null=True,
         blank=True,
         verbose_name=_('Frozen Biography'),
         help_text=_("The author's biography at the time they published"
@@ -2025,11 +2043,11 @@ class FrozenAuthor(AbstractLastModifiedModel):
     )
     frozen_email = models.EmailField(
             blank=True,
-            null=True,
             verbose_name=_("Author Email"),
     )
     frozen_orcid = models.CharField(
-        max_length=40, null=True, blank=True,
+        max_length=40,
+        blank=True,
         verbose_name=_('ORCiD'),
         help_text=_("ORCiD to be displayed when no account is"
                     " associated with this author. It should be introduced in code "
@@ -2058,7 +2076,6 @@ class FrozenAuthor(AbstractLastModifiedModel):
             self.name_suffix
         ]
         return " ".join([each for each in name_elements if each])
-        full_name = u"%s %s" % (self.first_name, self.last_name)
 
     @property
     def dc_name_string(self):

@@ -72,7 +72,17 @@ urlpatterns = [
 
 
 
-    re_path(r'^funder_articles/(?P<funder_id>.+)$', views.funder_articles, name='funder_articles'),
+    re_path(
+        r'^articles/$',
+        views.PublishedArticlesListView.as_view(),
+        name='journal_articles',
+    ),
+
+    re_path(
+        r'^funder_articles/(?P<funder_id>.+)$',
+        views.funder_articles,
+        name='funder_articles',
+    ),
 
     # Issues/Collections
     re_path(r'^issues/$', views.issues, name='journal_issues'),
@@ -87,6 +97,7 @@ urlpatterns = [
     re_path(r'^article/(?P<article_id>\d+)/galley/(?P<galley_id>\d+)/download/',
         views.download_galley,
         name='article_download_galley'),
+            
     re_path(r'^collections/$', views.collections, name='journal_collections_type'),
     re_path(r'^collections/(?P<collection_id>\d+)/$', views.collection, name='journal_collection'),
 
@@ -169,8 +180,16 @@ urlpatterns = [
         views.sort_issue_sections, name='manage_sort_issue_sections'),
 
     # Article Archive
-    re_path(r'^manage/archive/$',
-        views.manage_archive, name='manage_archive'),
+    re_path(
+        r'^manage/archive/$',
+        views.published_article_archive,
+        name='manage_archive',
+    ),
+    re_path(
+        r'^manage/archive/rejected-archived/$',
+        views.rejected_archived_article_archive,
+        name='manage_rejected_archived_archive',
+    ),
     re_path(r'^manage/archive/article/(?P<article_id>\d+)/$',
         views.manage_archive_article, name='manage_archive_article'),
 
@@ -258,6 +277,13 @@ urlpatterns = [
         views.send_user_email, name='send_user_email'),
     re_path(r'^email/user/(?P<user_id>\d+)/article/(?P<article_id>\d+)/$',
         views.send_user_email, name='send_user_email_article'),
+
+    # Manage users
+    re_path(
+        r'^user/all/$',
+        views.JournalUsers.as_view(),
+        name='journal_users',
+    ),
 
 
     # Newsletter

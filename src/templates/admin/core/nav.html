@@ -103,7 +103,12 @@
             </li>
             <li>
                 <a href="{% url 'manage_archive' %}">
-                    <i class="fa fa-file">&nbsp;</i> Articles
+                    <i class="fa fa-file">&nbsp;</i> Published Articles
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'manage_rejected_archived_archive' %}">
+                    <i class="fa fa-archive">&nbsp;</i> Archived Articles
                 </a>
             </li>
             <li>
@@ -145,10 +150,10 @@
                 </a>
             </li>
             {% hook 'journal_admin_nav_block' %}
-            <li class="subtitle">
-                <a href="#">Version: {{ version }}</a>
-            </li>
         {% endif %}
+        <li class="subtitle">
+            <a href="#">Version: {{ version }}</a>
+        </li>
     </ul>
 </div>
 

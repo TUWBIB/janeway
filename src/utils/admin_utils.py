@@ -89,8 +89,8 @@ class RevisionActionInline(admin.TabularInline):
     raw_id_fields = ('revisionaction',)
 
 
-class ToAddressInline(admin.TabularInline):
-    model = utils_models.ToAddress
+class AddresseeInline(admin.TabularInline):
+    model = utils_models.Addressee
     extra = 0
 
 
@@ -118,11 +118,6 @@ class ArticleInline(admin.TabularInline):
     fields = ('title', 'correspondence_author', 'journal')
     readonly_fields = ('title', 'correspondence_author', 'journal')
     fk_name = 'primary_issue'
-
-
-class FundersArticleInline(admin.TabularInline):
-    model = submission_models.Article.funders.through
-    extra = 0
 
 
 class ArticleOrderingInline(admin.TabularInline):

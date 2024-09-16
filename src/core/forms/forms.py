@@ -95,7 +95,6 @@ class JournalContactForm(JanewayTranslationModelForm):
 
 class EditorialGroupForm(JanewayTranslationModelForm):
 
-
     def __init__(self, *args, **kwargs):
         next_sequence = kwargs.pop('next_sequence', None)
         super(EditorialGroupForm, self).__init__(*args, **kwargs)
@@ -104,7 +103,7 @@ class EditorialGroupForm(JanewayTranslationModelForm):
 
     class Meta:
         model = models.EditorialGroup
-        fields = ('name', 'description', 'sequence',)
+        fields = ('name', 'description', 'sequence', 'display_profile_images')
         exclude = ('journal', 'press')
 
 
@@ -125,6 +124,16 @@ class PasswordResetForm(forms.Form):
         return password_2
 
 
+class GetResetTokenForm(forms.Form):
+    """ A form that validates password reset email addresses"""
+
+    email_address = forms.EmailField(
+        required=True, 
+        label=_("Email"),
+        widget=forms.EmailInput(attrs={"placeholder": "janeway@example.com"}),
+    )
+    
+
 class RegistrationForm(forms.ModelForm, CaptchaForm):
     """ A form that creates a user, with no privileges,
     from the given username and password."""
@@ -140,7 +149,8 @@ class RegistrationForm(forms.ModelForm, CaptchaForm):
     class Meta:
         model = models.Account
         fields = ('email', 'salutation', 'first_name', 'middle_name',
-                  'last_name', 'department', 'institution', 'country',)
+                  'last_name', 'department', 'institution', 'country', 'orcid',)
+        widgets = {'orcid': forms.HiddenInput() }
 
     def __init__(self, *args, **kwargs):
         self.journal = kwargs.pop('journal', None)
@@ -401,8 +411,9 @@ class JournalImageForm(forms.ModelForm):
     class Meta:
         model = journal_models.Journal
         fields = (
-           'header_image', 'default_cover_image',
-           'default_large_image', 'favicon', 'press_image_override',
+            'header_image', 'default_cover_image',
+            'default_large_image', 'favicon', 'press_image_override',
+            'default_profile_image',
         )
 
 
@@ -614,6 +625,11 @@ class CBVFacetForm(forms.Form):
                     count = values_list.count(each.pk)
                     label_with_count = f'{label} ({count})'
                     choices.append((each.pk, label_with_count))
+
+                if not facet.get('order_by'):
+                    # Default to alpha by choice label
+                    choices = sorted(choices, key=lambda x: x[1])
+
                 self.fields[facet_key] = forms.ChoiceField(
                     widget=forms.widgets.CheckboxSelectMultiple,
                     choices=choices,
@@ -675,8 +691,30 @@ class CBVFacetForm(forms.Form):
                     ),
                 )
 
+            elif facet['type'] == 'integer':
+                self.fields[facet_key] = forms.IntegerField(
+                    required=False,
+                )
+
+            elif facet['type'] == 'search':
+                self.fields[facet_key] = forms.CharField(
+                    required=False,
+                    widget=forms.TextInput(
+                        attrs={'type': 'search'}
+                    ),
+                )
+
             elif facet['type'] == 'boolean':
-                pass
+                self.fields[facet_key] = forms.TypedChoiceField(
+                    widget=forms.widgets.RadioSelect,
+                    choices=[
+                        ('', facet.get('all_label', 'All')),
+                        (1, facet.get('true_label', 'Yes')),
+                        (0, facet.get('false_label', 'No')),
+                    ],
+                    required=False,
+                    coerce=int,
+                )
 
             self.fields[facet_key].label = facet['field_label']
 
@@ -695,9 +733,6 @@ class CBVFacetForm(forms.Form):
                 queryset,
                 key=lambda x: sorted_fks.index(x.pk)
             )
-
-        # Note: There is no way yet to sort on the result of a 
-        # function property like journal.name
 
         return queryset
 
@@ -778,7 +813,6 @@ class ConfirmableIfErrorsForm(ConfirmableForm):
 
 
 class EmailForm(forms.Form):
-    subject = forms.CharField(max_length=1000)
     cc = TagitField(
         required=False,
         max_length=10000,
@@ -787,6 +821,7 @@ class EmailForm(forms.Form):
         required=False,
         max_length=10000,
     )
+    subject = forms.CharField(max_length=1000)
     body = forms.CharField(widget=TinyMCE)
     attachments = MultipleFileField(required=False)
 
@@ -812,6 +847,21 @@ class EmailForm(forms.Form):
 
     def as_dataclass(self):
         return email.EmailData(**self.cleaned_data)
+
+
+class FullEmailForm(EmailForm):
+    """ An email form that includes the To field
+    """
+    to = TagitField(
+        required=True,
+        max_length=10000,
+    )
+
+    field_order = ['to', 'cc', 'bcc', 'subject', 'body', 'attachments']
+
+    def clean_to(self):
+        to = self.cleaned_data['to']
+        return self.email_sequence_cleaner("to", to)
 
 
 class SettingEmailForm(EmailForm):
@@ -843,6 +893,13 @@ class SettingEmailForm(EmailForm):
             setting_name,
         )
 
+
+class FullSettingEmailForm(SettingEmailForm, FullEmailForm):
+    """ A setting-based email form that includes the To field
+    """
+    pass
+
+
 class SimpleTinyMCEForm(forms.Form):
     """ A one-field form for populating a TinyMCE textarea
     """
@@ -850,3 +907,10 @@ class SimpleTinyMCEForm(forms.Form):
     def __init__(self, field_name, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields[field_name] = forms.CharField(widget=TinyMCE)
+
+
+class AccountRoleForm(forms.ModelForm):
+
+    class Meta:
+        model = models.AccountRole
+        fields = '__all__'
