@@ -2057,7 +2057,7 @@ msgstr ""
 
 #: src/templates/admin/journal/manage/issues.html:88
 msgid "Issue is already set as the current issue."
-msgstr "Nutzer:in ist bereits Gast-Redakteur:in"
+msgstr "Heft ist bereits als aktuelles Heft gesetzt."
 
 #: src/templates/admin/journal/manage/languages.html:21
 msgid ""
@@ -4311,7 +4311,7 @@ msgstr "Zitierungen"
 #: src/themes/material/templates/journal/article.html:377
 #: src/themes/material/templates/preprints/article.html:123
 msgid "Published on"
-msgstr "Veröffentlicht an"
+msgstr "Veröffentlicht am"
 
 #: src/themes/OLH/templates/journal/article.html:383
 msgid "Downloads are not available until this article is published "
