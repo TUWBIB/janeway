@@ -45,21 +45,21 @@
             {% endif %}
 
             {% if article.language == 'deu' %}
-                {% if article.abstract_de_tuw %}
-                    <dc:description>{{ article.abstract_de_tuw }}</dc:description>
+                {% if article.abstract_de %}
+                    <dc:description>{{ article.abstract_de }}</dc:description>
                 {% else %}
-                    {% if article.abstract %}
-                        <dc:description>{{ article.abstract }}</dc:description>
+                    {% if article.abstract_en %}
+                        <dc:description>{{ article.abstract_en }}</dc:description>
                     {% endif %}
                 {% endif %}
             {% endif %}
 
             {% if article.language == 'eng' %}
-                {% if article.abstract %}
-                    <dc:description>{{ article.abstract }}</dc:description>
+                {% if article.abstract_en %}
+                    <dc:description>{{ article.abstract_en }}</dc:description>
                 {% else %}
-                    {% if article.abstract_de_tuw %}
-                        <dc:description>{{ article.abstract_de_tuw }}</dc:description>
+                    {% if article.abstract_de %}
+                        <dc:description>{{ article.abstract_de }}</dc:description>
                     {% endif %}
                 {% endif %}
             {% endif %}

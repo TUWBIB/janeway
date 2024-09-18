@@ -58,12 +58,6 @@
                             </div>
                         {% endif %}
 
-                        {% if request.journal.submissionconfiguration.abstract %}
-                            <div class="large-12 columns">
-                                {{ form.abstract_de_tuw|foundation }}
-                            </div>
-                        {% endif %}
-
                         {% if journal_settings.general.submission_summary %}
                             <div class="large-12 columns">
                                 {{ form.non_specialist_summary|foundation }}

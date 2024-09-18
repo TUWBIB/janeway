@@ -225,19 +225,19 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if article.abstract %}
+            {% if article.abstract_en %}
             <div id="article">
-                {% if article.abstract != '' %}
+                {% if article.abstract_en != '' %}
                     <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
-                    <p>{{ article.abstract | safe }}</p>
+                    <p>{{ article.abstract_en | safe }}</p>
                 {% endif %}
             </div>
             {% endif %}
-            {% if article.abstract_de_tuw %}
+            {% if article.abstract_de %}
             <div id="article">
-                {% if article.abstract_de_tuw != '' %}
+                {% if article.abstract_de != '' %}
                     <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
-                    <p>{{ article.abstract_de_tuw | safe }}</p>
+                    <p>{{ article.abstract_de | safe }}</p>
                 {% endif %}
             </div>
             {% endif %}

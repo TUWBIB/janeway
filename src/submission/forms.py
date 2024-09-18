@@ -72,7 +72,7 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
 
     class Meta:
         model = models.Article
-        fields = ('title', 'title_de_tuw', 'subtitle', 'subtitle_de_tuw', 'abstract', 'abstract_de_tuw', 'non_specialist_summary',
+        fields = ('title', 'title_de_tuw', 'subtitle', 'subtitle_de_tuw', 'abstract', 'non_specialist_summary',
                   'language', 'section', 'license', 'primary_issue',
                   'article_number', 'is_remote', 'remote_url', 'peer_reviewed',
                   'first_page', 'last_page', 'page_numbers', 'total_pages',
@@ -83,7 +83,6 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
             'title_de_tuw': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
             'subtitle_de_tuw': forms.TextInput(attrs={'placeholder': _('Subtitle of parallel title')}),
             'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
-            'abstract_de_tuw': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here (German)')}),
         }
 
     def __init__(self, *args, **kwargs):
