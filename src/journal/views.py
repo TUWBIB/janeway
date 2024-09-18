@@ -26,7 +26,7 @@ from django.db.models import Q, Count
 from django.db.models.functions import Lower
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -61,6 +61,8 @@ from submission import logic as submission_logic
 from identifiers import models as identifier_models
 from utils import models as utils_models, shared, setting_handler
 from utils.logger import get_logger
+from utils.decorators import GET_language_override
+from utils.shared import create_language_override_redirect
 from events import logic as event_logic
 from repository import models as repo_models
 from production import logic as prod_logic
@@ -3012,47 +3014,54 @@ def backcontent(request):
 
     return render(request, template, context)
 
+@GET_language_override
 @editor_user_required
 def backcontent_article(request, article_id):
     from production import logic as production_logic,forms as production_forms    
-    article = get_object_or_404(submission_models.Article, pk=article_id, journal=request.journal)
-    additional_fields = submission_models.Field.objects.filter(journal=request.journal)
+    with translation.override(request.override_language):
+        article = get_object_or_404(
+            submission_models.Article,
+            pk=article_id,
+            journal=request.journal,
+        )
 
-    if not article.license:
-        default_configuration = request.journal.submissionconfiguration
-        article.license = default_configuration.default_license
+        additional_fields = submission_models.Field.objects.filter(journal=request.journal)
 
-    article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields)
-    author_form = bc_forms.BackContentAuthorForm()
-    pub_form = bc_forms.PublicationInfo(instance=article)
-    remote_form = bc_forms.RemoteArticle(instance=article)
-    galley_form = production_forms.GalleyForm()
+        if not article.license:
+            default_configuration = request.journal.submissionconfiguration
+            article.license = default_configuration.default_license
 
-    modal = None
+        article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields)
+        author_form = bc_forms.BackContentAuthorForm()
+        pub_form = bc_forms.PublicationInfo(instance=article)
+        remote_form = bc_forms.RemoteArticle(instance=article)
+        galley_form = production_forms.GalleyForm()
 
-    if request.POST:
-        if 'add_author' in request.POST:
-            return handleAddAuthor(request, article)
-        
-        if 'file' in request.FILES:
-            return handleFileUpload(request, article)
+        modal = None
 
-        if 'publish' in request.POST:
-            handleSaveForm(request, article)
-            if not article.stage == submission_models.STAGE_PUBLISHED:
-#                id_logic.generate_crossref_doi_with_pattern(article)
-                article.stage = submission_models.STAGE_PUBLISHED
-                article.save()
-            article.snapshot_authors()
+        if request.POST:
+            if 'add_author' in request.POST:
+                return handleAddAuthor(request, article)
+            
+            if 'file' in request.FILES:
+                return handleFileUpload(request, article)
 
-            return redirect(reverse('backcontent'))
+            if 'publish' in request.POST:
+                handleSaveForm(request, article)
+                if not article.stage == submission_models.STAGE_PUBLISHED:
+    #                id_logic.generate_crossref_doi_with_pattern(article)
+                    article.stage = submission_models.STAGE_PUBLISHED
+                    article.save()
+                article.snapshot_authors()
 
-        if 'draft' in request.POST:
-            handleSaveForm(request, article)
-            return redirect(reverse('backcontent'))
+                return redirect(reverse('backcontent'))
 
-        if 'delete' in request.POST:
-            return redirect(reverse('backcontent_delete_article', kwargs={'article_id': article_id}))
+            if 'draft' in request.POST:
+                handleSaveForm(request, article)
+                return redirect(reverse('backcontent'))
+
+            if 'delete' in request.POST:
+                return redirect(reverse('backcontent_delete_article', kwargs={'article_id': article_id}))
 
     template = 'journal/manage/backcontent/submission.html'
     context = {
@@ -3355,35 +3364,36 @@ def handleFileUpload(request, article):
     }
     return JsonResponse(data)
 
+@GET_language_override
 def handleSaveForm(request, article):
+    with translation.override(request.override_language):
+        article_form = submission_forms.ArticleInfo(request.POST, instance=article)
 
-    article_form = submission_forms.ArticleInfo(request.POST, instance=article)
+        if article_form.is_valid():
+            article_form.save(request=request)
 
-    if article_form.is_valid():
-        article_form.save(request=request)
+        correspondence_author = request.POST.get('main-author', None)
 
-    correspondence_author = request.POST.get('main-author', None)
-
-    if correspondence_author:
-        author = core_models.Account.objects.get(pk=correspondence_author)
-        article.correspondence_author = author
-        article.save()
-
-    pub_form = bc_forms.PublicationInfo(request.POST, instance=article)
-
-    if pub_form.is_valid():
-        pub_form.save()
-        if article.primary_issue:
-            article.primary_issue.articles.add(article)
-
-        if article.date_published:
-            article.stage = submission_models.STAGE_READY_FOR_PUBLICATION
+        if correspondence_author:
+            author = core_models.Account.objects.get(pk=correspondence_author)
+            article.correspondence_author = author
             article.save()
 
-    remote_form = bc_forms.RemoteArticle(request.POST, instance=article)
+        pub_form = bc_forms.PublicationInfo(request.POST, instance=article)
 
-    if remote_form.is_valid():
-        remote_form.save()
+        if pub_form.is_valid():
+            pub_form.save()
+            if article.primary_issue:
+                article.primary_issue.articles.add(article)
+
+            if article.date_published:
+                article.stage = submission_models.STAGE_READY_FOR_PUBLICATION
+                article.save()
+
+        remote_form = bc_forms.RemoteArticle(request.POST, instance=article)
+
+        if remote_form.is_valid():
+            remote_form.save()
 
     return True
 
