@@ -3005,7 +3005,7 @@ def backcontent(request):
 
     articles = submission_models.Article.objects.filter(journal=request.journal)
 
-    template = 'journal/manage/backcontent/new_article.html'
+    template = 'journal/manage/backcontent/articles.html'
     context = {
         'articles': articles,
     }
