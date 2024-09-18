@@ -662,6 +662,10 @@ def submit_review(request, article_id):
         journal=request.journal,
     )
 
+    additional_fields = models.Field.objects.filter(
+        journal=request.journal,
+    )
+
     if article.current_step < 4 and not request.user.is_staff:
         return redirect(
             reverse(
