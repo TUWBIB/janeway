@@ -17,6 +17,7 @@
 
 {% block body %}
     <section class="content">
+        {% include "elements/translations/form_tabs.html" with object=article %}
         <div class="row expanded">
             <div class="large-12 columns box">
                 <form method="POST">
@@ -356,6 +357,10 @@
     <script type="text/javascript">
         $(document).ready(function () 
         {
+            // workaround
+            // hides the article-jump elements which gets inherited from base.html
+            $("#article-jump").hide();
+
             $("#sortable").sortable({
             update: function (event, ui) {
                 var data = $(this).sortable('serialize');
