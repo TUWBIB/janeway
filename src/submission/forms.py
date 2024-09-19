@@ -104,6 +104,10 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
         editor_view = kwargs.pop('editor_view', False)
         super(ArticleInfo, self).__init__(*args, **kwargs)
 
+        self.fields['title_de_tuw'].label = "Parallel Title"        
+        self.fields['subtitle_de_tuw'].label = "Subtitle Of Parallel Title"
+        self.fields['abstract_de_tuw'].label = "Abstract (German)"
+
         # Flag labels for translation
         for field in self.fields.values():
             field.label = _(field.label)

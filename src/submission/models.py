@@ -636,12 +636,12 @@ class Article(AbstractLastModifiedModel):
         max_length=999,
         help_text=_('Your article title'),
     )
-    subtitle = models.CharField(
+    subtitle = JanewayBleachCharField(
         # Note: subtitle is deprecated as of version 1.4.2
         max_length=999,
         blank=True,
         null=True,
-        help_text=_('Do not use--deprecated in version 1.4.1 and later.')
+        help_text=_('Subtitle for the article.')
     )
     abstract = JanewayBleachField(
         blank=True,
@@ -662,11 +662,28 @@ class Article(AbstractLastModifiedModel):
     publisher_notes = models.ManyToManyField('PublisherNote', blank=True, null=True, related_name='publisher_notes')
 
 
-    # TUW extensions
-    title_de_tuw = models.CharField(max_length=300, blank=True, null=True, help_text=_('Parallel title of the article'), db_column='title_de_tuw')
-    subtitle_de_tuw = models.CharField(max_length=300, blank=True, null=True,
-                                help_text=_('Subtitle of the parallel title of the article'))
-    abstract_de_tuw = models.TextField(blank=True, null=True, help_text=_('Abstract (German)'))
+    # TUW
+    title_de_tuw = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        help_text=_('Parallel title of the article'),
+        db_column='title_de_tuw'
+    )
+
+    subtitle_de_tuw = JanewayBleachCharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        help_text=_('Subtitle of the parallel title of the article')
+    )
+    
+    abstract_de_tuw = JanewayBleachField(
+        blank=True,
+        null=True,
+        help_text=_('Abstract (German)')
+    )
+    # - TUW
 
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
     # this is useful for overlay journals. The ToC display of an issue uses this flag to link to a DOI rather
