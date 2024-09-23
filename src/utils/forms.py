@@ -12,8 +12,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from modeltranslation import forms as mt_forms, translator
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox as ReCaptchaWidget
+from captcha.fields import CaptchaField
 from simplemathcaptcha.fields import MathCaptchaField
 from hcaptcha.fields import hCaptchaField
 
@@ -137,10 +136,10 @@ class CaptchaForm(Form):
         if settings.CAPTCHA_TYPE == 'simple_math':
             self.question_template = _('What is %(num1)i %(operator)s %(num2)i? ')
             captcha = MathCaptchaField(label=_('Answer this question: '))
-        elif settings.CAPTCHA_TYPE == 'recaptcha':
-            captcha = ReCaptchaField(widget=ReCaptchaWidget())
         elif settings.CAPTCHA_TYPE == 'hcaptcha':
             captcha = hCaptchaField()
+        elif settings.CAPTCHA_TYPE == 'simple-captcha':
+            captcha = CaptchaField()
         else:
             captcha = CharField(widget=HiddenInput, required=False)
 

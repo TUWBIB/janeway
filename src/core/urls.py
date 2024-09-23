@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('summernote/', include('django_summernote.urls')),
     path('', include('core.include_urls')),
+    path('captcha/', include('captcha.urls')),
 ]
 
 try:

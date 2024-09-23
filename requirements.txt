@@ -17,7 +17,6 @@ django-hijack==3.2.1
 -e git+https://github.com/BirkbeckCTP/django-mailgun.git@8f97af5a4133934f939826c00a30f1357478b139#egg=django_mailgun
 django-modeltranslation==0.18.11
 django-settings-export==1.2.1
-django-recaptcha==3.0.0
 django-simple-math-captcha==2.0.1
 django-simple-history==3.3.0
 django-summernote==0.8.20.0
@@ -67,5 +66,6 @@ freezegun==1.2.0
 git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.3
 gunicorn
 mysqlclient==2.2.0
+django-simple-captcha==0.6.0
 
 
