@@ -31,7 +31,7 @@ def update_text_editor_comments(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0080_frozen_author_bleach_20240507_1350'),
+        ('submission', '9008_tuw_custom_to_bleach_fields_and_more'),
     ]
 
     operations = [
