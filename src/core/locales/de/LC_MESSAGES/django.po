@@ -2,24 +2,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Janeway\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-16 13:29+0200\n"
+"POT-Creation-Date: 2024-10-07 14:58+0200\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
-#: src/cms/models.py:21 src/core/janeway_global_settings.py:263
-#: src/core/settings.py:142
+#: src/cms/models.py:21 src/core/janeway_global_settings.py:264
 msgid "English"
 msgstr "Englisch"
 
-#: src/cms/models.py:22 src/core/janeway_global_settings.py:266
-#: src/core/settings.py:143
+#: src/cms/models.py:22 src/core/janeway_global_settings.py:267
 msgid "German"
 msgstr "Deutsch"
 
-#: src/cms/models.py:23 src/core/janeway_global_settings.py:265
+#: src/cms/models.py:23 src/core/janeway_global_settings.py:266
 msgid "French"
 msgstr "Französisch"
 
@@ -34,10 +32,12 @@ msgid ""
 msgstr ""
 
 #: src/comms/models.py:119
+#, python-brace-format
 msgid "Posted by {byline}"
 msgstr "Erstellt von {byline}"
 
 #: src/comms/models.py:120
+#, python-brace-format
 msgid "Posted by  {byline}"
 msgstr "Erstellt von {byline}"
 
@@ -65,12 +65,11 @@ msgstr "Passwort"
 msgid "Repeat Password"
 msgstr "Passwort wiederholen"
 
-#: src/core/forms/forms.py:132 src/core/models.py:234
-#: src/templates/admin/journal/manage/backcontent/submission.html:132
+#: src/core/forms/forms.py:132 src/core/models.py:235
+#: src/templates/admin/journal/manage/backcontent/submission.html:133
 #: src/templates/admin/repository/article.html:213
 #: src/templates/admin/repository/author_article.html:92
 #: src/templates/admin/repository/submit/authors.html:77
-#: src/templates/admin/submission/edit/metadata.html:154
 #: src/templates/admin/submission/submit_authors.html:70
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:29
 #: src/themes/OLH/templates/press/core/login.html:30
@@ -140,15 +139,15 @@ msgstr ""
 msgid "Issues and Collections"
 msgstr "Ausgaben und Sammlungen"
 
-#: src/core/janeway_global_settings.py:264
+#: src/core/janeway_global_settings.py:265
 msgid "English (US)"
 msgstr "Englisch (US)"
 
-#: src/core/janeway_global_settings.py:267
+#: src/core/janeway_global_settings.py:268
 msgid "Dutch"
 msgstr "Niederländisch"
 
-#: src/core/janeway_global_settings.py:268
+#: src/core/janeway_global_settings.py:269
 msgid "Welsh"
 msgstr "Walisisch"
 
@@ -164,147 +163,147 @@ msgstr ""
 msgid "A number is required"
 msgstr ""
 
-#: src/core/models.py:76
+#: src/core/models.py:77
 msgid "Miss"
 msgstr ""
 
-#: src/core/models.py:77
+#: src/core/models.py:78
 msgid "Ms"
 msgstr ""
 
-#: src/core/models.py:78
+#: src/core/models.py:79
 msgid "Mrs"
 msgstr ""
 
-#: src/core/models.py:79
+#: src/core/models.py:80
 msgid "Mr"
 msgstr ""
 
-#: src/core/models.py:80
+#: src/core/models.py:81
 msgid "Mx"
 msgstr ""
 
-#: src/core/models.py:81
+#: src/core/models.py:82
 msgid "Dr"
 msgstr ""
 
-#: src/core/models.py:82
+#: src/core/models.py:83
 msgid "Prof."
 msgstr ""
 
-#: src/core/models.py:235
+#: src/core/models.py:236
 msgid "Username"
 msgstr "Benutzername"
 
-#: src/core/models.py:241
+#: src/core/models.py:242
 msgid "First name"
 msgstr "Vorname"
 
-#: src/core/models.py:246 src/submission/forms.py:311
+#: src/core/models.py:248 src/submission/forms.py:317
 msgid "Middle name"
 msgstr "Zweiter Vorname"
 
-#: src/core/models.py:251 src/submission/forms.py:312
+#: src/core/models.py:254 src/submission/forms.py:318
 msgid "Last name"
 msgstr "Nachname"
 
-#: src/core/models.py:259
+#: src/core/models.py:263
 msgid "Salutation"
 msgstr "Anrede"
 
-#: src/core/models.py:264
+#: src/core/models.py:269
 msgid "Name suffix"
 msgstr ""
 
-#: src/core/models.py:268
+#: src/core/models.py:274
 #: src/themes/OLH/templates/core/accounts/public_profile.html:46
 #: src/themes/clean/templates/core/accounts/public_profile.html:19
 #: src/themes/material/templates/core/accounts/public_profile.html:19
 msgid "Biography"
 msgstr "Biografie"
 
-#: src/core/models.py:270 src/submission/models.py:2051
+#: src/core/models.py:276 src/submission/models.py:2090
 msgid "ORCiD"
 msgstr "ORCiD"
 
-#: src/core/models.py:274 src/templates/admin/submission/edit/metadata.html:155
+#: src/core/models.py:280
 msgid "Institution"
 msgstr "Institution"
 
-#: src/core/models.py:279
+#: src/core/models.py:286
 msgid "Department"
 msgstr "Fachbereich"
 
-#: src/core/models.py:281
+#: src/core/models.py:289
 msgid "Twitter Handle"
 msgstr "Twitter Handle"
 
-#: src/core/models.py:282
+#: src/core/models.py:290
 msgid "Facebook Handle"
 msgstr "Facebook Handle"
 
-#: src/core/models.py:283
+#: src/core/models.py:291
 msgid "Linkedin Profile"
 msgstr "Linkedin Profil"
 
-#: src/core/models.py:284
+#: src/core/models.py:292
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:3
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:3
 msgid "Website"
 msgstr "Website"
 
-#: src/core/models.py:285
+#: src/core/models.py:293
 msgid "Github Username"
 msgstr "Github Username"
 
-#: src/core/models.py:289
+#: src/core/models.py:297
 msgid "Confirmation Code"
 msgstr "Bestätigungscode"
 
-#: src/core/models.py:292
+#: src/core/models.py:300
 msgid "Signature"
 msgstr ""
 
-#: src/core/models.py:299 src/templates/admin/submission/edit/metadata.html:157
+#: src/core/models.py:307
 #: src/themes/OLH/templates/core/accounts/public_profile.html:41
 #: src/themes/clean/templates/core/accounts/public_profile.html:15
 #: src/themes/material/templates/core/accounts/public_profile.html:15
 msgid "Country"
 msgstr "Land"
 
-#: src/core/models.py:306
+#: src/core/models.py:314
 msgid "Preferred Timezone"
 msgstr ""
 
-#: src/core/models.py:315
+#: src/core/models.py:323
 msgid "Enable Digest"
 msgstr ""
 
-#: src/core/models.py:320
+#: src/core/models.py:328
 msgid "If enabled, your basic profile will be available to the public."
 msgstr ""
 
-#: src/core/models.py:322
+#: src/core/models.py:330
 msgid "Enable public profile"
 msgstr ""
 
-#: src/core/models.py:330
+#: src/core/models.py:338
 msgid "GND ID"
 msgstr ""
 
-#: src/core/models.py:634 src/core/models.py:646
+#: src/core/models.py:642 src/core/models.py:654
 msgid "Expires on"
 msgstr ""
 
-#: src/core/models.py:910 src/core/models.py:1188
+#: src/core/models.py:918 src/core/models.py:1196
 msgid "Article PK"
 msgstr "Artikel PK"
 
-#: src/core/models.py:915 src/core/models.py:1193 src/repository/models.py:848
-#: src/templates/admin/journal/manage/backcontent/submission.html:173
+#: src/core/models.py:923 src/core/models.py:1201 src/repository/models.py:848
+#: src/templates/admin/journal/manage/backcontent/submission.html:174
 #: src/templates/admin/submission/submit_files.html:46
 #: src/templates/admin/submission/submit_files.html:86
-#: src/templates/admin/submission/submit_review.html:178
+#: src/templates/admin/submission/submit_review.html:189
 #: src/themes/TUWJFM/templates/preprints/review.html:77
 #: src/themes/TUWJFM/templates/preprints/review.html:96
 #: src/themes/TUWJFM/templates/preprints/submit_files.html:41
@@ -312,23 +311,23 @@ msgstr "Artikel PK"
 msgid "Label"
 msgstr "Kennzeichen"
 
-#: src/core/models.py:916 src/core/models.py:1194
+#: src/core/models.py:924 src/core/models.py:1202
 msgid "Description"
 msgstr "Beschreibung"
 
-#: src/core/models.py:927
+#: src/core/models.py:935
 msgid "Remote URL of file"
 msgstr ""
 
-#: src/core/models.py:1220
+#: src/core/models.py:1228
 msgid "Other"
 msgstr ""
 
-#: src/core/models.py:1221
+#: src/core/models.py:1229
 msgid "Image"
 msgstr ""
 
-#: src/core/models.py:1589 src/templates/admin/journal/contact.html:38
+#: src/core/models.py:1597 src/templates/admin/journal/contact.html:38
 #: src/themes/OLH/templates/journal/contact.html:30
 #: src/themes/OLH/templates/press/journal/contact.html:22
 #: src/themes/TUWJFM/templates/journal/contact.html:30
@@ -336,15 +335,15 @@ msgstr ""
 msgid "Who would you like to contact?"
 msgstr "Wen möchten Sie kontaktieren?"
 
-#: src/core/models.py:1590
+#: src/core/models.py:1598
 msgid "Your contact email address"
 msgstr "Ihre Kontaktadresse (E-Mail)"
 
-#: src/core/models.py:1591 src/themes/TUWJFM/templates/preprints/review.html:41
+#: src/core/models.py:1599 src/themes/TUWJFM/templates/preprints/review.html:41
 msgid "Subject"
 msgstr "Thema"
 
-#: src/core/models.py:1592
+#: src/core/models.py:1600
 msgid "Your message"
 msgstr "Ihre Nachricht"
 
@@ -432,11 +431,11 @@ msgid ""
 "section if you want to delete it."
 msgstr ""
 
-#: src/core/views.py:2719 src/journal/forms.py:24 src/journal/views.py:2965
+#: src/core/views.py:2719 src/journal/forms.py:24 src/journal/views.py:2978
 msgid "Newest"
 msgstr ""
 
-#: src/core/views.py:2720 src/journal/forms.py:25 src/journal/views.py:2966
+#: src/core/views.py:2720 src/journal/forms.py:25 src/journal/views.py:2979
 msgid "Oldest"
 msgstr ""
 
@@ -457,11 +456,11 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: src/journal/forms.py:22 src/journal/views.py:2967
+#: src/journal/forms.py:22 src/journal/views.py:2980
 msgid "Titles A-Z"
 msgstr "Titel A-Z"
 
-#: src/journal/forms.py:23 src/journal/views.py:2968
+#: src/journal/forms.py:23 src/journal/views.py:2981
 msgid "Titles Z-A"
 msgstr "Titel Z-A"
 
@@ -611,7 +610,7 @@ msgid "Current Issue"
 msgstr "Aktuelle Ausgabe"
 
 #: src/journal/models.py:874 src/journal/models.py:950
-#: src/journal/views.py:2970
+#: src/journal/views.py:2983
 msgid "Volume"
 msgstr ""
 
@@ -622,7 +621,7 @@ msgstr "Ausgabe"
 
 #: src/journal/models.py:884 src/journal/models.py:891
 #: src/journal/models.py:952
-#: src/templates/admin/journal/manage/backcontent/new_article.html:43
+#: src/templates/admin/journal/manage/backcontent/articles.html:43
 #: src/templates/admin/journal/manage/sync/sync_articles.html:29
 #: src/templates/common/elements/journal/article_issue_list.html:4
 #: src/themes/OLH/templates/403.html:4
@@ -647,69 +646,69 @@ msgstr "Seiten"
 msgid "page"
 msgstr "Seite"
 
-#: src/journal/views.py:782
+#: src/journal/views.py:794
 msgid "No file uploaded"
 msgstr "Keine Datei hochgeladen"
 
-#: src/journal/views.py:1107
+#: src/journal/views.py:1120
 msgid "Issue not in this journal’s issue list."
 msgstr ""
 
-#: src/journal/views.py:1153
+#: src/journal/views.py:1166
 msgid ""
 "Publication date set to { article.date_published.strftime(\"%Y-%m-%d %H:%M "
 "%Z\") } "
 msgstr ""
 
-#: src/journal/views.py:1160
+#: src/journal/views.py:1173
 msgid "Publication date unset"
 msgstr "Publikationsgebühren"
 
-#: src/journal/views.py:1166
+#: src/journal/views.py:1179
 msgid "Something went wrong when trying to save the form. "
 msgstr ""
 
-#: src/journal/views.py:1251
+#: src/journal/views.py:1264
 msgid "Article set for publication."
 msgstr "Artikel zur Veröffentlichung bereit."
 
-#: src/journal/views.py:1535
+#: src/journal/views.py:1548
 msgid "You cannot move the first section up the order list"
 msgstr "Die erste Rubrik kann nicht nach oben verschoben werden"
 
-#: src/journal/views.py:1567
+#: src/journal/views.py:1580
 msgid "You cannot move the last section down the order list"
 msgstr "Die letzte Rubrik kann nicht nach unten verschoben werden"
 
-#: src/journal/views.py:1574
+#: src/journal/views.py:1587
 msgid "This page accepts post requests only."
 msgstr "Die Seite akzeptiert nur POST-Anfragen."
 
-#: src/journal/views.py:1645
+#: src/journal/views.py:1658
 msgid "User is already a guest editor."
 msgstr "Nutzer:in ist bereits Gast-Redakteur:in"
 
-#: src/journal/views.py:1651
+#: src/journal/views.py:1664
 msgid "This user is not a member of this journal."
 msgstr "Nutzer:in ist noch kein Mitglied dieses Journals."
 
-#: src/journal/views.py:1704
+#: src/journal/views.py:1717
 msgid "Editor removed from Issue."
 msgstr "Redakteur:in wurde von dieser Ausgabe entfernt."
 
-#: src/journal/views.py:1710
+#: src/journal/views.py:1723
 msgid "Issue Editor not found."
 msgstr "Redakteur:in der Ausgabe kann nicht gefunden werden."
 
-#: src/journal/views.py:1716
+#: src/journal/views.py:1729
 msgid "No Issue Editor ID supplied."
 msgstr "Es wurde keine ID angegeben für Redakteur:in der Ausgabe."
 
-#: src/journal/views.py:1870 src/journal/views.py:3318
+#: src/journal/views.py:1883 src/journal/views.py:3338
 msgid "Uploaded file is not UTF-8 encoded"
 msgstr "Geladene Datei ist nicht im UTF-8 Format kodiert."
 
-#: src/journal/views.py:1980
+#: src/journal/views.py:1993
 msgid ""
 "You must login before you can become a reviewer. Click the button below to "
 "login."
@@ -717,7 +716,7 @@ msgstr ""
 "Sie müssen sich anmelden, bevor Sie Gutachter:in werden können. Klicken Sie "
 "auf die Schaltfläche unten, um sich anzumelden."
 
-#: src/journal/views.py:1985
+#: src/journal/views.py:1998
 msgid ""
 "You are not yet a reviewer for this journal. Click the button below to "
 "become a reviewer."
@@ -725,66 +724,66 @@ msgstr ""
 "Sie sind noch kein:e Gutachter:in für diese Zeitschrift. Klicken Sie auf die "
 "Schaltfläche, um Gutachter:in zu werden."
 
-#: src/journal/views.py:1990
+#: src/journal/views.py:2003
 msgid "You are already a reviewer."
 msgstr "Sie sind bereits Gutachter:in."
 
-#: src/journal/views.py:1997
+#: src/journal/views.py:2010
 msgid "You are now a reviewer"
 msgstr "Sie sind jetzt Gutachter:in."
 
-#: src/journal/views.py:2036
+#: src/journal/views.py:2049
 msgid "Your message has been sent."
 msgstr "Ihre Nachricht wurde versendet."
 
-#: src/journal/views.py:2526
+#: src/journal/views.py:2539
 msgid "Manuscript file uploaded."
 msgstr "Manuskriptdatei wurde hochgeladen."
 
-#: src/journal/views.py:2543
+#: src/journal/views.py:2556
 msgid "Data/figure file uploaded."
 msgstr ""
 
-#: src/journal/views.py:2554
+#: src/journal/views.py:2567
 msgid "Production file uploaded."
 msgstr "Produktionsdatei wurde hochgeladen."
 
-#: src/journal/views.py:2564
+#: src/journal/views.py:2577
 msgid "Galley file uploaded."
 msgstr "Galley Datei hochgeladen"
 
-#: src/journal/views.py:2600
+#: src/journal/views.py:2613
 msgid "Proofing file uploaded."
 msgstr "Datei für den Prüfdruck (Proof) wurde hochgeladen."
 
-#: src/journal/views.py:2606
+#: src/journal/views.py:2619
 msgid "Saved file."
 msgstr "Datei gespeicher"
 
-#: src/journal/views.py:2616
+#: src/journal/views.py:2629
 msgid "Supplementary file uploaded."
 msgstr "Zusätzliche Dateien hochgeladen"
 
-#: src/journal/views.py:2626
+#: src/journal/views.py:2639
 msgid "Typesetting source file uploaded."
 msgstr "Datei für Typesetting wurde hochgeladen."
 
-#: src/journal/views.py:2941
+#: src/journal/views.py:2954
 msgid "Published after"
 msgstr "Veröffentlicht nach"
 
-#: src/journal/views.py:2945
+#: src/journal/views.py:2958
 msgid "Published before"
 msgstr "Veröffentlicht vor"
 
-#: src/journal/views.py:2950
-#: src/templates/admin/journal/manage/backcontent/new_article.html:40
-#: src/templates/admin/journal/manage/backcontent/submission.html:65
+#: src/journal/views.py:2963
+#: src/templates/admin/journal/manage/backcontent/articles.html:40
+#: src/templates/admin/journal/manage/backcontent/submission.html:66
 #: src/templates/admin/submission/submit_review.html:111
 msgid "Section"
 msgstr "Rubrik"
 
-#: src/journal/views.py:2969 src/themes/OLH/templates/repository/list.html:77
+#: src/journal/views.py:2982 src/themes/OLH/templates/repository/list.html:77
 #: src/themes/material/templates/preprints/list.html:80
 #: src/themes/material/templates/repository/list.html:61
 msgid "Author Name"
@@ -798,10 +797,10 @@ msgstr "Beschreibung gelöscht."
 msgid "Description saved."
 msgstr "Beschreibung gespeichert."
 
-#: src/repository/forms.py:42 src/submission/forms.py:81
+#: src/repository/forms.py:42 src/submission/forms.py:85
 #: src/templates/admin/core/manager/sections/section_articles.html:30
-#: src/templates/admin/journal/manage/backcontent/new_article.html:37
-#: src/templates/admin/journal/manage/backcontent/submission.html:28
+#: src/templates/admin/journal/manage/backcontent/articles.html:37
+#: src/templates/admin/journal/manage/backcontent/submission.html:29
 #: src/templates/admin/journal/manage/sync/sync_articles.html:26
 #: src/templates/admin/submission/submit_review.html:51
 #: src/themes/OLH/templates/elements/journal/article_filter_form.html:21
@@ -816,7 +815,7 @@ msgstr "Beschreibung gespeichert."
 msgid "Title"
 msgstr "Titel"
 
-#: src/repository/forms.py:45 src/submission/forms.py:85
+#: src/repository/forms.py:45 src/submission/forms.py:89
 msgid "Enter your article's abstract here"
 msgstr "Geben Sie hier das Abstract Ihres Artikels ein"
 
@@ -843,12 +842,12 @@ msgid ""
 msgstr ""
 
 #: src/repository/models.py:421 src/repository/models.py:993
-#: src/repository/models.py:1144 src/submission/models.py:636
+#: src/repository/models.py:1144 src/submission/models.py:637
 msgid "Your article title"
 msgstr "Titel Ihres Artikels"
 
 #: src/repository/models.py:959
-#: src/templates/admin/submission/submit_review.html:159
+#: src/templates/admin/submission/submit_review.html:170
 msgid "ORCID"
 msgstr ""
 
@@ -905,6 +904,10 @@ msgstr ""
 msgid "This article has already been accepted or declined."
 msgstr "Dieser Artikel ist bereits akzeptiert oder abgelehnt."
 
+#: src/security/templatetags/securitytags.py:102
+msgid "[Anonymised data]"
+msgstr ""
+
 #: src/submission/decorators.py:22
 msgid "This page can only be accessed on Journals."
 msgstr "Diese Seite ist nur über Zeitschriften zugänglich."
@@ -913,36 +916,36 @@ msgstr "Diese Seite ist nur über Zeitschriften zugänglich."
 msgid "Submission is disabled for this journal."
 msgstr "Abgabe ist für diese Zeitschrift deaktiviert. "
 
-#: src/submission/forms.py:82
-#: src/templates/admin/journal/manage/backcontent/submission.html:33
+#: src/submission/forms.py:86
+#: src/templates/admin/journal/manage/backcontent/submission.html:34
 #: src/templates/admin/submission/submit_review.html:53
 #: src/themes/TUWJFM/templates/preprints/review.html:27
 msgid "Subtitle"
 msgstr "Untertitel"
 
-#: src/submission/forms.py:83
-#: src/templates/admin/journal/manage/backcontent/submission.html:38
+#: src/submission/forms.py:87
+#: src/templates/admin/journal/manage/backcontent/submission.html:39
 #: src/templates/admin/submission/submit_review.html:63
 #: src/themes/TUWJFM/templates/journal/article.html:110
 msgid "Parallel title"
 msgstr "Paralleltitel"
 
-#: src/submission/forms.py:84
-#: src/templates/admin/journal/manage/backcontent/submission.html:43
+#: src/submission/forms.py:88
+#: src/templates/admin/journal/manage/backcontent/submission.html:44
 #: src/templates/admin/submission/submit_review.html:64
 msgid "Subtitle of parallel title"
 msgstr "Subtitel des Paralleltitels"
 
-#: src/submission/forms.py:86
+#: src/submission/forms.py:90
 msgid "Enter your article's abstract here (German)"
 msgstr "Geben Sie hier das Abstract Ihres Artikels ein"
 
-#: src/submission/forms.py:378
+#: src/submission/forms.py:384
 #, python-format
 msgid "Currently linked to %s, leave blank to use this address"
 msgstr ""
 
-#: src/submission/forms.py:383
+#: src/submission/forms.py:389
 #, python-format
 msgid "If left blank, the account ORCiD will be used (%s)"
 msgstr ""
@@ -952,74 +955,74 @@ msgid "You must upload a file that is either a Doc, Docx, RTF or ODT."
 msgstr ""
 
 #: src/submission/migrations/9006_tuw_rename_de_fields.py:21
-#: src/submission/models.py:665
+#: src/submission/models.py:670
 msgid "Parallel title of the article"
 msgstr "Paralleltitel des Artikels"
 
 #: src/submission/migrations/9006_tuw_rename_de_fields.py:32
-#: src/submission/models.py:667
+#: src/submission/models.py:678
 msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitels des Artikels"
 
 #: src/submission/migrations/9006_tuw_rename_de_fields.py:43
-#: src/submission/models.py:668 src/templates/admin/elements/metadata.html:50
-#: src/templates/admin/journal/manage/backcontent/submission.html:55
+#: src/submission/models.py:684 src/templates/admin/elements/metadata.html:55
+#: src/templates/admin/journal/manage/backcontent/submission.html:56
 #: src/templates/admin/submission/submit_review.html:84
 #: src/themes/TUWJFM/templates/journal/article.html:239
 msgid "Abstract (German)"
 msgstr "Abstract (Deutsch)"
 
-#: src/submission/models.py:356
+#: src/submission/models.py:357
 msgid "Additional information regarding this funding entry"
 msgstr ""
 
-#: src/submission/models.py:643
-msgid "Do not use--deprecated in version 1.4.1 and later."
-msgstr ""
+#: src/submission/models.py:644
+msgid "Subtitle for the article."
+msgstr "Subtitel des Artikels"
 
-#: src/submission/models.py:658
+#: src/submission/models.py:659
 msgid "The primary language of the article"
 msgstr "Die Hauptsprache des Artikels"
 
-#: src/submission/models.py:729
+#: src/submission/models.py:747
 msgid "Custom page range. e.g.: 'I-VII' or 1-3,4-8"
 msgstr ""
 
-#: src/submission/models.py:752
+#: src/submission/models.py:770
 msgid "Add any comments you'd like the editor to consider here."
 msgstr ""
 
-#: src/submission/models.py:775
+#: src/submission/models.py:793
 msgid ""
 "Custom 'how to cite' text. To be used only if the block generated by Janeway "
 "is not suitable."
 msgstr ""
 
-#: src/submission/models.py:781 src/submission/models.py:788
+#: src/submission/models.py:799 src/submission/models.py:806
 msgid ""
 "Name of the publisher who published this article Only relevant to migrated "
 "articles from a different publisher"
 msgstr ""
 
-#: src/submission/models.py:794
+#: src/submission/models.py:812
 msgid ""
 "Original ISSN of this article's journal when published Only relevant for "
 "back content published under a different title"
 msgstr ""
 
-#: src/submission/models.py:2006
+#: src/submission/models.py:2024
 msgid "Optional name prefix (e.g: Prof or Dr)"
 msgstr ""
 
-#: src/submission/models.py:2012
+#: src/submission/models.py:2030
 msgid "Optional name suffix (e.g.: Jr or III)"
 msgstr ""
 
-#: src/submission/models.py:2022
+#: src/submission/models.py:2061
 msgid "Frozen Biography"
 msgstr "Biografie"
 
-#: src/submission/models.py:2023
+#: src/submission/models.py:2062
 msgid ""
 "The author's biography at the time they published the linked article. For "
 "this article only, it overrides any main biography attached to the author's "
@@ -1027,100 +1030,100 @@ msgid ""
 "account will be populated instead."
 msgstr ""
 
-#: src/submission/models.py:2046
+#: src/submission/models.py:2085
 msgid "Author Email"
 msgstr "E-Mail Autor:in"
 
-#: src/submission/models.py:2052
+#: src/submission/models.py:2091
 msgid ""
 "ORCiD to be displayed when no account is associated with this author. It "
 "should be introduced in code format (e.g: 0000-0000-0000-000X)"
 msgstr ""
 
-#: src/submission/models.py:2059
+#: src/submission/models.py:2098
 msgid ""
 "If checked, this authors email address link will be displayed on the article "
 "page."
 msgstr ""
 
-#: src/submission/models.py:2434
+#: src/submission/models.py:2473
 #: src/templates/admin/submission/submit_files.html:75
 msgid "Figures and Data Files"
 msgstr "Abbildungen und Datensätze"
 
-#: src/submission/models.py:2441
+#: src/submission/models.py:2480
 msgid "The default license applied when no option is presented"
 msgstr "Eine Standardlizenz wird angewendet, wenn keine Auswahl angezeigt wird"
 
-#: src/submission/models.py:2449
+#: src/submission/models.py:2488
 msgid "The default language of articles when lang is hidden"
 msgstr "Die Standardsprache der Artikel, wenn die Auswahl ausgeblendet ist"
 
-#: src/submission/models.py:2455
+#: src/submission/models.py:2494
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standardrubrik der Artikel, wenn keine Auswahl angezeigt wird"
 
-#: src/submission/views.py:277 src/submission/views.py:312
-#: src/submission/views.py:337
+#: src/submission/views.py:283 src/submission/views.py:318
+#: src/submission/views.py:343
 #, python-brace-format
 msgid "{author_name} added to the article."
 msgstr "{author_name} wurde dem Artikel hinzugefügt."
 
-#: src/submission/views.py:305
+#: src/submission/views.py:311
 msgid "Errors found in the new author form"
 msgstr "Es sind Fehler im Formular Neuer Autor aufgetreten"
 
-#: src/submission/views.py:326
+#: src/submission/views.py:332
 msgid "An empty search is not allowed."
 msgstr "Eine leere Suche ist nicht zulässig."
 
-#: src/submission/views.py:344
+#: src/submission/views.py:350
 msgid "No author found with those details."
 msgstr "Mit diesen Angaben konnte kein/e Autor:in gefunden werden."
 
-#: src/submission/views.py:354
+#: src/submission/views.py:360
 msgid "You must select a main author."
 msgstr "Ein Hauptautor muss ausgewählt werden."
 
-#: src/submission/views.py:577
+#: src/submission/views.py:583
 msgid "File deleted"
 msgstr "Datei gelöscht"
 
-#: src/submission/views.py:632
+#: src/submission/views.py:638
 msgid "You must upload a manuscript file."
 msgstr ""
 
-#: src/submission/views.py:700
+#: src/submission/views.py:710
 #, python-brace-format
 msgid "Article {title} submitted"
 msgstr "Artikel {title} eingereicht"
 
-#: src/submission/views.py:810
+#: src/submission/views.py:820
 msgid "Metadata updated."
 msgstr "Metadaten aktualisiert."
 
-#: src/submission/views.py:822
+#: src/submission/views.py:832
 msgid "Primary author set."
 msgstr ""
 
-#: src/submission/views.py:839
+#: src/submission/views.py:849
 #, python-brace-format
 msgid "Author {author_name} updated."
 msgstr "Autor:in {author_name} aktualisiert."
 
-#: src/submission/views.py:857
+#: src/submission/views.py:867
 msgid "Frozen Author deleted."
 msgstr "Archivierter Autor:innen-Eintrag gelöscht."
 
-#: src/submission/views.py:972
+#: src/submission/views.py:982
 msgid "License saved."
 msgstr "Lizenz gespeichert."
 
-#: src/submission/views.py:1017
+#: src/submission/views.py:1027
 msgid "License {license_name} deleted."
 msgstr "Lizenz {license name} entfernt."
 
-#: src/submission/views.py:1053
+#: src/submission/views.py:1063
 msgid "Configuration updated."
 msgstr "Konfiguration aktualisiert."
 
@@ -1233,7 +1236,7 @@ msgid "Stage"
 msgstr ""
 
 #: src/templates/admin/core/manager/sections/section_articles.html:33
-#: src/templates/admin/journal/manage/backcontent/new_article.html:39
+#: src/templates/admin/journal/manage/backcontent/articles.html:39
 msgid "Main Author"
 msgstr "Hauptautor:in"
 
@@ -1480,7 +1483,7 @@ msgid "Add funder"
 msgstr "Fördermittelquelle hinzufügen"
 
 #: src/templates/admin/elements/history_modal.html:8
-#: src/templates/admin/journal/manage/backcontent/submission.html:179
+#: src/templates/admin/journal/manage/backcontent/submission.html:180
 msgid "History"
 msgstr ""
 
@@ -1512,8 +1515,8 @@ msgstr "Anwenden"
 msgid "Clear all"
 msgstr "Filter löschen"
 
-#: src/templates/admin/elements/metadata.html:44
-#: src/templates/admin/journal/manage/backcontent/submission.html:49
+#: src/templates/admin/elements/metadata.html:49
+#: src/templates/admin/journal/manage/backcontent/submission.html:50
 #: src/templates/admin/submission/submit_review.html:75
 #: src/themes/OLH/templates/journal/article.html:178
 #: src/themes/OLH/templates/journal/print.html:30
@@ -1529,7 +1532,7 @@ msgstr "Filter löschen"
 msgid "Abstract"
 msgstr "Abstract"
 
-#: src/templates/admin/elements/metadata.html:56
+#: src/templates/admin/elements/metadata.html:61
 #: src/templates/admin/submission/submit_info.html:94
 #: src/templates/admin/submission/submit_review.html:93
 #: src/themes/OLH/templates/journal/article.html:181
@@ -1558,23 +1561,23 @@ msgstr "Abstract"
 msgid "Keywords"
 msgstr "Schlagwörter"
 
-#: src/templates/admin/elements/metadata.html:59
-#: src/templates/admin/elements/metadata.html:65
+#: src/templates/admin/elements/metadata.html:64
+#: src/templates/admin/elements/metadata.html:70
 #: src/templates/admin/submission/submit_review.html:96
 #: src/templates/admin/submission/submit_review.html:103
 msgid "No keywords recorded"
 msgstr ""
 
-#: src/templates/admin/elements/metadata.html:62
-#: src/templates/admin/submission/edit/metadata.html:125
+#: src/templates/admin/elements/metadata.html:67
+#: src/templates/admin/submission/edit/metadata.html:122
 #: src/templates/admin/submission/submit_info.html:104
 #: src/templates/admin/submission/submit_review.html:100
 #: src/themes/TUWJFM/templates/journal/article.html:181
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
-#: src/templates/admin/elements/metadata.html:153
-#: src/templates/admin/submission/edit/metadata.html:248
+#: src/templates/admin/elements/metadata.html:158
+#: src/templates/admin/submission/edit/metadata.html:255
 #: src/templates/admin/submission/submit_funding.html:75
 msgid "Funding Statement"
 msgstr ""
@@ -1613,24 +1616,24 @@ msgstr "Hinweis der Herausgeber:innen speichern"
 
 #: src/templates/admin/elements/repository/metadata_form.html:39
 #: src/templates/admin/repository/submit/start.html:71
-#: src/templates/admin/submission/edit/metadata.html:121
-#: src/templates/admin/submission/edit/metadata.html:128
+#: src/templates/admin/submission/edit/metadata.html:118
+#: src/templates/admin/submission/edit/metadata.html:125
 #: src/templates/admin/submission/submit_info.html:96
-#: src/templates/admin/submission/submit_info.html:106 src/utils/forms.py:55
-#: src/utils/forms.py:57
+#: src/templates/admin/submission/submit_info.html:106 src/utils/forms.py:59
+#: src/utils/forms.py:61
 msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
 
 #: src/templates/admin/elements/repository/metadata_form.html:50
 #: src/templates/admin/elements/submission/additional_fields.html:4
-#: src/templates/admin/journal/manage/backcontent/submission.html:95
-#: src/templates/admin/submission/submit_review.html:138
+#: src/templates/admin/journal/manage/backcontent/submission.html:96
+#: src/templates/admin/submission/submit_review.html:149
 msgid "Additional Fields"
 msgstr "Weitere Felder"
 
 #: src/templates/admin/elements/submit/author.html:8
-#: src/templates/admin/journal/manage/backcontent/submission.html:115
-#: src/templates/admin/journal/manage/backcontent/submission.html:121
+#: src/templates/admin/journal/manage/backcontent/submission.html:116
+#: src/templates/admin/journal/manage/backcontent/submission.html:122
 #: src/templates/admin/journal/manage/backcontent/submission_author.html:8
 #: src/templates/admin/repository/submit/authors.html:62
 #: src/templates/admin/repository/submit/authors.html:113
@@ -1644,7 +1647,7 @@ msgstr "Autor:in neu hinzufügen"
 
 #: src/templates/admin/elements/submit/author.html:67
 #: src/templates/admin/journal/manage/backcontent/submission_author.html:67
-#: src/templates/admin/submission/edit/metadata.html:143
+#: src/templates/admin/submission/edit/metadata.html:140
 #: src/themes/OLH/templates/elements/submit/author.html:64
 #: src/themes/TUWJFM/templates/elements/submit/author.html:68
 msgid "Add Author"
@@ -1767,16 +1770,16 @@ msgid ""
 "article will move back to the %(stage)s stage."
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:20
+#: src/templates/admin/journal/manage/backcontent/articles.html:20
 #: src/templates/admin/journal/manage/backcontent/submission.html:15
 msgid "New Article"
 msgstr "Neuer Artikel"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:23
+#: src/templates/admin/journal/manage/backcontent/articles.html:23
 msgid "To submit an article, click the start button below"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:26
+#: src/templates/admin/journal/manage/backcontent/articles.html:26
 #: src/templates/admin/journal/submissions.html:38
 #: src/templates/admin/submission/start.html:77
 #: src/themes/OLH/templates/core/nav.html:45
@@ -1788,30 +1791,30 @@ msgstr ""
 msgid "Start Submission"
 msgstr "Einreichung beginnen"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:30
+#: src/templates/admin/journal/manage/backcontent/articles.html:30
 msgid "Existing Articles"
 msgstr "Vorhandene Artikel"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:36
+#: src/templates/admin/journal/manage/backcontent/articles.html:36
 #: src/templates/admin/journal/manage/sync/sync_articles.html:25
 msgid "Id"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:38
+#: src/templates/admin/journal/manage/backcontent/articles.html:38
 msgid "Submitted"
 msgstr "Eingereicht"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:45
+#: src/templates/admin/journal/manage/backcontent/articles.html:45
 #: src/templates/admin/journal/manage/sync/sync_articles.html:31
 msgctxt "oes"
 msgid "Issue"
 msgstr "Ausgabe"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:49
+#: src/templates/admin/journal/manage/backcontent/articles.html:49
 msgid "Actions"
 msgstr "Aktionen"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:67
+#: src/templates/admin/journal/manage/backcontent/articles.html:67
 #: src/themes/OLH/templates/press/press_journals.html:61
 #: src/themes/OLH/templates/press/press_journals.html:68
 #: src/themes/clean/templates/journal/article.html:212
@@ -1823,30 +1826,30 @@ msgstr "Aktionen"
 msgid "View"
 msgstr "Ansehen"
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:68
-#: src/templates/admin/journal/manage/backcontent/submission.html:337
+#: src/templates/admin/journal/manage/backcontent/articles.html:68
+#: src/templates/admin/journal/manage/backcontent/submission.html:338
 #: src/templates/admin/repository/article.html:216
 #: src/templates/admin/repository/submit/authors.html:79
 #: src/templates/admin/submission/submit_funding.html:77
 msgid "Delete"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/new_article.html:74
+#: src/templates/admin/journal/manage/backcontent/articles.html:74
 #: src/templates/admin/journal/manage/sync/sync_articles.html:115
 msgid "No articles in this stage"
 msgstr "Keine Artikel für die Anzeige"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:24
+#: src/templates/admin/journal/manage/backcontent/submission.html:25
 msgid "Add A New Article"
 msgstr "Neuem Artikel hinzufügen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:60
+#: src/templates/admin/journal/manage/backcontent/submission.html:61
 #: src/templates/admin/submission/submit_review.html:109
 #: src/themes/TUWJFM/templates/preprints/review.html:40
 msgid "Language"
 msgstr "Sprache"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:71
+#: src/templates/admin/journal/manage/backcontent/submission.html:72
 #: src/themes/OLH/templates/journal/article.html:311
 #: src/themes/OLH/templates/repository/preprint.html:127
 #: src/themes/TUWJFM/templates/journal/article.html:245
@@ -1857,27 +1860,27 @@ msgstr "Sprache"
 msgid "License"
 msgstr "Lizenz"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:78
+#: src/templates/admin/journal/manage/backcontent/submission.html:79
 msgctxt "bc"
 msgid "Keywords"
 msgstr "Schlagwörter"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:81
-#: src/templates/admin/journal/manage/backcontent/submission.html:87
+#: src/templates/admin/journal/manage/backcontent/submission.html:82
+#: src/templates/admin/journal/manage/backcontent/submission.html:88
 msgctxt "bc"
 msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:84
+#: src/templates/admin/journal/manage/backcontent/submission.html:85
 msgctxt "bc"
 msgid "Keywords (German)"
 msgstr "Schlagwörter"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:109
+#: src/templates/admin/journal/manage/backcontent/submission.html:110
 msgid "Article Authors"
 msgstr "Artikel Autor:innen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:113
+#: src/templates/admin/journal/manage/backcontent/submission.html:114
 msgid ""
 "You can add an author by clicking the button below. This will open a popup "
 "modal for you to complete their details."
@@ -1887,7 +1890,7 @@ msgstr ""
 "Schaltfläche unten klicken. Dies öffnet eine Eingabemaske für Sie, um ihre "
 "Details zu vervollständigen."
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:114
+#: src/templates/admin/journal/manage/backcontent/submission.html:115
 msgid ""
 "If you know of an existing author, complete only the email field and they "
 "will be added as an author."
@@ -1895,7 +1898,7 @@ msgstr ""
 "If you know of an existing author, complete only the email field and they "
 "will be added as an author."
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:117
+#: src/templates/admin/journal/manage/backcontent/submission.html:118
 #: src/templates/admin/submission/submit_authors.html:30
 #: src/themes/TUWJFM/templates/preprints/authors.html:25
 msgid ""
@@ -1907,19 +1910,19 @@ msgstr ""
 "Übereinstimmung gefunden wird, werden diese automatisch als Autor:in "
 "hinzugefügt. Diese Suche gibt nur exakte Übereinstimmungen zurück."
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:119
+#: src/templates/admin/journal/manage/backcontent/submission.html:120
 #: src/templates/admin/submission/submit_authors.html:36
 #: src/themes/TUWJFM/templates/preprints/authors.html:31
 msgid "Search by email address or ORCiD"
 msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:124
+#: src/templates/admin/journal/manage/backcontent/submission.html:125
 #: src/templates/admin/submission/submit_authors.html:60
 #: src/themes/TUWJFM/templates/preprints/authors.html:55
 msgid "Current Authors"
 msgstr "Aktuelle Autor:innen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:131
+#: src/templates/admin/journal/manage/backcontent/submission.html:132
 #: src/templates/admin/repository/article.html:212
 #: src/templates/admin/repository/author_article.html:91
 #: src/templates/admin/repository/submit/authors.html:76
@@ -1929,13 +1932,13 @@ msgstr "Aktuelle Autor:innen"
 msgid "Name"
 msgstr "Name"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:148
+#: src/templates/admin/journal/manage/backcontent/submission.html:149
 #: src/templates/admin/submission/submit_authors.html:86
 #: src/themes/TUWJFM/templates/preprints/authors.html:78
 msgid "No authors yet, add one!"
 msgstr "Noch keine Autor:innen vorhanden, fügen Sie jemanden hinzu!"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:154
+#: src/templates/admin/journal/manage/backcontent/submission.html:155
 msgid ""
 "You may select a main author, this author will receive the communications "
 "regarding your articles process through our systems. This does not have to "
@@ -1945,35 +1948,35 @@ msgstr ""
 "die Mitteilungen bezüglich des Artikelprozesses durch unsere Systeme. Sie "
 "müssen sich nicht selbst nennen."
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:155
+#: src/templates/admin/journal/manage/backcontent/submission.html:156
 #: src/templates/admin/submission/submit_authors.html:94
 msgid "Select main author"
 msgstr "Hauptautor:in wählen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:168
+#: src/templates/admin/journal/manage/backcontent/submission.html:169
 msgid "Galleys"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:174
+#: src/templates/admin/journal/manage/backcontent/submission.html:175
 msgid "Filename"
 msgstr "Dateiname"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:175
+#: src/templates/admin/journal/manage/backcontent/submission.html:176
 msgid "Type"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:176
+#: src/templates/admin/journal/manage/backcontent/submission.html:177
 #: src/templates/admin/press/edit_press_journal_description.html:11
 #: src/templates/admin/press/edit_press_journal_description.html:17
 #: src/templates/admin/repository/article.html:215
-#: src/templates/admin/review/unassigned_article.html:122
+#: src/templates/admin/review/unassigned_article.html:120
 #: src/templates/admin/review/view_review.html:112
 #: src/templates/admin/submission/submit_funding.html:76
 #: src/themes/OLH/templates/elements/edit_author.html:4
 msgid "Edit"
 msgstr "Editieren"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:177
+#: src/templates/admin/journal/manage/backcontent/submission.html:178
 #: src/themes/OLH/templates/journal/article.html:139
 #: src/themes/OLH/templates/journal/article.html:213
 #: src/themes/OLH/templates/journal/article.html:363
@@ -1994,60 +1997,60 @@ msgstr "Editieren"
 msgid "Download"
 msgstr "Herunterladen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:178
+#: src/templates/admin/journal/manage/backcontent/submission.html:179
 msgid "Replace"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:180
+#: src/templates/admin/journal/manage/backcontent/submission.html:181
 msgid "Create PDF"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:181
+#: src/templates/admin/journal/manage/backcontent/submission.html:182
 msgid "Create EPUB"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:244
+#: src/templates/admin/journal/manage/backcontent/submission.html:245
 msgid "No galleys have been uploaded."
 msgstr "Keine Galley-Dateien hochgeladen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:249
+#: src/templates/admin/journal/manage/backcontent/submission.html:250
 msgid "Upload a new galley"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:281
+#: src/templates/admin/journal/manage/backcontent/submission.html:282
 msgid "Publication Info"
 msgstr "Publikationsinfo"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:305
+#: src/templates/admin/journal/manage/backcontent/submission.html:306
 msgid "More Pub Info is available on the"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:305
+#: src/templates/admin/journal/manage/backcontent/submission.html:306
 msgid "Pre Publication Checklist"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:310
+#: src/templates/admin/journal/manage/backcontent/submission.html:311
 msgid "Remote"
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:313
+#: src/templates/admin/journal/manage/backcontent/submission.html:314
 msgid ""
 "If your article is remote, you can fill the required details here. If the "
 "remote article has a DOI, you should use it for full resolution."
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:324
-#: src/templates/admin/journal/manage/backcontent/submission.html:331
+#: src/templates/admin/journal/manage/backcontent/submission.html:325
+#: src/templates/admin/journal/manage/backcontent/submission.html:332
 msgid "Publish"
 msgstr "Veröffentlichen"
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:327
+#: src/templates/admin/journal/manage/backcontent/submission.html:328
 msgid ""
 "When you are ready to publish your article, press the publish button and it "
 "will be published."
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/submission.html:334
+#: src/templates/admin/journal/manage/backcontent/submission.html:335
 msgid "Save as Draft"
 msgstr "Als Draft speichern"
 
@@ -2187,7 +2190,7 @@ msgstr "Korrektor:innen des Prüfdrucks (Proof)"
 #: src/templates/admin/repository/article.html:214
 #: src/templates/admin/repository/author_article.html:93
 #: src/templates/admin/repository/submit/authors.html:78
-#: src/templates/admin/submission/submit_review.html:160
+#: src/templates/admin/submission/submit_review.html:171
 #: src/themes/OLH/templates/core/accounts/public_profile.html:38
 #: src/themes/TUWJFM/templates/journal/newsletter.html:64
 #: src/themes/clean/templates/core/accounts/public_profile.html:14
@@ -2283,7 +2286,7 @@ msgstr ""
 "Details zu vervollständigen."
 
 #: src/templates/admin/repository/submit/authors.html:67
-#: src/templates/admin/submission/edit/metadata.html:142
+#: src/templates/admin/submission/edit/metadata.html:139
 #: src/themes/OLH/templates/journal/article.html:27
 #: src/themes/OLH/templates/journal/article.html:63
 #: src/themes/OLH/templates/journal/article.html:161
@@ -2417,31 +2420,31 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:25
+#: src/templates/admin/review/in_review.html:23
 msgid "This article is not yet in the review stage"
 msgstr "Dieser Artikel wurde nicht begutachtet."
 
-#: src/templates/admin/review/in_review.html:27
+#: src/templates/admin/review/in_review.html:25
 msgid "Before you can move this paper into review you need to"
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:28
+#: src/templates/admin/review/in_review.html:26
 msgid "assign an editor"
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:41
-#: src/templates/admin/review/unassigned_article.html:293
+#: src/templates/admin/review/in_review.html:39
+#: src/templates/admin/review/unassigned_article.html:295
 msgid ""
 "This paper has not had an automatic plagiarism check. If you wish to do so "
 "you can run a"
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:41
-#: src/templates/admin/review/unassigned_article.html:293
+#: src/templates/admin/review/in_review.html:39
+#: src/templates/admin/review/unassigned_article.html:295
 msgid "Similarity Check via iThenticate"
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:68
+#: src/templates/admin/review/in_review.html:66
 #, python-format
 msgid ""
 "\n"
@@ -2450,7 +2453,7 @@ msgid ""
 "                                            "
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:217
+#: src/templates/admin/review/in_review.html:215
 msgid ""
 "\n"
 "                                The latest manuscript and figure files for "
@@ -2459,7 +2462,7 @@ msgid ""
 "                                "
 msgstr ""
 
-#: src/templates/admin/review/in_review.html:287
+#: src/templates/admin/review/in_review.html:285
 msgid "Move to Next Stage"
 msgstr ""
 
@@ -2518,25 +2521,25 @@ msgid ""
 "revisions once you click 'Submit Revisions'"
 msgstr ""
 
-#: src/templates/admin/review/unassigned_article.html:122
+#: src/templates/admin/review/unassigned_article.html:120
 msgid "Assign"
 msgstr "Zuweisen"
 
-#: src/templates/admin/review/unassigned_article.html:122
+#: src/templates/admin/review/unassigned_article.html:120
 msgid "Projected Issue"
 msgstr "Geplante Ausgabe"
 
-#: src/templates/admin/review/unassigned_article.html:127
+#: src/templates/admin/review/unassigned_article.html:125
 msgid "This article is projected to be published as part of"
 msgstr "Es ist geplant, diesen Artikel als Teil der Ausgabe zu veröffentlichen"
 
-#: src/templates/admin/review/unassigned_article.html:129
+#: src/templates/admin/review/unassigned_article.html:127
 msgid "This article is not projected to be published as part of any issue."
 msgstr ""
 "Es ist nicht geplant, dass dieser Artikel als Teil einer Ausgabe "
 "veröffentlicht wird."
 
-#: src/templates/admin/review/unassigned_article.html:142
+#: src/templates/admin/review/unassigned_article.html:140
 msgid ""
 "To check an article for possible plagiarism, you can send an article for an "
 "automated Similarity Check via iThenticate by clicking Send below. The "
@@ -2682,38 +2685,11 @@ msgstr ""
 msgid "Suggested Reviewers"
 msgstr "Vorgeschlagene Gutachter"
 
-#: src/templates/admin/submission/edit/metadata.html:26
+#: src/templates/admin/submission/edit/metadata.html:23
 msgid "Edit Metadata"
 msgstr "Metadaten bearbeiten"
 
-#: src/templates/admin/submission/edit/metadata.html:150
-msgid "Full Name"
-msgstr "Voller Name"
-
-#: src/templates/admin/submission/edit/metadata.html:151
-#: src/templates/admin/submission/submit_review.html:155
-msgid "First Name"
-msgstr "Vorname"
-
-#: src/templates/admin/submission/edit/metadata.html:152
-#: src/templates/admin/submission/submit_review.html:156
-msgid "Middle Name"
-msgstr "Zweiter Vorname"
-
-#: src/templates/admin/submission/edit/metadata.html:153
-#: src/templates/admin/submission/submit_review.html:157
-msgid "Last Name"
-msgstr "Nachname"
-
-#: src/templates/admin/submission/edit/metadata.html:156
-msgid "Departement"
-msgstr "Fachbereich"
-
-#: src/templates/admin/submission/edit/metadata.html:158
-msgid "Correspondence Author"
-msgstr "Korrespondierende Autor:in"
-
-#: src/templates/admin/submission/edit/metadata.html:199
+#: src/templates/admin/submission/edit/metadata.html:206
 msgid ""
 "\n"
 "                            You can search the <a href=\"https://www."
@@ -2723,11 +2699,11 @@ msgid ""
 "                        "
 msgstr ""
 
-#: src/templates/admin/submission/edit/metadata.html:299
+#: src/templates/admin/submission/edit/metadata.html:306
 msgid "Cited Reference"
 msgstr ""
 
-#: src/templates/admin/submission/edit/metadata.html:300
+#: src/templates/admin/submission/edit/metadata.html:307
 msgid "Add Cited Reference"
 msgstr ""
 
@@ -2893,7 +2869,7 @@ msgstr "Hochladen"
 
 #: src/templates/admin/submission/submit_files.html:47
 #: src/templates/admin/submission/submit_files.html:87
-#: src/templates/admin/submission/submit_review.html:179
+#: src/templates/admin/submission/submit_review.html:190
 #: src/themes/TUWJFM/templates/preprints/review.html:78
 #: src/themes/TUWJFM/templates/preprints/review.html:97
 #: src/themes/TUWJFM/templates/preprints/submit_files.html:42
@@ -3020,55 +2996,67 @@ msgstr ""
 msgid "Licence"
 msgstr "Lizenz"
 
-#: src/templates/admin/submission/submit_review.html:152
+#: src/templates/admin/submission/submit_review.html:163
 #: src/themes/TUWJFM/templates/preprints/review.html:52
 msgid "Author Info"
 msgstr "Informationen über den Autor / die Autorin"
 
-#: src/templates/admin/submission/submit_review.html:158
+#: src/templates/admin/submission/submit_review.html:166
+msgid "First Name"
+msgstr "Vorname"
+
+#: src/templates/admin/submission/submit_review.html:167
+msgid "Middle Name"
+msgstr "Zweiter Vorname"
+
+#: src/templates/admin/submission/submit_review.html:168
+msgid "Last Name"
+msgstr "Nachname"
+
+#: src/templates/admin/submission/submit_review.html:169
 msgid "Email Address"
 msgstr "E-Mail-Adresse"
 
-#: src/templates/admin/submission/submit_review.html:168
+#: src/templates/admin/submission/submit_review.html:179
 msgid "No ORCID supplied"
 msgstr "Keine ORCID angegeben"
 
-#: src/templates/admin/submission/submit_review.html:175
+#: src/templates/admin/submission/submit_review.html:186
 #: src/templates/admin/submission/timeline.html:28
 #: src/templates/admin/submission/timeline.html:29
 #: src/themes/TUWJFM/templates/preprints/review.html:71
 msgid "Article Files"
 msgstr "Artikeldateien"
 
-#: src/templates/admin/submission/submit_review.html:180
+#: src/templates/admin/submission/submit_review.html:191
 msgid "File Type"
 msgstr "Dateityp"
 
-#: src/templates/admin/submission/submit_review.html:186
+#: src/templates/admin/submission/submit_review.html:197
 msgid "Manuscript"
 msgstr "Manuskript"
 
-#: src/templates/admin/submission/submit_review.html:194
+#: src/templates/admin/submission/submit_review.html:205
 #: src/themes/TUWJFM/templates/preprints/review.html:93
 msgid "Figure/Data"
 msgstr "Abbildungen / Daten"
 
-#: src/templates/admin/submission/submit_review.html:204
+#: src/templates/admin/submission/submit_review.html:215
 msgid "Comments to the Editor"
 msgstr "Kommentare an die Herausgeber:innen"
 
-#: src/templates/admin/submission/submit_review.html:207
+#: src/templates/admin/submission/submit_review.html:218
 msgid ""
 "Before submitting you have the option to add additional comments for the "
 "editor using the field below. Only the editor will see anything you add here."
 msgstr ""
 
-#: src/templates/admin/submission/submit_review.html:213
+#: src/templates/admin/submission/submit_review.html:224
 #: src/themes/TUWJFM/templates/preprints/review.html:115
 msgid "Complete"
 msgstr "Vollständig"
 
-#: src/templates/admin/submission/submit_review.html:213
+#: src/templates/admin/submission/submit_review.html:224
 #: src/themes/OLH/templates/core/nav.html:42
 #: src/themes/TUWJFM/templates/preprints/review.html:115
 #: src/themes/clean/templates/core/nav.html:48
@@ -3125,7 +3113,7 @@ msgstr ""
 msgid "This article is not a part of any issues"
 msgstr "Dieser Artikel ist nicht Teil einer Ausgabe"
 
-#: src/templates/common/elements/orcid_registration.html:12
+#: src/templates/common/elements/orcid_registration.html:15
 msgid "Register with ORCiD"
 msgstr "Registrieren mit ORCiD"
 
@@ -5380,13 +5368,17 @@ msgstr "Neue Einreichung beginnen"
 msgid "Add a Comment"
 msgstr "Neuer Kommentar"
 
-#: src/utils/forms.py:133
+#: src/utils/forms.py:137
 msgid "What is %(num1)i %(operator)s %(num2)i? "
 msgstr "Was ist% (num1) i% (Operator) s% (num2) i?"
 
-#: src/utils/forms.py:134
+#: src/utils/forms.py:138
 msgid "Answer this question: "
 msgstr "Beantworten Sie diese Frage:"
+
+#: src/utils/forms.py:183
+msgid "HTML is not allowed in this field"
+msgstr ""
 
 #: src/utils/transactional_emails.py:385
 msgid "accepted"
