@@ -34,7 +34,7 @@ more-itertools==10.1.0
 jsmin==3.0.1
 kitchen==1.2.4
 libsass==0.23.0
-lxml==4.9.2
+lxml==5.3.0
 markdown
 maxminddb==2.5.1
 mock
@@ -53,7 +53,7 @@ python-dateutil==2.8.1
 python-docx==0.8.11
 python-magic==0.4.13
 requests==2.31.0
-six==1.14.0
+six==1.16.0
 sqlparse==0.4.4
 swapper==1.3.0
 tqdm==4.66.3
@@ -67,5 +67,6 @@ git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.3
 gunicorn
 mysqlclient==2.2.0
 django-simple-captcha==0.6.0
+pytz==2024.2
 
 
