@@ -337,20 +337,20 @@ def parse_backend_list(url, auth_file, auth_url, regex):
 def get_article_list(url, list_type, auth_file):
     auth_url = url
 
-    regex = '\/jms\/editor\/submissionReview\/(\d+)'
+    regex = r'/jms/editor/submissionReview/(\d+)'
 
     if list_type == 'in_review':
         url += '/jms/editor/submissions/submissionsInReview'
-        regex = '\/jms\/editor\/submissionReview\/(\d+)'
+        regex = r'/jms/editor/submissionReview/(\d+)'
     elif list_type == 'unassigned':
         url += '/jms/editor/submissions/submissionsUnassigned'
-        regex = '\/jms\/editor\/submission\/(\d+)'
+        regex = r'/jms/editor/submission/(\d+)'
     elif list_type == 'in_editing':
         url += '/jms/editor/submissions/submissionsInEditing'
-        regex = '\/jms\/editor\/submissionEditing\/(\d+)'
+        regex = r'/jms/editor/submissionEditing/(\d+)'
     elif list_type == 'archive':
         url += '/jms/editor/submissions/submissionsArchives'
-        regex = '\/jms\/editor\/submissionEditing\/(\d+)'
+        regex = r'/jms/editor/submissionEditing/(\d+)'
     else:
         return None
 
@@ -379,7 +379,7 @@ def get_user_list(url, auth_file):
     auth_url = url
 
     url += '/jms/manager/people/all'
-    regex = '\/manager\/userProfile\/(\d+)'
+    regex = r'/manager/userProfile/(\d+)'
 
     matches = parse_backend_user_list(url, auth_file, auth_url, regex)
 
