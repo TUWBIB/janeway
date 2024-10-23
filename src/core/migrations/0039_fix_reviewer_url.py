@@ -5,7 +5,7 @@ import re
 
 from django.db import migrations
 
-REGEX = re.compile("({%\ ?journal_url 'do_review' review_assignment.id\ ?%})")
+REGEX = re.compile(r"({%\ ?journal_url 'do_review' review_assignment.id\ ?%})")
 OUTPUT = "{{ review_url }}"
 
 def replace_template(apps, schema_editor):

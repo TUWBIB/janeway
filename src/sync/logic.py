@@ -451,7 +451,7 @@ def articleToMarc(article):
 
             # 300 __ physical description
             datafield=DataField.createDataField("300"," "," ")
-            match=re.match('(\d+)-(\d+)',article.page_numbers)
+            match=re.match(r'(\d+)-(\d+)',article.page_numbers)
             no_pages=None
             if match:
                 first_page=int(match[1])
