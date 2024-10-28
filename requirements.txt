@@ -68,5 +68,4 @@ gunicorn
 mysqlclient==2.2.0
 django-simple-captcha==0.6.0
 pytz==2024.2
-
-
+lingua-language-detector 

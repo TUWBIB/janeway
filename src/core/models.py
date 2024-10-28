@@ -1600,6 +1600,8 @@ class Contact(models.Model):
     body = JanewayBleachField(verbose_name=_('Your message'))
     client_ip = models.GenericIPAddressField()
     date_sent = models.DateField(auto_now_add=True)
+    detected_language = models.CharField(max_length=2,default=None,null=True,blank=True,verbose_name=_('Detected language'))
+    is_spam = models.PositiveSmallIntegerField(default=None,null=True,blank=True,verbose_name=_('Message is spam'))
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='contact_c_t',
                                      null=True)
