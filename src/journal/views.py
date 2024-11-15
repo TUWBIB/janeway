@@ -2068,7 +2068,7 @@ def contact(request):
             new_contact.save()
 
             # TODO
-            # for now just don't send if russian ist detected
+            # for now just don't send if russian is detected
             if new_contact.detected_language and new_contact.detected_language == 'ru':
                 pass
             else:
