@@ -1,3 +1,4 @@
+from django.utils import timezone
 from journal import models
 
 
@@ -18,6 +19,7 @@ def yield_homepage_element_context(request, homepage_elements):
 
             issue_objects = models.Issue.objects.filter(
                 journal=request.journal,
+                date__lte=timezone.now()
             )
 
             context = {
