@@ -4797,7 +4797,7 @@ msgstr "Schließen"
 
 #: src/themes/TUWJFM/templates/journal/article.html:94
 msgid "Journal Article"
-msgstr "Aritkel"
+msgstr "Artikel"
 
 #: src/themes/TUWJFM/templates/journal/article.html:158
 msgid "Published in"
