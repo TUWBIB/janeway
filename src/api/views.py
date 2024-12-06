@@ -171,7 +171,7 @@ class PreprintViewSet(viewsets.ModelViewSet):
 
 
 @csrf_exempt
-def oai(request):
+def oai_tuw(request):
     context = {}
     context['journal'] = request.journal
     context['responseDate'] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()+'Z'
@@ -206,7 +206,7 @@ def oai(request):
             resumption = params['resumptionToken'] if 'resumptionToken' in params else None
             if resumption or resumption == '': return error(request,context,'badResumptionToken')
 
-            template = 'apis/OAI_ListSets.xml'
+            template = 'apis/oai_tuw/OAI_ListSets.xml'
             
         elif verb == 'ListRecords':
             a = set(params.keys())
@@ -235,7 +235,7 @@ def oai(request):
 
             if len(articles) == 0: return error(request,context,'noRecordsMatch')
 
-            template = 'apis/OAI_ListRecords.xml'
+            template = 'apis/oai_tuw/OAI_ListRecords.xml'
             context['articles'] =  articles
 
         elif verb == 'ListIdentifiers':
@@ -265,7 +265,7 @@ def oai(request):
 
             if len(articles) == 0: return error(request,context,'noRecordsMatch')
 
-            template = 'apis/OAI_ListIdentifiers.xml'
+            template = 'apis/oai_tuw/OAI_ListIdentifiers.xml'
             context['articles'] =  articles
 
         elif verb == 'ListMetadataFormats':
@@ -285,7 +285,7 @@ def oai(request):
             except:
                 return error(request,context,'idDoesNotExist')
            
-            template = 'apis/OAI_ListMetadataFormats.xml'
+            template = 'apis/oai_tuw/OAI_ListMetadataFormats.xml'
     
         elif verb == 'GetRecord':
             a = set(params.keys())
@@ -309,11 +309,11 @@ def oai(request):
             except:
                 return error(request,context,'idDoesNotExist')
             
-            template = 'apis/OAI_GetRecord.xml'
+            template = 'apis/oai_tuw/OAI_GetRecord.xml'
             context['article'] = article            
 
         elif verb == 'Identify':
-            template = 'apis/OAI_Identify.xml'
+            template = 'apis/oai_tuw/OAI_Identify.xml'
             context['repositoryName'] = request.journal.description
             context['baseURL'] = request.scheme+'://'+request.META['HTTP_HOST']+request.path
             context['adminEmail'] = 'repositum@tuwien.ac.at'
@@ -341,7 +341,7 @@ def getArticles(journal=None,id_type='doi',identifier=None,from_date=None,until_
 
 def error(request,context,err_code,err_val=None):
     if err_val is None: err_val = err_code
-    template = 'apis/OAI_Error.xml'
+    template = 'apis/oai_tuw/OAI_Error.xml'
     context['err_code'] = err_code
     context['err_val'] = err_val
     return render(request, template, context, content_type="text/xml")
