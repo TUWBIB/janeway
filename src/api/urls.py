@@ -21,7 +21,7 @@ router.register(r'accounts', views.AccountViewSet, 'accounts')
 urlpatterns = [
     re_path(r'^', include(router.urls)),
     # keep TUW impl
-    re_path(r'^oai/$', oai_views.oai_view_factory, name='OAI_list_records'),
+    re_path(r'^oai/$', views.oai_tuw, name='OAI_list_records'),
     # Janeway master
 #    re_path(r'^oai/$', oai_views.oai_view_factory, name='OAI_list_records'),
     re_path(r'^kbart/$', views.kbart, name='kbart'),
