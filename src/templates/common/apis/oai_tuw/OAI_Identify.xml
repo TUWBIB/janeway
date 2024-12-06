@@ -1,4 +1,4 @@
-{% extends "apis/OAI_base.xml" %}
+{% extends "apis/oai_tuw/OAI_base.xml" %}
 {% block content %}
 <Identify>       
         <repositoryName>{{ repositoryName }}</repositoryName>

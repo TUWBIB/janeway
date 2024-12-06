@@ -1,0 +1,7 @@
+{% extends "apis/oai_tuw/OAI_base.xml" %}
+{% load oai %} 
+{% block content %}
+{% block record %}
+{% include "apis/oai_tuw/OAI_record.xml" %}
+{% endblock %}
+{% endblock %}
