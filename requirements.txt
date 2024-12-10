@@ -52,6 +52,7 @@ python-crontab==2.2.3
 python-dateutil==2.8.1
 python-docx==0.8.11
 python-magic==0.4.13
+pytz==2024.2
 requests==2.31.0
 six==1.16.0
 sqlparse==0.4.4
@@ -67,6 +68,4 @@ git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.3
 gunicorn
 mysqlclient==2.2.0
 django-simple-captcha==0.6.0
-pytz==2024.2
-
-
+lingua-language-detector 

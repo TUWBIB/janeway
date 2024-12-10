@@ -221,13 +221,13 @@ class EditAccountForm(forms.ModelForm):
         user.clean()
 
         posted_interests = self.cleaned_data['interests'].split(',')
+        user.interest.clear()
         for interest in posted_interests:
-            new_interest, c = models.Interest.objects.get_or_create(name=interest)
-            user.interest.add(new_interest)
-
-        for interest in user.interest.all():
-            if interest.name not in posted_interests:
-                user.interest.remove(interest)
+            if interest:
+                new_interest, _ = models.Interest.objects.get_or_create(
+                    name=interest,
+                )
+                user.interest.add(new_interest)
 
         user.save()
 
@@ -596,7 +596,7 @@ class CBVFacetForm(forms.Form):
         self.id = 'facet_form'
         self.queryset = kwargs.pop('queryset')
         self.facets = kwargs.pop('facets')
-        self.fields = {}
+        self.journal_filter_query = kwargs.pop('journal_filter_query', Q())
 
         super().__init__(*args, **kwargs)
 
@@ -612,12 +612,15 @@ class CBVFacetForm(forms.Form):
                 choices = []
                 for each in choice_queryset:
                     label = getattr(each, facet["choice_label_field"])
-                    count = self.queryset.filter(Q((facet_key, each.pk))).count()
+                    count = self.queryset.filter(
+                        Q((facet_key, each.pk)),
+                        self.journal_filter_query,
+                    ).count()
                     label_with_count = f'{label} ({count})'
                     choices.append((each.pk, label_with_count))
 
                 choices = sorted(choices, key=lambda x: x[1])
-                self.fields[facet_key] = forms.ChoiceField(
+                self.fields[facet_key] = forms.MultipleChoiceField(
                     widget=forms.widgets.CheckboxSelectMultiple,
                     choices=choices,
                     required=False,
@@ -652,6 +655,8 @@ class CBVFacetForm(forms.Form):
                     count = values_list.count(value)
                     label_with_count = f'{label} ({count})'
                     choices.append((value, label_with_count))
+
+                choices = sorted(choices, key=lambda x: x[1])
                 self.fields[facet_key] = forms.ChoiceField(
                     widget=forms.widgets.CheckboxSelectMultiple,
                     choices=choices,

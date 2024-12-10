@@ -78,6 +78,10 @@ from repository import models as repo_models
 from production import logic as prod_logic
 
 
+from lingua import Language, LanguageDetectorBuilder, ConfidenceValue
+detect_languages = [Language.ENGLISH, Language.GERMAN, Language.RUSSIAN]
+detector = LanguageDetectorBuilder.from_languages(*detect_languages).build()
+
 logger = get_logger(__name__)
 
 
@@ -148,11 +152,15 @@ def serve_journal_cover(request):
 
 @has_journal
 def funder_articles(request, funder_id):
-    """ Renders the list of articles in the journal.
+    """ Deprecated. Renders the list of articles in the journal.
 
         :param request: the request associated with this call
         :return: a rendered template of all articles
         """
+    raise DeprecationWarning(
+        'This view is deprecated.'
+    )
+
     if request.POST and 'clear' in request.POST:
         return logic.unset_article_session_variables(request)
 
@@ -2040,9 +2048,31 @@ def contact(request):
             new_contact.client_ip = shared.get_ip_address(request)
             new_contact.content_type = request.model_content_type
             new_contact.object_ic = request.site_type.pk
+            new_contact.detected_language = None
+            # TODO
+            # not implemented yet
+            new_contact.is_spam = None
+
+            # TODO
+            # library doesn't recognize gibberish
+            confidence_values = detector.compute_language_confidence_values(new_contact.body)
+            if confidence_values:
+                primary_conf_value = confidence_values[0]
+                if primary_conf_value:
+                    logger.info(f"contact form language detected: {primary_conf_value.language.iso_code_639_1.name.lower()}: {primary_conf_value.value}")
+                    if primary_conf_value.value >= 0.8:
+                        new_contact.detected_language = primary_conf_value.language.iso_code_639_1.name.lower()
+            else:
+                logger.info(f"contact form, no language detected")
+
             new_contact.save()
 
-            logic.send_contact_message(new_contact, request)
+            # TODO
+            # for now just don't send if russian is detected
+            if new_contact.detected_language and new_contact.detected_language == 'ru':
+                pass
+            else:
+                logic.send_contact_message(new_contact, request)
             messages.add_message(
                 request,
                 messages.SUCCESS,
