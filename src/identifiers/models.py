@@ -44,23 +44,23 @@ IDENTIFIER_TYPES = {
 
 NON_DOI_IDENTIFIER_TYPES = IDENTIFIER_TYPES - {"doi"}
 
-DOI_REGEX_PATTERN = '10.\d{4,9}/[-._;()/:A-Za-z0-9]+'
-URL_DOI_REGEX_PATTERN = 'https://doi.org/10.\d{4,9}/[-._;()/:A-Za-z0-9]+'
-PUB_ID_REGEX_PATTERN = '[\w-]+'
+DOI_REGEX_PATTERN = r'10.\d{4,9}/[-._;()/:A-Za-z0-9]+'
+URL_DOI_REGEX_PATTERN = r'https://doi.org/10.\d{4,9}/[-._;()/:A-Za-z0-9]+'
+PUB_ID_REGEX_PATTERN = r'[\w-]+'
 PUB_ID_RE = re.compile("^{}$".format(PUB_ID_REGEX_PATTERN))
 DOI_RE = re.compile(DOI_REGEX_PATTERN)
 URL_DOI_RE = re.compile(URL_DOI_REGEX_PATTERN)
 
-AC_REGEX_PATTERN = 'AC\d{8}'
+AC_REGEX_PATTERN = r'AC\d{8}'
 AC_RE = re.compile(AC_REGEX_PATTERN)
 
-MMSID_REGEX_PATTERN = '(99000\d{9}3336|99\d{9}3336)'
+MMSID_REGEX_PATTERN = r'(99000\d{9}3336|99\d{9}3336)'
 MMSID_RE = re.compile(MMSID_REGEX_PATTERN)
 
-URN_REGEX_PATTERN = 'urn:nbn:at:at-ubtuw:\d-\d{4,6}'
+URN_REGEX_PATTERN = r'urn:nbn:at:at-ubtuw:\d-\d{4,6}'
 URN_RE = re.compile(URN_REGEX_PATTERN)
 
-VLID_REGEX_PATTERN = '\d{5,8}'
+VLID_REGEX_PATTERN = r'\d{5,8}'
 VLID_RE = re.compile(VLID_REGEX_PATTERN)
 
 

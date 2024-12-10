@@ -89,7 +89,7 @@ class API():
     def doiConformsToCurrentConfiguration(self,journal_code,doi):
         prefix = self.journals[journal_code]['prefix']
         namespace_separator = self.journals[journal_code]['namespace_separator']
-        pattern = prefix+'/'+namespace_separator+r'\.'+r'\d{4}'+r'\.'+r'\d{3,4}'
+        pattern = prefix+'/'+namespace_separator+r'\.\d{4}\.\d{3,4}'
 
         match = re.match(pattern,doi)
         if not match:
@@ -141,7 +141,7 @@ class API():
                 status = "error"
                 content=response.text;    
             else:
-                match = re.search('OK \((.+)\)',response.text)
+                match = re.search(r'OK \((.+)\)',response.text)
                 if match is None:
                     status = "error"
                     content = "can't decode doi from response"

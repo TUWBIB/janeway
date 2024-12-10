@@ -3,7 +3,7 @@ from functools import partial
 import re
 from django.db import migrations
 
-REGEX = re.compile("({{\ ?journal.site_url\ ?}})?{% url '(\w+)' ([\w\ \.]*)%}")
+REGEX = re.compile(r"({{\ ?journal.site_url\ ?}})?{% url '(\w+)' ([\w\ \.]*)%}")
 OUTPUT_FMT = "{%% journal_url '%s' %s%%}"
 
 def replace_matches( match):

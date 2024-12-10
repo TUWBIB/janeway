@@ -14,6 +14,17 @@ from utils import notify
 
 SANITIZE_FROM_RE = re.compile("\r|\n|\t|\"|<|>|,")
 
+# TUW changes
+# allow display name in from address
+
+def split_address(from_):
+    display_name = None
+    if match := re.search("(.*?)<(.+)>",from_):
+        display_name = match[1].strip()
+        from_ = match[2].strip()
+
+    return display_name,from_
+
 def sanitize_from(from_):
     return re.sub(SANITIZE_FROM_RE, "", from_)
 
@@ -31,6 +42,8 @@ def send_email(
         from_email = request.press.main_contact
     else:
         from_email = request.press.main_contact
+
+    display_name,from_email = split_address(from_email)
 
     if isinstance(to, str):
         if settings.DUMMY_EMAIL_DOMAIN in to:
@@ -63,6 +76,9 @@ def send_email(
     full_from_string = sanitize_address(
         full_from_string, settings.DEFAULT_CHARSET,
     )
+
+    if display_name:
+        full_from_string = display_name + ' <' + full_from_string + '>'
 
     # if a replyto is passed to this function, use that.
     if replyto:

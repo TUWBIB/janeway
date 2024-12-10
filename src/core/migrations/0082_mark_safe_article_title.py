@@ -3,7 +3,7 @@ import re
 from django.conf import settings
 from django.db import migrations
 
-REGEX = re.compile("{{\ ?([a-z\._-]*)article.title\ ?}}")
+REGEX = re.compile(r"{{\ ?([a-z\._-]*)article.title\ ?}}")
 OUTPUT_FMT = "{{ %sarticle.safe_title }}"
 
 def replace_matches( match):

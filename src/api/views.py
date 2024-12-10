@@ -348,11 +348,11 @@ def error(request,context,err_code,err_val=None):
 
 def match_date(date_str,round):
     date = None
-    match = re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',date_str)
+    match = re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z',date_str)
     if match:
         date = datetime.datetime.strptime(date_str,'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
     else:
-        match = re.match('\d{4}-\d{2}-\d{2}T?',date_str)
+        match = re.match(r'\d{4}-\d{2}-\d{2}T?',date_str)
         if match:
             if date_str[-1] == 'T':
                 date = datetime.datetime.strptime(date_str,'%Y-%m-%dT')

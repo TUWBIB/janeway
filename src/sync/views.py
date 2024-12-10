@@ -293,7 +293,7 @@ def almaCreateUpdateConfirm(article):
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-        match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+        match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
         if match:
             mmsid_nz=match[1]
             errors.append("can't update record; already in NZ: "+mmsid_nz)
@@ -353,7 +353,7 @@ def almaPushNZ(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
     if match:
         mmsid_nz=match[1]
         errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
@@ -392,7 +392,7 @@ def almaPushNZConfirm(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
-    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
     if match:
         mmsid_nz=match[1]
         errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
@@ -464,7 +464,7 @@ def almaFetchAC(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-    match=re.search('<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+    match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
     if not match:
         errors.append("record has no NZ mmsid, push to NZ!: ")
         return JsonResponse({ 'errors': errors, 'warnings': None,
