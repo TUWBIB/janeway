@@ -866,6 +866,44 @@ class Article(AbstractLastModifiedModel):
     objects = ArticleSearchManager()
     active_objects = ActiveArticleManager()
 
+    # TUW
+    # methods to explicitly access translations (in templates)
+    @property
+    def getTitleRAW(self):
+        return self.__dict__.get('title','')
+
+    @property
+    def getTitleEN(self):
+        return self.__dict__.get('title_en','')
+
+    @property
+    def getTitleDE(self):
+        return self.__dict__.get('title_de','')
+
+    @property
+    def getSubTitleRAW(self):
+        return self.__dict__.get('subtitle','')
+
+    @property
+    def getSubTitleEN(self):
+        return self.__dict__.get('subtitle_en','')
+
+    @property
+    def getSubTitleDE(self):
+        return self.__dict__.get('subtitle_de','')
+
+    @property
+    def getAbstractRAW(self):
+        return self.__dict__.get('abstract','')
+
+    @property
+    def getAbstractEN(self):
+        return self.__dict__.get('abstract_en','')
+
+    @property
+    def getAbstractDE(self):
+        return self.__dict__.get('abstract_de','')
+
     class Meta:
         ordering = ('-date_published', 'title')
 
