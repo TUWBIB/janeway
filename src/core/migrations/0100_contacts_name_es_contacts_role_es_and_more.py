@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0099_alter_accountrole_options'),
+        ('core', '9001_tuw_contact_detected_language_contact_is_spam'),
     ]
 
     operations = [
