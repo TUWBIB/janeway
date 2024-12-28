@@ -104,6 +104,16 @@
                         {% endif %}
                         </td>
                     </tr>
+                    {% if LANGUAGE_CODE == 'de' %}
+                        {% if article.getTitleEN %}
+                            <tr>
+                            <th>{% trans "Title (Englisch)" %}</th>
+                            <td>{{ article.getTitleEN }}</td>
+                            </tr>
+                        {% endif %}        
+                    {% endif %}
+
+
                     {% if article.title_de_tuw %}
                         {% if article.title_de_tuw != article.title %}
                         <tr>
