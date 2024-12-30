@@ -174,16 +174,16 @@ def articleToDataCiteXML(article_id):
                 l.append('</relatedIdentifiers>')
 
             l.append('<descriptions>')
-            if article.abstract or article.abstract_de_tuw:
-                if article.abstract:
+            if article.getAbstractEN or article.getAbstractDE:
+                if article.getAbstractEN:
                     l.append('<description xml:lang="')
                     l.append('en" descriptionType="Abstract">')
-                    l.append(escape(article.abstract))
+                    l.append(escape(article.getAbstractEN))
                     l.append('</description>')
-                if article.abstract_de_tuw:
+                if article.getAbstractDE:
                     l.append('<description xml:lang="')
                     l.append('de" descriptionType="Abstract">')
-                    l.append(escape(article.abstract_de_tuw))
+                    l.append(escape(article.getAbstractDE))
                     l.append('</description>')
             else:
                 warnings.append("neither english nor german abstract")
@@ -500,14 +500,14 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 520, abstracts
-            if article.abstract:
+            if article.getAbstractEN:
                 datafield=DataField.createDataField("520"," "," ")
-                datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.abstract)))
+                datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.getAbstractEN)))
                 mr.addDataField(datafield)
 
-            if article.abstract_de_tuw:
+            if article.getAbstractDE:
                 datafield=DataField.createDataField("520"," "," ")
-                datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.abstract_de_tuw)))
+                datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.getAbstractDE)))
                 mr.addDataField(datafield)
 
             # 540, Lizenz

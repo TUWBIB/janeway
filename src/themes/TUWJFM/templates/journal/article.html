@@ -112,6 +112,14 @@
                             </tr>
                         {% endif %}        
                     {% endif %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        {% if article.getTitleEN %}
+                            <tr>
+                            <th>{% trans "Title (Englisch)" %}</th>
+                            <td>{{ article.getTitleEN }}</td>
+                            </tr>
+                        {% endif %}        
+                    {% endif %}
 
 
                     {% if article.title_de_tuw %}
@@ -235,20 +243,16 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if article.abstract %}
-            <div id="article">
-                {% if article.abstract != '' %}
-                    <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
-                    <p>{{ article.abstract | safe }}</p>
-                {% endif %}
+            {% if article.getAbstractEN %}
+            <div id="abstract_en">
+                <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
+                <p>{{ article.getAbstractEN | safe }}</p>
             </div>
             {% endif %}
-            {% if article.abstract_de_tuw %}
-            <div id="article">
-                {% if article.abstract_de_tuw != '' %}
-                    <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
-                    <p>{{ article.abstract_de_tuw | safe }}</p>
-                {% endif %}
+            {% if article.getAbstractDE %}
+            <div id="abstract_de">
+                <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
+                <p>{{ article.getAbstractDE | safe }}</p>
             </div>
             {% endif %}
             {% if article.license %}
