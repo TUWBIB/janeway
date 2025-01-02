@@ -37,6 +37,10 @@ class Command(BaseCommand):
         pk = options.get('pk', None)
         mode = options.get('mode', None)
 
+        abstract_exceptions_no_changes = [698]
+        abstract_exceptions_delete_abstract_de = [111,118,119,137,569]
+        abstract_exceptions_delete_abstract_en = []
+
         wb = xlsxwriter.Workbook(fileout)
         format_top = wb.add_format()
         format_top.set_align('top')
@@ -52,6 +56,7 @@ class Command(BaseCommand):
 
         row = 0
         col = iter(range(0,30))
+        sheet.write(row,next(col),'journal',format_top)
         sheet.write(row,next(col),'id',format_top)
         sheet.write(row,next(col),'language',format_top)
         if 't' in mode:
@@ -131,26 +136,46 @@ class Command(BaseCommand):
 
             ### abstract corrections:
             if 'a' in mode:
+                # exceptions - no action
+                if article.pk in abstract_exceptions_no_changes:
+                    l.append('in exception list, no changes')
+
+                # exception
+                # delete abstract_de
+                # article language german, only abstract is english
+                if article.pk in abstract_exceptions_delete_abstract_de:
+                    l.append('delete abstract_de')
+                    article.__dict__['abstract_de'] = None
+
                 # no "parallel abstract"
                 # article language german
                 # english abstract set
                 # >> delete english abstract
-                if language == 'deu' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
-                    l.append('delete english abstract')
+                elif language == 'deu' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
+                    l.append('delete abstract_en')
                     article.__dict__['abstract_en'] = None
 
                 # no "parallel abstract"
                 # article language english
                 # german abstract set
                 # >> delete german abstract
-                if language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
-                    l.append('delete german abstract')
+                elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw 
+                    l.append('delete abstract_de')
                     article.__dict__['abstract_de'] = None
-                
+
+                # no "parallel abstract"
+                # article language english
+                # german abstract set
+                # >> delete german abstract
+                elif language == 'eng' and abstract and not abstract_en and abstract_de and not abstract_de_tuw:
+                    l.append('move abstract_de to abstract_en')
+                    article.__dict__['abstract_de'] = None
+                    article.__dict__['abstract_en'] = abstract_de
+
                 # language german, no abstract, no englisch absract, only abstract_de_tuw_set:
                 # >> delete abstract_de_tuw, set abstract raw and german
-                if language == 'deu' and not abstract and not abstract_de and not abstract_en and abstract_de_tuw:
-                    l.append('move abstract from abstract_de_tuw')
+                elif language == 'deu' and not abstract and not abstract_de and not abstract_en and abstract_de_tuw:
+                    l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
                     with translation.override('de'):
                         article.abstract = abstract_de_tuw
@@ -158,8 +183,8 @@ class Command(BaseCommand):
                 # language german
                 # everything set
                 # >> make primary abstract german, set abstract_de, delete abstract_de_tuw
-                if language == 'deu' and abstract and abstract_de and abstract_en and abstract_de_tuw:
-                    l.append('move abstract from abstract_de_tuw to abstract_de, make primary_abstract german')
+                elif language == 'deu' and abstract and abstract_de and abstract_en and abstract_de_tuw:
+                    l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
                     with translation.override('de'):
                         article.abstract = abstract_de_tuw
@@ -169,6 +194,7 @@ class Command(BaseCommand):
 
             row += 1 
             col = iter(range(0,30))
+            sheet.write(row,next(col),article.journal.code,format_top)
             sheet.write(row,next(col),article.pk,format_top)
             sheet.write(row,next(col),language,format_top)
             if 't' in mode:
@@ -188,11 +214,18 @@ class Command(BaseCommand):
                 sheet.write(row,next(col),abstract_de_tuw,format_wrap)
             sheet.write(row,next(col),'; '.join(l),format_top)
 
+        # after changes
+        if not dryrun:
+            if pk is None:
+                articles = submission_models.Article.objects.all().order_by('id')
+            else:
+                articles = submission_models.Article.objects.filter(pk=pk).order_by('id')
+
         sheet = wb.add_worksheet('after')
         sheet.freeze_panes(1, 0)
-
         row = 0
         col = iter(range(0,30))
+        sheet.write(row,next(col),'journal',format_top)
         sheet.write(row,next(col),'id',format_top)
         sheet.write(row,next(col),'language',format_top)
         if 't' in mode:
@@ -230,6 +263,7 @@ class Command(BaseCommand):
 
             row += 1 
             col = iter(range(0,30))
+            sheet.write(row,next(col),article.journal.code,format_top)
             sheet.write(row,next(col),article.pk,format_top)
             sheet.write(row,next(col),language,format_top)
             if 't' in mode:
