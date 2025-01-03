@@ -79,15 +79,6 @@
                         </tr>
                         {% endif %}
 
-                        {% if request.journal.submissionconfiguration.abstract %}
-                        <tr>
-                            <th colspan="3">{% trans "Abstract (German)" %}</th>
-                        </tr>
-                        <tr>
-                            <td colspan="3">{{ article.abstract_de_tuw|safe }}</td>
-                        </tr>
-                        {% endif %}
-
                         {% if request.journal.submissionconfiguration.keywords %}
                         <tr>
                             <th colspan="3">{% trans "Keywords" %}</th>

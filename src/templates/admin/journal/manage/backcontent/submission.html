@@ -51,12 +51,6 @@
                             {{ article_form.abstract }}
                             {{ article_form.abstract.errors }}
                         </div>
-                        <div class="large-12 columns">
-                            <label for="id_abstract_de_tuw">
-                                {% trans "Abstract (German)" %}{% if form.abstract.field.required %}*{% endif %}</label>
-                            {{ article_form.abstract_de_tuw }}
-                            {{ article_form.abstract_de_tuw.errors }}
-                        </div>
                         <div class="large-4 columns">
                             <label for="id_language">{% trans "Language" %}</label>
                             {{ article_form.language }}
