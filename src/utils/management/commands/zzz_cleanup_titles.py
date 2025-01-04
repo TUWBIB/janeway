@@ -32,7 +32,13 @@ class Command(BaseCommand):
         :param options: None
         :return: None
         """
+
+        sql = """
+        UPDATE submission_article SET abstract = %s, abstract_en = %s, abstract_de = %s, abstract_de_tuw = %s WHERE id = %s
+        """
+
         dryrun = options.get('dryrun', True)
+        if type(dryrun) == str and dryrun.lower() == 'false': dryrun = False
         fileout = options.get('fileout', 'result.xlsx')
         pk = options.get('pk', None)
         mode = options.get('mode', None)
@@ -83,6 +89,8 @@ class Command(BaseCommand):
 
         count = 0
         for article in articles:
+            print (f"processing article {article.pk}")
+
             l = []
             title = article.getTitleRAW
             title_en = article.getTitleEN
@@ -99,6 +107,29 @@ class Command(BaseCommand):
 
             language = article.language
             if language is None: language = ''
+
+            row += 1 
+            col = iter(range(0,30))
+            sheet.write(row,next(col),article.journal.code,format_top)
+            sheet.write(row,next(col),article.pk,format_top)
+            sheet.write(row,next(col),language,format_top)
+            if 't' in mode:
+                sheet.write(row,next(col),title,format_wrap)
+                sheet.write(row,next(col),title_en,format_wrap)
+                sheet.write(row,next(col),title_de,format_wrap)
+                sheet.write(row,next(col),title_de_tuw,format_wrap)
+            if 's' in mode:
+                sheet.write(row,next(col),subtitle,format_wrap)
+                sheet.write(row,next(col),subtitle_en,format_wrap)
+                sheet.write(row,next(col),subtitle_de,format_wrap)
+                sheet.write(row,next(col),subtitle_de_tuw,format_wrap)
+            if 'a' in mode:
+                sheet.write(row,next(col),abstract,format_wrap)
+                sheet.write(row,next(col),abstract_en,format_wrap)
+                sheet.write(row,next(col),abstract_de,format_wrap)
+                sheet.write(row,next(col),abstract_de_tuw,format_wrap)
+            sheet.write(row,next(col),'; '.join(l),format_top)
+
 
             ## title corrections
             if 't' in mode:
@@ -159,7 +190,7 @@ class Command(BaseCommand):
                 # article language english
                 # german abstract set
                 # >> delete german abstract
-                elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw 
+                elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
                     l.append('delete abstract_de')
                     article.__dict__['abstract_de'] = None
 
@@ -177,44 +208,30 @@ class Command(BaseCommand):
                 elif language == 'deu' and not abstract and not abstract_de and not abstract_en and abstract_de_tuw:
                     l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
-                    with translation.override('de'):
-                        article.abstract = abstract_de_tuw
-                
+                    article.__dict__['abstract'] = abstract_de_tuw
+                    article.__dict__['abstract_en'] = ''
+                    article.__dict__['abstract_de'] = abstract_de_tuw
+
+
                 # language german
                 # everything set
                 # >> make primary abstract german, set abstract_de, delete abstract_de_tuw
                 elif language == 'deu' and abstract and abstract_de and abstract_en and abstract_de_tuw:
                     l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
-                    with translation.override('de'):
-                        article.abstract = abstract_de_tuw
+                    article.__dict__['abstract'] = abstract_de_tuw
+                    article.__dict__['abstract_en'] = ''
+                    article.__dict__['abstract_de'] = abstract_de_tuw
 
             if not dryrun and l:
-                article.save()
+                with connection.cursor() as cur:
 
-            row += 1 
-            col = iter(range(0,30))
-            sheet.write(row,next(col),article.journal.code,format_top)
-            sheet.write(row,next(col),article.pk,format_top)
-            sheet.write(row,next(col),language,format_top)
-            if 't' in mode:
-                sheet.write(row,next(col),title,format_wrap)
-                sheet.write(row,next(col),title_en,format_wrap)
-                sheet.write(row,next(col),title_de,format_wrap)
-                sheet.write(row,next(col),title_de_tuw,format_wrap)
-            if 's' in mode:
-                sheet.write(row,next(col),subtitle,format_wrap)
-                sheet.write(row,next(col),subtitle_en,format_wrap)
-                sheet.write(row,next(col),subtitle_de,format_wrap)
-                sheet.write(row,next(col),subtitle_de_tuw,format_wrap)
-            if 'a' in mode:
-                sheet.write(row,next(col),abstract,format_wrap)
-                sheet.write(row,next(col),abstract_en,format_wrap)
-                sheet.write(row,next(col),abstract_de,format_wrap)
-                sheet.write(row,next(col),abstract_de_tuw,format_wrap)
-            sheet.write(row,next(col),'; '.join(l),format_top)
+                    cur.execute(sql,
+                                [article.getAbstractRAW, article.getAbstractEN, article.getAbstractDE,article.abstract_de_tuw,   
+                                str(article.pk)]
+                                )
 
-        # after changes
+
         if not dryrun:
             if pk is None:
                 articles = submission_models.Article.objects.all().order_by('id')
