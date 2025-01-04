@@ -106,14 +106,14 @@ def articleToDataCiteXML(article_id):
                     l.append(escape(article.subtitle))
                     l.append('</title>')
 
-            if article.title_de_tuw:
+            if article.getTitleDE:
                 l.append('<title titleType="AlternativeTitle">')
-                l.append(escape(article.title_de_tuw))
+                l.append(escape(article.getTitleDE))
                 l.append('</title>')
 
-            if article.subtitle_de_tuw:
+            if article.getSubTitleDE:
                 l.append('<title titleType="Other">')
-                l.append(escape(article.subtitle_de_tuw))
+                l.append(escape(article.getSubTitleDE))
                 l.append('</title>')
 
             l.append('</titles>')
@@ -414,10 +414,10 @@ def articleToMarc(article):
             sf_b = ''
             if article.subtitle:
                 sf_b += article.subtitle
-            if article.title_de_tuw:
-                sf_b += ' = '+article.title_de_tuw
-            if article.subtitle_de_tuw:
-                sf_b += ' : '+article.subtitle_de_tuw
+            if article.getTitleDE:
+                sf_b += ' = '+article.getTitleDE
+            if article.getSubTitleDE:
+                sf_b += ' : '+article.getSubTitleDE
             if sf_b:
                 datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
 
@@ -428,11 +428,11 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 246 11
-            if article.title_de_tuw:
+            if article.getTitleDE:
                 datafield=DataField.createDataField("246","1","1")
-                datafield.addSubField(SubField.createSubField("a",escape(article.title_de_tuw)))
-                if article.subtitle_de_tuw:
-                    datafield.addSubField(SubField.createSubField("b",escape(article.subtitle_de_tuw)))
+                datafield.addSubField(SubField.createSubField("a",escape(article.getTitleDE)))
+                if article.getSubTitleDE:
+                    datafield.addSubField(SubField.createSubField("b",escape(article.getSubTitleDE)))
                 mr.addDataField(datafield)
 
             # 251 __ coar
@@ -447,7 +447,6 @@ def articleToMarc(article):
             datafield.addSubField(SubField.createSubField("b","Technische Universität Wien"))
             datafield.addSubField(SubField.createSubField("c",str(article.primary_issue.tuw_year)))
             mr.addDataField(datafield)
-
 
             # 300 __ physical description
             datafield=DataField.createDataField("300"," "," ")

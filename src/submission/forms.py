@@ -76,7 +76,7 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
 
     class Meta:
         model = models.Article
-        fields = ('title', 'title_de_tuw', 'subtitle', 'subtitle_de_tuw', 'abstract', 'non_specialist_summary',
+        fields = ('title', 'subtitle', 'abstract', 'non_specialist_summary',
                   'language', 'section', 'license', 'primary_issue',
                   'article_number', 'is_remote', 'remote_url', 'peer_reviewed',
                   'first_page', 'last_page', 'page_numbers', 'total_pages',
@@ -84,8 +84,6 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
-            'title_de_tuw': forms.TextInput(attrs={'placeholder': _('Parallel title')}),
-            'subtitle_de_tuw': forms.TextInput(attrs={'placeholder': _('Subtitle of parallel title')}),
             'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
         }
 
@@ -106,9 +104,6 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
         self.pop_disabled_fields = kwargs.pop('pop_disabled_fields', True)
         editor_view = kwargs.pop('editor_view', False)
         super(ArticleInfo, self).__init__(*args, **kwargs)
-
-        self.fields['title_de_tuw'].label = "Parallel Title"        
-        self.fields['subtitle_de_tuw'].label = "Subtitle Of Parallel Title"
 
         # Flag labels for translation
         for field in self.fields.values():

@@ -2245,8 +2245,6 @@ def old_search(request):
                     (
                         Q(title__icontains=search_term) |
                         Q(subtitle__icontains=search_term) |
-                        Q(title_de_tuw__icontains=search_term) |
-                        Q(subtitle_de_tuw__icontains=search_term) |
                         Q(id__in=identifier_ids) |
                         Q(id__in=keywords)
                     )
