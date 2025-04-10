@@ -94,31 +94,30 @@
             <h1 class="mainheader">{% trans "Journal Article" %}</h1>
             <table class="infotable">
                 <tbody>
-                    <tr>
-                        <th>{% trans "Title" %}</th>
-                        <td>
-                        {{ article.title }}
-                        {% if article.subtitle %}
-                        <br>
-                        {{ article.subtitle }}
-                        {% endif %}
-                        </td>
-                    </tr>
-                    {% if article.title_de_tuw %}
-                        {% if article.title_de_tuw != article.title %}
+                    {% if article.getTitleEN %}
                         <tr>
-                                <th>{% trans "Parallel title" %}</th>
-                                <td>
-                                {{ article.title_de_tuw }}
-                                {% if article.subtitle_de_tuw %}
-                                <br>
-                                {{ article.subtitle_de_tuw }}
-                                {% endif %}
-                                </td>                                
-                            </tr>
-                        {% endif %}
+                        <th>{% trans "Title (English)" %}</th>
+                        <td>{{ article.getTitleEN }}</td>
+                        </tr>
                     {% endif %}
-    
+                    {% if article.getSubTitleEN %}
+                        <tr>
+                        <th>{% trans "Subtitle (English)" %}</th>
+                        <td>{{ article.getSubTitleEN }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if article.getTitleDE %}
+                        <tr>
+                        <th>{% trans "Title (German)" %}</th>
+                        <td>{{ article.getTitleDE }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if article.getSubTitleDE %}
+                        <tr>
+                        <th>{% trans "Subtitle (German)" %}</th>
+                        <td>{{ article.getSubTitleDE }}</td>
+                        </tr>
+                    {% endif %}
                     {% if article.frozen_authors %}
                     <tr>
                         <th>{% trans "Author" %}</th>
@@ -225,20 +224,16 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if article.abstract %}
-            <div id="article">
-                {% if article.abstract != '' %}
-                    <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
-                    <p>{{ article.abstract | safe }}</p>
-                {% endif %}
+            {% if article.getAbstractEN %}
+            <div id="abstract_en">
+                <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
+                <p>{{ article.getAbstractEN | safe }}</p>
             </div>
             {% endif %}
-            {% if article.abstract_de_tuw %}
-            <div id="article">
-                {% if article.abstract_de_tuw != '' %}
-                    <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
-                    <p>{{ article.abstract_de_tuw | safe }}</p>
-                {% endif %}
+            {% if article.getAbstractDE %}
+            <div id="abstract_de">
+                <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
+                <p>{{ article.getAbstractDE | safe }}</p>
             </div>
             {% endif %}
             {% if article.license %}
