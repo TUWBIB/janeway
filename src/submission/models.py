@@ -634,6 +634,8 @@ class Article(AbstractLastModifiedModel):
     )
     title = JanewayBleachCharField(
         max_length=999,
+        blank=True,
+        null=True,
         help_text=_('Your article title'),
     )
     subtitle = JanewayBleachCharField(
