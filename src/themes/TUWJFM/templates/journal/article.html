@@ -94,28 +94,16 @@
             <h1 class="mainheader">{% trans "Journal Article" %}</h1>
             <table class="infotable">
                 <tbody>
-                    {% if article.getTitleEN %}
+                    {% if article.title %}
                         <tr>
-                        <th>{% trans "Title (English)" %}</th>
-                        <td>{{ article.getTitleEN }}</td>
+                        <th>{% trans "Title" %}</th>
+                        <td>{{ article.title }}</td>
                         </tr>
                     {% endif %}
-                    {% if article.getSubTitleEN %}
+                    {% if article.subtitle %}
                         <tr>
-                        <th>{% trans "Subtitle (English)" %}</th>
-                        <td>{{ article.getSubTitleEN }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if article.getTitleDE %}
-                        <tr>
-                        <th>{% trans "Title (German)" %}</th>
-                        <td>{{ article.getTitleDE }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if article.getSubTitleDE %}
-                        <tr>
-                        <th>{% trans "Subtitle (German)" %}</th>
-                        <td>{{ article.getSubTitleDE }}</td>
+                        <th>{% trans "Subtitle" %}</th>
+                        <td>{{ article.subtitle }}</td>
                         </tr>
                     {% endif %}
                     {% if article.frozen_authors %}
@@ -230,7 +218,7 @@
                 <p>{{ article.getAbstractEN | safe }}</p>
             </div>
             {% endif %}
-            {% if article.getAbstractDE %}
+            {% if article.getAbstractDE and article.getAbstractDE != article.getAbstractEN %}
             <div id="abstract_de">
                 <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
                 <p>{{ article.getAbstractDE | safe }}</p>

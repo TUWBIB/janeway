@@ -22,7 +22,7 @@ class Command(BaseCommand):
         """
         parser.add_argument('--dryrun', default=True)
         parser.add_argument('--fileout', default='result.xlsx')
-        parser.add_argument('--mode', default='tsa')
+        parser.add_argument('--mode', default='ltsa')
         parser.add_argument('--minpk', default=1)
         parser.add_argument('--maxpk', default=99999)
 
@@ -36,6 +36,14 @@ class Command(BaseCommand):
 
         article: submission_models.Article
 
+        sql_language = """
+        UPDATE 
+        submission_article 
+        SET 
+        language = %s
+        WHERE id = %s
+        """
+
         sql_abstract = """
         UPDATE 
         submission_article 
@@ -43,6 +51,7 @@ class Command(BaseCommand):
         abstract = %s, abstract_en = %s, abstract_de = %s, abstract_de_tuw = %s
         WHERE id = %s
         """
+
         sql_title = """
         UPDATE 
         submission_article 
@@ -55,7 +64,7 @@ class Command(BaseCommand):
         UPDATE 
         submission_article 
         SET 
-        subsitle = %s, subtitle_en = %s, subtitle_de = %s, subtitle_de_tuw = %s
+        subtitle = %s, subtitle_en = %s, subtitle_de = %s, subtitle_de_tuw = %s
         WHERE id = %s
         """
 
@@ -133,6 +142,7 @@ class Command(BaseCommand):
             print (f"processing article {article.pk}")
 
             l = []
+            language_changed = False
             title_changed = False
             subtitle_changed = False
             abstract_changed = False
@@ -177,26 +187,15 @@ class Command(BaseCommand):
             ## title corrections
             if 't' in mode:
                 # hardcoded cases
-                if not language:
-                    if article.pk in l_title_is_german_delete_english and title_en:
-                        l.append('set article language german')               
-                        article.language = 'deu'
-                        if not dryrun:
-                            print(f"set lang 'deu' for {article.pk}")
-                            article.save()
-                        l.append('delete english title')                        
-                        article.__dict__['title_en'] = None
-                        title_changed = True
+                if article.pk in l_title_is_german_delete_english and title_en:
+                    l.append('delete english title')                        
+                    article.__dict__['title_en'] = None
+                    title_changed = True
 
-                    elif article.pk in l_title_is_english_delete_german and title_de:
-                        l.append('set article language english')                        
-                        article.language = 'eng'
-                        if not dryrun:
-                            print(f"set lang 'eng' for {article.pk}")
-                            article.save()
-                        l.append('delete german title')                        
-                        article.__dict__['title_de'] = None
-                        title_changed = True
+                elif article.pk in l_title_is_english_delete_german and title_de:
+                    l.append('delete german title')                        
+                    article.__dict__['title_de'] = None
+                    title_changed = True
 
 
                 # no parallel title
@@ -257,7 +256,51 @@ class Command(BaseCommand):
 
             ### subtitle corrections
             if 's' in mode:
-                pass
+                # no parallel subtitle
+                # article language english
+                # subtitle set
+                # english subtitle not set
+                # german subtitle not set
+                # >> populate english subtitle
+                if language == 'eng' and subtitle and not subtitle_en and not subtitle_de and not subtitle_de_tuw:
+                    l.append('populate english subtitle')
+                    article.__dict__['subtitle_en'] = subtitle
+                    subtitle_changed = True
+
+                # no parallel subtitle
+                # article language german
+                # subtitle set
+                # english subtitle not set
+                # german subtitle not set
+                # >> populate german subtitle
+                elif language == 'deu' and subtitle and not subtitle_en and not subtitle_de and not subtitle_de_tuw:
+                    l.append('populate german subtitle')
+                    article.__dict__['subtitle_de'] = subtitle
+                    subtitle_changed = True
+
+                # no parallel subtitle
+                # article language german
+                # subtitle set
+                # english subtitle not set
+                # german subtitle not set
+                # >> populate german subtitle
+                elif language == 'deu' and subtitle and not subtitle_en and not subtitle_de and not subtitle_de_tuw:
+                    l.append('populate german subtitle')
+                    article.__dict__['subtitle_de'] = subtitle
+                    subtitle_changed = True
+
+                # article language german
+                # subtitle set
+                # parallel subtitle set
+                # english subtitle not set
+                # german subtitle not set
+                # >> populate german subtitle from title, move parallel title to english subtitle, delete parallel subtitle
+                elif language == 'deu' and subtitle and not subtitle_en and not subtitle_de and subtitle_de_tuw:
+                    l.append('populate german subtitle from title, move parallel title to english subtitle')
+                    article.__dict__['subtitle_de'] = subtitle
+                    article.__dict__['subtitle_en'] = subtitle_de_tuw
+                    article.subtitle_de_tuw = None
+                    subtitle_changed = True
 
             ### abstract corrections:
             if 'a' in mode:
@@ -327,6 +370,13 @@ class Command(BaseCommand):
 
             if not dryrun and l:
                 with connection.cursor() as cur:
+                    if 'l' in mode and language_changed:
+                        cur.execute(sql_language,
+                                    [article.language,
+                                     str(article.pk)]
+                                    )
+                        print (f"updating language")
+
                     if 'a' in mode and abstract_changed:
                         cur.execute(sql_abstract,
                                     [article.getAbstractRAW, article.getAbstractEN, article.getAbstractDE,article.abstract_de_tuw,
