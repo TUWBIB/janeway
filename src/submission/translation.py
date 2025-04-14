@@ -9,11 +9,9 @@ from submission import models
 class SectionTranslationOptions(TranslationOptions):
     fields = ('name', 'plural')
 
-
 @register(models.Article)
 class ArticleTranslationOptions(TranslationOptions):
-    fields = ('title', 'abstract')
-
+    fields = ('title', 'subtitle', 'abstract')
 @register(models.SubmissionConfiguration)
 class ArticleTranslationOptions(TranslationOptions):
     fields = ('submission_file_text',)
