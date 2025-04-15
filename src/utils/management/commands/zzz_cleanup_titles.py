@@ -22,27 +22,12 @@ class Command(BaseCommand):
         """
         parser.add_argument('--dryrun', default=True)
         parser.add_argument('--fileout', default='result.xlsx')
-        parser.add_argument('--mode', default='ltsa')
+        parser.add_argument('--mode', default='tsa')
         parser.add_argument('--minpk', default=1)
         parser.add_argument('--maxpk', default=99999)
 
     def handle(self, *args, **options):
-        """Checks existing journal settings, adds missing ones.
-
-        :param args: None
-        :param options: None
-        :return: None
-        """
-
         article: submission_models.Article
-
-        sql_language = """
-        UPDATE 
-        submission_article 
-        SET 
-        language = %s
-        WHERE id = %s
-        """
 
         sql_abstract = """
         UPDATE 
@@ -119,14 +104,14 @@ class Command(BaseCommand):
 
         l_title_is_english_delete_german =  [
             #jfm
-            1,113,120,126,133,139,613,
+            113,120,126,133,139,
             #oes
             185,204,419,434,435,436,444,446,447,458,460,461,472
         ]
 
         l_title_is_german_delete_english =  [
             # jfm
-            2,3,10,11,12,19,20,21,27,28,29,36,37,38,43,44,45,50,51,52,57,58,59,64,65,66,71,72,73,79,80,81,86,87,88,93,94,95,100,101,102,107,108,109,114,115,
+            1,2,3,10,11,12,19,20,21,27,28,29,36,37,38,43,44,45,50,51,52,57,58,59,64,65,66,71,72,73,79,80,81,86,87,88,93,94,95,100,101,102,107,108,109,114,115,
             121,122,127,128,134,135,140,141,
             # oes
             145,146,147,155,156,161,162,167,168,169,171,172,173,178,179,186,187,188,194,195,196,197,
@@ -142,7 +127,6 @@ class Command(BaseCommand):
             print (f"processing article {article.pk}")
 
             l = []
-            language_changed = False
             title_changed = False
             subtitle_changed = False
             abstract_changed = False
@@ -311,7 +295,7 @@ class Command(BaseCommand):
                 # exception
                 # delete abstract_de
                 # article language german, only abstract is english
-                if article.pk in abstract_exceptions_delete_abstract_de:
+                if article.pk in abstract_exceptions_delete_abstract_de and abstract_de:
                     l.append('delete abstract_de')
                     article.__dict__['abstract_de'] = None
                     abstract_changed = True
@@ -340,18 +324,21 @@ class Command(BaseCommand):
                 # german abstract set
                 # >> delete german abstract
                 elif language == 'eng' and abstract and not abstract_en and abstract_de and not abstract_de_tuw:
-                    l.append('move abstract_de to abstract_en')
+                    l.append('delete german abstract')
                     article.__dict__['abstract_de'] = None
                     article.__dict__['abstract_en'] = abstract_de
                     abstract_changed = True                    
 
-                # language german, no abstract, no englisch absract, only abstract_de_tuw_set:
+                # language german
+                # no abstract
+                # no english absract
+                # only abstract_de_tuw_set
                 # >> delete abstract_de_tuw, set abstract raw and german
                 elif language == 'deu' and not abstract and not abstract_de and not abstract_en and abstract_de_tuw:
                     l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
-                    article.__dict__['abstract'] = abstract_de_tuw
-                    article.__dict__['abstract_en'] = ''
+                    article.abstract = abstract_de_tuw
+                    article.__dict__['abstract_en'] = None
                     article.__dict__['abstract_de'] = abstract_de_tuw
                     abstract_changed = True
 
@@ -361,8 +348,9 @@ class Command(BaseCommand):
                 elif language == 'deu' and abstract and abstract_de and abstract_en and abstract_de_tuw:
                     l.append('move abstract_de_tuw to abstract and abstract_de')
                     article.abstract_de_tuw = None
-                    article.__dict__['abstract'] = abstract_de_tuw
-                    article.__dict__['abstract_en'] = ''
+                    article.abstract = abstract_de_tuw
+                    article.__dict__['abstract_de'] = abstract_de_tuw
+                    article.__dict__['abstract_en'] = abstract_en
                     abstract_changed = True
 
             sheet.write(row,next(col),'; '.join(l),format_top)
@@ -370,13 +358,6 @@ class Command(BaseCommand):
 
             if not dryrun and l:
                 with connection.cursor() as cur:
-                    if 'l' in mode and language_changed:
-                        cur.execute(sql_language,
-                                    [article.language,
-                                     str(article.pk)]
-                                    )
-                        print (f"updating language")
-
                     if 'a' in mode and abstract_changed:
                         cur.execute(sql_abstract,
                                     [article.getAbstractRAW, article.getAbstractEN, article.getAbstractDE,article.abstract_de_tuw,
