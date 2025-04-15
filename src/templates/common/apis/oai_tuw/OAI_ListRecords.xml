@@ -4,7 +4,7 @@
 <ListRecords>       
 {% for article in articles %}
 {% block record %}
-{% include "apis/OAI_record.xml" %}
+{% include "apis/oai_tuw/OAI_record.xml" %}
 {% endblock %}
 {% endfor %}
 </ListRecords>
