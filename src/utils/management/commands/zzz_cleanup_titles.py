@@ -1,3 +1,4 @@
+from io import BytesIO
 
 from django.core.management.base import BaseCommand
 from django.utils.translation import activate
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         :return: None
         """
         parser.add_argument('--dryrun', default=True)
-        parser.add_argument('--fileout', default='result.xlsx')
+        parser.add_argument('--fileout', default=None)
         parser.add_argument('--mode', default='tsa')
         parser.add_argument('--minpk', default=1)
         parser.add_argument('--maxpk', default=99999)
@@ -65,7 +66,9 @@ class Command(BaseCommand):
         abstract_exceptions_delete_abstract_de = [111,118,119,137,569]
         abstract_exceptions_delete_abstract_en = []
 
-        wb = xlsxwriter.Workbook(fileout)
+        output = BytesIO()
+
+        wb = xlsxwriter.Workbook(output)
         format_top = wb.add_format()
         format_top.set_align('top')
         format_top.set_align('left')
@@ -290,13 +293,13 @@ class Command(BaseCommand):
             if 'a' in mode:
                 # exceptions - no action
                 if article.pk in abstract_exceptions_no_changes:
-                    l.append('in exception list, no changes')
+                    pass
 
                 # exception
                 # delete abstract_de
                 # article language german, only abstract is english
-                if article.pk in abstract_exceptions_delete_abstract_de and abstract_de:
-                    l.append('delete abstract_de')
+                elif article.pk in abstract_exceptions_delete_abstract_de and abstract_de:
+                    l.append('delete abstract_de, hardcoded')
                     article.__dict__['abstract_de'] = None
                     abstract_changed = True
 
@@ -305,7 +308,7 @@ class Command(BaseCommand):
                 # article language german
                 # english abstract set
                 # >> delete english abstract
-                elif language == 'deu' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
+                elif language == 'deu' and abstract and abstract_en and abstract_de and not abstract_de_tuw and abstract_en.strip() == abstract_de.strip():
                     l.append('delete abstract_en')
                     article.__dict__['abstract_en'] = None
                     abstract_changed = True
@@ -314,7 +317,7 @@ class Command(BaseCommand):
                 # article language english
                 # german abstract set
                 # >> delete german abstract
-                elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw:
+                elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw and abstract_en.strip() == abstract_de.strip():
                     l.append('delete abstract_de')
                     article.__dict__['abstract_de'] = None
                     abstract_changed = True
@@ -355,6 +358,8 @@ class Command(BaseCommand):
 
             sheet.write(row,next(col),'; '.join(l),format_top)
 
+            if l:
+                print("; ".join(l))
 
             if not dryrun and l:
                 with connection.cursor() as cur:
@@ -446,4 +451,10 @@ class Command(BaseCommand):
                 sheet.write(row,next(col),abstract_de_tuw,format_wrap)
 
         wb.close()
+
+
+        if fileout:
+            output.seek(0)
+            with open(fileout, "wb") as f:
+               f.write(output.read())
     
