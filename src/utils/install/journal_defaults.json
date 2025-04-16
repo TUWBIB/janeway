@@ -5138,5 +5138,43 @@
         "value": {
             "default": ""
         }
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Default publication place.",
+            "is_translatable": true,
+            "name": "default_publication_place",
+            "pretty_name": "Default Publication Place",
+            "type": "text"
+        },
+        "value": {
+            "default": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Default Publisher",
+            "is_translatable": true,
+            "name": "default_publisher",
+            "pretty_name": "Default Publisher",
+            "type": "text"
+        },
+        "value": {
+            "default": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
     }
 ]
