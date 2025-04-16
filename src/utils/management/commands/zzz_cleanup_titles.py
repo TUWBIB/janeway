@@ -134,15 +134,15 @@ class Command(BaseCommand):
             title = article.getTitleRAW
             title_en = article.getTitleEN
             title_de = article.getTitleDE
-            title_de_tuw = article.title_de_tuw if article.title_de_tuw else ''
+            title_de_tuw = getattr(article,'title_de_tuw','')
             subtitle = article.getSubTitleRAW
             subtitle_en = article.getSubTitleEN
             subtitle_de = article.getSubTitleDE
-            subtitle_de_tuw = article.subtitle_de_tuw if article.subtitle_de_tuw else ''
+            subtitle_de_tuw = getattr(article,'subtitle_de_tuw','')
             abstract = article.getAbstractRAW
             abstract_en = article.getAbstractEN
             abstract_de = article.getAbstractDE
-            abstract_de_tuw = article.abstract_de_tuw if article.abstract_de_tuw else ''
+            abstract_de_tuw = getattr(article,'abstract_de_tuw','')
 
             language = article.language
             if language is None: language = ''
@@ -411,15 +411,15 @@ class Command(BaseCommand):
             title = article.getTitleRAW
             title_en = article.getTitleEN
             title_de = article.getTitleDE
-            title_de_tuw = article.title_de_tuw if article.title_de_tuw else ''
+            title_de_tuw = getattr(article,'title_de_tuw','')
             subtitle = article.getSubTitleRAW
             subtitle_en = article.getSubTitleEN
             subtitle_de = article.getSubTitleDE
-            subtitle_de_tuw = article.subtitle_de_tuw if article.subtitle_de_tuw else ''
+            subtitle_de_tuw = getattr(article,'subtitle_de_tuw','')
             abstract = article.getAbstractRAW
             abstract_en = article.getAbstractEN
             abstract_de = article.getAbstractDE
-            abstract_de_tuw = article.abstract_de_tuw if article.abstract_de_tuw else ''
+            abstract_de_tuw = getattr(article,'abstract_de_tuw','')
 
             language = article.language
             if language is None: language = ''
