@@ -309,7 +309,7 @@ class Command(BaseCommand):
                 # english abstract set
                 # >> delete english abstract
                 elif language == 'deu' and abstract and abstract_en and abstract_de and not abstract_de_tuw and abstract_en.strip() == abstract_de.strip():
-                    l.append('delete abstract_en')
+                    l.append('delete english abstract')
                     article.__dict__['abstract_en'] = None
                     abstract_changed = True
 
@@ -318,16 +318,16 @@ class Command(BaseCommand):
                 # german abstract set
                 # >> delete german abstract
                 elif language == 'eng' and abstract and abstract_en and abstract_de and not abstract_de_tuw and abstract_en.strip() == abstract_de.strip():
-                    l.append('delete abstract_de')
+                    l.append('delete german abstract')
                     article.__dict__['abstract_de'] = None
                     abstract_changed = True
 
                 # no "parallel abstract"
                 # article language english
                 # german abstract set
-                # >> delete german abstract
+                # >> move german abstract to english
                 elif language == 'eng' and abstract and not abstract_en and abstract_de and not abstract_de_tuw:
-                    l.append('delete german abstract')
+                    l.append('move german abstract to english')
                     article.__dict__['abstract_de'] = None
                     article.__dict__['abstract_en'] = abstract_de
                     abstract_changed = True                    
