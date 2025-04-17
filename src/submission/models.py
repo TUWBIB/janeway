@@ -663,30 +663,6 @@ class Article(AbstractLastModifiedModel):
     license = models.ForeignKey('Licence', blank=True, null=True, on_delete=models.SET_NULL)
     publisher_notes = models.ManyToManyField('PublisherNote', blank=True, null=True, related_name='publisher_notes')
 
-
-    # TUW
-    title_de_tuw = JanewayBleachCharField(
-        max_length=300,
-        blank=True,
-        null=True,
-        help_text=_('Parallel title of the article'),
-        db_column='title_de_tuw'
-    )
-
-    subtitle_de_tuw = JanewayBleachCharField(
-        max_length=300,
-        blank=True,
-        null=True,
-        help_text=_('Subtitle of the parallel title of the article')
-    )
-    
-    abstract_de_tuw = JanewayBleachField(
-        blank=True,
-        null=True,
-        help_text=_('Abstract (German)')
-    )
-    # - TUW
-
     # Remote: a flag that specifies that this article is actually a _link_ to a remote instance
     # this is useful for overlay journals. The ToC display of an issue uses this flag to link to a DOI rather
     # than an internal URL
