@@ -212,15 +212,28 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if article.getAbstractEN %}
+            {% if article.getAbstractEN and article.getAbstractDE and article.getAbstractEN == article.getAbstractDE %}
+            <div id="abstract">
+                <h2 class="subheader">{% trans "Abstract" %}</h2>
+                <p>{{ article.getAbstractEN | safe }}</p>
+            </div>
+            {% elif article.getAbstractEN and article.getAbstractDE and article.getAbstractEN != article.getAbstractDE %}
             <div id="abstract_en">
                 <h2 class="subheader">{% trans "Abstract (English)" %}</h2>
                 <p>{{ article.getAbstractEN | safe }}</p>
             </div>
-            {% endif %}
-            {% if article.getAbstractDE and article.getAbstractDE != article.getAbstractEN %}
             <div id="abstract_de">
                 <h2 class="subheader">{% trans "Abstract (German)" %}</h2>
+                <p>{{ article.getAbstractDE | safe }}</p>
+            </div>
+            {% elif article.getAbstractEN and not article.getAbstractDE %}
+            <div id="abstract">
+                <h2 class="subheader">{% trans "Abstract" %}</h2>
+                <p>{{ article.getAbstractEN | safe }}</p>
+            </div>
+            {% elif not article.getAbstractEN and article.getAbstractDE %}
+            <div id="abstract">
+                <h2 class="subheader">{% trans "Abstract" %}</h2>
                 <p>{{ article.getAbstractDE | safe }}</p>
             </div>
             {% endif %}
