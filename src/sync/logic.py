@@ -144,9 +144,9 @@ def articleToDataCiteXML(article_id):
                 l.append('</subjects>')
 
             l.append('<publisher>')
-            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+            if article.journal.code == 'JFM':
                 l.append('Journal für Facility Management')
-            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+            elif article.journal.code == 'OES':
                 l.append('Der Öffentliche Sektor - The Public Sector')
             l.append('</publisher>')
 
@@ -179,9 +179,9 @@ def articleToDataCiteXML(article_id):
 
             l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
 
-            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+            if article.journal.code == 'JFM':
                 pass
-            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+            elif article.journal.code == 'OES':
                 l.append('<relatedIdentifiers>')
                 l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">2412-3862</relatedIdentifier>')
                 l.append('</relatedIdentifiers>')
@@ -201,9 +201,9 @@ def articleToDataCiteXML(article_id):
             else:
                 warnings.append("neither english nor german abstract")
 
-            if article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+            if article.journal.code == 'JFM':
                 pass
-            elif article.journal.code == 'OES' or article.journal.code == 'OEST':
+            elif article.journal.code == 'OES':
                 l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
                 l.append(str(article.primary_issue.volume))
                 l.append('(')
@@ -571,28 +571,28 @@ def articleToMarc(article):
             # 773 08 relation
             datafield=DataField.createDataField("773","0","8")
             datafield.addSubField(SubField.createSubField("i","Enthalten in"))
-            if article.journal.code == 'OES' or article.journal.code == 'OEST':
+            if article.journal.code == 'OES':
                 datafield.addSubField(SubField.createSubField("t","Der Öffentliche Sektor - The Public Sector"))
-            elif article.journal.code == 'JFM' or article.journal.code == 'JFM':            
+            elif article.journal.code == 'JFM':            
                 datafield.addSubField(SubField.createSubField("t","IFM Journal"))
             else:
                 pass
             datafield.addSubField(SubField.createSubField("d",str(article.primary_issue.tuw_year)))
-            if article.journal.code == 'OES' or article.journal.code == 'OEST':
+            if article.journal.code == 'OES':
                 s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+str(article.primary_issue.tuw_year)+'), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
-            elif article.journal.code == 'JFM' or article.journal.code == 'JFMT':
+            elif article.journal.code == 'JFM':
                 s = 'Jahrgang ('+str(article.primary_issue.tuw_year)+'), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
             else:
                 pass
-            if article.journal.code == 'OES' or article.journal.code == 'OEST':
+            if article.journal.code == 'OES':
                 datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC10863779"))
-            elif article.journal.code == 'JFM' or article.journal.code == 'JFM':
+            elif article.journal.code == 'JFM':
                 datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC13348910"))
             else:
                 pass

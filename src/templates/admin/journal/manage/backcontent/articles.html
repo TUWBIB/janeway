@@ -39,9 +39,9 @@
                             <th>{% trans "Main Author" %}</th>
                             <th>{% trans "Section" %}</th>
                             <th>
-                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+                            {% if request.journal.code == "JFM" %} 
                                 {% trans "Issue" %}
-                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                            {% elif request.journal.code == "OES" %}
                                 {% trans "Issue" context "oes" %}
                             {% else %}
                             {% endif %}

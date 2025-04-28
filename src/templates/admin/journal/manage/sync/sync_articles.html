@@ -25,9 +25,9 @@
                             <th rowspan="2">{% trans "Id" %}</th>
                             <th rowspan="2">{% trans "Title" %}</th>
                             <th rowspan="2">
-                            {% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+                            {% if request.journal.code == "JFM" %} 
                                 {% trans "Issue" %}
-                            {% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+                            {% elif request.journal.code == "OES" %}
                                 {% trans "Issue" context "oes" %}
                             {% else %}
                             {% endif %}

@@ -4,18 +4,18 @@
 {% load i18n %}
 
 {% block page_title %}
-{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+{% if request.journal.code == "JFM" %} 
 {% trans "Issues" %}
-{% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+{% elif request.journal.code == "OES" %}
 {% trans "Issues" context "fe_oes" %}
 {% else %}
 {% endif %}
 {% endblock %}
 
 {% block title %}
-{% if request.journal.code == "JFM" or request.journal.code == "JFMT" %} 
+{% if request.journal.code == "JFM" %} 
 {% trans "Issues" %}
-{% elif request.journal.code == "OES" or request.journal.code == "OEST" %}
+{% elif request.journal.code == "OES" %}
 {% trans "Issues" context "fe_oes" %}
 {% else %}
 {% endif %}
