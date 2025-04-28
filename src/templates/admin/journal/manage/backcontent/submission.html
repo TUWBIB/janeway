@@ -30,11 +30,15 @@
                             {{ article_form.title }}
                             {{ article_form.title.errors }}
                         </div>
+
+                        {% if request.journal.submissionconfiguration.subtitle %}
                         <div class="large-12 columns">
                             <label for="id_subtitle">{% trans "Subtitle" %}</label>
                             {{ article_form.subtitle }}
                             {{ article_form.subtitle.errors }}
                         </div>
+                        {% endif %}
+
                         <div class="large-12 columns">
                             <label for="id_abstract">
                                 {% trans "Abstract" %}{% if form.abstract.field.required %}*{% endif %}</label>
