@@ -80,11 +80,11 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
                   'language', 'section', 'license', 'primary_issue',
                   'article_number', 'is_remote', 'remote_url', 'peer_reviewed',
                   'first_page', 'last_page', 'page_numbers', 'total_pages',
-                  'custom_how_to_cite', 'rights')
+                  'custom_how_to_cite', 'rights',
+                  )
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': _('Title')}),
             'subtitle': forms.TextInput(attrs={'placeholder': _('Subtitle')}),
-            'abstract': forms.Textarea(attrs={'placeholder': _('Enter your article\'s abstract here')}),
         }
 
     def __init__(self, *args, **kwargs):
