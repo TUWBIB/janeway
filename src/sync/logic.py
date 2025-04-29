@@ -15,12 +15,26 @@ from identifiers import models as identifier_models
 from sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField
 
-def create_article_doi(article):
+def create_article_doi(article: submission_models.Article):
+    doi: str
+
     api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     journal_code = article.journal.code
-    prefix = api.journals[journal_code]['prefix']
-    namespace_separator = api.journals[journal_code]['namespace_separator']
-    doi = prefix+'/'+namespace_separator+'.'+str(article.primary_issue.tuw_year)+'.'+str(article.pk+int(api.options['id_offset']))
+    journal_settings = settings.DATACITE['journals'][journal_code]
+    # new method
+    if "pattern_article" in journal_settings: 
+        doi = journal_settings["pattern_article"]
+        if "***publication_year***" in doi:
+            doi = doi.replace("***publication_year***",str(article.issue.date.year))
+        if "***counter_within_issue***":
+            dois_issue = identifier_models.Identifier.objects.filter(article__journal__issue=article.issue,id_type="doi")
+            cnt = len(dois_issue) + 1
+            doi = doi.replace("***counter_within_issue***",str(cnt))
+    # legacy
+    else:
+        prefix = api.journals[journal_code]['prefix']
+        namespace_separator = api.journals[journal_code]['namespace_separator']
+        doi = prefix+'/'+namespace_separator+'.'+str(article.primary_issue.tuw_year)+'.'+str(article.pk+int(api.options['id_offset']))
 
     return doi
 
@@ -148,6 +162,8 @@ def articleToDataCiteXML(article_id):
                 l.append('Journal für Facility Management')
             elif article.journal.code == 'OES':
                 l.append('Der Öffentliche Sektor - The Public Sector')
+            elif article.journal.code == 'ARW':
+                l.append(article.publisher)
             l.append('</publisher>')
 
             l.append('<publicationYear>')
