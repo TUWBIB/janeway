@@ -1740,28 +1740,6 @@ class Article(AbstractLastModifiedModel):
             answer__isnull=False,
         ).values_list('answer', flat=False)
 
-    @property
-    def publisher(self):
-        """ Returns publisher by filtering FieldAnswers"""
-        publisher = self.fieldanswer_set.filter(
-            field__display=True,
-            answer__isnull=False,
-            field__name='publisher'
-        )
-        if len(publisher) > 0:
-            return publisher[0].answer
-
-    @property
-    def edition(self):
-        """ Returns edition by filtering FieldAnswers"""
-        edition = self.fieldanswer_set.filter(
-            field__display=True,
-            answer__isnull=False,
-            field__name='edition'
-        )
-        if len(edition) > 0:
-            return edition[0].answer
-
     def get_meta_image_path(self):
         path = None
         if self.meta_image and self.meta_image.url:
