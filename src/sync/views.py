@@ -26,6 +26,7 @@ from django.core.management import call_command
 from django.template import RequestContext, loader
 from security.decorators import has_journal, editor_user_required
 from submission import models as submission_models
+from journal import models as journal_models
 from utils.logger import get_logger
 from sync import logic
 from sync.datacite import api as datacite_api
@@ -39,6 +40,7 @@ logger = get_logger(__name__)
 @editor_user_required
 def sync(request):
     articles = submission_models.Article.objects.filter(journal=request.journal)
+    issues = journal_models.Issue.objects.filter(journal=request.journal)
 
     if request.method  == "POST":
 
@@ -98,6 +100,7 @@ def sync(request):
     template = 'journal/manage/sync/sync_articles.html'
     context = {
         'articles': articles,
+        'issues': issues,
     }
 
     return render(request, template, context)

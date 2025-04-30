@@ -12,122 +12,226 @@
 {% endblock breadcrumbs %}
 
 {% block body %}
-    <section class="content">
-        <div class="row expanded">
-            <div class="box">
-                <div class="title-area">
-                    <h2>{% trans "Articles" %}</h2>
-                </div>
-                <div class="content">
-                    <table class="table table-bordered" id="datatable">
-                        <thead>
-                        <tr>
-                            <th rowspan="2">{% trans "Id" %}</th>
-                            <th rowspan="2">{% trans "Title" %}</th>
-                            <th rowspan="2">
-                            {% if request.journal.code == "JFM" %} 
-                                {% trans "Issue" %}
-                            {% elif request.journal.code == "OES" %}
-                                {% trans "Issue" context "oes" %}
-                            {% else %}
-                            {% endif %}
-                            <th colspan="2">Datacite</th>
-                            <th colspan="2">Alma</th>
-                            <th rowspan="2">Actions</th>
-                            </tr>
-                        <tr>
-                            <th>DOI</th>
-                            <th>State</th>
-                            <th>MMS Id / AC</th>
-                            <th>Sync</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for article in articles %}
-                            <tr>
-                                <td><a href="{% url 'edit_metadata' article.pk %}">{{ article.id }}</a></td>
-                                <td>{{ article.title }}</td>
-                                {% if article.primary_issue %}
-                                <td>{{ article.primary_issue.tuw_issue_count }}</td>    
-                                {% else %}
-                                <td></td>
-                                {% endif %}
-                                {% if article.get_doi %}                                
-                                <td id="datacite_doi_{{ article.pk }}">{{ article.get_doi }}</td>
-                                {% else %}
-                                <td id="datacite_doi_{{ article.pk }}"></td>
-                                {% endif %}                      
-                                {% if article.datacite_state %}                                
-                                <td id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
-                                {% else %}
-                                <td id="datacite_state_{{ article.pk }}"></td>
-                                {% endif %}                      
-                                <td id="alma_mmsid_ac_{{ article.pk }}">
-                                {% if article.get_mmsid %} {{ article.get_mmsid }} {% endif %}
-                                {% if article.get_ac %} {% if article.get_mmsid %} <br> {% endif %} {{ article.get_ac }} {% endif %}
-                                </td>
-                                <td></td>
-                                <td>
-                                    <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
-                                        <li>
-                                           <a href="#">Datacite</a>
-                                            <ul class="vertical menu nested">
-                                            <li>
-                                                <a href="#" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">Register DOI / Update Metadata</a>
-                                            </li>
-                                            <li>
-                                                <a href="#" class="btn_datacite_url" id="btn_datacite_url_{{ article.pk }}">Register URL</a>
-                                            </li>
-                                            <hr>
-                                            <li>
-                                                <a href="#" class="btn_datacite_check_metadata" id="btn_datacite_check_metadata_{{ article.pk }}">Check Metadata</a>
-                                            </li>
-                                            <li>
-                                                <a href="#" class="btn_datacite_check_url" id="btn_datacite_check_url_{{ article.pk }}">Check URL</a>
-                                            </li>
-                                            <li>
-                                                <a href="#" class="btn_datacite_delete_doi" id="btn_datacite_delete_doi_{{ article.pk }}">Delete DOI</a>
-                                            </li>
-                                          </ul>
-                                        </li>
-                                        <li><a href="#">Alma</a>
-                                            <ul class="vertical menu nested">
-                                            <li>
-                                                <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
-                                            </li>
-                                            <li>
-                                                <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
-                                            </li>
-                                            <li>
-                                                <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
-                                            </li>
-                                            <hr>
-                                            <li>
-                                                <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
-                                            </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td>{% trans "No articles in this stage" %}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="row expanded" style="min-height: 100px;">
-        </div>
-        </section>
+{# tabs header #}
+<ul class="tabs" data-tabs id="tabs">
+<li class="tabs-title is-active"><a data-tabs-target="tab-articles" href="#tab-articles" aria-selected="True">Articles</a></li>
+<li class="tabs-title"><a data-tabs-target="tab-issues" href="#tab-issues">Issues</a></li>
+</ul>
+
+{# tabs #}
+<div class="tabs-content" data-tabs-content="tabs">
+
+{# article tab #}
+<div class="tabs-panel" id="tab-articles">
+<div class="row expanded content">
+        <table class="table table-bordered" id="datatable-articles">
+            <thead>
+            <tr>
+                <th rowspan="2">{% trans "Id" %}</th>
+                <th rowspan="2">{% trans "Title" %}</th>
+                <th rowspan="2">
+                {% if request.journal.code == "JFM" %} 
+                    {% trans "Issue" %}
+                {% elif request.journal.code == "OES" %}
+                    {% trans "Issue" context "oes" %}
+                {% else %}
+                    {% trans "Issue" %}
+                {% endif %}
+                <th colspan="2">Datacite</th>
+                <th colspan="2">Alma</th>
+                <th rowspan="2">Actions</th>
+                </tr>
+            <tr>
+                <th>DOI</th>
+                <th>State</th>
+                <th>MMS Id / AC</th>
+                <th>Sync</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for article in articles %}
+                <tr>
+                    <td><a href="{% url 'edit_metadata' article.pk %}">{{ article.id }}</a></td>
+                    <td>{{ article.title }}</td>
+                    {% if article.primary_issue %}
+                    <td>{{ article.primary_issue.tuw_issue_count }}</td>    
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    {% if article.get_doi %}                                
+                    <td id="datacite_doi_{{ article.pk }}">{{ article.get_doi }}</td>
+                    {% else %}
+                    <td id="datacite_doi_{{ article.pk }}"></td>
+                    {% endif %}                      
+                    {% if article.datacite_state %}                                
+                    <td id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
+                    {% else %}
+                    <td id="datacite_state_{{ article.pk }}"></td>
+                    {% endif %}                      
+                    <td id="alma_mmsid_ac_{{ article.pk }}">
+                    {% if article.get_mmsid %} {{ article.get_mmsid }} {% endif %}
+                    {% if article.get_ac %} {% if article.get_mmsid %} <br> {% endif %} {{ article.get_ac }} {% endif %}
+                    </td>
+                    <td></td>
+                    <td>
+                        <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
+                            <li>
+                                <a href="#">Datacite</a>
+                                <ul class="vertical menu nested">
+                                <li>
+                                    <a href="#" class="btn_datacite_metadata" id="btn_datacite_metadata_{{ article.pk }}">Register DOI / Update Metadata</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="btn_datacite_url" id="btn_datacite_url_{{ article.pk }}">Register URL</a>
+                                </li>
+                                <hr>
+                                <li>
+                                    <a href="#" class="btn_datacite_check_metadata" id="btn_datacite_check_metadata_{{ article.pk }}">Check Metadata</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="btn_datacite_check_url" id="btn_datacite_check_url_{{ article.pk }}">Check URL</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="btn_datacite_delete_doi" id="btn_datacite_delete_doi_{{ article.pk }}">Delete DOI</a>
+                                </li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Alma</a>
+                                <ul class="vertical menu nested">
+                                <li>
+                                    <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
+                                </li>
+                                <hr>
+                                <li>
+                                    <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
+                                </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td>{% trans "No articles in this stage" %}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+</div>
+<div class="row expanded" style="min-height: 100px;"></div>
+</div>        
+
+{# issue tab #}
+<div class="tabs-panel" id="tab-issues">
+<div class="row expanded content">
+    <table class="table table-bordered" id="datatable-issues">
+        <thead>
+        <tr>
+            <th rowspan="2">{% trans "Id" %}</th>
+            <th rowspan="2">{% trans "Title" %}</th>
+            <th colspan="2">Datacite</th>
+            <th colspan="2">Alma</th>
+            <th rowspan="2">Actions</th>#}
+            </tr>
+        <tr>
+            <th>DOI</th>
+            <th>State</th>
+            <th>MMS Id / AC</th>
+            <th>Sync</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for issue in issues %}
+            <tr>
+                <td><a href="{% url 'manage_issues_id' issue.pk %}">{{ issue.pk }}</a></td>
+                <td>{{ issue.title }}</td>
+{#
+                {% if issue.doi %}                                
+                <td id="datacite_issue_doi_{{ issue.pk }}">{{ issue.doi }}</td>
+                {% else %}
+                <td id="datacite_issue_doi_{{ issue.pk }}"></td>
+                {% endif %}                      
+                {% if issue.datacite_state %}                                
+                <td id="datacite_issue_state_{{ issue.pk }}">{{ issue.datacite_state }}</td>
+                {% else %}
+                <td id="datacite_issue_state_{{ issue.pk }}"></td>
+                {% endif %}                      
+                <td id="alma_issue_mmsid_ac_{{ article.pk }}">
+                {% if issue.get_mmsid %} {{ issue.get_mmsid }} {% endif %}
+                {% if issue.get_ac %} {% if issue.get_mmsid %} <br> {% endif %} {{ issue.get_ac }} {% endif %}
+                </td>
+                <td></td>
+                <td>
+                    <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
+                        <li>
+                            <a href="#">Datacite</a>
+                            <ul class="vertical menu nested">
+                            <li>
+                                <a href="#" class="btn_datacite_issue_metadata" id="btn_datacite_issue_metadata_{{ issue.pk }}">Register DOI / Update Metadata</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn_datacite_issue_url" id="btn_datacite_issue_url_{{ issue.pk }}">Register URL</a>
+                            </li>
+                            <hr>
+                            <li>
+                                <a href="#" class="btn_datacite_issue_check_metadata" id="btn_datacite_issue_check_metadata_{{ issue.pk }}">Check Metadata</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn_datacite_issue_check_url" id="btn_datacite_issue_check_url_{{ issue.pk }}">Check URL</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn_datacite_issue_delete_doi" id="btn_datacite_issue_delete_doi_{{ article.pk }}">Delete DOI</a>
+                            </li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Alma</a>
+                            <ul class="vertical menu nested">
+                            <li>
+                                <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
+                            </li>
+                            <hr>
+                            <li>
+                                <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
+                            </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td> #}
+            </tr>
+            {% empty %}
+            <tr>
+                <td>{% trans "No articles in this stage" %}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="row expanded" style="min-height: 100px;"></div>
+</div>
+
+</div>        
 {% endblock %}
 
 {% block js %}
@@ -144,12 +248,11 @@
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.reveal.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdown.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.dropdownMenu.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.0/js/plugins/foundation.tabs.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
 
     <script type="text/javascript">
-
-
         $(document).foundation();   
 
         $(document).ready(function () 
@@ -780,11 +883,11 @@
 
             })
 
-            var table = $('#datatable').DataTable();
- 
-             table
-                 .order( [[ 0, 'desc' ]] )
-                .draw();
+            var table_articles = $('#datatable-articles').DataTable();
+            table_articles.order( [[ 0, 'desc' ]] ).draw(); 
+
+            var table_isseus = $('#datatable-issues').DataTable();
+            table_issues.order( [[ 0, 'desc' ]] ).draw(); 
         })
         
         function dataciteMetadataConfirm(article_id)
