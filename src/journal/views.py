@@ -3028,7 +3028,8 @@ def backcontent(request):
     if request.POST:
         article = submission_models.Article.objects.create(journal=request.journal,
                                                 date_accepted=timezone.now(),
-                                                is_import=True)
+                                                is_import=True,
+                                                title='')
         return redirect(reverse('backcontent_article', kwargs={'article_id': article.pk}))
 
     articles = submission_models.Article.objects.filter(journal=request.journal)
