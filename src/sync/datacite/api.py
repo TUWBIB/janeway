@@ -87,15 +87,18 @@ class API():
 
 
     def doiConformsToCurrentConfiguration(self,journal_code,doi):
-        prefix = self.journals[journal_code]['prefix']
-        namespace_separator = self.journals[journal_code]['namespace_separator']
-        pattern = prefix+'/'+namespace_separator+r'\.\d{4}\.\d{3,4}'
+        if journal_code in ['JFM','OES']:
+            prefix = self.journals[journal_code]['prefix']
+            namespace_separator = self.journals[journal_code]['namespace_separator']
+            pattern = prefix+'/'+namespace_separator+r'\.\d{4}\.\d{3,4}'
 
-        match = re.match(pattern,doi)
-        if not match:
-            return False
-        else:
-            return True
+            match = re.match(pattern,doi)
+            if not match:
+                return False
+            else:
+                return True
+
+        return True
 
 
     def getMetadata(self,doi):
@@ -193,6 +196,8 @@ class API():
 
 
     def getURL(self,doi):
+        print(f"DOI {doi}")
+
         url = self.login['endpoint']
         url += 'doi/'
         url += doi
@@ -204,10 +209,13 @@ class API():
                             )
 
             content=response.text
+
             if response.status_code != 200:
                 status = "error"
                 if response.status_code == 400:
                     content = "Not found"
+                if response.status_code == 204:
+                    content = "No content"
 
         except ConnectTimeout as e:
             status = "error"

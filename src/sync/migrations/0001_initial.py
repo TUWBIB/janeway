@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='DataCite',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', models.CharField(blank=True, choices=[('', ''), ('', 'draft'), ('findable', 'findable'), ('registered', 'registered')], max_length=20, null=True)),
+                ('status', models.CharField(blank=True, choices=[('', ''), ('', 'draft'), ('findable', 'findable'), ('registered', 'registered')], max_length=20, null=True)),
                 ('ts', models.DateTimeField(blank=True, null=True)),
                 ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='submission.article')),
                 ('issue', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='journal.issue')),

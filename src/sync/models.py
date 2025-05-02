@@ -2,19 +2,20 @@ from django.db import models
 
 # Create your models here.
 
-DATACITE_STATUS_NONE=''
-DATACITE_STATUS_DRAFT='draft'
-DATACITE_STATUS_FINDABLE='findable'
-DATACITE_STATUS_REGISTERED='registered'
-
-
-DATACITE_STATUS_CHOICES = [
-    (DATACITE_STATUS_NONE, DATACITE_STATUS_NONE),
-    (DATACITE_STATUS_NONE, DATACITE_STATUS_DRAFT),
-    (DATACITE_STATUS_FINDABLE, DATACITE_STATUS_FINDABLE),
-    (DATACITE_STATUS_REGISTERED, DATACITE_STATUS_REGISTERED),
-]
 class DataCite(models.Model):
+
+    DATACITE_STATUS_NONE=''
+    DATACITE_STATUS_DRAFT='draft'
+    DATACITE_STATUS_FINDABLE='findable'
+    DATACITE_STATUS_REGISTERED='registered'
+
+
+    DATACITE_STATUS_CHOICES = [
+        (DATACITE_STATUS_NONE, DATACITE_STATUS_NONE),
+        (DATACITE_STATUS_NONE, DATACITE_STATUS_DRAFT),
+        (DATACITE_STATUS_FINDABLE, DATACITE_STATUS_FINDABLE),
+        (DATACITE_STATUS_REGISTERED, DATACITE_STATUS_REGISTERED),
+    ]
 
     article = models.ForeignKey(
         'submission.Article',
@@ -30,7 +31,7 @@ class DataCite(models.Model):
         blank=True,
     )
 
-    state = models.CharField(max_length=20, blank=True, null=True, choices=DATACITE_STATUS_CHOICES)
+    status = models.CharField(max_length=20, blank=True, null=True, choices=DATACITE_STATUS_CHOICES)
     ts = models.DateTimeField(blank=True, null=True)
 
 class Alma(models.Model):

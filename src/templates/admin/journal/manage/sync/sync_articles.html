@@ -142,7 +142,7 @@
             <th rowspan="2">{% trans "Title" %}</th>
             <th colspan="2">Datacite</th>
             <th colspan="2">Alma</th>
-            <th rowspan="2">Actions</th>#}
+            <th rowspan="2">Actions</th>
             </tr>
         <tr>
             <th>DOI</th>
@@ -156,14 +156,14 @@
             <tr>
                 <td><a href="{% url 'manage_issues_id' issue.pk %}">{{ issue.pk }}</a></td>
                 <td>{{ issue.title }}</td>
-{#
+
                 {% if issue.doi %}                                
                 <td id="datacite_issue_doi_{{ issue.pk }}">{{ issue.doi }}</td>
                 {% else %}
                 <td id="datacite_issue_doi_{{ issue.pk }}"></td>
                 {% endif %}                      
-                {% if issue.datacite_state %}                                
-                <td id="datacite_issue_state_{{ issue.pk }}">{{ issue.datacite_state }}</td>
+                {% if issue.datacite and issue.datacite.state %}                                
+                <td id="datacite_issue_state_{{ issue.pk }}">{{ issue.datacite.state }}</td>
                 {% else %}
                 <td id="datacite_issue_state_{{ issue.pk }}"></td>
                 {% endif %}                      
@@ -178,42 +178,44 @@
                             <a href="#">Datacite</a>
                             <ul class="vertical menu nested">
                             <li>
-                                <a href="#" class="btn_datacite_issue_metadata" id="btn_datacite_issue_metadata_{{ issue.pk }}">Register DOI / Update Metadata</a>
+                                <a href="#" class="btn_datacite_metadata" id="btn_datacite_issue_metadata_{{ issue.pk }}">Register DOI / Update Metadata</a>
                             </li>
                             <li>
-                                <a href="#" class="btn_datacite_issue_url" id="btn_datacite_issue_url_{{ issue.pk }}">Register URL</a>
+                                <a href="#" class="btn_datacite_url" id="btn_datacite_issue_url_{{ issue.pk }}">Register URL</a>
                             </li>
                             <hr>
                             <li>
-                                <a href="#" class="btn_datacite_issue_check_metadata" id="btn_datacite_issue_check_metadata_{{ issue.pk }}">Check Metadata</a>
+                                <a href="#" class="btn_datacite_check_metadata" id="btn_datacite_issue_check_metadata_{{ issue.pk }}">Check Metadata</a>
                             </li>
                             <li>
-                                <a href="#" class="btn_datacite_issue_check_url" id="btn_datacite_issue_check_url_{{ issue.pk }}">Check URL</a>
+                                <a href="#" class="btn_datacite_check_url" id="btn_datacite_issue_check_url_{{ issue.pk }}">Check URL</a>
                             </li>
                             <li>
-                                <a href="#" class="btn_datacite_issue_delete_doi" id="btn_datacite_issue_delete_doi_{{ article.pk }}">Delete DOI</a>
+                                <a href="#" class="btn_datacite_delete_doi" id="btn_datacite_issue_delete_doi_{{ issue.pk }}">Delete DOI</a>
                             </li>
                             </ul>
                         </li>
+                        {% comment "later" %}
                         <li><a href="#">Alma</a>
                             <ul class="vertical menu nested">
                             <li>
-                                <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
+                                <a href="#" class="btn_alma_create_update" id="btn_alma_issue_create_update_{{ issuee.pk }}">Create / Update Record</a>
                             </li>
                             <li>
-                                <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
+                                <a href="#" class="btn_alma_push_nz" id="btn_alma_issue_push_nz_{{ issue.pk }}">Push To Network Zone</a>
                             </li>
                             <li>
-                                <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
+                                <a href="#" class="btn_alma_fetch_ac" id="btn_alma_issue_fetch_ac_{{ issue.pk }}">Fetch AC</a>
                             </li>
                             <hr>
                             <li>
-                                <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
+                                <a href="#" class="btn_alma_view_current" id="btn_alma_issue_view_current_{{ issue.pk }}">View current marc record</a>
                             </li>
                             </ul>
                         </li>
+                        {% endcomment %}
                     </ul>
-                </td> #}
+                </td> 
             </tr>
             {% empty %}
             <tr>
@@ -261,11 +263,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'alma_create_update',
                 };
 
@@ -325,7 +331,7 @@
 			                    modal.close();
                                 $('#modal').remove();
                                 $('.reveal-overlay').remove();
-                                almaCreateUpdateConfirm(id)                                
+                                almaCreateUpdateConfirm(article_id,issue_id)                                
                             });
                             
                             $('#modal').children('.cancel').on('click', function() 
@@ -347,11 +353,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'alma_push_nz',
                 };
 
@@ -422,11 +432,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'alma_fetch_ac',
                 };
 
@@ -455,10 +469,14 @@
                             str="";
                             if (mmsid) { str+=mmsid; }
                             if (ac) { if (mmsid) { str+="<br>";} str += ac; } 
-
-                            console.log(str)
-
-                            $("#alma_mmsid_ac_"+id).html(str)
+                            if (article_id !== null)
+                            {
+                                $("#alma_mmsid_ac_"+article_id).html(str)
+                            }
+                            if (issue_id !== null)
+                            {
+                                $("#alma_issue_mmsid_ac_"+issue_id).html(str)
+                            }
                         }
                     },
                     error: function(response)
@@ -473,11 +491,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'alma_view_current',
                 };
 
@@ -535,15 +557,21 @@
             })
 
 
+
+
             $(".btn_datacite_check_metadata").on("click", function(e)
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'datacite_check_metadata',
                 };
 
@@ -605,11 +633,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'datacite_check_url',
                 };
 
@@ -673,11 +705,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'datacite_delete_doi',
                 };
 
@@ -712,8 +748,16 @@
                             {
                                 toastr.success("DOI deleted")
                             }
-                            $("#datacite_state_"+id).html(state);
-                            $("#datacite_doi_"+id).html(doi)
+                            if (article_id !== null)
+                            {
+                                $("#datacite_state_"+article_id).html(state);
+                                $("#datacite_doi_"+article_id).html(doi);
+                            }                            
+                            if (issue_id !== null)
+                            {
+                                $("#datacite_issue_state_"+issue_id).html(state);
+                                $("#datacite_issue_doi_"+issue_id).html(doi);
+                            }                            
                         }
                     },
                     error: function(response)
@@ -729,11 +773,15 @@
             {
                 e.preventDefault();
 
+                var article_id = null;
+                var issue_id = null;
                 var parts = this.id.split(/_/);
                 var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'datacite_metadata',
                 };
 
@@ -794,7 +842,7 @@
 			                    confirm_datacite_metadata.close();
                                 $('#confirm_datacite_metadata').remove();
                                 $('.reveal-overlay').remove();
-                                dataciteMetadataConfirm(id)                                
+                                dataciteMetadataConfirm(article_id,issue_id)                                
                             });
                             
                             $('#confirm_datacite_metadata').children('.cancel').on('click', function() 
@@ -815,12 +863,15 @@
             $(".btn_datacite_url").on("click", function(e)
             {
                 e.preventDefault();
-                    var parts = this.id.split(/_/);
-                    var id = parts[parts.length-1]
-
+                var article_id = null;
+                var issue_id = null;
+                var parts = this.id.split(/_/);
+                var id = parts[parts.length-1]
+                if (this.id.search(/issue/)>=0 ) { issue_id = id; } else { article_id = id; }
                 var data = {
                     'csrfmiddlewaretoken': '{{ csrf_token }} ',
-                    'article_id': id,
+                    'article_id': article_id,
+                    'issue_id' : issue_id,
                     'operation': 'datacite_url',
                 };
 
@@ -864,7 +915,7 @@
 			                    confirm_datacite_url.close();
                                 $('#confirm_datacite_url').remove();
                                 $('.reveal-overlay').remove();
-                                dataciteURLConfirm(id)                                
+                                dataciteURLConfirm(article_id,issue_id)                                
                             });
                             
                             $('#confirm_datacite_url').children('.cancel').on('click', function() 
@@ -886,15 +937,16 @@
             var table_articles = $('#datatable-articles').DataTable();
             table_articles.order( [[ 0, 'desc' ]] ).draw(); 
 
-            var table_isseus = $('#datatable-issues').DataTable();
+            var table_issues = $('#datatable-issues').DataTable();
             table_issues.order( [[ 0, 'desc' ]] ).draw(); 
         })
         
-        function dataciteMetadataConfirm(article_id)
+        function dataciteMetadataConfirm(article_id,issue_id)
         {
             var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }} ',
                 'article_id': article_id,
+                'issue_id': issue_id,
                 'operation': 'datacite_metadata_confirm',
             };
 
@@ -921,19 +973,37 @@
                     }
                     else
                     {
-                        $("#datacite_state_"+article_id).html(state);
-
-                        old_val=$("#datacite_doi_"+article_id).html()
-                        $("#datacite_doi_"+article_id).html(doi)
-                        if (! old_val)
+                        if (article_id !== null)
                         {
-                            toastr.success("doi registered");
-                        }
-                        else
-                        {
-                            toastr.success("metadata updated");
+                            $("#datacite_state_"+article_id).html(state);
+
+                            old_val=$("#datacite_doi_"+article_id).html()
+                            $("#datacite_doi_"+article_id).html(doi)
+                            if (! old_val)
+                            {
+                                toastr.success("doi registered");
+                            }
+                            else
+                            {
+                                toastr.success("metadata updated");
+                            }
                         }
 
+                        if (issue_id !== null)
+                        {
+                            $("#datacite_issue_state_"+issue_id).html(state);
+
+                            old_val=$("#datacite_issue_doi_"+issue_id).html()
+                            $("#datacite_issue_doi_"+issue_id).html(doi)
+                            if (! old_val)
+                            {
+                                toastr.success("doi registered");
+                            }
+                            else
+                            {
+                                toastr.success("metadata updated");
+                            }
+                        }
                     }
                 },
                 error: function(response)
@@ -943,11 +1013,12 @@
             })
         }
 
-        function dataciteURLConfirm(article_id)
+        function dataciteURLConfirm(article_id,issue_id)
         {
             var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }} ',
                 'article_id': article_id,
+                'issue_id': issue_id,
                 'operation': 'datacite_url_confirm',
             };
 
@@ -974,7 +1045,15 @@
                     }
                     else
                     {
-                        $("#datacite_state_"+article_id).html(state)
+                        if (article_id !== null)
+                        {
+                            $("#datacite_state_"+article_id).html(state);
+                        }                       
+                        if (issue_id !== null)                             
+                        {
+                            $("#datacite_issue_state_"+issue_id).html(state);
+                        }                       
+
                     }
                 },
                 error: function(response)
@@ -984,11 +1063,12 @@
             })
         }
 
-        function almaCreateUpdateConfirm(article_id)
+        function almaCreateUpdateConfirm(article_id,issue_id)
         {
             var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }} ',
                 'article_id': article_id,
+                'issue_id': issue_id, 
                 'operation': 'alma_create_update_confirm',
             };
 
@@ -1017,7 +1097,14 @@
                         str="";
                         if (mmsid) { str+=mmsid; }
                         if (ac) { if (mmsid) { str+="<br>";} str += ac; } 
-                        $("#alma_mmsid_ac_"+article_id).html(str)
+                        if (article_id !== null)
+                        {
+                            $("#alma_mmsid_ac_"+article_id).html(str)
+                        }
+                        if (issue_id !== null)
+                        {
+                            $("#alma_issue_mmsid_ac_"+issue_id).html(str)
+                        }
                     }
                 },
                 error: function(response)
@@ -1027,11 +1114,12 @@
             })
         }
 
-        function almaPushNZConfirm(article_id)
+        function almaPushNZConfirm(article_id,issue_id)
         {
             var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }} ',
                 'article_id': article_id,
+                'issue_id': issue_id,
                 'operation': 'alma_push_nz_confirm',
             };
 

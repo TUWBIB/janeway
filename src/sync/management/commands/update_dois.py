@@ -82,7 +82,7 @@ class Command(BaseCommand):
         else:
             articles = submission_models.Article.objects.filter(pk=int(self.article_id),journal=self.journal)
             if len(articles) == 0:
-                print ("No article with id {} found.".format(article_id))
+                print ("No article with id {} found.".format(self.article_id))
                 sys.exit(0)
 
         for article in articles:
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                 print ("\tno doi skipping...")
                 continue
 
-            (url, errors, warnings) = logic.getCurrentDataCiteURL(article.id)
+            (url, errors, warnings) = logic.getCurrentDataCiteURL(article_id=article.id)
             if errors:
                 print ('\n'.join(errors))
                 sys.exit(0)
