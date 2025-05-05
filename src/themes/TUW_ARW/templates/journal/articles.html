@@ -1,0 +1,80 @@
+<!-- Deprecated in version 1.5.1. Use journal/article_list.html -->
+
+{% extends "core/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load pages %}
+
+
+{% block title %}{% trans "Articles" %}{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+
+    <section id="content">
+        <div class="row">
+            <div class="large-8 columns border-right">
+                <div class="hide-for-large">
+                    <ul class="accordion" data-accordion data-allow-all-closed="true">
+                        <li class="accordion-item" data-accordion-item>
+                            <a href="#" class="accordion-title">{% trans 'Show Filter Options' %}</a>
+                             <div class="accordion-content" data-tab-content>
+                                {% include "elements/journal/article_filter_form.html" %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                {% if pinned_articles and articles.number == 1 and not active_filters %}
+                <h1>{% trans 'Pinned Articles' %}</h1>
+                    {% for article in pinned_articles %}
+                        {% include "elements/journal/box_article.html" with article=article %}
+                    {% endfor %}
+                {% endif %}
+                <h1>{% trans "Articles" %}</h1>
+                {% for article in articles %}
+                    {% include "elements/journal/box_article.html" with article=article %}
+                {% empty %}
+                    <h3>{% trans 'There are no articles published in this journal yet' %}.</h3>
+                {% endfor %}
+
+                <div class="pagination-block">
+                    <ul class="pagination">
+                        {% if articles.has_previous %}
+                            <li class="arrow"><a href="?page={{ articles.previous_page_number }}">&laquo;</a>
+                            </li>{% endif %}
+                        {{ articles.page.page_range }}
+                        {% for page in articles|slice_pages:3 %}
+                            <li class="{% if articles.number == page.number %}current{% endif %}"><a
+                                    href="?page={{ page.number }}">{{ page.number }}</a></li>
+                        {% endfor %}
+                        {% if articles.has_next %}
+                            <li class="arrow"><a href="?page={{ articles.next_page_number }}">&raquo;</a>
+                            </li>{% endif %}
+                    </ul>
+                </div>
+            </div>
+           <aside class="large-4 columns show-for-large" data-sticky-container>
+                    <div class="sticky" data-sticky data-margin-top="0"
+                         data-anchor="content" data-sticky-on="large">
+                    {% include "elements/journal/article_filter_form.html" %}
+                </div>
+           </aside>
+        </div>
+
+    </section>
+{% endblock body %}
+
+{% block js %}
+{{ block.super }}
+<script>
+    //.sticky not behaving correctly
+    //https://github.com/zurb/foundation-sites/issues/9892
+    Foundation.MediaQuery._init()
+    if (Foundation.MediaQuery.current == 'medium') {
+      $('.sticky').removeAttr('data-sticky');
+    }
+    $(document).foundation();
+</script>
+{% endblock js %}

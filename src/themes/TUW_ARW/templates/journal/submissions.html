@@ -1,0 +1,56 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Submissions' %}{% endblock title %}
+
+{% block css %}
+    <style>
+        .fa-check {
+            color: green;
+        }
+        .fa-times {
+            color: darkred;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <section id="content">
+        <div class="row columns">
+            <div class="large-8">
+                <h1>{% trans 'Submissions' %}</h1>
+                {% if journal_settings.general.disable_journal_submission %}
+                <p>{{ journal_settings.general.disable_journal_submission_message|safe }}</p>
+                {% endif %}
+                {{ journal_settings.general.submission_intro_text|safe }}
+
+                {% if not journal_settings.general.disable_journal_submission %}
+                <div class="button-group">
+                    {% if not request.user.is_authenticated %}<a href="{% url 'core_register' %}" class="button">{% trans 'Register' %}</a>
+                    <a href="{% url 'core_login' %}" class="button">{% trans 'Login' %}</a>{% else %}
+                    <a href="{% url 'submission_start' %}" class="button">{% trans 'Start Submission' %}</a>{% endif %}
+                </div>
+                {% endif %}
+                <hr />
+
+                {% for item in submission_items %}
+                    {% if item.title == 'licences' %}
+                        <h3>{% trans 'Licences' %}</h3>
+                        <p>{% trans "The following licences are allowed:" %}</p>
+                        {% include "elements/license_block.html" %}
+                        <hr />
+                    {% elif item.title == 'sections' %}
+                        {% include "elements/section_block.html" %}
+                    {% elif item.get_display_text %}
+                        <h3>{{ item.title|capfirst }}</h3>
+                        {{ item.get_display_text|safe }}
+                    {% endif %}
+                    <hr />
+                {% endfor %}
+
+            </div>
+
+        </div>
+    </section>
+{% endblock body %}

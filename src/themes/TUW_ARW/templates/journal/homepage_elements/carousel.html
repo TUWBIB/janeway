@@ -1,0 +1,34 @@
+{% load i18n %}
+{% if carousel.enabled %}
+        <section class="no-padding" id="orbitsection">
+            <div class="row column" id="orbiter">
+                <div class="orbit" role="region" aria-label="Favorite Space Pictures" data-orbit>
+                    <ul class="orbit-container orbit-carousel">
+                        {% for carousel_item in carousel_items %}
+                            <li class="orbit-slide overlay">
+                            <a href="{{ carousel_item.url }}" class="box-link"></a>
+                                <img class="orbit-image"
+                                     {% if carousel_item.large_image_file.id %}
+                                     src="{% url carousel_item.carousel_image_resolver 'id' carousel_item.id carousel_item.large_image_file.id %}"
+                                     {% elif carousel_item.hero_image_url %}
+                                        src="{{ carousel_item.hero_image_url }}"
+                                     {% elif journal.default_large_image %}
+                                        src="{{ journal.default_large_image.url }}"
+                                     {% elif request.press.default_carousel_image %}
+                                         src="{{ request.press.default_carousel_image.url }}"
+                                     {% else %}
+                                        src=""
+                                     {% endif %}
+                                     alt="{{ carousel_item.carousel_title|striptags }}">
+                                <figcaption class="orbit-caption">
+                                    <p>{{ carousel_item.carousel_subtitle|safe }}</p>
+                                    <h3>{{ carousel_item.carousel_title|truncatechars_html:200|safe }}</h3>
+                                    {% if request.site_type.code == 'press' and carousel_item.stage %}<p>Published in: {{ carousel_item.journal.name }}</p>{% endif %}
+                                </figcaption>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+    {% endif %}
