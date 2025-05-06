@@ -313,7 +313,6 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('0000-0002-5907-4624')
                 l.append('</nameIdentifier>')
                 l.append('</creator>')
-                l.append('</creators>')
 
                 l.append('<creator>')
                 l.append('<creatorName nameType="Personal">')
@@ -329,6 +328,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('0000-0002-2799-491X')                         
                 l.append('</nameIdentifier>')
                 l.append('</creator>')
+
                 l.append('</creators>')
 
                 l.append('<titles>')
@@ -341,7 +341,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
                 l.append('<publisher>')
                 if issue.journal.code == 'ARW':
-                    l.append('Gesellschaft für Messtechnik, Automatisierung und Robotik – GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien')
+                    l.append('Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien')
                 l.append('</publisher>')
 
                 l.append('<publicationYear>')
@@ -408,14 +408,16 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
 
                 l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
-                l.append("---to be determined---'")
+                l.append("---to be 𝄞 determined---'")
                 l.append('</resourceType>')
-
                 l.append('</resource>')
 
                 xml = ''.join(l)
                 x = etree.fromstring(xml)
-                xml = etree.tostring(x, pretty_print=True).decode("utf-8")
+                xml = etree.tostring(x, 
+                                     encoding='unicode',
+                                     pretty_print=True)
+                
                 xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
 
             except Exception as e:
@@ -433,7 +435,6 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
         article = submission_models.Article.objects.get(pk=article_id)
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
-
         doi = article.get_doi()
         if doi is None:
             errors.append("No DOI registered")
@@ -446,9 +447,19 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
             if status != 'success':
                 errors.append(content)
             else:
-                xml=content
+                xml = content
     elif issue_id:
-        pass
+        issue = journal_models.Issue.objects.get(pk=issue_id)
+        doi = issue.doi
+        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
+        if doi is None:
+            errors.append("No DOI registered")
+        if not errors:
+            status,content = api.getMetadata(doi)
+            if status != 'success':
+                errors.append(content)
+            else:
+                xml = content
 
     return (xml, errors, warnings)
 
@@ -458,6 +469,7 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
     errors: List[str] = []    
 
     if article_id:
+        
         article = submission_models.Article.objects.get(pk=article_id)
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
@@ -475,7 +487,15 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
             else:
                 url=content
     elif issue_id:
-        pass
+        issue = journal_models.Issue.objects.get(pk=issue_id)
+        doi = issue.doi
+        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
+        if not errors:
+            status,content=api.getURL(doi)
+            if status != 'success':
+                errors.append(content)
+            else:
+                url=content
 
     print (f"{url} {errors} {warnings}")
 

@@ -155,7 +155,7 @@
         {% for issue in issues %}
             <tr>
                 <td><a href="{% url 'manage_issues_id' issue.pk %}">{{ issue.pk }}</a></td>
-                <td>{{ issue.title }}</td>
+                <td>{{ issue.issue_title }}</td>
 
                 {% if issue.doi %}                                
                 <td id="datacite_issue_doi_{{ issue.pk }}">{{ issue.doi }}</td>
