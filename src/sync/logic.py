@@ -28,8 +28,8 @@ def create_article_doi(article: submission_models.Article):
     if "pattern_article" in journal_settings: 
         doi = journal_settings["pattern_article"]
         if "***publication_year***" in doi:
-            doi = doi.replace("***publication_year***",str(article.issue.date.year))
-        if "***counter_within_issue***":
+            doi = doi.replace("***publication_year***", article.issue.publication_year)
+        if "***counter_within_issue***" in doi:
             dois_issue = identifier_models.Identifier.objects.filter(article__journal__issue=article.issue,id_type="doi")
             cnt = len(dois_issue) + 1
             doi = doi.replace("***counter_within_issue***",str(cnt))
@@ -37,7 +37,7 @@ def create_article_doi(article: submission_models.Article):
     else:
         prefix = api.journals[journal_code]['prefix']
         namespace_separator = api.journals[journal_code]['namespace_separator']
-        doi = prefix+'/'+namespace_separator+'.'+str(article.primary_issue.tuw_year)+'.'+str(article.pk+int(api.options['id_offset']))
+        doi = prefix+'/'+namespace_separator+'.'+ article.primary_issue.publication_year + '.'+str(article.pk+int(api.options['id_offset']))
 
     return doi
 
@@ -189,12 +189,12 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('</publisher>')
 
                 l.append('<publicationYear>')
-                l.append(str(article.primary_issue.tuw_year))
+                l.append(article.primary_issue.publication_year)
                 l.append('</publicationYear>')
 
                 l.append('<dates>')
                 l.append('<date dateType="Issued">')
-                l.append(str(article.primary_issue.tuw_year))
+                l.append(article.primary_issue.publication_year)
                 l.append('</date>')
                 l.append('</dates>')
 
@@ -624,7 +624,7 @@ def articleToMarc(article):
             s = ''
             s += now.strftime('%y%m%d')
             s += '|'
-            s += str(article.primary_issue.tuw_year)
+            s += article.primary_issue.publication_year
             s += '    |||     o     ||| 0 '
 
             if lang:
@@ -746,7 +746,7 @@ def articleToMarc(article):
             datafield=DataField.createDataField("264"," ","1")
             datafield.addSubField(SubField.createSubField("a","Wien"))
             datafield.addSubField(SubField.createSubField("b","Technische Universität Wien"))
-            datafield.addSubField(SubField.createSubField("c",str(article.primary_issue.tuw_year)))
+            datafield.addSubField(SubField.createSubField("c",article.primary_issue.publication_year))
             mr.addDataField(datafield)
 
             # 300 __ physical description
@@ -840,14 +840,14 @@ def articleToMarc(article):
                 datafield.addSubField(SubField.createSubField("t","IFM Journal"))
             else:
                 pass
-            datafield.addSubField(SubField.createSubField("d",str(article.primary_issue.tuw_year)))
+            datafield.addSubField(SubField.createSubField("d",article.primary_issue.publication_year))
             if article.journal.code == 'OES':
-                s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+str(article.primary_issue.tuw_year)+'), '
+                s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+ article.primary_issue.publication_year + '), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
             elif article.journal.code == 'JFM':
-                s = 'Jahrgang ('+str(article.primary_issue.tuw_year)+'), '
+                s = 'Jahrgang ('+ article.primary_issue.publication_year + '), '
                 s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))

@@ -780,7 +780,9 @@ class Issue(AbstractLastModifiedModel):
         ),
     )
 
-    tuw_year = models.IntegerField(null=True)
+    tuw_year = models.IntegerField(null=True, 
+                                   help_text=gettext("publication year (as claimed in issue) different from actual issue date"
+        ))
     tuw_issue_str = models.CharField(blank=True, null=True, max_length=10)
     tuw_vlid = models.IntegerField(null=True)
 
@@ -894,10 +896,8 @@ class Issue(AbstractLastModifiedModel):
                 issuestr = issuestr.format(self.issue)
         issue=issuestr
 
-        year = "{}".format(
-            self.tuw_year) if journal.display_issue_year else ""
-        title = "{}".format(
-            self.issue_title) if journal.display_issue_title else ""
+        year = "{}".format(self.publication_year) if journal.display_issue_year else ""
+        title = "{}".format(self.issue_title) if journal.display_issue_title else ""
 
         title_list = [volume, issue, year, title]
 
@@ -917,7 +917,7 @@ class Issue(AbstractLastModifiedModel):
                 issuestr = "{}".format(self.issue)
         issue=issuestr
 
-        year = "{}".format(self.tuw_year) if journal.display_issue_year else ""
+        year = "{}".format(self.publication_year) if journal.display_issue_year else ""
 
         title_list = [volume, issue, year]
 
@@ -929,6 +929,12 @@ class Issue(AbstractLastModifiedModel):
             self.cached_display_title
             or self.update_display_title(save=True)
         )
+    
+    @property
+    def publication_year(self):
+        year = self.tuw_year if self.tuw_year else self.date.year
+        return str(year)
+
 
     def update_display_title(self, save=False):
         title = None
