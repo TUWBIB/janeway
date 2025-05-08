@@ -217,11 +217,9 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
                 l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
 
-                if article.journal.code == 'JFM':
-                    pass
-                elif article.journal.code == 'OES':
+                if article.journal.issn:
                     l.append('<relatedIdentifiers>')
-                    l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">2412-3862</relatedIdentifier>')
+                    l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">' + article.journal.issn + '</relatedIdentifier>')
                     l.append('</relatedIdentifiers>')
 
                 l.append('<descriptions>')
