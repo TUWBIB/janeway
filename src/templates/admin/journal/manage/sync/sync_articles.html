@@ -14,17 +14,18 @@
 {% block body %}
 {# tabs header #}
 <ul class="tabs" data-tabs id="tabs">
-<li class="tabs-title is-active"><a data-tabs-target="tab-articles" href="#tab-articles" aria-selected="True">Articles</a></li>
-<li class="tabs-title"><a data-tabs-target="tab-issues" href="#tab-issues">Issues</a></li>
+{% if settings.alma_article_sync or settings.datacite_article_sync %}<li class="tabs-title is-active"><a data-tabs-target="tab-articles" href="#tab-articles" aria-selected="True">Articles</a></li> {% endif %}
+{% if settings.alma_issue_sync or settings.datacite_issue_sync %}<li class="tabs-title {% if not settings.alma_article_sync and not settings.datacite_article_sync %} is-active {% endif %}"><a data-tabs-target="tab-issues" href="#tab-issues">Issues</a></li> {% endif %}
 </ul>
 
+
 {# tabs #}
-<div class="tabs-content" data-tabs-content="tabs">
+<div class="row expanded tabs-content" data-tabs-content="tabs" style="min-height: 100vh; max-height: 100vh; overflow-y: scroll;">
 
 {# article tab #}
 <div class="tabs-panel" id="tab-articles">
-<div class="row expanded content">
-        <table class="table table-bordered" id="datatable-articles">
+<div class="content">
+        <table class="table table-bordered" id="datatable-articles" >
             <thead>
             <tr>
                 <th rowspan="2">{% trans "Id" %}</th>
@@ -75,6 +76,7 @@
                     <td></td>
                     <td>
                         <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
+                            {% if settings.datacite_article_sync %}
                             <li>
                                 <a href="#">Datacite</a>
                                 <ul class="vertical menu nested">
@@ -96,6 +98,8 @@
                                 </li>
                                 </ul>
                             </li>
+                            {% endif %}
+                            {% if settings.alma_article_sync %}
                             <li><a href="#">Alma</a>
                                 <ul class="vertical menu nested">
                                 <li>
@@ -113,12 +117,13 @@
                                 </li>
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td>{% trans "No articles in this stage" %}</td>
+                    <td>{% trans "No articles" %}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -129,7 +134,6 @@
             </tbody>
         </table>
 </div>
-<div class="row expanded" style="min-height: 100px;"></div>
 </div>        
 
 {# issue tab #}
@@ -174,6 +178,7 @@
                 <td></td>
                 <td>
                     <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
+                        {% if settings.datacite_issue_sync %}
                         <li>
                             <a href="#">Datacite</a>
                             <ul class="vertical menu nested">
@@ -195,7 +200,8 @@
                             </li>
                             </ul>
                         </li>
-                        {% comment "later" %}
+                        {% endif %}
+                        {% if settings.alma_issue_sync %}
                         <li><a href="#">Alma</a>
                             <ul class="vertical menu nested">
                             <li>
@@ -213,26 +219,24 @@
                             </li>
                             </ul>
                         </li>
-                        {% endcomment %}
+                        {% endif %}
                     </ul>
                 </td> 
             </tr>
             {% empty %}
             <tr>
-                <td>{% trans "No articles in this stage" %}</td>
+                <td>{% trans "No Issues" %}</td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
             </tr>
-        {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 </div>
-<div class="row expanded" style="min-height: 100px;"></div>
 </div>
-
 </div>        
 {% endblock %}
 

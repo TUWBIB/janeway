@@ -47,16 +47,19 @@ def sync(request):
 
     articles = submission_models.Article.objects.filter(journal=request.journal)
     issues = journal_models.Issue.objects.filter(journal=request.journal)
+    sync_settings = settings.DATACITE['journals'][request.journal.code]
+    view_settings = {}
+    view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM') else False
+    view_settings['alma_issue_sync'] = False
+    view_settings['datacite_article_sync'] = True if 'prefix' in sync_settings or 'pattern_article' in sync_settings else False
+    view_settings['datacite_issue_sync'] = True if 'pattern_issue' in sync_settings else False
 
     if request.method  == "POST":
 
-        data=json.loads(request.body)
+        data = json.loads(request.body)
         article_id = data['article_id']
         issue_id = data['issue_id']
         operation = data["operation"]
-
-        print(f"issue_id {issue_id} article_id {article_id} operation {operation}" )
-       
 
         if article_id:
             article = submission_models.Article.objects.filter(journal=request.journal,pk=article_id)[0]
@@ -125,9 +128,6 @@ def sync(request):
             elif operation == "datacite_delete_doi":
                 response = deleteDOI(issue=issue)
 
-            elif operation == "datacite_url":
-                response = dataciteURL(request.META['HTTP_HOST'],issue=issue)
-
         if not response:
             errors = []
             errors.append("invalid operation")
@@ -140,6 +140,7 @@ def sync(request):
     context = {
         'articles': articles,
         'issues': issues,
+        'settings': view_settings,
     }
 
     return render(request, template, context)
@@ -188,7 +189,11 @@ def dataciteMetadataConfirm(article_id=None,issue_id=None):
             return JsonResponse({ 'errors': errors, 'warnings': None,
                 'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
 
-def dataciteURL(host,article=None,issue=None):
+def dataciteURL(host,article=None,issue:journal_models.Issue=None):
+    ''' 
+    generates a url for datacite to be confirmed by the user
+    url is set to article or issue page    
+    '''
     errors = []
     api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     url = api.options['protocol']
@@ -204,7 +209,13 @@ def dataciteURL(host,article=None,issue=None):
         if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
             errors.append("URL already registered")
     if issue:
-        pass
+        url += reverse('journal_issue',args=[issue.pk])
+        doi = issue.doi
+        if doi is None:
+            errors.append("no doi registered yet")
+        datacite = sync_models.DataCite.objects.get(issue=issue)
+        if datacite and datacite.status == sync_models.DataCite.DATACITE_STATUS_FINDABLE:
+            errors.append("URL already registered")
 
     return JsonResponse({ 'errors': errors, 'warnings': None,
         'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
@@ -226,16 +237,21 @@ def dataciteURLConfirm(host,article=None,issue=None):
         if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
             errors.append("URL already registered")
     if issue:
-        pass
+        url += reverse('journal_issue',args=[issue.pk])
+        doi = issue.doi
+        if doi is None:
+            errors.append("no doi registered yet")
+        datacite = sync_models.DataCite.objects.get(issue=issue)
+        if datacite and datacite.status == sync_models.DataCite.DATACITE_STATUS_FINDABLE:
+            errors.append("URL already registered")
 
     if errors:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
 
-
-    (status,content)=api.registerURL(doi,url)
+    (status,content) = api.registerURL(doi,url)
     if status == "success":
-        status,errors = logic.urlSet(doi,article_id=article.pk,issue_id=issue.pk)
+        status,errors = logic.urlSet(doi,article=article,issue=issue)
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : submission_models.DATACITE_STATE_FINDABLE }})
     else:

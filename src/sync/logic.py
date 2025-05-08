@@ -436,8 +436,6 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
             else:
                 url=content
 
-    print (f"{url} {errors} {warnings}")
-
     return (url, errors, warnings)
 
 
@@ -486,13 +484,13 @@ def metadataUpdated(doi,article_id=None,issue_id=None):
         return (status,errors,datacite_status)            
    
 
-def urlSet(doi,article_id=None,issue_id=None):
+def urlSet(doi,article=None,issue=None):
     status = "success"
     errors: List[str] = []    
 
-    if article_id:
+    if article:
         try:
-            article = submission_models.Article.objects.get(pk=article_id)
+            article = submission_models.Article.objects.get(pk=article.pk)
             if not article.datacite_state or article.datacite_state!=submission_models.DATACITE_STATE_FINDABLE:
                 article.datacite_state = submission_models.DATACITE_STATE_FINDABLE
             article.datacite_ts = datetime.datetime.now(get_current_timezone())
@@ -502,8 +500,18 @@ def urlSet(doi,article_id=None,issue_id=None):
             logger.error(f"stacktrace={traceback.format_exc()}")
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
-    elif issue_id:
-        pass
+    elif issue:
+        try:
+            issue = journal_models.Issue.objects.get(pk=issue.pk)
+            datacite = sync_models.DataCite.objects.get(issue=issue)
+            datacite.ts = datetime.datetime.now(get_current_timezone())
+            datacite.status = sync_models.DataCite.DATACITE_STATUS_FINDABLE
+            datacite.save()
+        except Exception as e:
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
+            errors.append(''.join(['error writing db: ',str(e)]))
+            status = "error"
 
     return (status,errors)
 
