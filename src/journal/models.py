@@ -876,18 +876,10 @@ class Issue(AbstractLastModifiedModel):
 
         volume = gettext("Volume")
         volume += " {}"
-        volume = volume.format(
-            self.volume) if journal.display_issue_volume else ""
+        volume = volume.format(self.volume) if journal.display_issue_volume else ""
 
         if journal.display_issue_number:
-            if self.tuw_issue_str is not None:
-                if journal.code=='OES':
-                    issuestr = pgettext("fe_oes","Issue")
-                else:
-                    issuestr = gettext("Issue")
-                issuestr += " {}"
-                issuestr = issuestr.format(self.tuw_issue_str)
-            elif self.issue is not None:
+            if self.issue is not None:
                 if journal.code=='OES':
                     issuestr = pgettext("fe_oes","Issue")
                 else:
@@ -911,11 +903,9 @@ class Issue(AbstractLastModifiedModel):
         volume = "{}".format(self.volume) if journal.display_issue_volume else ""
 
         if journal.display_issue_number:
-            if self.tuw_issue_str is not None:
-                issuestr = "{}".format(self.tuw_issue_str)
-            elif self.issue is not None:
+            if self.issue is not None:
                 issuestr = "{}".format(self.issue)
-        issue=issuestr
+        issue = issuestr
 
         year = "{}".format(self.publication_year) if journal.display_issue_year else ""
 
