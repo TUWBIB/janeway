@@ -15,8 +15,11 @@ from submission import models as submission_models
 from journal import models as journal_models
 from sync import models as sync_models
 from identifiers import models as identifier_models
+from utils.logger import get_logger
 from sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField
+
+logger = get_logger(__name__)
 
 def create_article_doi(article: submission_models.Article):
     doi: str
@@ -45,7 +48,6 @@ def create_article_doi(article: submission_models.Article):
 def create_issue_doi(issue: journal_models.Issue):
     doi: str
 
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     journal_code = issue.journal.code
     journal_settings = settings.DATACITE['journals'][journal_code]
     # new method
@@ -257,7 +259,8 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
 
             except Exception as e:
-                print (traceback.format_exc())
+                logger.error(f"exception={type(e).__name__}")
+                logger.error(f"stacktrace={traceback.format_exc()}")
                 errors.append(''.join(['error creating xml: ',str(e)]))
 
     elif issue_id:
@@ -356,7 +359,8 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
 
             except Exception as e:
-                print (traceback.format_exc())
+                logger.error(f"exception={type(e).__name__}")
+                logger.error(f"stacktrace={traceback.format_exc()}")
                 errors.append(''.join(['error creating xml: ',str(e)]))
 
     return (xml, errors, warnings)
@@ -456,6 +460,8 @@ def metadataUpdated(doi,article_id=None,issue_id=None):
                 identifier_models.Identifier.objects.create(article=article,id_type='doi',identifier=doi)
             datacite_status = article.datacite_state
         except Exception as e:
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
         
@@ -472,6 +478,8 @@ def metadataUpdated(doi,article_id=None,issue_id=None):
             datacite.save()
             datacite_status = datacite.status 
         except Exception as e:
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
         
@@ -490,6 +498,8 @@ def urlSet(doi,article_id=None,issue_id=None):
             article.datacite_ts = datetime.datetime.now(get_current_timezone())
             article.save()
         except Exception as e:
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
     elif issue_id:
@@ -521,7 +531,8 @@ def doiDeleted(doi,article=None,issue=None):
             if datacite:
                 datacite.delete()
         except Exception as e:
-            print (traceback.format_exc())
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
 
@@ -859,7 +870,8 @@ def setMMSId(article,mmsid):
         identifier_models.Identifier.objects.filter(article=article,id_type='mmsid').delete()
         identifier_models.Identifier.objects.create(article=article,id_type='mmsid',identifier=mmsid)
     except Exception as e:
-        print (traceback.format_exc())
+        logger.error(f"exception={type(e).__name__}")
+        logger.error(f"stacktrace={traceback.format_exc()}")
         errs.append(''.join(['error writing db: ',str(e)]))
 
     return errs
@@ -870,7 +882,8 @@ def setAC(article,ac):
         identifier_models.Identifier.objects.filter(article=article,id_type='ac').delete()
         identifier_models.Identifier.objects.create(article=article,id_type='ac',identifier=ac)
     except Exception as e:
-        print (traceback.format_exc())
+        logger.error(f"exception={type(e).__name__}")
+        logger.error(f"stacktrace={traceback.format_exc()}")
         errs.append(''.join(['error writing db: ',str(e)]))
 
     return errs
