@@ -245,10 +245,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
                     l.append(str(article.primary_issue.volume))
                     l.append('(')
-                    if article.primary_issue.tuw_issue_str is not None:
-                        l.append(article.primary_issue.tuw_issue_str)
-                    else:
-                        l.append(str(article.primary_issue.issue))
+                    l.append(str(article.primary_issue.issue))
                     l.append('): ')
                     l.append(str(article.page_numbers))
                     l.append('</description>')
@@ -347,66 +344,6 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('<publicationYear>')
                 l.append(str(issue.date.year))
                 l.append('</publicationYear>')
-#
-#
-#                if article.get_urn() is not None:
-#                    l.append('<alternateIdentifiers>')
-#                    l.append('<alternateIdentifier alternateIdentifierType="URN">')
-#                    l.append(article.get_urn())
-#                    l.append('</alternateIdentifier>')
-#                    l.append('</alternateIdentifiers>')
-#
-#
-#                if article.license is not None and article.license.short_name != 'Copyright':
-#                    l.append('<rightsList>')
-#                    l.append('<rights rightsURI="')
-#                    l.append(article.license.url)
-#                    l.append('" xml:lang="en-US">')
-#                    l.append(article.license.name)
-#                    l.append('</rights>')
-#                    l.append('</rightsList>')
-#
-#                l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
-#
-#                if article.journal.code == 'JFM':
-#                    pass
-#                elif article.journal.code == 'OES':
-#                    l.append('<relatedIdentifiers>')
-#                    l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">2412-3862</relatedIdentifier>')
-#                    l.append('</relatedIdentifiers>')
-#
-#                l.append('<descriptions>')
-#                if article.getAbstractEN or article.getAbstractDE:
-#                    if article.getAbstractEN:
-#                        l.append('<description xml:lang="')
-#                        l.append('en" descriptionType="Abstract">')
-#                        l.append(escape(article.getAbstractEN))
-#                        l.append('</description>')
-#                    if article.getAbstractDE:
-#                        l.append('<description xml:lang="')
-#                        l.append('de" descriptionType="Abstract">')
-#                        l.append(escape(article.getAbstractDE))
-#                        l.append('</description>')
-#                else:
-#                    warnings.append("neither english nor german abstract")
-#
-#                if article.journal.code == 'JFM':
-#                    pass
-#                elif article.journal.code == 'OES':
-#                    l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
-#                    l.append(str(article.primary_issue.volume))
-#                    l.append('(')
-#                    if article.primary_issue.tuw_issue_str is not None:
-#                        l.append(article.primary_issue.tuw_issue_str)
-#                    else:
-#                        l.append(str(article.primary_issue.issue))
-#                    l.append('): ')
-#                    l.append(str(article.page_numbers))
-#                    l.append('</description>')
-#                l.append('</descriptions>')
-
-
-
                 l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
                 l.append("---to be 𝄞 determined---'")
                 l.append('</resourceType>')
@@ -841,14 +778,14 @@ def articleToMarc(article):
             else:
                 pass
             datafield.addSubField(SubField.createSubField("d",article.primary_issue.publication_year))
-            if article.journal.code == 'OES':
-                s = 'Jahrgang '+str(article.primary_issue.volume)+' ('+ article.primary_issue.publication_year + '), '
-                s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
+            if article.journal.code in 'OES':
+                s = 'Jahrgang '+str(article.primary_issue.volume) + ' ('+ article.primary_issue.publication_year + '), '
+                s += 'Heft '+ article.primary_issue.issue + ', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
             elif article.journal.code == 'JFM':
                 s = 'Jahrgang ('+ article.primary_issue.publication_year + '), '
-                s += 'Heft '+str(article.primary_issue.tuw_issue_str if article.primary_issue.tuw_issue_str else article.primary_issue.issue)+', '
+                s += 'Heft '+ article.primary_issue.issue + ', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
             else:
