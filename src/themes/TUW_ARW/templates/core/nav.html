@@ -9,10 +9,9 @@
         {% if request.journal.nav_news %}<li><a href="{% url 'core_news_list' %}">{{ journal_settings.news.news_title }}</a></li>{% endif %}
         {% for item in navigation_items %}
         {% if item.has_sub_nav %}
-            <li class=".is-dropdown-submenu-parent"><a href="#"
-                                                       data-options="is_hover:true; hover_timeout:5000">{{ item.link_name }}</a>
+            <li class=".is-dropdown-submenu-parent"><a href="#" data-options="is_hover:true; hover_timeout:5000">{{ item.link_name }}</a> 
             <ul class="menu vertical medium-horizontal">
-            <li><a href="{{ item.url }}">{{ item.link_name }}</a></li>
+{#            <li><a href="{{ item.url }}">{{ item.link_name }}</a></li> #}
             {% tag_get_sub_nav_items item LANGUAGE_CODE as sub_nav_items %}
             {% for subnav in sub_nav_items %}
                 <li><a href="{{ subnav.url }}">{{ subnav.link_name }}</a></li>
