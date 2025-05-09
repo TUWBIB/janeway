@@ -4,6 +4,7 @@ import requests
 import re
 import traceback
 import json
+import base64
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectTimeout,ReadTimeout
 from pathlib import Path
@@ -69,20 +70,58 @@ class API():
         self.options = data['options']
         self.login = data['login']
 
+#    def getMetadata(self,doi):
+#        url = self.login['endpoint']
+#        url += 'metadata/'
+#        url += doi
+#
+#        status = 'success'
+#        try:
+#            response = requests.get(url,
+#                            auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+#                            )
+#            
+#            if response.status_code != 200:
+#                status = "error"
+#            content=response.text
+#
+#        except ConnectTimeout as e:
+#            status = "error"
+#            content = (''.join(['connect timeout: ',str(e)]))
+#        except ReadTimeout as e:
+#            status = "error"
+#            content = (''.join(['read timeout: ',str(e)]))
+#        except Exception as e:
+#            status = "error"
+#            content = (''.join(['general exception: ',str(e)]))
+#
+#        return (status,content)
+
+
     def getMetadata(self,doi):
-        url = self.login['endpoint']
-        url += 'metadata/'
+        url = self.login['rest-endpoint']
+        url += 'dois/'
         url += doi
 
         status = 'success'
         try:
+            headers = {"accept": "application/vnd.api+json"}
+
             response = requests.get(url,
                             auth=HTTPBasicAuth(self.login['user'],self.login['password']),
+                            headers=headers,
                             )
             
             if response.status_code != 200:
                 status = "error"
             content=response.text
+
+            print(content)
+
+            d = json.loads(response.text)
+            content = d['data']['attributes']['xml']
+            content = base64.b64decode(content).decode()
+
 
         except ConnectTimeout as e:
             status = "error"
@@ -95,6 +134,8 @@ class API():
             content = (''.join(['general exception: ',str(e)]))
 
         return (status,content)
+
+
 
     def updateMetadata(self,doi,xml):
         url = self.login['endpoint']
