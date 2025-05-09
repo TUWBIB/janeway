@@ -10,6 +10,8 @@ from xml.sax.saxutils import escape, unescape
 from django.conf import settings
 from django.db.models import Max
 from django.utils.timezone import get_current_timezone
+from django.utils.translation import activate
+
 
 from submission import models as submission_models
 from journal import models as journal_models
@@ -21,42 +23,53 @@ from laapy import API,MarcRecord,ControlField,DataField,SubField
 
 logger = get_logger(__name__)
 
-def create_article_doi(article: submission_models.Article):
-    doi: str
+def createDOI(article:submission_models.Article = None, issue: journal_models.Issue = None) -> str:
+    doi: str = None
 
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-    journal_code = article.journal.code
-    journal_settings = settings.DATACITE['journals'][journal_code]
-    # new method
-    if "pattern_article" in journal_settings: 
-        doi = journal_settings["pattern_article"]
-        if "***publication_year***" in doi:
-            doi = doi.replace("***publication_year***", article.issue.publication_year)
-        if "***counter_within_issue***" in doi:
-            dois_issue = identifier_models.Identifier.objects.filter(article__journal__issue=article.issue,id_type="doi")
-            cnt = len(dois_issue) + 1
-            doi = doi.replace("***counter_within_issue***",str(cnt))
-    # legacy
-    else:
-        prefix = api.journals[journal_code]['prefix']
-        namespace_separator = api.journals[journal_code]['namespace_separator']
-        doi = prefix+'/'+namespace_separator+'.'+ article.primary_issue.publication_year + '.'+str(article.pk+int(api.options['id_offset']))
-
-    return doi
-
-
-def create_issue_doi(issue: journal_models.Issue):
-    doi: str
-
-    journal_code = issue.journal.code
-    journal_settings = settings.DATACITE['journals'][journal_code]
-    # new method
-    if "pattern_issue" in journal_settings: 
-        doi = journal_settings["pattern_issue"]
-        if "***publication_year***" in doi:
-            doi = doi.replace("***publication_year***",str(issue.date.year))
+    if article:
+        journal_code = article.journal.code
+        journal_settings = settings.DATACITE['journals'][journal_code]
+        if "pattern_article" in journal_settings: 
+            doi = journal_settings["pattern_article"]
+            if "***publication_year***" in doi:
+                doi = doi.replace("***publication_year***", article.issue.publication_year)
+            if "***counter_within_issue***" in doi:
+                dois_issue = identifier_models.Identifier.objects.filter(article__journal__issue=article.issue,id_type="doi")
+                cnt = len(dois_issue) + 1
+                doi = doi.replace("***counter_within_issue***",str(cnt))
+            if '***article_id_plus_offset***' in doi:
+                offset = int(journal_settings.get('offset',0))
+                val = article.pk + offset
+                doi = doi.replace("***article_id_plus_offset***",str(val))
+    elif issue:
+        journal_code = issue.journal.code
+        journal_settings = settings.DATACITE['journals'][journal_code]
+        if "pattern_issue" in journal_settings: 
+            doi = journal_settings["pattern_issue"]
+            if "***publication_year***" in doi:
+                doi = doi.replace("***publication_year***",str(issue.date.year))
 
     return doi
+
+def checkDOI(doi:str,article: submission_models.Article = None,issue: journal_models.Issue = None) -> bool:
+    if article:
+        journal_code = article.journal.code
+        journal_settings = settings.DATACITE['journals'][journal_code]
+        pattern = journal_settings.get('pattern_article_regex','')
+        if match := re.search(pattern,doi):
+            return True
+        else:
+            return False
+    elif issue:
+        journal_code = issue.journal.code
+        journal_settings = settings.DATACITE['journals'][journal_code]
+        pattern = journal_settings.get('pattern_issue_regex','')
+        if match := re.search(pattern,doi):
+            return True
+        else:
+            return False
+
+    return False
 
 
 def checkArticleMandatoryFields(article):
@@ -74,6 +87,9 @@ def dataciteMetadata(article_id=None,issue_id=None):
     xml: str = ''
     errors: List[str] = []
     warnings: List[str] = []
+    article: submission_models.Article
+
+    activate('en')
 
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
@@ -88,10 +104,10 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://datacite.org/schema/kernel-4" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">')
             
                 doi = article.get_doi()
-                if doi is None:
-                    doi = create_article_doi(article)
+                if not doi:
+                    doi = createDOI(article=article)
                 else:
-                    if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+                    if not checkDOI(doi,article=article):
                         errors.append("existing DOI doesn't conform to current configuration")
 
                 l.append('<identifier identifierType="DOI">')
@@ -182,12 +198,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('</subjects>')
 
                 l.append('<publisher>')
-                if article.journal.code == 'JFM':
-                    l.append('Journal für Facility Management')
-                elif article.journal.code == 'OES':
-                    l.append('Der Öffentliche Sektor - The Public Sector')
-                elif article.journal.code == 'ARW':
-                    l.append(article.publisher)
+                l.append(article.publisher)
                 l.append('</publisher>')
 
                 l.append('<publicationYear>')
@@ -275,7 +286,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
                 doi = issue.doi
                 if not doi:
-                    doi = create_issue_doi(issue)
+                    doi = createDOI(issue=issue)
 
                 l.append('<identifier identifierType="DOI">')
                 l.append(doi)
@@ -373,12 +384,11 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-
         doi = article.get_doi()
-        if doi is None:
+        if not doi:
             errors.append("No DOI registered")
         else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            if not checkDOI(doi,article=article):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if not errors:
@@ -391,8 +401,12 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
         issue = journal_models.Issue.objects.get(pk=issue_id)
         doi = issue.doi
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-        if doi is None:
+        if not doi:
             errors.append("No DOI registered")
+        else:
+            if not checkDOI(doi,issue=issue):
+                errors.append("existing DOI doesn't conform to current configuration")
+
         if not errors:
             status,content = api.getMetadata(doi)
             if status != 'success':
@@ -408,15 +422,13 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
     errors: List[str] = []    
 
     if article_id:
-        
         article = submission_models.Article.objects.get(pk=article_id)
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-
         doi = article.get_doi()
-        if doi is None:
+        if not doi:
             errors.append("No DOI registered")
         else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            if not checkDOI(doi,article=article):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if not errors:
@@ -427,8 +439,13 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
                 url=content
     elif issue_id:
         issue = journal_models.Issue.objects.get(pk=issue_id)
-        doi = issue.doi
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
+        doi = issue.doi
+        if not doi:
+            errors.append("No DOI registered")
+        else:
+            if not checkDOI(doi,issue=issue):
+                errors.append("existing DOI doesn't conform to current configuration")
         if not errors:
             status,content=api.getURL(doi)
             if status != 'success':

@@ -51,11 +51,10 @@ def sync(request):
     view_settings = {}
     view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM') else False
     view_settings['alma_issue_sync'] = False
-    view_settings['datacite_article_sync'] = True if 'prefix' in sync_settings or 'pattern_article' in sync_settings else False
+    view_settings['datacite_article_sync'] = True if 'pattern_article' in sync_settings else False
     view_settings['datacite_issue_sync'] = True if 'pattern_issue' in sync_settings else False
 
     if request.method  == "POST":
-
         data = json.loads(request.body)
         article_id = data['article_id']
         issue_id = data['issue_id']

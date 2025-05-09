@@ -7,8 +7,6 @@ import json
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectTimeout,ReadTimeout
 from pathlib import Path
-import base64
-
 
 class API():
     def __init__(self,obj_cfg=None,file_cfg=None,json_str=None):
@@ -52,9 +50,6 @@ class API():
         if not 'protocol' in data['options'].keys():
             raise Exception("DataciteApi config file: 'options.id_protocl' expected")
 
-        if not 'id_offset' in data['options'].keys():
-            raise Exception("DataciteApi config file: 'options.id_offset' expected")
-
         if not 'conn_timeout' in data['options'].keys():
             conn_timeout = 2
         
@@ -73,33 +68,6 @@ class API():
 
         self.options = data['options']
         self.login = data['login']
-        self.journals = data['journals']
-#            for k,v in self.options.items():
-#    	        print (str(k)+': '+str(v))
-#    
-#            for k,v in self.login.items():
-#    	        print (str(k)+': '+str(v))
-#    
-#            for k,v in self.journals.items():
-#                print (k)
-#                for k1,v1 in self.journals[k].items():
-#    	            print ('   '+str(k1)+': '+str(v1))
-
-
-    def doiConformsToCurrentConfiguration(self,journal_code,doi):
-        if journal_code in ['JFM','OES']:
-            prefix = self.journals[journal_code]['prefix']
-            namespace_separator = self.journals[journal_code]['namespace_separator']
-            pattern = prefix+'/'+namespace_separator+r'\.\d{4}\.\d{3,4}'
-
-            match = re.match(pattern,doi)
-            if not match:
-                return False
-            else:
-                return True
-
-        return True
-
 
     def getMetadata(self,doi):
         url = self.login['endpoint']
@@ -196,8 +164,6 @@ class API():
 
 
     def getURL(self,doi):
-        print(f"DOI {doi}")
-
         url = self.login['endpoint']
         url += 'doi/'
         url += doi
@@ -259,17 +225,6 @@ class API():
             content = (''.join(['general exception: ',str(e)]))
         
         return (status,content)
-
-#    def listDOIs(self):
-#        req_url = self.login['endpoint']+'doi'
-#        print (req_url)
-#        response = requests.get(req_url,
-#                        auth=HTTPBasicAuth(self.login['user'],self.login['password']),
-#                        )
-#        if response.status_code != 201: 
-#            print (str(response.status_code))
-#        content=response.text
-#        print (content)
 
 if __name__ == '__main__':
     try:
