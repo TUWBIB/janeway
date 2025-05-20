@@ -3301,7 +3301,7 @@ def handleAddAuthor(request, article):
             messages.add_message(request, messages.ERROR, '%s is already author' % author_exists.full_name())
     else:
         if author_form.is_valid():
-            if author_form.cleaned_data["first_name"] and author_form.cleaned_data["last_name"] and author_form.cleaned_data["institution"]:
+            if author_form.cleaned_data["first_name"] and author_form.cleaned_data["last_name"]:
                 new_author = author_form.save(commit=False)
                 new_author.username = new_author.email
                 new_author.set_password(shared.generate_password())
@@ -3319,7 +3319,7 @@ def handleAddAuthor(request, article):
                     'author' : serializers.serialize('json',[new_author], fields=["pk","last_name","first_name","email"]) 
                 }
             else:
-                messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname, Lastname and Institution' % request.POST.get('email'))
+                messages.add_message(request, messages.ERROR, '%s could not be found. Enter Firstname and Lastname' % request.POST.get('email'))
         else:
             messages.add_message(request, messages.ERROR,'% form invalid') 
             print (author_form.errors)
