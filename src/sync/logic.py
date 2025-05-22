@@ -498,7 +498,7 @@ def metadataUpdated(doi,article_id=None,issue_id=None):
             errors.append(''.join(['error writing db: ',str(e)]))
             status = "error"
         
-        return (status,errors,datacite_status)            
+    return (status,errors,datacite_status)            
    
 
 def urlSet(doi,article=None,issue=None):
