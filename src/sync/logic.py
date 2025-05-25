@@ -248,7 +248,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         
 
                 if article.journal.code == 'ARW':
-                    l.append('<resourceType resourceTypeGeneral="Conference Paper">Conference Paper</resourceType>')
+                    l.append('<resourceType resourceTypeGeneral="ConferencePaper">Conference Paper</resourceType>')
                 else:
                     l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
 
