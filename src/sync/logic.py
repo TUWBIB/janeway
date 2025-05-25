@@ -161,23 +161,23 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append('</title>')
 
                 if article.language == 'eng':
-                    if article.getTitleDE:
+                    if article.getTitleDE and article.getTitleDE.strip() != article.getTitleEN.strip():
                         l.append('<title titleType="AlternativeTitle">')
                         l.append(escape(article.getTitleDE))
                         l.append('</title>')
 
-                    if article.getSubTitleDE:
+                    if article.getSubTitleDE and article.getSubTitleDE.strip() != article.getSubTitleEN.strip():
                         l.append('<title titleType="Other">')
                         l.append(escape(article.getSubTitleDE))
                         l.append('</title>')
 
                 if article.language == 'deu':
-                    if article.getTitleEN:
+                    if article.getTitleEN and article.getTitleDE.strip() != article.getTitleEN.strip():
                         l.append('<title titleType="AlternativeTitle">')
                         l.append(escape(article.getTitleEN))
                         l.append('</title>')
 
-                    if article.getSubTitleEN:
+                    if article.getSubTitleEN and article.getSubTitleDE.strip() != article.getSubTitleEN.strip():
                         l.append('<title titleType="Other">')
                         l.append(escape(article.getSubTitleEN))
                         l.append('</title>')
@@ -205,11 +205,19 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(article.primary_issue.publication_year)
                 l.append('</publicationYear>')
 
-                l.append('<dates>')
-                l.append('<date dateType="Issued">')
-                l.append(article.primary_issue.publication_year)
-                l.append('</date>')
-                l.append('</dates>')
+                if article.journal.code == 'ARW':
+                    l.append('<dates>')
+                    l.append('<date dateType="Issued">')
+                    l.append(article.date_published.strftime('%Y-%m-%d'))
+                    l.append('</date>')
+                    l.append('</dates>')
+                else:
+                    l.append('<dates>')
+                    l.append('<date dateType="Issued">')
+                    l.append(article.primary_issue.publication_year)
+                    l.append('</date>')
+                    l.append('</dates>')
+
 
                 if article.get_urn() is not None:
                     l.append('<alternateIdentifiers>')
@@ -220,20 +228,46 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
 
                 if article.license is not None and article.license.short_name != 'Copyright':
-                    l.append('<rightsList>')
-                    l.append('<rights rightsURI="')
-                    l.append(article.license.url)
-                    l.append('" xml:lang="en-US">')
-                    l.append(article.license.name)
-                    l.append('</rights>')
-                    l.append('</rightsList>')
+                    if article.journal.code == 'ARW':
+                        l.append('<rightsList>')
+                        l.append('<rights xml:lang="en" schemeURI="https://spdx.org/licenses/" rightsIdentifierScheme="SPDX" ')
+                        l.append(f'rightsIdentifier="{article.license.short_name.replace(' ','-')}" ')
+                        l.append(f'rightsURI="{article.license.url}" ')                                 
+                        l.append('>')
+                        l.append(article.license.name)
+                        l.append('</rights>')
+                        l.append('</rightsList>')
+                    else:
+                        l.append('<rightsList>')
+                        l.append('<rights rightsURI="')
+                        l.append(article.license.url)
+                        l.append('" xml:lang="en-US">')
+                        l.append(article.license.name)
+                        l.append('</rights>')
+                        l.append('</rightsList>')
+                        
 
-                l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
+                if article.journal.code == 'ARW':
+                    l.append('<resourceType resourceTypeGeneral="Conference Paper">Conference Paper</resourceType>')
+                else:
+                    l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
 
-                if article.journal.issn:
-                    l.append('<relatedIdentifiers>')
-                    l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">' + article.journal.issn + '</relatedIdentifier>')
-                    l.append('</relatedIdentifiers>')
+
+
+
+                if article.journal.code == 'ARW':
+                    if article.journal.issn or article.issue.doi:
+                        l.append('<relatedIdentifiers>')
+                        if article.journal.issn:
+                            l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPublishedIn">' + article.journal.issn + '</relatedIdentifier>')
+                        if article.issue.doi:
+                            l.append('<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPublishedIn" resourceTypeGeneral="ConferenceProceeding">' + article.issue.doi + '</relatedIdentifier>')
+                        l.append('</relatedIdentifiers>')
+                else:
+                    if article.journal.issn:
+                        l.append('<relatedIdentifiers>')
+                        l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">' + article.journal.issn + '</relatedIdentifier>')
+                        l.append('</relatedIdentifiers>')
 
                 l.append('<descriptions>')
                 if article.getAbstractEN or article.getAbstractDE:
@@ -242,7 +276,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append('en" descriptionType="Abstract">')
                         l.append(escape(article.getAbstractEN))
                         l.append('</description>')
-                    if article.getAbstractDE:
+                    if article.getAbstractDE and article.getAbstractDE.strip() != article.getAbstractEN.strip():
                         l.append('<description xml:lang="')
                         l.append('de" descriptionType="Abstract">')
                         l.append(escape(article.getAbstractDE))
