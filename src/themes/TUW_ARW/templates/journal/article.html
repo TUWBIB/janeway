@@ -109,6 +109,7 @@
                     </div>
                     <div id="options-menu">
                         <div class="small-4 medium-3 large-2 columns">
+                            {% comment "disable social media sharing " %}
                             <ul class="menu vertical medium-horizontal pad-left-15"
                                 data-responsive-menu="drilldown medium-dropdown">
                               {% with article.get_doi_url as doi_url %}
@@ -119,6 +120,7 @@
                                 <li><a href="https://www.linkedin.com/sharing/share-offsite?url={% if doi_url %}{{ doi_url }}{% else %}{{ article.url }}{% endif %}" target="_blank" aria-label="{% trans 'Share on LinkedIn' %}"><i class="fa fa-linkedin"></i></a></li>
                               {% endwith %}
                             </ul>
+                            {% endcomment %}
                         </div>
                         <div class="small-8 medium-9 large-10 columns">
                             <div class = "float-right">
