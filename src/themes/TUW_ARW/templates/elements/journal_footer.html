@@ -21,11 +21,22 @@
                 </li>
             {% endif %}
         {% endfor %}
-      {% if journal_settings.general.privacy_policy_url %}
+
+
+        {% comment "hardcode privacy link" %}
+
+        {% if journal_settings.general.privacy_policy_url %}
         <li><a href="{{ journal_settings.general.privacy_policy_url }}">{% trans "Privacy Policy" %}</a></li>
       {% else %}
         <li><a href="{% url 'cms_page' "privacy" %}">{% trans "Privacy Policy" %}</a></li>
       {% endif %}
+        {% endcomment %}    
+        {% get_current_language as LANGUAGE_CODE %}
+        {% if LANGUAGE_CODE == 'de' %}
+        <li><a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Dokumente/Datenschutzerkl%C3%A4rungen%20Sonstige/Datenschutzinformation_Bibliothek.pdf">{% trans "Privacy Policy" %}</a></li>
+        {% else %}
+        <li><a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Documents/Data%20Protection%20Declaration%20Other/Data%20Protection%20Information_Bibliothek.pdf">{% trans "Privacy Policy" %}</a></li>
+        {% endif %}
         <li><a href="{% url 'contact' %}">{% trans "Contact" %}</a></li>
         {% if not request.user.is_authenticated %}<li><a href="{% url 'core_login' %}">{% trans 'Login' %}</a></li>{% endif %}
 
