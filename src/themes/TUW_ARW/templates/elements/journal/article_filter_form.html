@@ -1,5 +1,23 @@
 <!-- Deprecated in version 1.5.1. Use journal/article_list_filters.html -->
+{# still used in OLH-theme though #}
+{# restrict to number of shown entries #}
 
+<form method="POST">
+    {% csrf_token %}
+    <div class="section">
+        <label>{% trans "Show" %}
+            <select name="show">
+                <option value="10"{% if show == 10 %} selected="selected"{% endif %}>10</option>
+                <option value="20"{% if show == 20 %} selected="selected"{% endif %}>20</option>
+                <option value="50"{% if show == 50 %} selected="selected"{% endif %}>50</option>
+                <option value="100"{% if show == 100 %} selected="selected"{% endif %}>100</option>
+            </select>
+        </label>
+        <button type="submit" class="button">{% trans "Apply" %}</button>
+    </div>
+</form>
+
+{% comment "original code" %}
 <form method="POST">
     {% csrf_token %}
     <div class="section">
@@ -37,3 +55,5 @@
             <button type="submit" class="button" name="clear">{% trans "Clear Filters" %}</button>{% endif %}
     </div>
 </form>
+{% endcomment %}
+
