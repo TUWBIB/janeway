@@ -2274,7 +2274,10 @@ class Section(AbstractLastModifiedModel):
                   " (e.g: Article -> Articles)",
     )
 
-    visible = models.BooleanField(default=True)
+    visible = models.BooleanField(default=True,
+                                  help_text="Determines, if the section label is visible "
+                                  "(needs to be supported by the frontend theme)",
+    )
     objects = model_utils.JanewayMultilingualManager()
 
     class Meta:

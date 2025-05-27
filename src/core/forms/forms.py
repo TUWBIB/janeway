@@ -477,7 +477,7 @@ class SectionForm(JanewayTranslationModelForm):
         model = submission_models.Section
         fields = [
             'name', 'plural', 'number_of_reviewers',
-            'is_filterable', 'sequence', 'section_editors',
+            'is_filterable', 'sequence', 'visible', 'section_editors',
             'editors', 'public_submissions', 'indexing',
             'auto_assign_editors',
         ]
