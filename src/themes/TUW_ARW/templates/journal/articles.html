@@ -6,7 +6,7 @@
 {% load pages %}
 
 
-{% block title %}{% trans "Articles" %}{% endblock %}
+{% block title %}{% trans "Contributions" context 'fe-arw' %}{% endblock %}
 
 {% block css %}
 {% endblock %}
@@ -32,7 +32,7 @@
                         {% include "elements/journal/box_article.html" with article=article %}
                     {% endfor %}
                 {% endif %}
-                <h1>{% trans "Articles" %}</h1>
+                <h1>{% trans "Contributions" context 'fe-arw' %}</h1>
                 {% for article in articles %}
                     {% include "elements/journal/box_article.html" with article=article %}
                 {% empty %}
