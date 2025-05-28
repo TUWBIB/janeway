@@ -59,24 +59,16 @@ urlpatterns = [
         views.identifier_figure,
         name='article_figure'),
 
-    re_path(r'^articles/$', views.articles, name='journal_articles'),
+    # TUW todo: templates needed for TUWJFM-theme
+    # for now redirect in old function based view
 
-    # TUW todo: templates needed
-
+     re_path(r'^articles/$', views.articles, name='journal_articles'),
 #    re_path(
 #        r'^articles/$',
 #        views.PublishedArticlesListView.as_view(),
 #        name='journal_articles',
 #    ),
 
-
-
-
-    re_path(
-        r'^articles/$',
-        views.PublishedArticlesListView.as_view(),
-        name='journal_articles',
-    ),
 
     # Issues/Collections
     re_path(r'^issues/$', views.issues, name='journal_issues'),

@@ -3,7 +3,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Articles" %}{% endblock %}
+{% block title %}{% trans "Contributions" context 'fe-arw' %}{% endblock %}
 
 {% block body %}
     <section id="content">
@@ -19,7 +19,7 @@
                         </li>
                     </ul>
                 </aside>
-                <h1>{% trans "Articles" %}</h1>
+                <h1>{% trans "Contributions" context 'fe-arw' %}</h1>
                 {% include "common/elements/sorting.html" with form_id=facet_form.id %}
                 {% for article in article_list %}
                     {% include "elements/journal/box_article.html" with article=article %}

@@ -218,6 +218,13 @@ def articles(request):
     :param request: the request associated with this call
     :return: a rendered template of all articles
     """
+
+    # TUW_ARW based on OLH, can use new function based view, redirect
+    # todo:
+    # TUWJFM missing templates, use old code
+    if request.journal.code == 'ARW':
+        return PublishedArticlesListView.as_view()(request)        
+
     if request.POST and 'clear' in request.POST:
         return logic.unset_article_session_variables(request)
 
@@ -225,10 +232,10 @@ def articles(request):
         journal=request.journal,
         is_filterable=True,
     )
-    page, show, filters, sort, redirect, active_filters = logic.handle_article_controls(request, sections)
+    page, show, filters, sort, redirectx, active_filters = logic.handle_article_controls(request, sections)
 
-    if redirect:
-        return redirect
+    if redirectx:
+        return redirectx
 
     pinned_articles = [pin.article for pin in models.PinnedArticle.objects.filter(
         journal=request.journal)]
