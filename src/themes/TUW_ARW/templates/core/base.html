@@ -186,10 +186,13 @@
             {% elif 'svg' in request.press_cover %}
                 <a href="{% press_url request %}">{% svg request.press_cover %}</a>
             {% else %}
-                <a href="https://janeway.systems">{% svg "static/common/img/sample/janeway.svg" %}</a>
             {% endif %}
         </div>
     {% endcomment %}
+        <div class="large-2 columns text-center logo-wrapper">
+            <a alt="Janeway Logo" data-open="myModal">{% svg "static/common/img/sample/janeway.svg" %}</a>
+        </div>
+
 
         {% if request.journal %}
         {% include "elements/journal_footer.html" %}
@@ -197,6 +200,22 @@
         {% include "press/elements/press_footer.html" %}
         {% endif %}
 </footer>
+
+<div class="reveal" id="myModal" data-reveal>
+        <div class="modal-body">
+           <div style="line-height: 30px;">
+           {% trans "Janeway developed by BirkbeckCTP" context "fe-agplv3" %}<br>
+           <a href="https://janeway.systems">https://janeway.systems</a><br>
+           {% trans "The modified source code is available on GitHub:" context "fe-agplv3" %}<br>
+           <a href="https://github.com/TUWBIB/janeway">https://github.com/TUWBIB/janeway</a><br>
+            <button class="close-button" data-close aria-label="Close modal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+          </div>
+        </div>
+  </div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.5.1/js/foundation.min.js"></script>
 <script src="{% static "TUW_ARW/js/app.min.js" %}"></script>

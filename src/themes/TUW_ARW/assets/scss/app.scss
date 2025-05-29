@@ -708,9 +708,9 @@ div.caption span.label {
 
 footer {
   .logo-wrapper {
-    padding-top: rem-calc(20px);
-    padding-bottom: rem-calc(20px);
-    height: $footer-height;
+    padding-top: rem-calc(12px);
+    padding-bottom: rem-calc(12px);
+    height: calc($footer-height-30px);
   }
   p {
     font-family: $header-font-family;
@@ -732,7 +732,7 @@ footer {
   }
   svg {
     path {
-      fill: $white;
+      fill: #000;
     }
   }
   ul {

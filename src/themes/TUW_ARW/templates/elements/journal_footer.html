@@ -1,12 +1,12 @@
 {% load i18n %}
-<div class="large-5 columns">
+<div class="large-7 columns">
     <p>
-    {% if request.journal.issn %}ISSN: {{ request.journal.issn }} |{% endif %}
-    {% if request.journal.print_issn %}Print ISSN: {{ request.journal.print_issn }} |{% endif %}
-    {% if journal_settings.general.publisher_name %} {% trans 'Published by' %} {% if journal_settings.general.publisher_url %}<a href="{{ journal_settings.general.publisher_url}}">{% endif %}{{ journal_settings.general.publisher_name }}{% if journal_settings.general.publisher_url %}</a>{% endif %} | {% endif %}
+    {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}
+    {% if request.journal.print_issn %}Print ISSN: {{ request.journal.print_issn }} <br> {% endif %}
+    {% if journal_settings.general.publisher_name %} {% trans 'Published by' %} {% if journal_settings.general.publisher_url %}<a href="{{ journal_settings.general.publisher_url}}">{% endif %}{{ journal_settings.general.publisher_name }}{% if journal_settings.general.publisher_url %}</a>{% endif %} {% endif %}
     </p>
 </div>
-<div class="large-5 columns large-text-right">
+<div class="large-3 columns large-text-right">
     <ul class="inline-list">
         {% for item in journal.press.navigation_items %}
             {% if item.for_footer and item.extend_to_journals %}
