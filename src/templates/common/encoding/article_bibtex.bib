@@ -1,5 +1,22 @@
+{% spaceless %}
 {% load settings %}
 {% load encoding %}
+{% if article.journal.code == 'ARW' %}
+@inproceedings{% templatetag openbrace %}{{ article.journal.code }}{{ article.id }},
+    title = {{ article.title|escape|latex_conform }},
+    author = {{ article.bibtex_author_list_tuw|latex_conform }},
+    year = {{ article.date_published.year }},
+    month = {{ article.date_published.month }},
+    booktitle = {{ 'Proceedings of the Austrian Robotics Workshop 2025'|latex_conform }},
+    publisher = {{ 'Gesellschaft für Messtechnik, Automatisierung und Robotik – GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien'|latex_conform }},
+    {% if article.page_range %}pages = {{ article.page_range|latex_conform_page_range }},{% endif %}
+    {% if article.get_doi %}doi = {{ article.get_doi|latex_conform }},{% endif %}
+    {% if article.journal_issn %}issn = {{ article.journal_issn|latex_conform }},{% endif %}
+    url = {{ article.url|latex_conform }},
+    abstract = {{ article.abstract|escape|latex_conform_abstract }},
+    {% if article.keywords.exists %}keywords = {{ article.keyword_list_str|escape|latex_conform }}{% endif %}
+}
+{% else %}
 {% if article.journal.is_conference %}@conference{% else %}@article{% endif %}{% templatetag openbrace %}{{ article.journal.code }}{{ article.id }},
 	author = {{ article.bibtex_author_list|latex_conform }},
 	title = {{ article.title|escape|latex_conform }},
@@ -16,3 +33,5 @@
 	publisher ={{ article.journal|setting:'publisher_name'|latex_conform }},
 	journal = {{article.journal_title|latex_conform }}
 }
+{% endif %}
+{% endspaceless %}

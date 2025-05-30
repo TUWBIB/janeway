@@ -1517,6 +1517,13 @@ class Article(AbstractLastModifiedModel):
             [author.full_name() for author in self.frozen_authors()],
         )
 
+    # TUW
+    # preferred display for bibtex
+    def bibtex_author_list_tuw(self):
+        l = [a.last_name + ', ' + a.first_name for a in self.frozen_authors()]
+        return " AND ".join(l)
+
+
     def keyword_list_str(self, separator=","):
         if self.keywords.exists():
             return separator.join(kw.word for kw in self.keywords.all())
