@@ -203,7 +203,7 @@ def dataciteURL(host,article=None,issue:journal_models.Issue=None):
         if doi is None:
             errors.append("no doi registered yet")
         else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            if not logic.checkDOI(doi,article):
                 errors.append("existing DOI doesn't conform to current configuration")
         if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
             errors.append("URL already registered")
@@ -230,7 +230,7 @@ def dataciteURLConfirm(host,article=None,issue=None):
         if doi is None:
             errors.append("no doi registered yet")
         else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            if not logic.checkDOI(doi,article):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
@@ -272,7 +272,7 @@ def deleteDOI(article: submission_models.Article = None,
         if doi is None:
             errors.append("No DOI registered")
         else:
-            if not api.doiConformsToCurrentConfiguration(article.journal.code,doi):
+            if not logic.checkDOI(doi,article):
                 errors.append("existing DOI doesn't conform to current configuration")
         if errors:
             return JsonResponse({ 'errors': errors, 'warnings': None,
