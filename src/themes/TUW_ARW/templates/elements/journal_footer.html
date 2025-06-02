@@ -37,7 +37,9 @@
         {% else %}
         <li><a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Documents/Data%20Protection%20Declaration%20Other/Data%20Protection%20Information_Bibliothek.pdf">{% trans "Privacy Policy" %}</a></li>
         {% endif %}
+        {% comment "disable contact" %}
         <li><a href="{% url 'contact' %}">{% trans "Contact" %}</a></li>
+        {% endcomment %}
         {% if not request.user.is_authenticated %}<li><a href="{% url 'core_login' %}">{% trans 'Login' %}</a></li>{% endif %}
 
         {% get_current_language as LANGUAGE_CODE %}
