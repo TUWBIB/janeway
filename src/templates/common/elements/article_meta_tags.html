@@ -59,4 +59,6 @@
     {% if article.xml_galleys.exists %}
     <meta name="citation_xml_url" content="{% journal_url 'serve_article_xml' 'id' article.id %}"/>
     {% endif %}
+    {% comment "twitter, facebook" %}
     {% include "elements/journal/social_meta.html" %}
+    {% endcomment %}    

@@ -6,7 +6,9 @@
 {% block title %}{{ journal_settings.news.news_title }} - {{ news_item.title|striptags }}{% endblock title %}
 
 {% block head %}
+{% comment "twitter, facebook" %}
 {% include "elements/social_meta.html" %}
+{% endcomment %}
 {% endblock head %}
 
 {% block body %}
