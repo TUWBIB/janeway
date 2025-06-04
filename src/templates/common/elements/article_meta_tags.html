@@ -37,9 +37,9 @@
     <meta name="citation_issn" content="{{ article.journal_issn }}"/>
     {% for author in article.frozen_authors.all %}
         <meta name="citation_author" content="{{ author.full_name }}"/>
-        {% if not '@journal.org' in author.author.email %}
-            <meta name="citation_author_email" content="{{ author.author.email }}"/>{% endif %}
-        <meta name="citation_author_institution" content="{{ author.institution }}"/>{% endfor %}
+        {% if author.author.hasValidEmail %}<meta name="citation_author_email" content="{{ author.author.email }}"/>{% endif %}
+        {% if author.author.institution %}<meta name="citation_author_institution" content="{{ author.institution }}"/>{% endif %}
+    {% endfor %}
     <meta name="citation_title" content="{{ article.title | striptags }}"/>
     {% if article.date_published %}<meta name="citation_publication_date" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
     {% if article.issue.volume %}<meta name="citation_volume" content="{{ article.issue.volume }}"/>{% endif %}

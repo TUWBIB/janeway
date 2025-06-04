@@ -7,6 +7,7 @@ import os
 import uuid
 import statistics
 import json
+import re
 from datetime import timedelta
 from django.utils.html import format_html
 import pytz
@@ -336,6 +337,23 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     # TUW extensions
     gndid = models.CharField(max_length=40, null=True, blank=True, verbose_name=_('GND ID'))
+
+    def hasValidEmail(self):
+        if not self.email:
+            return False
+        
+        l = []
+        l.append('@no.valid.email.com')
+        l.append('@invalid.com')
+        l.append('@notvalid.com')
+        l.append('@notvaild.com')  # yup, typo
+
+        pattern = '|'.join(l)
+
+        if match := re.search(pattern,self.email):
+            return False
+        else:
+            return True
 
     objects = AccountManager()
 
