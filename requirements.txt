@@ -64,7 +64,7 @@ urllib3<2
 user-agents==2.2.0
 pdf2image==1.11.0
 freezegun==1.2.0
-git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.3
+git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.6
 gunicorn
 mysqlclient==2.2.0
 django-simple-captcha==0.6.0
