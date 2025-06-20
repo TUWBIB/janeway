@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Janeway\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-28 13:27+0200\n"
+"POT-Creation-Date: 2025-06-20 17:00+0200\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10,12 +10,12 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 
 #: src/cms/models.py:21 src/core/janeway_global_settings.py:264
-#: src/core/settings.py:37
+#: src/core/settings.py:45
 msgid "English"
 msgstr "Englisch"
 
 #: src/cms/models.py:22 src/core/janeway_global_settings.py:267
-#: src/core/settings.py:40
+#: src/core/settings.py:48
 msgid "German"
 msgstr "Deutsch"
 
@@ -69,7 +69,7 @@ msgstr "Passwort"
 msgid "Repeat Password"
 msgstr "Passwort wiederholen"
 
-#: src/core/forms/forms.py:133 src/core/models.py:235
+#: src/core/forms/forms.py:133 src/core/models.py:236
 #: src/templates/admin/journal/manage/backcontent/submission.html:121
 #: src/templates/admin/repository/article.html:213
 #: src/templates/admin/repository/author_article.html:92
@@ -173,59 +173,59 @@ msgstr ""
 msgid "A number is required"
 msgstr ""
 
-#: src/core/models.py:77
+#: src/core/models.py:78
 msgid "Miss"
 msgstr ""
 
-#: src/core/models.py:78
+#: src/core/models.py:79
 msgid "Ms"
 msgstr ""
 
-#: src/core/models.py:79
+#: src/core/models.py:80
 msgid "Mrs"
 msgstr ""
 
-#: src/core/models.py:80
+#: src/core/models.py:81
 msgid "Mr"
 msgstr ""
 
-#: src/core/models.py:81
+#: src/core/models.py:82
 msgid "Mx"
 msgstr ""
 
-#: src/core/models.py:82
+#: src/core/models.py:83
 msgid "Dr"
 msgstr ""
 
-#: src/core/models.py:83
+#: src/core/models.py:84
 msgid "Prof."
 msgstr ""
 
-#: src/core/models.py:236
+#: src/core/models.py:237
 msgid "Username"
 msgstr "Benutzername"
 
-#: src/core/models.py:242
+#: src/core/models.py:243
 msgid "First name"
 msgstr "Vorname"
 
-#: src/core/models.py:248 src/submission/forms.py:310
+#: src/core/models.py:249 src/submission/forms.py:310
 msgid "Middle name"
 msgstr "Zweiter Vorname"
 
-#: src/core/models.py:254 src/submission/forms.py:311
+#: src/core/models.py:255 src/submission/forms.py:311
 msgid "Last name"
 msgstr "Nachname"
 
-#: src/core/models.py:263
+#: src/core/models.py:264
 msgid "Salutation"
 msgstr "Anrede"
 
-#: src/core/models.py:269
+#: src/core/models.py:270
 msgid "Name suffix"
 msgstr ""
 
-#: src/core/models.py:274
+#: src/core/models.py:275
 #: src/themes/OLH/templates/core/accounts/public_profile.html:46
 #: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:46
 #: src/themes/clean/templates/core/accounts/public_profile.html:19
@@ -233,50 +233,50 @@ msgstr ""
 msgid "Biography"
 msgstr "Biografie"
 
-#: src/core/models.py:276 src/submission/models.py:2101
+#: src/core/models.py:277 src/submission/models.py:2108
 msgid "ORCiD"
 msgstr "ORCiD"
 
-#: src/core/models.py:280
+#: src/core/models.py:281
 msgid "Institution"
 msgstr "Institution"
 
-#: src/core/models.py:286
+#: src/core/models.py:287
 msgid "Department"
 msgstr "Fachbereich"
 
-#: src/core/models.py:289
+#: src/core/models.py:290
 msgid "Twitter Handle"
 msgstr "Twitter Handle"
 
-#: src/core/models.py:290
+#: src/core/models.py:291
 msgid "Facebook Handle"
 msgstr "Facebook Handle"
 
-#: src/core/models.py:291
+#: src/core/models.py:292
 msgid "Linkedin Profile"
 msgstr "Linkedin Profil"
 
-#: src/core/models.py:292
+#: src/core/models.py:293
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:3
 #: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:3
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:3
 msgid "Website"
 msgstr "Website"
 
-#: src/core/models.py:293
+#: src/core/models.py:294
 msgid "Github Username"
 msgstr "Github Username"
 
-#: src/core/models.py:297
+#: src/core/models.py:298
 msgid "Confirmation Code"
 msgstr "Bestätigungscode"
 
-#: src/core/models.py:300
+#: src/core/models.py:301
 msgid "Signature"
 msgstr ""
 
-#: src/core/models.py:307
+#: src/core/models.py:308
 #: src/themes/OLH/templates/core/accounts/public_profile.html:41
 #: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:41
 #: src/themes/clean/templates/core/accounts/public_profile.html:15
@@ -284,35 +284,35 @@ msgstr ""
 msgid "Country"
 msgstr "Land"
 
-#: src/core/models.py:314
+#: src/core/models.py:315
 msgid "Preferred Timezone"
 msgstr ""
 
-#: src/core/models.py:323
+#: src/core/models.py:324
 msgid "Enable Digest"
 msgstr ""
 
-#: src/core/models.py:328
+#: src/core/models.py:329
 msgid "If enabled, your basic profile will be available to the public."
 msgstr ""
 
-#: src/core/models.py:330
+#: src/core/models.py:331
 msgid "Enable public profile"
 msgstr ""
 
-#: src/core/models.py:338
+#: src/core/models.py:339
 msgid "GND ID"
 msgstr ""
 
-#: src/core/models.py:642 src/core/models.py:654
+#: src/core/models.py:660 src/core/models.py:672
 msgid "Expires on"
 msgstr ""
 
-#: src/core/models.py:918 src/core/models.py:1196
+#: src/core/models.py:936 src/core/models.py:1214
 msgid "Article PK"
 msgstr "Artikel PK"
 
-#: src/core/models.py:923 src/core/models.py:1201 src/repository/models.py:848
+#: src/core/models.py:941 src/core/models.py:1219 src/repository/models.py:848
 #: src/templates/admin/journal/manage/backcontent/submission.html:162
 #: src/templates/admin/submission/submit_files.html:46
 #: src/templates/admin/submission/submit_files.html:86
@@ -324,23 +324,23 @@ msgstr "Artikel PK"
 msgid "Label"
 msgstr "Kennzeichen"
 
-#: src/core/models.py:924 src/core/models.py:1202
+#: src/core/models.py:942 src/core/models.py:1220
 msgid "Description"
 msgstr "Beschreibung"
 
-#: src/core/models.py:935
+#: src/core/models.py:953
 msgid "Remote URL of file"
 msgstr ""
 
-#: src/core/models.py:1228
+#: src/core/models.py:1246
 msgid "Other"
 msgstr ""
 
-#: src/core/models.py:1229
+#: src/core/models.py:1247
 msgid "Image"
 msgstr ""
 
-#: src/core/models.py:1597 src/templates/admin/journal/contact.html:38
+#: src/core/models.py:1615 src/templates/admin/journal/contact.html:38
 #: src/themes/OLH/templates/journal/contact.html:30
 #: src/themes/OLH/templates/press/journal/contact.html:22
 #: src/themes/TUWJFM/templates/journal/contact.html:30
@@ -350,23 +350,23 @@ msgstr ""
 msgid "Who would you like to contact?"
 msgstr "Wen möchten Sie kontaktieren?"
 
-#: src/core/models.py:1598
+#: src/core/models.py:1616
 msgid "Your contact email address"
 msgstr "Ihre Kontaktadresse (E-Mail)"
 
-#: src/core/models.py:1599 src/themes/TUWJFM/templates/preprints/review.html:41
+#: src/core/models.py:1617 src/themes/TUWJFM/templates/preprints/review.html:41
 msgid "Subject"
 msgstr "Thema"
 
-#: src/core/models.py:1600
+#: src/core/models.py:1618
 msgid "Your message"
 msgstr "Ihre Nachricht"
 
-#: src/core/models.py:1603
+#: src/core/models.py:1621
 msgid "Detected language"
 msgstr ""
 
-#: src/core/models.py:1604
+#: src/core/models.py:1622
 msgid "Message is spam"
 msgstr ""
 
@@ -673,7 +673,7 @@ msgid "Article"
 msgstr "Artikel"
 
 #: src/journal/models.py:961
-#: src/themes/TUWJFM/templates/journal/article.html:147
+#: src/themes/TUWJFM/templates/journal/article.html:149
 msgid "pages"
 msgstr "Seiten"
 
@@ -836,7 +836,7 @@ msgstr "Beschreibung gespeichert."
 #: src/templates/admin/submission/submit_review.html:51
 #: src/themes/OLH/templates/elements/journal/article_filter_form.html:21
 #: src/themes/OLH/templates/repository/list.html:75
-#: src/themes/TUWJFM/templates/journal/article.html:99
+#: src/themes/TUWJFM/templates/journal/article.html:101
 #: src/themes/TUWJFM/templates/journal/articles.html:69
 #: src/themes/TUWJFM/templates/journal/newsletter.html:36
 #: src/themes/TUW_ARW/templates/elements/journal/article_filter_form.html:39
@@ -979,7 +979,7 @@ msgid "Subtitle of the parallel title of the article"
 msgstr "Subtitel des Paralleltitels des Artikels"
 
 #: src/submission/migrations/9006_tuw_rename_de_fields.py:43
-#: src/themes/TUWJFM/templates/journal/article.html:226
+#: src/themes/TUWJFM/templates/journal/article.html:228
 msgid "Abstract (German)"
 msgstr "Abstract (Deutsch)"
 
@@ -1021,19 +1021,19 @@ msgid ""
 "back content published under a different title"
 msgstr ""
 
-#: src/submission/models.py:2035
+#: src/submission/models.py:2042
 msgid "Optional name prefix (e.g: Prof or Dr)"
 msgstr ""
 
-#: src/submission/models.py:2041
+#: src/submission/models.py:2048
 msgid "Optional name suffix (e.g.: Jr or III)"
 msgstr ""
 
-#: src/submission/models.py:2072
+#: src/submission/models.py:2079
 msgid "Frozen Biography"
 msgstr "Biografie"
 
-#: src/submission/models.py:2073
+#: src/submission/models.py:2080
 msgid ""
 "The author's biography at the time they published the linked article. For "
 "this article only, it overrides any main biography attached to the author's "
@@ -1041,36 +1041,36 @@ msgid ""
 "account will be populated instead."
 msgstr ""
 
-#: src/submission/models.py:2096
+#: src/submission/models.py:2103
 msgid "Author Email"
 msgstr "E-Mail Autor:in"
 
-#: src/submission/models.py:2102
+#: src/submission/models.py:2109
 msgid ""
 "ORCiD to be displayed when no account is associated with this author. It "
 "should be introduced in code format (e.g: 0000-0000-0000-000X)"
 msgstr ""
 
-#: src/submission/models.py:2109
+#: src/submission/models.py:2116
 msgid ""
 "If checked, this authors email address link will be displayed on the article "
 "page."
 msgstr ""
 
-#: src/submission/models.py:2487
+#: src/submission/models.py:2494
 #: src/templates/admin/submission/submit_files.html:75
 msgid "Figures and Data Files"
 msgstr "Abbildungen und Datensätze"
 
-#: src/submission/models.py:2494
+#: src/submission/models.py:2501
 msgid "The default license applied when no option is presented"
 msgstr "Eine Standardlizenz wird angewendet, wenn keine Auswahl angezeigt wird"
 
-#: src/submission/models.py:2502
+#: src/submission/models.py:2509
 msgid "The default language of articles when lang is hidden"
 msgstr "Die Standardsprache der Artikel, wenn die Auswahl ausgeblendet ist"
 
-#: src/submission/models.py:2508
+#: src/submission/models.py:2515
 msgid "The default section of articles when no option is presented"
 msgstr "Der Standardrubrik der Artikel, wenn keine Auswahl angezeigt wird"
 
@@ -1550,9 +1550,9 @@ msgstr "Filter löschen"
 #: src/themes/OLH/templates/journal/article.html:178
 #: src/themes/OLH/templates/journal/print.html:30
 #: src/themes/OLH/templates/repository/preprint.html:45
-#: src/themes/TUWJFM/templates/journal/article.html:217
-#: src/themes/TUWJFM/templates/journal/article.html:231
-#: src/themes/TUWJFM/templates/journal/article.html:236
+#: src/themes/TUWJFM/templates/journal/article.html:219
+#: src/themes/TUWJFM/templates/journal/article.html:233
+#: src/themes/TUWJFM/templates/journal/article.html:238
 #: src/themes/TUWJFM/templates/journal/print.html:110
 #: src/themes/TUWJFM/templates/preprints/article.html:38
 #: src/themes/TUWJFM/templates/preprints/review.html:34
@@ -1613,7 +1613,7 @@ msgstr ""
 #: src/templates/admin/submission/edit/metadata.html:113
 #: src/templates/admin/submission/submit_info.html:88
 #: src/templates/admin/submission/submit_review.html:79
-#: src/themes/TUWJFM/templates/journal/article.html:168
+#: src/themes/TUWJFM/templates/journal/article.html:170
 msgid "Keywords (German)"
 msgstr "Schlagwörter (Deutsch)"
 
@@ -1765,7 +1765,7 @@ msgstr "Kontaktinformationen"
 #: src/themes/TUWJFM/templates/journal/contact.html:5
 #: src/themes/TUWJFM/templates/journal/contact.html:24
 #: src/themes/TUW_ARW/templates/core/nav.html:42
-#: src/themes/TUW_ARW/templates/elements/journal_footer.html:40
+#: src/themes/TUW_ARW/templates/elements/journal_footer.html:41
 #: src/themes/TUW_ARW/templates/journal/contact.html:5
 #: src/themes/TUW_ARW/templates/journal/contact.html:26
 #: src/themes/TUW_ARW/templates/press/elements/press_footer.html:14
@@ -1917,7 +1917,7 @@ msgstr "Sprache"
 #: src/templates/admin/journal/manage/backcontent/submission.html:60
 #: src/themes/OLH/templates/journal/article.html:287
 #: src/themes/OLH/templates/repository/preprint.html:127
-#: src/themes/TUWJFM/templates/journal/article.html:241
+#: src/themes/TUWJFM/templates/journal/article.html:243
 #: src/themes/TUWJFM/templates/preprints/article.html:103
 #: src/themes/TUW_ARW/templates/journal/article.html:289
 #: src/themes/TUW_ARW/templates/repository/preprint.html:127
@@ -2049,11 +2049,12 @@ msgstr "Editieren"
 #: src/themes/OLH/templates/journal/article.html:139
 #: src/themes/OLH/templates/journal/article.html:213
 #: src/themes/OLH/templates/journal/article.html:339
-#: src/themes/TUWJFM/templates/journal/article.html:203
+#: src/themes/TUWJFM/templates/journal/article.html:205
 #: src/themes/TUWJFM/templates/preprints/article.html:92
 #: src/themes/TUWJFM/templates/preprints/article.html:96
 #: src/themes/TUWJFM/templates/preprints/article.html:118
 #: src/themes/TUW_ARW/templates/journal/article.html:141
+#: src/themes/TUW_ARW/templates/journal/article.html:142
 #: src/themes/TUW_ARW/templates/journal/article.html:215
 #: src/themes/TUW_ARW/templates/journal/article.html:341
 #: src/themes/clean/templates/journal/article.html:104
@@ -2210,7 +2211,7 @@ msgstr "Registrieren"
 #: src/themes/TUW_ARW/templates/core/base.html:142
 #: src/themes/TUW_ARW/templates/core/login.html:6
 #: src/themes/TUW_ARW/templates/core/nav.html:76
-#: src/themes/TUW_ARW/templates/elements/journal_footer.html:41
+#: src/themes/TUW_ARW/templates/elements/journal_footer.html:43
 #: src/themes/TUW_ARW/templates/journal/become_reviewer.html:16
 #: src/themes/TUW_ARW/templates/journal/submissions.html:31
 #: src/themes/TUW_ARW/templates/press/core/login.html:5
@@ -3844,7 +3845,7 @@ msgstr "Filter-Tag"
 #: src/themes/OLH/templates/press/core/news/item.html:25
 #: src/themes/OLH/templates/press/core/news/item.html:34
 #: src/themes/TUW_ARW/templates/core/news/index.html:25
-#: src/themes/TUW_ARW/templates/core/news/item.html:25
+#: src/themes/TUW_ARW/templates/core/news/item.html:27
 #: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:28
 #: src/themes/TUW_ARW/templates/press/core/news/index.html:23
 #: src/themes/TUW_ARW/templates/press/core/news/item.html:25
@@ -3878,21 +3879,21 @@ msgid "This journal currently has no news items to display."
 msgstr "Diese Zeitschrift hat momentan keine aktuellen Meldungen zum Anzeigen."
 
 #: src/themes/OLH/templates/core/news/item.html:41
-#: src/themes/TUW_ARW/templates/core/news/item.html:41
+#: src/themes/TUW_ARW/templates/core/news/item.html:43
 #: src/themes/clean/templates/core/news/item.html:20
 #: src/themes/clean/templates/press/core/news/item.html:16
 msgid "Tags "
 msgstr "Tags "
 
 #: src/themes/OLH/templates/core/news/item.html:48
-#: src/themes/TUW_ARW/templates/core/news/item.html:48
+#: src/themes/TUW_ARW/templates/core/news/item.html:50
 #: src/themes/clean/templates/core/news/item.html:22
 #: src/themes/material/templates/core/news/item.html:44
 msgid "Back to"
 msgstr ""
 
 #: src/themes/OLH/templates/core/news/item.html:48
-#: src/themes/TUW_ARW/templates/core/news/item.html:48
+#: src/themes/TUW_ARW/templates/core/news/item.html:50
 #: src/themes/clean/templates/core/news/item.html:22
 #: src/themes/material/templates/core/news/item.html:44
 msgid "List"
@@ -4161,6 +4162,7 @@ msgstr "Preprints"
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:19
 #: src/themes/OLH/templates/journal/article.html:137
 #: src/themes/TUW_ARW/templates/elements/journal/citation_modals.html:19
+#: src/themes/TUW_ARW/templates/elements/journal/citation_modals.html:63
 #: src/themes/TUW_ARW/templates/journal/article.html:139
 msgid "Vancouver Citation Style"
 msgstr "Vancouver Zitierstil"
@@ -4277,14 +4279,12 @@ msgid "Downloads"
 msgstr "Downloads"
 
 #: src/themes/OLH/templates/elements/journal/issue_sidebar.html:8
-#: src/themes/TUW_ARW/templates/elements/journal/issue_sidebar.html:8
 #: src/themes/clean/templates/elements/journal/issue_sidebar.html:7
 msgid "Download Issue"
 msgstr "Ausgabe herunterladen"
 
 #: src/themes/OLH/templates/elements/journal/issue_sidebar.html:11
 #: src/themes/TUWJFM/templates/elements/journal/issue_sidebar.html:17
-#: src/themes/TUW_ARW/templates/elements/journal/issue_sidebar.html:11
 #: src/themes/clean/templates/elements/journal/issue_sidebar.html:10
 #: src/themes/material/templates/elements/journal/issue_sidebar.html:14
 msgid "Issue Archive"
@@ -4357,7 +4357,7 @@ msgid "This article has no summary"
 msgstr "Dieser Artikel hat keine Zusammenfassung"
 
 #: src/themes/OLH/templates/elements/journal_footer.html:6
-#: src/themes/TUWJFM/templates/journal/article.html:140
+#: src/themes/TUWJFM/templates/journal/article.html:142
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:6
 #: src/themes/clean/templates/elements/journal_footer.html:8
 #: src/themes/material/templates/elements/journal_footer.html:6
@@ -4528,7 +4528,7 @@ msgstr "Preprint"
 #: src/themes/OLH/templates/journal/article.html:64
 #: src/themes/OLH/templates/journal/article.html:162
 #: src/themes/OLH/templates/journal/print.html:15
-#: src/themes/TUWJFM/templates/journal/article.html:111
+#: src/themes/TUWJFM/templates/journal/article.html:113
 #: src/themes/TUWJFM/templates/journal/print.html:95
 #: src/themes/TUW_ARW/templates/journal/article.html:28
 #: src/themes/TUW_ARW/templates/journal/article.html:64
@@ -4598,7 +4598,6 @@ msgid "Cite article"
 msgstr "Artikel zitieren"
 
 #: src/themes/OLH/templates/journal/article.html:140
-#: src/themes/TUW_ARW/templates/journal/article.html:142
 msgid " Download"
 msgstr " Herunterladen"
 
@@ -4665,7 +4664,7 @@ msgid "Citations"
 msgstr "Zitierungen"
 
 #: src/themes/OLH/templates/journal/article.html:267
-#: src/themes/TUWJFM/templates/journal/article.html:129
+#: src/themes/TUWJFM/templates/journal/article.html:131
 #: src/themes/TUWJFM/templates/preprints/article.html:102
 #: src/themes/TUW_ARW/templates/journal/article.html:269
 #: src/themes/clean/templates/journal/article.html:233
@@ -4732,7 +4731,7 @@ msgid "Submitted on"
 msgstr "Eingereicht am"
 
 #: src/themes/OLH/templates/journal/article.html:399
-#: src/themes/TUWJFM/templates/journal/article.html:134
+#: src/themes/TUWJFM/templates/journal/article.html:136
 #: src/themes/TUW_ARW/templates/journal/article.html:401
 #: src/themes/clean/templates/journal/article.html:228
 #: src/themes/material/templates/journal/article.html:348
@@ -5204,11 +5203,13 @@ msgid "Imprint"
 msgstr "Imprint"
 
 #: src/themes/TUWJFM/templates/core/base.html:121
+#: src/themes/TUW_ARW/templates/core/base.html:207
 msgctxt "fe-agplv3"
 msgid "Janeway developed by BirkbeckCTP"
 msgstr "Janeway entwickelt von BirkbeckCTP"
 
 #: src/themes/TUWJFM/templates/core/base.html:123
+#: src/themes/TUW_ARW/templates/core/base.html:209
 msgctxt "fe-agplv3"
 msgid "The modified source code is available on GitHub:"
 msgstr "Der angepasste Quellcode ist auf GitHub verfügbar:"
@@ -5249,19 +5250,19 @@ msgstr "Sammlungen"
 msgid "Close"
 msgstr "Schließen"
 
-#: src/themes/TUWJFM/templates/journal/article.html:94
+#: src/themes/TUWJFM/templates/journal/article.html:96
 msgid "Journal Article"
 msgstr "Artikel"
 
-#: src/themes/TUWJFM/templates/journal/article.html:145
+#: src/themes/TUWJFM/templates/journal/article.html:147
 msgid "Published in"
 msgstr "Veröffentlicht in"
 
-#: src/themes/TUWJFM/templates/journal/article.html:161
+#: src/themes/TUWJFM/templates/journal/article.html:163
 msgid "Keywords (English)"
 msgstr "Schlagwörter (Englisch)"
 
-#: src/themes/TUWJFM/templates/journal/article.html:222
+#: src/themes/TUWJFM/templates/journal/article.html:224
 msgid "Abstract (English)"
 msgstr "Abstract (Englisch)"
 
@@ -5398,6 +5399,16 @@ msgstr "Beiträge"
 msgctxt "fe-arw"
 msgid "Volumes"
 msgstr "Bände"
+
+#: src/themes/TUW_ARW/templates/elements/journal/issue_sidebar.html:8
+msgctxt "fe-arw"
+msgid "Download Volume"
+msgstr "Band herunterladen"
+
+#: src/themes/TUW_ARW/templates/elements/journal/issue_sidebar.html:11
+msgctxt "fe-arw"
+msgid "Volume Archive"
+msgstr "Bändearchiv"
 
 #: src/themes/clean/templates/403.html:18
 msgid "You do not have permission to view this page"
