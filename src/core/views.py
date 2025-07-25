@@ -6,6 +6,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from importlib import import_module
 import json
+from urllib.parse import unquote, urlencode
 import pytz
 import time
 import warnings
@@ -15,11 +16,12 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.urls import NoReverseMatch, reverse
+from django.urls import NoReverseMatch, reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect, Http404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse, QueryDict
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.sessions.models import Session
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -27,6 +29,7 @@ from django.db import IntegrityError
 from django.conf import settings as django_settings
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import mark_safe
@@ -35,13 +38,17 @@ from django.db.models import Q, OuterRef, Subquery, Count, Avg
 from django.views import generic
 
 from core import models, forms, logic, workflow, files, models as core_models
-from core.model_utils import NotImplementedField, search_model_admin
+from core.model_utils import NotImplementedField, SafePaginator, search_model_admin
 from security.decorators import (
-    editor_user_required, article_author_required, has_journal,
-    any_editor_user_required, role_can_access,
-    user_can_edit_setting
+    editor_user_required,
+    article_author_required,
+    has_journal,
+    any_editor_user_required,
+    role_can_access,
+    user_can_edit_setting,
 )
 from submission import models as submission_models
+from utils.forms import clean_orcid_id
 from review import models as review_models
 from copyediting import models as copyedit_models
 from production import models as production_models
@@ -66,22 +73,21 @@ def user_login(request):
     :param request: HttpRequest
     :return: HttpResponse
     """
+    next_url = request.GET.get("next", "")
     if request.user.is_authenticated:
-        messages.info(request, 'You are already logged in.')
-        if request.GET.get('next'):
-            return redirect(request.GET.get('next'))
-        else:
-            return redirect(reverse('website_index'))
+        messages.info(request, "You are already logged in.")
+        return redirect(request.site_type.auth_success_url(next_url=next_url))
+
     else:
         bad_logins = logic.check_for_bad_login_attempts(request)
 
     if bad_logins >= 10:
         messages.info(
             request,
-            _('You have been banned from logging in due to failed attempts.'),
+            _("You have been banned from logging in due to failed attempts."),
         )
         logger.warning("[LOGIN_DENIED][FAILURES:%d]" % bad_logins)
-        return redirect(reverse('website_index'))
+        return redirect(reverse("website_index"))
 
     form = forms.LoginForm(bad_logins=bad_logins)
 
@@ -89,132 +95,193 @@ def user_login(request):
         form = forms.LoginForm(request.POST, bad_logins=bad_logins)
 
         if form.is_valid():
-            user = request.POST.get('user_name').lower()
-            pawd = request.POST.get('user_pass')
+            username = request.POST.get("user_name").lower()
+            password = request.POST.get("user_pass")
 
-            user = authenticate(username=user, password=pawd)
+            user = authenticate(username=username, password=password)
 
             if user is not None:
                 login(request, user)
-                messages.info(request, 'Login successful.')
+                messages.info(request, "Login successful.")
                 logic.clear_bad_login_attempts(request)
 
-                orcid_token = request.POST.get('orcid_token', None)
+                orcid_token = request.POST.get("orcid_token", None)
                 if orcid_token:
                     try:
-                        token_obj = models.OrcidToken.objects.get(token=orcid_token, expiry__gt=timezone.now())
+                        token_obj = models.OrcidToken.objects.get(
+                            token=orcid_token, expiry__gt=timezone.now()
+                        )
                         user.orcid = token_obj.orcid
                         user.save()
                         token_obj.delete()
                     except models.OrcidToken.DoesNotExist:
                         pass
+                return redirect(request.site_type.auth_success_url(next_url=next_url))
 
-                if request.GET.get('next'):
-                    return redirect(request.GET.get('next'))
-                elif request.journal:
-                    return redirect(reverse('core_dashboard'))
-                else:
-                    return redirect(reverse('website_index'))
             else:
-
-                empty_password_check = logic.no_password_check(request.POST.get('user_name').lower())
+                empty_password_check = logic.no_password_check(
+                    request.POST.get("user_name").lower()
+                )
 
                 if empty_password_check:
-                    messages.add_message(request, messages.INFO,
+                    messages.add_message(
+                        request,
+                        messages.INFO,
                         _(
-                            'Password reset process has been initiated,'
-                            ' please check your inbox for a'
-                            ' reset request link.'
+                            "Password reset process has been initiated,"
+                            " please check your inbox for a"
+                            " reset request link."
                         ),
                     )
                     logic.start_reset_process(request, empty_password_check)
                 else:
-
                     messages.add_message(
-                        request, messages.ERROR,
-                        _('Wrong email/password combination or your'
-                        ' email address has not been confirmed yet.'),
+                        request,
+                        messages.ERROR,
+                        _(
+                            "Wrong email/password combination or your"
+                            " email address has not been confirmed yet."
+                        ),
                     )
-                    util_models.LogEntry.add_entry(types='Authentication',
-                                                   description='Failed login attempt for user {0}'.format(
-                                                       request.POST.get('user_name')),
-                                                   level='Info', actor=None, request=request)
+                    util_models.LogEntry.add_entry(
+                        types="Authentication",
+                        description="Failed login attempt for user {0}".format(
+                            request.POST.get("user_name")
+                        ),
+                        level="Info",
+                        actor=None,
+                        request=request,
+                    )
                     logic.add_failed_login_attempt(request)
 
     context = {
-        'form': form,
+        "form": form,
     }
-    template = 'core/login.html'
+    template = "admin/core/accounts/login.html"
 
     return render(request, template, context)
 
+
 def user_login_orcid(request):
     """
-    Allows a user to login with ORCiD
+    Allow a user to log in with their ORCID account
+    or switch to registering if needed.
+
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    orcid_code = request.GET.get('code', None)
-    action = request.GET.get('state', 'login')
-
-    if orcid_code and django_settings.ENABLE_ORCID:
-        orcid_id = orcid.retrieve_tokens(
-            orcid_code,
-            request.site_type,
-            action=action
-        )
-
-        if orcid_id:
-            try:
-                user = models.Account.objects.get(orcid=orcid_id)
-                if action == 'login':
-                    user.backend = 'django.contrib.auth.backends.ModelBackend'
-                    login(request, user)
-
-                    if request.GET.get('next'):
-                        return redirect(request.GET.get('next'))
-                    elif request.journal:
-                        return redirect(reverse('core_dashboard'))
-                    else:
-                        return redirect(reverse('website_index'))
-
-            except models.Account.DoesNotExist:
-                # Lookup ORCID email addresses
-                orcid_details = orcid.get_orcid_record_details(orcid_id)
-                for email in orcid_details.get("emails", []):
-                    candidates = models.Account.objects.filter(email=email)
-                    if candidates.exists():
-                        # Store ORCID for future authentication requests
-                        candidates.update(orcid=orcid_id)
-                        login(request, candidates.first())
-                        if request.GET.get('next'):
-                            return redirect(request.GET.get('next'))
-                        elif request.journal:
-                            return redirect(reverse('core_dashboard'))
-                        else:
-                            return redirect(reverse('website_index'))
-
-            # Prepare ORCID Token for registration and redirect
-            models.OrcidToken.objects.filter(orcid=orcid_id).delete()
-            new_token = models.OrcidToken.objects.create(orcid=orcid_id)
-
-            if action == 'register':
-                return redirect(reverse('core_register') + f'?token={new_token.token}')
-            else:
-                return redirect(reverse('core_orcid_registration', kwargs={'token': new_token.token}))
-        else:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                'Valid ORCiD not returned, please try again, or login with your username and password.'
-            )
-            return redirect(reverse('core_login'))
+    # First figure out what the user is trying to do (action) and where they want to
+    # be returned to in Janeway (next).
+    # This information may be encoded in a 'state' parameter that we get back from ORCID
+    # or it may be in the generic request parameters.
+    state_string = request.GET.get("state", "")
+    state = orcid.decode_state(state_string)
+    if "action" in state:
+        action = state.get("action", "login")
     else:
+        action = request.GET.get("action", "login")
+
+    if "next" in state:
+        next_url = state.get("next", "")
+    else:
+        next_url = request.GET.get("next", "")
+
+    # If ORCID is not enabled, redirect the user to the regular Janeway login page.
+    if not django_settings.ENABLE_ORCID:
         messages.add_message(
             request,
             messages.WARNING,
-            'No authorisation code provided, please try again or login with your username and password.')
-        return redirect(reverse('core_login'))
+            _("ORCID is not enabled.Please log in with your username and password."),
+        )
+        return redirect(logic.reverse_with_next("core_login", next_url))
+
+    # If the orcid code is missing, that means the user has not come from
+    # orcid.org, just from a Janeway link.
+    # Send them to orcid.org to authenticate first.
+    # Encode the next URL and the action via 'state',
+    # which the ORCID auth system will pass back.
+    orcid_code = request.GET.get("code", "")
+    if not orcid_code:
+        base = django_settings.ORCID_URL
+        query_dict = {
+            "client_id": django_settings.ORCID_CLIENT_ID,
+            "response_type": "code",
+            "scope": "/authenticate",
+            "redirect_uri": orcid.build_redirect_uri(request.site_type),
+            "state": orcid.encode_state(next_url, action),
+        }
+        orcid_login_url = f"{base}?{urlencode(query_dict, safe='/')}"
+        return redirect(orcid_login_url)
+
+    # There is an orcid code, meaning the user has authenticated on orcid.org.
+    # Make another request to orcid.org to verify it.
+    orcid_id = orcid.retrieve_tokens(orcid_code, request.site_type)
+
+    # If verification did not work, send them to the regular login page.
+    if not orcid_id:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            "Valid ORCID not returned. "
+            "Please try again, or log in with your username and password.",
+        )
+        return redirect(logic.reverse_with_next("core_login", next_url))
+
+    # The verification worked.
+    # If the user wanted to log in, try to log them in.
+    if action == "login":
+        try:
+            user = models.Account.objects.get(orcid=orcid_id)
+            login(
+                request,
+                user,
+                backend="django.contrib.auth.backends.ModelBackend",
+            )
+            return redirect(request.site_type.auth_success_url(next_url=next_url))
+
+        except models.Account.DoesNotExist:
+            # Lookup ORCID email addresses
+            orcid_details = orcid.get_orcid_record_details(orcid_id)
+            for email in orcid_details.get("emails", []):
+                candidates = models.Account.objects.filter(email=email)
+                if candidates.exists():
+                    # Store ORCID for future authentication requests
+                    candidates.update(orcid=orcid_id)
+                    login(
+                        request,
+                        candidates.first(),
+                        backend="django.contrib.auth.backends.ModelBackend",
+                    )
+                    return redirect(
+                        request.site_type.auth_success_url(next_url=next_url)
+                    )
+
+        # If no account was found for login,
+        # then prepare an ORCID token for registration.
+        # Then send the user to a decision page that tells them
+        # the ORCID login did not work and they will need to register.
+        models.OrcidToken.objects.filter(orcid=orcid_id).delete()
+        new_token = models.OrcidToken.objects.create(orcid=orcid_id)
+        return redirect(
+            logic.reverse_with_next(
+                "core_orcid_registration",
+                next_url,
+                kwargs={"token": str(new_token.token)},
+            )
+        )
+
+    # If the user wanted to register, send them to the registration page
+    # and pass along their orcid token so information can be pre-filled.
+    elif action == "register":
+        models.OrcidToken.objects.filter(orcid=orcid_id).delete()
+        new_token = models.OrcidToken.objects.create(orcid=orcid_id)
+        return redirect(
+            logic.reverse_with_next(
+                "core_register_with_orcid_token",
+                next_url,
+                kwargs={"orcid_token": str(new_token.token)},
+            )
+        )
 
 
 @login_required
@@ -224,9 +291,9 @@ def user_logout(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    messages.info(request, _('You have been logged out.'))
+    messages.info(request, _("You have been logged out."))
     logout(request)
-    return redirect(reverse('website_index'))
+    return redirect(reverse("website_index"))
 
 
 def get_reset_token(request):
@@ -236,6 +303,7 @@ def get_reset_token(request):
     :return: HttpResponse object
     """
     new_reset_token = None
+    next_url = request.GET.get("next", "")
     form = forms.GetResetTokenForm()
 
     if request.POST:
@@ -245,21 +313,21 @@ def get_reset_token(request):
         if form.is_valid():
             email_address = form.cleaned_data.get("email_address")
             messages.add_message(
-                request, 
+                request,
                 messages.INFO,
-                _('If your account was found, an email has been sent to you.'),
-                )
+                _("If your account was found, an email has been sent to you."),
+            )
             try:
                 account = models.Account.objects.get(email__iexact=email_address)
                 logic.start_reset_process(request, account)
-                return redirect(reverse('core_login'))
+                return redirect(logic.reverse_with_next("core_login", next_url))
             except models.Account.DoesNotExist:
-                return redirect(reverse('core_login'))
+                return redirect(logic.reverse_with_next("core_login", next_url))
 
-    template = 'core/accounts/get_reset_token.html'
+    template = "admin/core/accounts/get_reset_token.html"
     context = {
-        'new_reset_token': new_reset_token,
-        'form': form,
+        "new_reset_token": new_reset_token,
+        "form": form,
     }
 
     return render(request, template, context)
@@ -267,12 +335,17 @@ def get_reset_token(request):
 
 def reset_password(request, token):
     """
-    Takes a reset token and checks if it is valid then allows a user to reset their password, adter it expires the token
+    Takes a reset token and checks if it is valid.
+    Then it allows a user to reset their password,
+    and finally it expires the token.
     :param request: HttpRequest
     :param token: string, PasswordResetToken.token
     :return: HttpResponse object
     """
-    reset_token = get_object_or_404(models.PasswordResetToken, token=token, expired=False)
+    next_url = request.GET.get("next", "")
+    reset_token = get_object_or_404(
+        models.PasswordResetToken, token=token, expired=False
+    )
     form = forms.PasswordResetForm()
 
     if reset_token.has_expired():
@@ -285,40 +358,52 @@ def reset_password(request, token):
 
         if password_policy_check:
             for policy_fail in password_policy_check:
-                form.add_error('password_1', policy_fail)
+                form.add_error("password_1", policy_fail)
 
         if form.is_valid():
-            password = form.cleaned_data['password_2']
+            password = form.cleaned_data["password_2"]
             reset_token.account.set_password(password)
             reset_token.account.is_active = True
             logic.clear_bad_login_attempts(request)
             reset_token.account.save()
             reset_token.expired = True
             reset_token.save()
-            messages.add_message(request, messages.SUCCESS, 'Your password has been reset.')
-            return redirect(reverse('core_login'))
+            messages.add_message(
+                request, messages.SUCCESS, "Your password has been reset."
+            )
+            return redirect(logic.reverse_with_next("core_login", next_url))
 
-    template = 'core/accounts/reset_password.html'
+    template = "admin/core/accounts/reset_password.html"
     context = {
-        'reset_token': reset_token,
-        'form': form,
+        "reset_token": reset_token,
+        "form": form,
     }
 
     return render(request, template, context)
 
 
-def register(request):
+def register(request, orcid_token=None):
     """
-    Displays a form for users to register with the journal. If the user is registering on a journal we give them
+    Displays a form for users to register with the press or journal.
+    If the user is registering on a journal we give them
     the Author role.
+
+    An ORCID token is passed when the user arrives here after they
+    tried to log in with ORCID, but Janeway said "No account found,
+    would you like to register instead?"
+
     :param request: HttpRequest object
+    :param orcid_token: str UUID4 belonging to an active OrcidToken
     :return: HttpResponse object
     """
     context = {}
     initial = {}
-    token, token_obj = request.GET.get('token', None), None
-    if token:
-        token_obj = get_object_or_404(models.OrcidToken, token=token)
+
+    token_obj = None
+    next_url = request.GET.get("next", "")
+
+    if orcid_token:
+        token_obj = get_object_or_404(models.OrcidToken, token=orcid_token)
         orcid_details = orcid.get_orcid_record_details(token_obj.orcid)
         # we use the full orcid uri for display
         context["orcid"] = orcid_details["uri"]
@@ -328,11 +413,6 @@ def register(request):
         initial["last_name"] = orcid_details.get("last_name", "")
         if orcid_details.get("emails"):
             initial["email"] = orcid_details["emails"][0]
-        if orcid_details.get("affiliation"):
-            initial['institution'] = orcid_details['affiliation']
-        if orcid_details.get("country"):
-            if models.Country.objects.filter(code=orcid_details['country']).exists():
-                initial["country"] = models.Country.objects.get(code=orcid_details['country'])
 
     form = forms.RegistrationForm(
         journal=request.journal,
@@ -349,49 +429,73 @@ def register(request):
 
         if password_policy_check:
             for policy_fail in password_policy_check:
-                form.add_error('password_1', policy_fail)
+                form.add_error("password_1", policy_fail)
 
         if form.is_valid():
             if token_obj:
                 new_user = form.save()
+                if new_user.orcid:
+                    orcid_details = orcid.get_orcid_record_details(token_obj.orcid)
+                    for orcid_affil in orcid_details.get("affiliations", []):
+                        orcid_affil_form = forms.OrcidAffiliationForm(
+                            orcid_affiliation=orcid_affil,
+                            tzinfo=new_user.preferred_timezone,
+                            data={"account": new_user},
+                        )
+                        if orcid_affil_form.is_valid():
+                            orcid_affil_form.save()
                 token_obj.delete()
                 # If the email matches the user email on ORCID, log them in
                 if new_user.email == initial.get("email"):
                     new_user.is_active = True
                     new_user.save()
-                    login(request, new_user)
-                    if request.GET.get('next'):
-                        return redirect(request.GET.get('next'))
-                    elif request.journal:
-                        return redirect(reverse('core_dashboard'))
-                    else:
-                        return redirect(reverse('website_index'))
+                    login(
+                        request,
+                        new_user,
+                        backend="django.contrib.auth.backends.ModelBackend",
+                    )
+                    return redirect(
+                        request.site_type.auth_success_url(next_url=next_url)
+                    )
+
             else:
                 new_user = form.save()
 
             if request.journal:
-                new_user.add_account_role('author', request.journal)
+                new_user.add_account_role("author", request.journal)
             logic.send_confirmation_link(request, new_user)
 
             messages.add_message(
-                request, messages.SUCCESS,
-                _('Your account has been created, please follow the'
-                'instructions in the email that has been sent to you.'),
+                request,
+                messages.SUCCESS,
+                _(
+                    "Your account has been created. Please follow the "
+                    "instructions in the email that has been sent to you."
+                ),
             )
-            return redirect(reverse('core_login'))
+            return redirect(logic.reverse_with_next("core_login", next_url))
 
-    template = 'core/accounts/register.html'
+    template = "admin/core/accounts/register.html"
     context["form"] = form
 
     return render(request, template, context)
 
 
 def orcid_registration(request, token):
+    """
+    Users arrive at this view when they have tried to log in
+    via ORCID, but no suitable Janeway account was found.
+    The view suggests to them they might want to register a new
+    account instead, and gives them options.
+
+    :param request: HttpRequest object
+    :param token: str UUID4 belonging to active OrcidToken
+    """
     token = get_object_or_404(models.OrcidToken, token=token, expiry__gt=timezone.now())
 
-    template = 'core/accounts/orcid_registration.html'
+    template = "admin/core/accounts/orcid_registration.html"
     context = {
-        'token': token,
+        "token": token,
     }
 
     return render(request, template, context)
@@ -405,12 +509,14 @@ def activate_account(request, token):
     :param token: string, Account.confirmation_token
     :return: HttpResponse object
     """
+    next_url = request.GET.get("next", "")
+
     try:
         account = models.Account.objects.get(confirmation_code=token, is_active=False)
     except models.Account.DoesNotExist:
         account = None
 
-    if account and request.POST:
+    if account and request.method == "POST":
         account.is_active = True
         account.confirmation_code = None
         account.save()
@@ -418,14 +524,14 @@ def activate_account(request, token):
         messages.add_message(
             request,
             messages.SUCCESS,
-            _('Account activated'),
+            _("Account activated"),
         )
 
-        return redirect(reverse('core_login'))
+        return redirect(logic.reverse_with_next("core_login", next_url))
 
-    template = 'core/accounts/activate_account.html'
+    template = "admin/core/accounts/activate_account.html"
     context = {
-        'account': account,
+        "account": account,
     }
 
     return render(request, template, context)
@@ -441,11 +547,11 @@ def edit_profile(request):
     user = request.user
     form = forms.EditAccountForm(instance=user)
     send_reader_notifications = False
+    next_url = request.GET.get("next", "")
+
     if request.journal:
         send_reader_notifications = setting_handler.get_setting(
-            'notifications',
-            'send_reader_notifications',
-            request.journal
+            "notifications", "send_reader_notifications", request.journal
         ).value
 
     if user.staffgroupmember_set.first():
@@ -456,97 +562,111 @@ def edit_profile(request):
         staff_group_membership_form = None
 
     if request.POST:
-        if 'email' in request.POST:
-            email_address = request.POST.get('email_address')
+        if "email" in request.POST:
+            email_address = request.POST.get("email_address")
             try:
                 validate_email(email_address)
                 try:
-                    logic.handle_email_change(request, email_address)
-                    return redirect(reverse('website_index'))
+                    next_url = reverse("core_edit_profile")
+                    logic.handle_email_change(request, email_address, next_url=next_url)
+                    return redirect(reverse("website_index"))
                 except IntegrityError:
                     messages.add_message(
                         request,
                         messages.WARNING,
-                        _('An account with that email address already exists.'),
+                        _("An account with that email address already exists."),
                     )
             except ValidationError:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    _('Email address is not valid.'),
+                    _("Email address is not valid."),
                 )
 
-        elif 'change_password' in request.POST:
-            old_password = request.POST.get('current_password')
-            new_pass_one = request.POST.get('new_password_one')
-            new_pass_two = request.POST.get('new_password_two')
+        elif "change_password" in request.POST:
+            old_password = request.POST.get("current_password")
+            new_pass_one = request.POST.get("new_password_one")
+            new_pass_two = request.POST.get("new_password_two")
 
             if old_password and request.user.check_password(old_password):
-
                 if new_pass_one == new_pass_two:
                     problems = request.user.password_policy_check(request, new_pass_one)
                     if not problems:
                         request.user.set_password(new_pass_one)
                         request.user.save()
-                        messages.add_message(request, messages.SUCCESS, _('Password updated.'))
+                        messages.add_message(
+                            request, messages.SUCCESS, _("Password updated.")
+                        )
                     else:
-                        [messages.add_message(request, messages.INFO, problem) for problem in problems]
+                        [
+                            messages.add_message(request, messages.INFO, problem)
+                            for problem in problems
+                        ]
                 else:
-                    messages.add_message(request, messages.WARNING, _('Passwords do not match'))
+                    messages.add_message(
+                        request, messages.WARNING, _("Passwords do not match")
+                    )
 
             else:
-                messages.add_message(request, messages.WARNING, _('Old password is not correct.'))
+                messages.add_message(
+                    request, messages.WARNING, _("Old password is not correct.")
+                )
 
-        elif 'subscribe' in request.POST and send_reader_notifications:
+        elif "subscribe" in request.POST and send_reader_notifications:
             request.user.add_account_role(
-                'reader',
+                "reader",
                 request.journal,
             )
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Successfully subscribed to article notifications.'),
+                _("Successfully subscribed to article notifications."),
             )
 
-        elif 'unsubscribe' in request.POST and send_reader_notifications:
-            request.user.remove_account_role(
-                'reader',
-                request.journal
-            )
+        elif "unsubscribe" in request.POST and send_reader_notifications:
+            request.user.remove_account_role("reader", request.journal)
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Successfully unsubscribed from article notifications.'),
+                _("Successfully unsubscribed from article notifications."),
             )
 
-        elif 'edit_profile' in request.POST:
+        elif "edit_profile" in request.POST:
             form = forms.EditAccountForm(request.POST, request.FILES, instance=user)
 
             if form.is_valid():
                 form.save()
-                messages.add_message(request, messages.SUCCESS, 'Profile updated.')
-                return redirect(reverse('core_edit_profile'))
+                messages.add_message(request, messages.SUCCESS, "Profile updated.")
+                if next_url:
+                    return redirect(next_url)
+                else:
+                    return redirect(reverse("core_edit_profile"))
 
-        elif 'edit_staff_member_info' in request.POST:
+        elif "edit_staff_member_info" in request.POST:
             form = press_forms.StaffGroupMemberForm(
-                request.POST,
-                instance=user.staffgroupmember_set.first()
+                request.POST, instance=user.staffgroupmember_set.first()
             )
 
             if form.is_valid():
                 form.save()
-                messages.add_message(request, messages.SUCCESS, 'Staff member info updated.')
-                return redirect(reverse('core_edit_profile'))
+                messages.add_message(
+                    request, messages.SUCCESS, "Staff member info updated."
+                )
+                if next_url:
+                    return redirect(next_url)
+                else:
+                    return redirect(reverse("core_edit_profile"))
 
-        elif 'export' in request.POST:
+        elif "export" in request.POST:
             return logic.export_gdpr_user_profile(user)
 
-    template = 'core/accounts/edit_profile.html'
+    template = "admin/core/accounts/edit_profile.html"
     context = {
-        'form': form,
-        'staff_group_membership_form': staff_group_membership_form,
-        'user_to_edit': user,
-        'send_reader_notifications': send_reader_notifications,
+        "form": form,
+        "staff_group_membership_form": staff_group_membership_form,
+        "user_to_edit": user,
+        "send_reader_notifications": send_reader_notifications,
+        "user_is_reader": user.is_reader(request),
     }
 
     return render(request, template, context)
@@ -566,29 +686,113 @@ def public_profile(request, uuid):
         is_active=True,
         enable_public_profile=True,
     )
-    template = 'core/accounts/public_profile.html'
+    template = "core/accounts/public_profile.html"
     context = {
-        'user': user,
+        "user": user,
     }
 
     if request.journal:
-        context['editorial_groups'] = user.editorialgroupmember_set.filter(
+        context["editorial_groups"] = user.editorialgroupmember_set.filter(
             group__journal=request.journal
         )
-        context['roles'] = models.AccountRole.objects.filter(
+        context["roles"] = models.AccountRole.objects.filter(
             user=user,
             journal=request.journal,
         )
-        if not context['roles']:
+        if not context["roles"]:
             raise Http404()
 
     elif request.press:
-        context['editorial_groups'] = user.editorialgroupmember_set.filter(
+        context["editorial_groups"] = user.editorialgroupmember_set.filter(
             group__press=request.press,
             group__journal__isnull=True,
         )
-        context['staff_groups'] = user.staffgroupmember_set.all()
+        context["staff_groups"] = user.staffgroupmember_set.all()
 
+    return render(request, template, context)
+
+
+@login_required
+def affiliation_update_from_orcid(request, how_many="primary"):
+    """
+    Allows a user to update their own affiliations
+    from public ORCID records.
+    :param request: HttpRequest object
+    :return: HttpResponse object
+    """
+    next_url = request.GET.get("next", "")
+    try:
+        cleaned_orcid = clean_orcid_id(request.user.orcid)
+    except ValueError:
+        cleaned_orcid = None
+    if not cleaned_orcid:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            _(
+                "Your account does not have an ORCID. "
+                "Please log in with ORCID and try again."
+            ),
+        )
+        if next_url:
+            return redirect(next_url)
+        else:
+            return redirect(reverse("core_edit_profile"))
+
+    orcid_details = orcid.get_orcid_record_details(cleaned_orcid)
+    orcid_affils = orcid_details.get("affiliations", [])
+    if not orcid_affils:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            _(
+                "No affiliations were found on your public ORCID record "
+                "for ID %(orcid_id)s. "
+                "Please update your affiliations on orcid.org and try again."
+            )
+            % {"orcid_id": cleaned_orcid},
+        )
+        if next_url:
+            return redirect(next_url)
+        else:
+            return redirect(reverse("core_edit_profile"))
+
+    form = forms.ConfirmDeleteForm()
+    new_affils = []
+    if how_many == "primary":
+        orcid_affils = orcid_affils[:1]
+    for orcid_affil in orcid_affils:
+        orcid_affil_form = forms.OrcidAffiliationForm(
+            orcid_affil,
+            tzinfo=request.user.preferred_timezone,
+            data={"account": request.user},
+        )
+        if orcid_affil_form.is_valid():
+            new_affils.append(orcid_affil_form.save(commit=False))
+
+    if request.method == "POST":
+        form = forms.ConfirmDeleteForm(request.POST)
+        if form.is_valid():
+            request.user.affiliations.delete()
+            for affil in new_affils:
+                affil.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Affiliations updated."),
+            )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_edit_profile"))
+
+    template = "admin/core/affiliation_update_from_orcid.html"
+    context = {
+        "account": request.user,
+        "form": form,
+        "old_affils": request.user.affiliations,
+        "new_affils": new_affils,
+    }
     return render(request, template, context)
 
 
@@ -600,111 +804,161 @@ def dashboard(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    template = 'core/dashboard.html'
-    new_proofing, active_proofing, completed_proofing = proofing_logic.get_tasks(request)
-    new_proofing_typesetting, active_proofing_typesetting, completed_proofing_typesetting = proofing_logic.get_typesetting_tasks(request)
-    section_editor_articles = review_models.EditorAssignment.objects.filter(editor=request.user,
-                                                                            editor_type='section-editor',
-                                                                            article__journal=request.journal)
+    template = "core/dashboard.html"
+    new_proofing, active_proofing, completed_proofing = proofing_logic.get_tasks(
+        request
+    )
+    (
+        new_proofing_typesetting,
+        active_proofing_typesetting,
+        completed_proofing_typesetting,
+    ) = proofing_logic.get_typesetting_tasks(request)
+    section_editor_articles = review_models.EditorAssignment.objects.filter(
+        editor=request.user,
+        editor_type="section-editor",
+        article__journal=request.journal,
+    )
 
     # TODO: Move most of this to model logic.
     context = {
-        'new_proofing': new_proofing.count(),
-        'active_proofing': active_proofing.count(),
-        'completed_proofing': completed_proofing.count(),
-        'new_proofing_typesetting': new_proofing_typesetting.count(),
-        'completed_proofing_typesetting': completed_proofing_typesetting.count(),
-        'active_proofing_typesetting': active_proofing_typesetting.count(),
-        'unassigned_articles_count': submission_models.Article.objects.filter(
-            stage=submission_models.STAGE_UNASSIGNED, journal=request.journal).count(),
-        'assigned_articles_count': submission_models.Article.objects.filter(
-            Q(stage=submission_models.STAGE_ASSIGNED) | Q(stage=submission_models.STAGE_UNDER_REVIEW) | Q(
-                stage=submission_models.STAGE_UNDER_REVISION), journal=request.journal).count(),
-        'editing_articles_count': submission_models.Article.objects.filter(
-            Q(stage=submission_models.STAGE_EDITOR_COPYEDITING) | Q(
-                stage=submission_models.STAGE_AUTHOR_COPYEDITING) | Q(
-                stage=submission_models.STAGE_FINAL_COPYEDITING), journal=request.journal).count(),
-        'production_articles_count': submission_models.Article.objects.filter(
-            Q(stage=submission_models.STAGE_TYPESETTING), journal=request.journal).count(),
-        'proofing_articles_count': submission_models.Article.objects.filter(
-            Q(stage=submission_models.STAGE_PROOFING), journal=request.journal).count(),
-        'prepub_articles_count': submission_models.Article.objects.filter(
-            Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION), journal=request.journal).count(),
-        'is_editor': request.user.is_editor(request),
-        'is_author': request.user.is_author(request),
-        'is_reviewer': request.user.is_reviewer(request),
-        'section_editor_articles': section_editor_articles,
-        'active_submission_count': submission_models.Article.objects.filter(
-            owner=request.user,
-            journal=request.journal).exclude(
-            stage=submission_models.STAGE_UNSUBMITTED).count(),
-        'in_progress_submission_count': submission_models.Article.objects.filter(owner=request.user,
-                                                                                 journal=request.journal,
-                                                                                 stage=submission_models.
-                                                                                 STAGE_UNSUBMITTED).count(),
-        'assigned_articles_for_user_review_count': review_models.ReviewAssignment.objects.filter(
-            Q(is_complete=False) &
-            Q(reviewer=request.user) &
-            Q(article__stage=submission_models.STAGE_UNDER_REVIEW) &
-            Q(date_accepted__isnull=True), article__journal=request.journal).count(),
-        'assigned_articles_for_user_review_accepted_count': review_models.ReviewAssignment.objects.filter(
-            Q(is_complete=False) &
-            Q(reviewer=request.user) &
-            Q(article__stage=submission_models.STAGE_UNDER_REVIEW) &
-            Q(date_accepted__isnull=False), article__journal=request.journal).count(),
-        'assigned_articles_for_user_review_completed_count': review_models.ReviewAssignment.objects.filter(
-            Q(is_complete=True) &
-            Q(reviewer=request.user) &
-            Q(date_declined__isnull=True), article__journal=request.journal).count(),
-
-        'copyeditor_requests': copyedit_models.CopyeditAssignment.objects.filter(
-            Q(copyeditor=request.user) &
-            Q(decision__isnull=True) &
-            Q(copyedit_reopened__isnull=True), article__journal=request.journal).count(),
-        'copyeditor_accepted_requests': copyedit_models.CopyeditAssignment.objects.filter(
-            Q(copyeditor=request.user, decision='accept', copyeditor_completed__isnull=True,
-              article__journal=request.journal) |
-            Q(copyeditor=request.user, decision='accept', copyeditor_completed__isnull=False,
-              article__journal=request.journal, copyedit_reopened__isnull=False,
-              copyedit_reopened_complete__isnull=True)
+        "new_proofing": new_proofing.count(),
+        "active_proofing": active_proofing.count(),
+        "completed_proofing": completed_proofing.count(),
+        "new_proofing_typesetting": new_proofing_typesetting.count(),
+        "completed_proofing_typesetting": completed_proofing_typesetting.count(),
+        "active_proofing_typesetting": active_proofing_typesetting.count(),
+        "unassigned_articles_count": submission_models.Article.objects.filter(
+            stage=submission_models.STAGE_UNASSIGNED, journal=request.journal
         ).count(),
-        'copyeditor_completed_requests': copyedit_models.CopyeditAssignment.objects.filter(
-            (Q(copyeditor=request.user) & Q(copyeditor_completed__isnull=False)) |
-            (Q(copyeditor=request.user) & Q(copyeditor_completed__isnull=False) &
-             Q(copyedit_reopened_complete__isnull=False)), article__journal=request.journal).count(),
-
-        'typeset_tasks': production_models.TypesetTask.active_objects.filter(
+        "assigned_articles_count": submission_models.Article.objects.filter(
+            Q(stage=submission_models.STAGE_ASSIGNED)
+            | Q(stage=submission_models.STAGE_UNDER_REVIEW)
+            | Q(stage=submission_models.STAGE_UNDER_REVISION),
+            journal=request.journal,
+        ).count(),
+        "editing_articles_count": submission_models.Article.objects.filter(
+            Q(stage=submission_models.STAGE_EDITOR_COPYEDITING)
+            | Q(stage=submission_models.STAGE_AUTHOR_COPYEDITING)
+            | Q(stage=submission_models.STAGE_FINAL_COPYEDITING),
+            journal=request.journal,
+        ).count(),
+        "production_articles_count": submission_models.Article.objects.filter(
+            Q(stage=submission_models.STAGE_TYPESETTING), journal=request.journal
+        ).count(),
+        "proofing_articles_count": submission_models.Article.objects.filter(
+            Q(stage=submission_models.STAGE_PROOFING), journal=request.journal
+        ).count(),
+        "prepub_articles_count": submission_models.Article.objects.filter(
+            Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION),
+            journal=request.journal,
+        ).count(),
+        "is_editor": request.user.is_editor(request),
+        "is_author": request.user.is_author(request),
+        "is_reviewer": request.user.is_reviewer(request),
+        "section_editor_articles": section_editor_articles,
+        "active_submission_count": submission_models.Article.objects.filter(
+            owner=request.user, journal=request.journal
+        )
+        .exclude(stage=submission_models.STAGE_UNSUBMITTED)
+        .count(),
+        "in_progress_submission_count": submission_models.Article.objects.filter(
+            owner=request.user,
+            journal=request.journal,
+            stage=submission_models.STAGE_UNSUBMITTED,
+        ).count(),
+        "assigned_articles_for_user_review_count": review_models.ReviewAssignment.objects.filter(
+            Q(is_complete=False)
+            & Q(reviewer=request.user)
+            & Q(article__stage=submission_models.STAGE_UNDER_REVIEW)
+            & Q(date_accepted__isnull=True),
+            article__journal=request.journal,
+        ).count(),
+        "assigned_articles_for_user_review_accepted_count": review_models.ReviewAssignment.objects.filter(
+            Q(is_complete=False)
+            & Q(reviewer=request.user)
+            & Q(article__stage=submission_models.STAGE_UNDER_REVIEW)
+            & Q(date_accepted__isnull=False),
+            article__journal=request.journal,
+        ).count(),
+        "assigned_articles_for_user_review_completed_count": review_models.ReviewAssignment.objects.filter(
+            Q(is_complete=True)
+            & Q(reviewer=request.user)
+            & Q(date_declined__isnull=True),
+            article__journal=request.journal,
+        ).count(),
+        "copyeditor_requests": copyedit_models.CopyeditAssignment.objects.filter(
+            Q(copyeditor=request.user)
+            & Q(decision__isnull=True)
+            & Q(copyedit_reopened__isnull=True),
+            article__journal=request.journal,
+        ).count(),
+        "copyeditor_accepted_requests": copyedit_models.CopyeditAssignment.objects.filter(
+            Q(
+                copyeditor=request.user,
+                decision="accept",
+                copyeditor_completed__isnull=True,
+                article__journal=request.journal,
+            )
+            | Q(
+                copyeditor=request.user,
+                decision="accept",
+                copyeditor_completed__isnull=False,
+                article__journal=request.journal,
+                copyedit_reopened__isnull=False,
+                copyedit_reopened_complete__isnull=True,
+            )
+        ).count(),
+        "copyeditor_completed_requests": copyedit_models.CopyeditAssignment.objects.filter(
+            (Q(copyeditor=request.user) & Q(copyeditor_completed__isnull=False))
+            | (
+                Q(copyeditor=request.user)
+                & Q(copyeditor_completed__isnull=False)
+                & Q(copyedit_reopened_complete__isnull=False)
+            ),
+            article__journal=request.journal,
+        ).count(),
+        "typeset_tasks": production_models.TypesetTask.active_objects.filter(
             assignment__article__journal=request.journal,
             accepted__isnull=True,
             completed__isnull=True,
-            typesetter=request.user).count(),
-        'typeset_in_progress_tasks': production_models.TypesetTask.active_objects.filter(
+            typesetter=request.user,
+        ).count(),
+        "typeset_in_progress_tasks": production_models.TypesetTask.active_objects.filter(
             assignment__article__journal=request.journal,
             accepted__isnull=False,
             completed__isnull=True,
-            typesetter=request.user).count(),
-        'typeset_completed_tasks': production_models.TypesetTask.active_objects.filter(
+            typesetter=request.user,
+        ).count(),
+        "typeset_completed_tasks": production_models.TypesetTask.active_objects.filter(
             assignment__article__journal=request.journal,
             accepted__isnull=False,
             completed__isnull=False,
-            typesetter=request.user).count(),
-        'active_submissions': submission_models.Article.objects.filter(
-            authors=request.user,
-            journal=request.journal
-        ).exclude(
-            stage__in=[submission_models.STAGE_UNSUBMITTED, submission_models.STAGE_PUBLISHED],
-        ).order_by('-date_submitted'),
-        'published_submissions': submission_models.Article.objects.filter(
-            authors=request.user,
+            typesetter=request.user,
+        ).count(),
+        "active_submissions": submission_models.Article.objects.filter(
+            owner=request.user, journal=request.journal
+        )
+        .exclude(
+            stage__in=[
+                submission_models.STAGE_UNSUBMITTED,
+                submission_models.STAGE_PUBLISHED,
+            ],
+        )
+        .order_by("-date_submitted"),
+        "published_submissions": submission_models.Article.objects.filter(
+            frozenauthor__author=request.user,
             journal=request.journal,
             stage=submission_models.STAGE_PUBLISHED,
-        ).order_by('-date_published'),
-        'progress_submissions': submission_models.Article.objects.filter(
+        ).order_by("-date_published"),
+        "progress_submissions": submission_models.Article.objects.filter(
             journal=request.journal,
             owner=request.user,
-            stage=submission_models.STAGE_UNSUBMITTED).order_by('-date_started'),
-        'workflow_elements': workflow.element_names(request.journal.workflow().elements.all()),
-        'workflow_element_url': request.GET.get('workflow_element_url', False)
+            stage=submission_models.STAGE_UNSUBMITTED,
+        ).order_by("-date_started"),
+        "workflow_elements": workflow.element_names(
+            request.journal.workflow().elements.all()
+        ),
+        "workflow_element_url": request.GET.get("workflow_element_url", False),
     }
 
     return render(request, template, context)
@@ -713,25 +967,27 @@ def dashboard(request):
 @has_journal
 @any_editor_user_required
 def active_submissions(request):
-    template = 'core/active_submissions.html'
+    template = "core/active_submissions.html"
 
-    active_submissions = submission_models.Article.active_objects.exclude(
-        stage=submission_models.STAGE_PUBLISHED,
-    ).filter(
-        journal=request.journal
-    ).order_by('pk', 'title')
+    active_submissions = (
+        submission_models.Article.active_objects.exclude(
+            stage=submission_models.STAGE_PUBLISHED,
+        )
+        .filter(journal=request.journal)
+        .order_by("pk", "title")
+    )
 
     if not request.user.is_editor(request) and request.user.is_section_editor(request):
         active_submissions = logic.filter_articles_to_editor_assigned(
-            request,
-            active_submissions
+            request, active_submissions
         )
 
     context = {
-        'active_submissions': active_submissions,
-        'sections': submission_models.Section.objects.filter(is_filterable=True,
-                                                             journal=request.journal),
-        'workflow_element_url': request.GET.get('workflow_element_url', False)
+        "active_submissions": active_submissions,
+        "sections": submission_models.Section.objects.filter(
+            is_filterable=True, journal=request.journal
+        ),
+        "workflow_element_url": request.GET.get("workflow_element_url", False),
     }
 
     return render(request, template, context)
@@ -741,15 +997,17 @@ def active_submissions(request):
 @any_editor_user_required
 def active_submission_filter(request):
     articles = logic.build_submission_list(request)
-    html = ''
+    html = ""
 
     for article in articles:
-        html = html + logic.create_html_snippet('article', article, 'elements/core/submission_list_element.html')
+        html = html + logic.create_html_snippet(
+            "article", article, "elements/core/submission_list_element.html"
+        )
 
     if not articles:
-        html = '<p>There are no articles to display</p>'
+        html = "<p>There are no articles to display</p>"
 
-    return HttpResponse(json.dumps({'status': 200, 'html': html}))
+    return HttpResponse(json.dumps({"status": 200, "html": html}))
 
 
 @has_journal
@@ -767,9 +1025,9 @@ def dashboard_article(request, article_id):
         journal=request.journal,
     )
 
-    template = 'core/article.html'
+    template = "core/article.html"
     context = {
-        'article': article,
+        "article": article,
     }
 
     return render(request, template, context)
@@ -784,24 +1042,25 @@ def manager_index(request):
     """
     if not request.journal:
         from press import views as press_views
+
         return press_views.manager_index(request)
 
-    template = 'core/manager/index.html'
+    template = "core/manager/index.html"
 
     support_message = logic.render_nested_setting(
-        'support_contact_message_for_staff',
-        'general',
+        "support_contact_message_for_staff",
+        "general",
         request,
-        nested_settings=[('support_email', 'general')],
+        nested_settings=[("support_email", "general")],
     )
 
     context = {
-        'published_articles': submission_models.Article.objects.filter(
+        "published_articles": submission_models.Article.objects.filter(
             date_published__isnull=False,
             stage=submission_models.STAGE_PUBLISHED,
-            journal=request.journal
-        ).select_related('section')[:25],
-        'support_message': support_message,
+            journal=request.journal,
+        ).select_related("section")[:25],
+        "support_message": support_message,
     }
     return render(request, template, context)
 
@@ -814,9 +1073,9 @@ def flush_cache(request):
     :return: HttpRedirect
     """
     cache.clear()
-    messages.add_message(request, messages.SUCCESS, 'Cache has been flushed.')
+    messages.add_message(request, messages.SUCCESS, "Cache has been flushed.")
 
-    return redirect(reverse('core_manager_index'))
+    return redirect(reverse("core_manager_index"))
 
 
 @editor_user_required
@@ -826,15 +1085,15 @@ def settings_index(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    settings = models.Setting.objects.all().order_by('name')
+    settings = models.Setting.objects.all().order_by("name")
     if not request.user.is_staff:
         settings = settings.filter(
             editable_by__in=request.user.roles_for_journal(request.journal)
         )
 
-    template = 'core/manager/settings/index.html'
+    template = "core/manager/settings/index.html"
     context = {
-        'settings': settings,
+        "settings": settings,
     }
 
     return render(request, template, context)
@@ -842,7 +1101,7 @@ def settings_index(request):
 
 @staff_member_required
 def default_settings_index(request):
-    """ Proxy view for edit_setting allowing to edit defaults
+    """Proxy view for edit_setting allowing to edit defaults
 
     :param request: HttpRequest object
     :return: HttpResponse object
@@ -866,23 +1125,20 @@ def edit_setting(request, setting_group, setting_name):
     """
     with translation.override(request.override_language):
         setting = models.Setting.objects.get(
-                name=setting_name, group__name=setting_group)
+            name=setting_name, group__name=setting_group
+        )
         setting_value = setting_handler.get_setting(
-                setting_group,
-                setting_name,
-                request.journal,
-                default=False
-            )
-
-        edit_form = forms.EditKey(
-            key_type=setting.types,
-            value=setting_value.value if setting_value else None
+            setting_group, setting_name, request.journal, default=False
         )
 
-        if request.POST and 'delete' in request.POST and setting_value:
+        edit_form = forms.EditKey(
+            key_type=setting.types, value=setting_value.value if setting_value else None
+        )
+
+        if request.POST and "delete" in request.POST and setting_value:
             setting_value.delete()
 
-            return redirect(reverse('core_settings_index'))
+            return redirect(reverse("core_settings_index"))
 
         if request.POST:
             edit_form = forms.EditKey(
@@ -892,9 +1148,7 @@ def edit_setting(request, setting_group, setting_name):
             if edit_form.is_valid():
                 if request.FILES:
                     value = logic.handle_file(
-                        request,
-                        setting_value,
-                        request.FILES['value']
+                        request, setting_value, request.FILES["value"]
                     )
 
                 # for JSON setting we should validate the JSON by attempting
@@ -905,7 +1159,7 @@ def edit_setting(request, setting_group, setting_name):
                         setting_group,
                         setting_name,
                         request.journal,
-                        edit_form.cleaned_data.get('value'),
+                        edit_form.cleaned_data.get("value"),
                     )
                 except ValidationError as error:
                     messages.add_message(request, messages.ERROR, error)
@@ -914,27 +1168,24 @@ def edit_setting(request, setting_group, setting_name):
 
                 return language_override_redirect(
                     request,
-                    'core_edit_setting',
-                    {
-                        'setting_group': setting_group,
-                        'setting_name': setting_name
-                    },
+                    "core_edit_setting",
+                    {"setting_group": setting_group, "setting_name": setting_name},
                 )
 
-        template = 'core/manager/settings/edit_setting.html'
+        template = "core/manager/settings/edit_setting.html"
         context = {
-            'setting': setting,
-            'setting_value': setting_value,
-            'group': setting.group,
-            'edit_form': edit_form,
-            'value': setting_value.value if setting_value else None
+            "setting": setting,
+            "setting_value": setting_value,
+            "group": setting.group,
+            "edit_form": edit_form,
+            "value": setting_value.value if setting_value else None,
         }
         return render(request, template, context)
 
 
 @staff_member_required
 def edit_default_setting(request, setting_group, setting_name):
-    """ Proxy view for edit_setting allowing editing the default value
+    """Proxy view for edit_setting allowing editing the default value
 
     :param request: HttpRequest object
     :param setting_group: string, SettingGroup.name
@@ -961,20 +1212,25 @@ def edit_settings_group(request, display_group):
             request.user,
         )
         edit_form = forms.GeneratedSettingForm(settings=settings)
-        attr_form_object, attr_form, display_tabs, fire_redirect = None, None, True, True
+        attr_form_object, attr_form, display_tabs, fire_redirect = (
+            None,
+            None,
+            True,
+            True,
+        )
 
-        if display_group == 'journal':
+        if display_group == "journal":
             attr_form_object = forms.JournalAttributeForm
-        elif display_group == 'images':
+        elif display_group == "images":
             attr_form_object = forms.JournalImageForm
             display_tabs = False
-        elif display_group == 'article':
+        elif display_group == "article":
             attr_form_object = forms.JournalArticleForm
             display_tabs = False
-        elif display_group == 'styling':
+        elif display_group == "styling":
             attr_form_object = forms.JournalStylingForm
             display_tabs = False
-        elif display_group == 'submission':
+        elif display_group == "submission":
             attr_form_object = forms.JournalSubmissionForm
 
         if attr_form_object:
@@ -1006,8 +1262,10 @@ def edit_settings_group(request, display_group):
                 if attr_form.is_valid():
                     attr_form.save()
 
-                    if display_group == 'images':
-                        logic.handle_default_thumbnail(request, request.journal, attr_form)
+                    if display_group == "images":
+                        logic.handle_default_thumbnail(
+                            request, request.journal, attr_form
+                        )
                 else:
                     fire_redirect = False
 
@@ -1016,24 +1274,26 @@ def edit_settings_group(request, display_group):
             if fire_redirect:
                 return language_override_redirect(
                     request,
-                    'core_edit_settings_group',
-                    {'display_group': display_group},
+                    "core_edit_settings_group",
+                    {"display_group": display_group},
                 )
 
-        template = 'admin/core/manager/settings/group.html'
+        template = "admin/core/manager/settings/group.html"
         context = {
-            'group': display_group,
-            'settings_list': settings,
-            'edit_form': edit_form,
-            'attr_form': attr_form,
-            'display_tabs': display_tabs,
+            "group": display_group,
+            "settings_list": settings,
+            "edit_form": edit_form,
+            "attr_form": attr_form,
+            "display_tabs": display_tabs,
         }
 
         return render(request, template, context)
 
 
 @editor_user_required
-def edit_plugin_settings_groups(request, plugin, setting_group_name, journal=None, title=None):
+def edit_plugin_settings_groups(
+    request, plugin, setting_group_name, journal=None, title=None
+):
     """
     Allows for editing a group of plugin settings
     :param request: HttpRequest object
@@ -1043,18 +1303,19 @@ def edit_plugin_settings_groups(request, plugin, setting_group_name, journal=Non
     :param title: an optional argument, page title, string
     :return: HttpResponse object
     """
-    if journal != '0':
+    if journal != "0":
         journal = journal_models.Journal.objects.get(fk=int(journal))
     else:
         journal = None
 
     from utils import models as utils_models
+
     plugin = utils_models.Plugin.objects.get(name=plugin)
 
     module_name = "{0}.{1}.plugin_settings".format("plugins", plugin.name)
     plugin_settings = import_module(module_name)
-    manager_url = getattr(plugin_settings, 'MANAGER_URL', '')
-    settings = getattr(plugin_settings, setting_group_name, '')()
+    manager_url = getattr(plugin_settings, "MANAGER_URL", "")
+    settings = getattr(plugin_settings, setting_group_name, "")()
 
     if not settings:
         raise Http404
@@ -1068,18 +1329,18 @@ def edit_plugin_settings_groups(request, plugin, setting_group_name, journal=Non
             edit_form.save(plugin=plugin, journal=journal)
             cache.clear()
 
-            return redirect(reverse(request.GET['return']))
+            return redirect(reverse(request.GET["return"]))
 
     if not title:
         title = plugin.best_name()
 
-    template = 'core/manager/settings/plugin.html'
+    template = "core/manager/settings/plugin.html"
     context = {
-        'plugin': plugin,
-        'settings': settings,
-        'edit_form': edit_form,
-        'title': title,
-        'manager_url': manager_url,
+        "plugin": plugin,
+        "settings": settings,
+        "edit_form": edit_form,
+        "title": title,
+        "manager_url": manager_url,
     }
 
     return render(request, template, context)
@@ -1092,14 +1353,14 @@ def roles(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    template = 'core/manager/roles/roles.html'
+    template = "core/manager/roles/roles.html"
 
-    roles = models.Role.objects.all().exclude(slug='reader')
+    roles = models.Role.objects.all().exclude(slug="reader")
     for role in roles:
         role.user_count = request.journal.users_with_role_count(role.slug)
 
     context = {
-        'roles': roles,
+        "roles": roles,
     }
 
     return render(request, template, context)
@@ -1119,41 +1380,45 @@ def role(request, slug):
         journal=request.journal,
         role=role_obj,
     ).select_related(
-        'user',
-        'journal',
+        "user",
+        "journal",
     )
 
     # Grab additional context for the reviewer page.
-    if slug == 'reviewer':
-        account_roles = account_roles.prefetch_related(
-            'user__interest',
-        ).annotate(
-            total_assignments=Count(
-                'user__reviewer',
-                filter=Q(user__reviewer__article__journal=request.journal),
-            ),
-            last_completed_review=Subquery(
-                review_models.ReviewAssignment.objects.filter(
-                    reviewer=OuterRef('user__pk'),
-                    is_complete=True,
-                    date_complete__isnull=False,
-                    article__journal=request.journal,
-                ).order_by('-date_complete').values('date_complete')[:1]
-            ),
-            average_score=Subquery(
-                review_models.ReviewerRating.objects.filter(
-                    assignment__reviewer=OuterRef('user__pk')
-                ).values('assignment__reviewer').annotate(
-                    avg_score=Avg('rating')
-                ).values('avg_score')[:1]
+    if slug == "reviewer":
+        account_roles = (
+            account_roles.filter(
+                user__is_active=True,
+            )
+            .prefetch_related(
+                "user__interest",
+            )
+            .annotate(
+                total_assignments=Count(
+                    "user__reviewer",
+                    filter=Q(user__reviewer__article__journal=request.journal),
+                ),
+                last_completed_review=Subquery(
+                    review_models.ReviewAssignment.completed_reviews.filter(
+                        article__journal=request.journal,
+                        reviewer=OuterRef("user__pk"),
+                    )
+                    .order_by("-date_complete")
+                    .values("date_complete")[:1]
+                ),
+                average_score=Subquery(
+                    review_models.ReviewerRating.objects.filter(
+                        assignment__reviewer=OuterRef("user__pk")
+                    )
+                    .values("assignment__reviewer")
+                    .annotate(avg_score=Avg("rating"))
+                    .values("avg_score")[:1]
+                ),
             )
         )
 
-    template = 'core/manager/roles/role.html'
-    context = {
-        'role': role_obj,
-        'account_roles': account_roles
-    }
+    template = "core/manager/roles/role.html"
+    context = {"role": role_obj, "account_roles": account_roles}
 
     return render(request, template, context)
 
@@ -1171,14 +1436,14 @@ def role_action(request, slug, user_id, action):
     user = get_object_or_404(models.Account, pk=user_id)
     role_obj = get_object_or_404(models.Role, slug=slug)
 
-    if action == 'add':
+    if action == "add":
         user.add_account_role(role_slug=slug, journal=request.journal)
-    elif action == 'remove':
+    elif action == "remove":
         user.remove_account_role(role_slug=slug, journal=request.journal)
 
     user.save()
 
-    return redirect(reverse('core_manager_role', kwargs={'slug': role_obj.slug}))
+    return redirect(reverse("core_manager_role", kwargs={"slug": role_obj.slug}))
 
 
 @editor_user_required
@@ -1189,15 +1454,15 @@ def users(request):
     :return: HttpResponse object
     """
     if request.POST:
-        users = request.POST.getlist('users')
-        role = request.POST.get('role')
+        users = request.POST.getlist("users")
+        role = request.POST.get("role")
         logic.handle_add_users_to_role(users, role, request)
-        return redirect(reverse('core_manager_users'))
+        return redirect(reverse("core_manager_users"))
 
-    template = 'core/manager/users/index.html'
+    template = "core/manager/users/index.html"
     context = {
-        'users': request.journal.journal_users(objects=True),
-        'roles': models.Role.objects.all().order_by(('name')),
+        "users": request.journal.journal_users(objects=True),
+        "roles": models.Role.objects.all().order_by(("name")),
     }
     return render(request, template, context)
 
@@ -1205,60 +1470,51 @@ def users(request):
 @editor_user_required
 def add_user(request):
     """
-    Displays a form for adding users to JW,
+    Allows an editor or staff member
+    to create a new user account.
     :param request: HttpRequest object
     :return: HttpResponse object
     """
     form = forms.EditAccountForm()
-    registration_form = forms.AdminUserForm(active='add', request=request)
-    return_url = request.GET.get('return', None)
-    role = request.GET.get('role', None)
+    registration_form = forms.AdminUserForm(active="add", request=request)
+    return_url = request.GET.get("return", None)
+    role = request.GET.get("role", None)
 
     if request.POST:
         registration_form = forms.AdminUserForm(
-            request.POST,
-            active='add',
-            request=request
+            request.POST, active="add", request=request
         )
 
         if registration_form.is_valid():
             new_user = registration_form.save()
             # Every new user is given the author role
             if request.journal:
-                new_user.add_account_role('author', request.journal)
+                new_user.add_account_role("author", request.journal)
 
             if role and request.journal:
                 new_user.add_account_role(role, request.journal)
 
-            form = forms.EditAccountForm(
-                request.POST,
-                request.FILES,
-                instance=new_user
-            )
+            form = forms.EditAccountForm(request.POST, request.FILES, instance=new_user)
 
             if form.is_valid():
                 form.save()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'User created.'
-                )
+                messages.add_message(request, messages.SUCCESS, "User created.")
 
                 if return_url:
                     return redirect(return_url)
 
-                return redirect(reverse('core_manager_users'))
+                return redirect(reverse("core_manager_users"))
 
         else:
             # If the registration form is not valid,
             # we need to add post data to the Edit form for display.
             form = forms.EditAccountForm(request.POST)
 
-    template = 'core/manager/users/edit.html'
+    template = "core/manager/users/edit.html"
     context = {
-        'form': form,
-        'registration_form': registration_form,
-        'active': 'add',
+        "form": form,
+        "registration_form": registration_form,
+        "active": "add",
     }
     return render(request, template, context)
 
@@ -1266,7 +1522,8 @@ def add_user(request):
 @editor_user_required
 def user_edit(request, user_id):
     """
-    Allows an editor to edit an existing user account.
+    Allows an editor or staff member
+    to edit an existing user account.
     :param request: HttpRequest object
     :param user_id: Account object PK
     :return: HttpResponse object
@@ -1274,29 +1531,34 @@ def user_edit(request, user_id):
     user = models.Account.objects.get(pk=user_id)
     form = forms.EditAccountForm(instance=user)
     registration_form = forms.AdminUserForm(instance=user, request=request)
+    next_url = request.GET.get("next", "")
 
     if request.POST:
         form = forms.EditAccountForm(request.POST, request.FILES, instance=user)
-        registration_form = forms.AdminUserForm(request.POST, instance=user, request=request)
+        registration_form = forms.AdminUserForm(
+            request.POST, instance=user, request=request
+        )
 
         if form.is_valid() and registration_form.is_valid():
             registration_form.save()
             form.save()
-            messages.add_message(request, messages.SUCCESS, 'Profile updated.')
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "User account updated.",
+            )
 
-            if request.GET.get('return'):
-                return redirect(
-                    request.GET.get('return')
-                )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_manager_users"))
 
-            return redirect(reverse('core_manager_users'))
-
-    template = 'core/manager/users/edit.html'
+    template = "core/manager/users/edit.html"
     context = {
-        'user_to_edit': user,
-        'form': form,
-        'registration_form': registration_form,
-        'active': 'update',
+        "user_to_edit": user,
+        "form": form,
+        "registration_form": registration_form,
+        "active": "update",
     }
     return render(request, template, context)
 
@@ -1310,9 +1572,9 @@ def inactive_users(request):
     """
     user_list = models.Account.objects.filter(is_active=False)
 
-    template = 'core/manager/users/inactive.html'
+    template = "core/manager/users/inactive.html"
     context = {
-        'users': user_list,
+        "users": user_list,
     }
 
     return render(request, template, context)
@@ -1330,13 +1592,13 @@ def logged_in_users(request):
 
     for session in sessions:
         data = session.get_decoded()
-        user_id_list.append(data.get('_auth_user_id', None))
+        user_id_list.append(data.get("_auth_user_id", None))
 
     users = models.Account.objects.filter(id__in=user_id_list)
 
-    template = 'core/manager/users/logged_in_users.html'
+    template = "core/manager/users/logged_in_users.html"
     context = {
-        'users': users,
+        "users": users,
     }
 
     return render(request, template, context)
@@ -1359,19 +1621,35 @@ def user_history(request, user_id):
         is_email=True,
     )
 
-    template = 'core/manager/users/history.html'
+    template = "core/manager/users/history.html"
     context = {
-        'user': user,
-        'review_assignments': review_models.ReviewAssignment.objects.filter(
+        "user": user,
+        "copyedit_assignments": copyedit_models.CopyeditAssignment.objects.filter(
+            copyeditor=user,
+            article__journal=request.journal,
+        ),
+        "log_entries": log_entries,
+        "publications": submission_models.Article.objects.filter(
+            frozenauthor__author=user,
+            journal=request.journal,
+            stage=submission_models.STAGE_PUBLISHED,
+            date_published__isnull=False,
+        ).order_by("-date_published"),
+        "review_assignments": review_models.ReviewAssignment.objects.filter(
             reviewer=user,
             article__journal=request.journal,
         ),
-        'copyedit_assignments':
-            copyedit_models.CopyeditAssignment.objects.filter(
-                copyeditor=user,
-                article__journal=request.journal,
-            ),
-        'log_entries': log_entries,
+        "stages": {
+            "STAGE_UNSUBMITTED": submission_models.STAGE_UNSUBMITTED,
+        },
+        "submissions": submission_models.Article.objects.filter(
+            frozenauthor__author=user,
+            journal=request.journal,
+        )
+        .exclude(
+            stage=submission_models.STAGE_PUBLISHED,
+        )
+        .order_by("-date_started"),
     }
 
     return render(request, template, context)
@@ -1380,39 +1658,39 @@ def user_history(request, user_id):
 @editor_user_required
 def enrol_users(request):
     user_search = []
-    first_name = request.GET.get('first_name', '')
-    last_name = request.GET.get('last_name', '')
-    email = request.GET.get('email', '')
+    first_name = request.GET.get("first_name", "")
+    last_name = request.GET.get("last_name", "")
+    email = request.GET.get("email", "")
     assignable_roles = models.Role.objects.exclude(
-        slug__in=['reader'],
-    ).order_by(('name'))
+        slug__in=["reader"],
+    ).order_by(("name"))
 
     # if the current user is not staff, exclude the journal-manager role.
     if not request.user.is_staff:
         assignable_roles = assignable_roles.exclude(
-            slug='journal-manager',
+            slug="journal-manager",
         )
 
     if first_name or last_name or email:
         filters = {}
         if first_name and len(first_name) >= 2:
-            filters['first_name__icontains'] = first_name
+            filters["first_name__icontains"] = first_name
         if last_name and len(last_name) >= 2:
-            filters['last_name__icontains'] = last_name
+            filters["last_name__icontains"] = last_name
         if email and len(email) >= 2:
-            filters['email__icontains'] = email
+            filters["email__icontains"] = email
 
         user_search = core_models.Account.objects.filter(**filters)
 
-    template = 'core/manager/users/enrol_users.html'
+    template = "core/manager/users/enrol_users.html"
     context = {
-        'user_search': user_search,
-        'roles': assignable_roles,
-        'first_name': first_name,
-        'last_name': last_name,
-        'email': email,
-        'return': request.GET.get('return'),
-        'reader': models.Role.objects.get(slug='reader'),
+        "user_search": user_search,
+        "roles": assignable_roles,
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "return": request.GET.get("return"),
+        "reader": models.Role.objects.get(slug="reader"),
     }
     return render(request, template, context)
 
@@ -1423,45 +1701,67 @@ def settings_home(request):
     # 1. An excluded list of homepage items
     # 2. A list of active homepage items
 
-    active_elements = models.HomepageElement.objects.filter(content_type=request.model_content_type,
-                                                            object_id=request.site_type.pk, active=True)
+    active_elements = models.HomepageElement.objects.filter(
+        content_type=request.model_content_type,
+        object_id=request.site_type.pk,
+        active=True,
+    )
     active_pks = [f.pk for f in active_elements.all()]
 
     if request.press and not request.journal:
-        elements = models.HomepageElement.objects.filter(content_type=request.model_content_type,
-                                                         object_id=request.site_type.pk,
-                                                         available_to_press=True).exclude(pk__in=active_pks)
+        elements = models.HomepageElement.objects.filter(
+            content_type=request.model_content_type,
+            object_id=request.site_type.pk,
+            available_to_press=True,
+        ).exclude(pk__in=active_pks)
     else:
-        elements = models.HomepageElement.objects.filter(content_type=request.model_content_type,
-                                                         object_id=request.site_type.pk).exclude(pk__in=active_pks)
+        elements = models.HomepageElement.objects.filter(
+            content_type=request.model_content_type, object_id=request.site_type.pk
+        ).exclude(pk__in=active_pks)
 
-    if 'add' in request.POST:
-        element_id = request.POST.get('add')
-        homepage_element = get_object_or_404(models.HomepageElement, pk=element_id,
-                                             content_type=request.model_content_type, object_id=request.site_type.pk)
-        if homepage_element.name == 'Carousel' and request.journal and not request.journal.default_large_image:
-            messages.add_message(request, messages.WARNING, 'You cannot enable the carousel until you add a default'
-                                                            'large image file.')
+    if "add" in request.POST:
+        element_id = request.POST.get("add")
+        homepage_element = get_object_or_404(
+            models.HomepageElement,
+            pk=element_id,
+            content_type=request.model_content_type,
+            object_id=request.site_type.pk,
+        )
+        if (
+            homepage_element.name == "Carousel"
+            and request.journal
+            and not request.journal.default_large_image
+        ):
+            messages.add_message(
+                request,
+                messages.WARNING,
+                "You cannot enable the carousel until you add a default"
+                "large image file.",
+            )
         else:
             homepage_element.active = True
             homepage_element.save()
 
-        return redirect(reverse('home_settings_index'))
+        return redirect(reverse("home_settings_index"))
 
-    if 'delete' in request.POST:
-        element_id = request.POST.get('delete')
-        homepage_element = get_object_or_404(models.HomepageElement, pk=element_id,
-                                             content_type=request.model_content_type, object_id=request.site_type.pk)
+    if "delete" in request.POST:
+        element_id = request.POST.get("delete")
+        homepage_element = get_object_or_404(
+            models.HomepageElement,
+            pk=element_id,
+            content_type=request.model_content_type,
+            object_id=request.site_type.pk,
+        )
 
         homepage_element.active = False
         homepage_element.save()
 
-        return redirect(reverse('home_settings_index'))
+        return redirect(reverse("home_settings_index"))
 
-    template = 'core/manager/settings/index_home.html'
+    template = "core/manager/settings/index_home.html"
     context = {
-        'active_elements': active_elements,
-        'elements': elements,
+        "active_elements": active_elements,
+        "elements": elements,
     }
 
     return render(request, template, context)
@@ -1475,15 +1775,18 @@ def journal_home_order(request):
     :return: HttpResponse
     """
     if request.POST:
-        ids = request.POST.getlist('element[]')
+        ids = request.POST.getlist("element[]")
         ids = [int(_id) for _id in ids]
 
-        for he in models.HomepageElement.objects.filter(content_type=request.model_content_type,
-                                                        object_id=request.site_type.pk, active=True):
+        for he in models.HomepageElement.objects.filter(
+            content_type=request.model_content_type,
+            object_id=request.site_type.pk,
+            active=True,
+        ):
             he.sequence = ids.index(he.pk)
             he.save()
 
-    return HttpResponse('Thanks')
+    return HttpResponse("Thanks")
 
 
 @editor_user_required
@@ -1495,9 +1798,9 @@ def article_images(request):
     """
     articles = submission_models.Article.objects.filter(journal=request.journal)
 
-    template = 'core/manager/images/articles.html'
+    template = "core/manager/images/articles.html"
     context = {
-        'articles': articles,
+        "articles": articles,
     }
 
     return render(request, template, context)
@@ -1512,44 +1815,58 @@ def article_image_edit(request, article_pk):
     :param article_pk: Article object PK
     :return: HttpResponse object
     """
-    article = get_object_or_404(submission_models.Article, pk=article_pk, journal=request.journal)
+    article = get_object_or_404(
+        submission_models.Article, pk=article_pk, journal=request.journal
+    )
     article_meta_image_form = forms.ArticleMetaImageForm(instance=article)
 
-    if 'delete' in request.POST:
-        delete_id = request.POST.get('delete')
-        file_to_delete = get_object_or_404(models.File, pk=delete_id, article_id=article_pk)
+    if "delete" in request.POST:
+        delete_id = request.POST.get("delete")
+        file_to_delete = get_object_or_404(
+            models.File, pk=delete_id, article_id=article_pk
+        )
         article_files = [article.thumbnail_image_file, article.large_image_file]
 
-        if file_to_delete in article_files and request.user.is_staff or request.user == file_to_delete.owner:
+        if (
+            file_to_delete in article_files
+            and request.user.is_staff
+            or request.user == file_to_delete.owner
+        ):
             file_to_delete.delete()
 
-        return redirect(reverse('core_article_image_edit', kwargs={'article_pk': article.pk}))
+        return redirect(
+            reverse("core_article_image_edit", kwargs={"article_pk": article.pk})
+        )
 
-    if request.POST and request.FILES and 'large' in request.POST:
-        uploaded_file = request.FILES.get('image_file')
+    if request.POST and request.FILES and "large" in request.POST:
+        uploaded_file = request.FILES.get("image_file")
         logic.handle_article_large_image_file(uploaded_file, article, request)
 
     elif request.POST and 'galley' in request.POST:
          logic.create_article_file_from_galley(article, request)
 
-    elif request.POST and request.FILES and 'thumb' in request.POST:
-        uploaded_file = request.FILES.get('image_file')
+    elif request.POST and request.FILES and "thumb" in request.POST:
+        uploaded_file = request.FILES.get("image_file")
         logic.handle_article_thumb_image_file(uploaded_file, article, request)
 
-    elif request.POST and request.FILES and 'meta' in request.POST:
+    elif request.POST and request.FILES and "meta" in request.POST:
         article.unlink_meta_file()
-        article_meta_image_form = forms.ArticleMetaImageForm(request.POST, request.FILES, instance=article)
+        article_meta_image_form = forms.ArticleMetaImageForm(
+            request.POST, request.FILES, instance=article
+        )
         if article_meta_image_form.is_valid():
             article_meta_image_form.save()
 
     if request.POST:
         flush_cache(request)
-        return redirect(reverse('core_article_image_edit', kwargs={'article_pk': article.pk}))
+        return redirect(
+            reverse("core_article_image_edit", kwargs={"article_pk": article.pk})
+        )
 
-    template = 'core/manager/images/article_image.html'
+    template = "core/manager/images/article_image.html"
     context = {
-        'article': article,
-        'article_meta_image_form': article_meta_image_form,
+        "article": article,
+        "article_meta_image_form": article_meta_image_form,
     }
 
     return render(request, template, context)
@@ -1568,8 +1885,8 @@ def contacts(request):
         object_id=request.site_type.pk,
     )
 
-    if 'delete' in request.POST:
-        contact_id = request.POST.get('delete')
+    if "delete" in request.POST:
+        contact_id = request.POST.get("delete")
         contact = get_object_or_404(
             models.Contacts,
             pk=contact_id,
@@ -1577,7 +1894,7 @@ def contacts(request):
             object_id=request.site_type.pk,
         )
         contact.delete()
-        return redirect(reverse('core_journal_contacts'))
+        return redirect(reverse("core_journal_contacts"))
 
     if request.POST:
         form = forms.JournalContactForm(request.POST)
@@ -1588,13 +1905,13 @@ def contacts(request):
             contact.object_id = request.site_type.pk
             contact.sequence = request.site_type.next_contact_order()
             contact.save()
-            return redirect(reverse('core_journal_contacts'))
+            return redirect(reverse("core_journal_contacts"))
 
-    template = 'core/manager/contacts/index.html'
+    template = "core/manager/contacts/index.html"
     context = {
-        'form': form,
-        'contacts': contacts,
-        'action': 'new',
+        "form": form,
+        "contacts": contacts,
+        "action": "new",
     }
 
     return render(request, template, context)
@@ -1638,14 +1955,14 @@ def edit_contacts(request, contact_id=None):
 
                 return language_override_redirect(
                     request,
-                    'core_journal_contact',
-                    {'contact_id': contact.pk},
+                    "core_journal_contact",
+                    {"contact_id": contact.pk},
                 )
 
-    template = 'core/manager/contacts/manage.html'
+    template = "core/manager/contacts/manage.html"
     context = {
-        'form': form,
-        'contact': contact,
+        "form": form,
+        "contact": contact,
     }
 
     return render(request, template, context)
@@ -1659,14 +1976,16 @@ def contacts_order(request):
     :return: HttpResponse object
     """
     if request.POST:
-        ids = request.POST.getlist('contact[]')
+        ids = request.POST.getlist("contact[]")
         ids = [int(_id) for _id in ids]
 
-        for jc in models.Contacts.objects.filter(content_type=request.model_content_type, object_id=request.site_type.pk):
+        for jc in models.Contacts.objects.filter(
+            content_type=request.model_content_type, object_id=request.site_type.pk
+        ):
             jc.sequence = ids.index(jc.pk)
             jc.save()
 
-    return HttpResponse('Thanks')
+    return HttpResponse("Thanks")
 
 
 @editor_user_required
@@ -1682,40 +2001,43 @@ def editorial_team(request):
             journal=request.journal,
         )
         settings, setting_group = logic.get_settings_to_edit(
-            'editorial',
+            "editorial",
             request.journal,
             request.user,
         )
         edit_form = forms.GeneratedSettingForm(settings=settings)
         if request.POST:
-            edit_form = forms.GeneratedSettingForm(
-                request.POST,
-                settings=settings,
+            if "save" in request.POST:
+                edit_form = forms.GeneratedSettingForm(
+                    request.POST,
+                    settings=settings,
+                )
+
+                if edit_form.is_valid():
+                    edit_form.save(
+                        group=setting_group,
+                        journal=request.journal,
+                    )
+                    # clear cache to ensure changes display immediately
+                    clear_cache()
+                    return language_override_redirect(
+                        request,
+                        "core_editorial_team",
+                        kwargs={},
+                    )
+
+        if "delete" in request.POST:
+            delete_id = request.POST.get("delete")
+            group = get_object_or_404(
+                models.EditorialGroup, pk=delete_id, journal=request.journal
             )
-
-            if edit_form.is_valid():
-                edit_form.save(
-                    group=setting_group,
-                    journal=request.journal,
-                )
-                # clear cache to ensure changes display immediately
-                clear_cache()
-                return language_override_redirect(
-                    request,
-                    'core_editorial_team',
-                    kwargs={},
-                )
-
-        if 'delete' in request.POST:
-            delete_id = request.POST.get('delete')
-            group = get_object_or_404(models.EditorialGroup, pk=delete_id, journal=request.journal)
             group.delete()
-            return redirect(reverse('core_editorial_team'))
+            return redirect(reverse("core_editorial_team"))
 
-        template = 'core/manager/editorial/index.html'
+        template = "core/manager/editorial/index.html"
         context = {
-            'editorial_groups': editorial_groups,
-            'edit_form': edit_form,
+            "editorial_groups": editorial_groups,
+            "edit_form": edit_form,
         }
 
         return render(request, template, context)
@@ -1747,9 +2069,7 @@ def edit_editorial_group(request, group_id=None):
                 next_sequence = request.journal.next_group_order()
             except AttributeError:
                 next_sequence = request.press.next_group_order()
-            form = forms.EditorialGroupForm(
-                next_sequence=next_sequence
-            )
+            form = forms.EditorialGroupForm(next_sequence=next_sequence)
 
         if request.POST:
             form = forms.EditorialGroupForm(request.POST, instance=group)
@@ -1764,14 +2084,14 @@ def edit_editorial_group(request, group_id=None):
 
                 return language_override_redirect(
                     request,
-                    'core_edit_editorial_team',
-                    {'group_id': group.pk},
+                    "core_edit_editorial_team",
+                    {"group_id": group.pk},
                 )
 
-    template = 'core/manager/editorial/manage_group.html'
+    template = "core/manager/editorial/manage_group.html"
     context = {
-        'group': group,
-        'form': form,
+        "group": group,
+        "form": form,
     }
 
     return render(request, template, context)
@@ -1789,9 +2109,7 @@ def add_member_to_group(request, group_id, user_id=None):
     :return:
     """
     group = get_object_or_404(
-        models.EditorialGroup,
-        pk=group_id,
-        journal=request.journal
+        models.EditorialGroup, pk=group_id, journal=request.journal
     )
     journal_users = request.journal.journal_users(objects=True)
     members = [member.user for member in group.editorialgroupmember_set.all()]
@@ -1799,39 +2117,28 @@ def add_member_to_group(request, group_id, user_id=None):
     # Drop users thagit t are in both lists.
     user_list = list(set(journal_users) ^ set(members))
 
-    if 'delete' in request.POST:
-        delete_id = request.POST.get('delete')
-        membership = get_object_or_404(
-            models.EditorialGroupMember,
-            pk=delete_id
-        )
+    if "delete" in request.POST:
+        delete_id = request.POST.get("delete")
+        membership = get_object_or_404(models.EditorialGroupMember, pk=delete_id)
         membership.delete()
         return redirect(
-            reverse(
-                'core_editorial_member_to_group',
-                kwargs={'group_id': group.pk}
-            )
+            reverse("core_editorial_member_to_group", kwargs={"group_id": group.pk})
         )
 
     if user_id:
         user_to_add = get_object_or_404(models.Account, pk=user_id)
         if user_to_add not in members:
             models.EditorialGroupMember.objects.create(
-                group=group,
-                user=user_to_add,
-                sequence=group.next_member_sequence()
+                group=group, user=user_to_add, sequence=group.next_member_sequence()
             )
         return redirect(
-            reverse(
-                'core_editorial_member_to_group',
-                kwargs={'group_id': group.pk}
-            )
+            reverse("core_editorial_member_to_group", kwargs={"group_id": group.pk})
         )
 
-    template = 'core/manager/editorial/add_member.html'
+    template = "core/manager/editorial/add_member.html"
     context = {
-        'group': group,
-        'users': user_list,
+        "group": group,
+        "users": user_list,
     }
 
     return render(request, template, context)
@@ -1864,25 +2171,25 @@ def plugin_list(request):
         try:
             module_name = "{0}.{1}.plugin_settings".format("plugins", plugin.name)
             plugin_settings = import_module(module_name)
-            manager_url = getattr(plugin_settings, 'MANAGER_URL', '')
+            manager_url = getattr(plugin_settings, "MANAGER_URL", "")
             if manager_url:
                 reverse(manager_url)
             plugin_list.append(
-                {'model': plugin,
-                 'manager_url': manager_url,
-                 'name': getattr(plugin_settings, 'PLUGIN_NAME')
-                 },
+                {
+                    "model": plugin,
+                    "manager_url": manager_url,
+                    "name": getattr(plugin_settings, "PLUGIN_NAME"),
+                },
             )
         except (ImportError, NoReverseMatch) as e:
             failed_to_load.append(plugin)
             logger.error("Importing plugin %s failed: %s" % (plugin, e))
             logger.exception(e)
 
-
-    template = 'core/manager/plugins.html'
+    template = "core/manager/plugins.html"
     context = {
-        'plugins': plugin_list,
-        'failed_to_load': failed_to_load,
+        "plugins": plugin_list,
+        "failed_to_load": failed_to_load,
     }
 
     return render(request, template, context)
@@ -1897,15 +2204,17 @@ def editorial_ordering(request, type_to_order, group_id=None):
     :param group_id: EditorialGroup PK, optional
     :return: HttpRespons eobject
     """
-    if type_to_order == 'group':
-        ids = request.POST.getlist('group[]')
+    if type_to_order == "group":
+        ids = request.POST.getlist("group[]")
         objects = models.EditorialGroup.objects.filter(journal=request.journal)
-    elif type_to_order == 'sections':
-        ids = request.POST.getlist('section[]')
+    elif type_to_order == "sections":
+        ids = request.POST.getlist("section[]")
         objects = submission_models.Section.objects.filter(journal=request.journal)
     else:
-        group = get_object_or_404(models.EditorialGroup, pk=group_id, journal=request.journal)
-        ids = request.POST.getlist('member[]')
+        group = get_object_or_404(
+            models.EditorialGroup, pk=group_id, journal=request.journal
+        )
+        ids = request.POST.getlist("member[]")
         objects = models.EditorialGroupMember.objects.filter(group=group)
 
     ids = [int(_id) for _id in ids]
@@ -1914,7 +2223,7 @@ def editorial_ordering(request, type_to_order, group_id=None):
         _object.sequence = ids.index(_object.pk)
         _object.save()
 
-    return HttpResponse('Thanks')
+    return HttpResponse("Thanks")
 
 
 @has_journal
@@ -1925,60 +2234,73 @@ def kanban(request):
     :param request: HttpRequest object
     :return: HttpResponse object
     """
-    unassigned_articles = submission_models.Article.objects.filter(Q(stage=submission_models.STAGE_UNASSIGNED),
-                                                                   journal=request.journal) \
-        .order_by('-date_submitted')
+    unassigned_articles = submission_models.Article.objects.filter(
+        Q(stage=submission_models.STAGE_UNASSIGNED), journal=request.journal
+    ).order_by("-date_submitted")
 
-    in_review = submission_models.Article.objects.filter(Q(stage=submission_models.STAGE_ASSIGNED) |
-                                                         Q(stage=submission_models.STAGE_UNDER_REVIEW) |
-                                                         Q(stage=submission_models.STAGE_UNDER_REVISION),
-                                                         journal=request.journal) \
-        .order_by('-date_submitted')
+    in_review = submission_models.Article.objects.filter(
+        Q(stage=submission_models.STAGE_ASSIGNED)
+        | Q(stage=submission_models.STAGE_UNDER_REVIEW)
+        | Q(stage=submission_models.STAGE_UNDER_REVISION),
+        journal=request.journal,
+    ).order_by("-date_submitted")
 
-    copyediting = submission_models.Article.objects.filter(Q(stage=submission_models.STAGE_ACCEPTED) |
-                                                           Q(stage__in=submission_models.COPYEDITING_STAGES),
-                                                           journal=request.journal) \
-        .order_by('-date_submitted')
+    copyediting = submission_models.Article.objects.filter(
+        Q(stage=submission_models.STAGE_ACCEPTED)
+        | Q(stage__in=submission_models.COPYEDITING_STAGES),
+        journal=request.journal,
+    ).order_by("-date_submitted")
 
-    assigned_table = production_models.ProductionAssignment.objects.filter(article__journal=request.journal)
+    assigned_table = production_models.ProductionAssignment.objects.filter(
+        article__journal=request.journal
+    )
     assigned = [assignment.article.pk for assignment in assigned_table]
 
     prod_articles = submission_models.Article.objects.filter(
-        stage=submission_models.STAGE_TYPESETTING, journal=request.journal)
+        stage=submission_models.STAGE_TYPESETTING, journal=request.journal
+    )
     assigned_articles = submission_models.Article.objects.filter(pk__in=assigned)
 
     proofing_assigned_table = proofing_models.ProofingAssignment.objects.filter(
         article__journal=request.journal,
     )
-    proofing_assigned = [assignment.article.pk for assignment in proofing_assigned_table]
+    proofing_assigned = [
+        assignment.article.pk for assignment in proofing_assigned_table
+    ]
 
     proof_articles = submission_models.Article.objects.filter(
-        stage=submission_models.STAGE_PROOFING, journal=request.journal)
+        stage=submission_models.STAGE_PROOFING, journal=request.journal
+    )
     proof_assigned_articles = submission_models.Article.objects.filter(
         pk__in=proofing_assigned,
+    )
+    typesetting_articles = submission_models.Article.objects.filter(
+        stage=submission_models.STAGE_TYPESETTING_PLUGIN,
+        journal=request.journal,
     )
 
     prepub = submission_models.Article.objects.filter(
         Q(stage=submission_models.STAGE_READY_FOR_PUBLICATION),
         journal=request.journal,
-    ).order_by('-date_submitted')
+    ).order_by("-date_submitted")
 
     articles_in_workflow_plugins = workflow.articles_in_workflow_plugins(request)
 
     context = {
-        'unassigned_articles': unassigned_articles,
-        'in_review': in_review,
-        'copyediting': copyediting,
-        'production': prod_articles,
-        'production_assigned': assigned_articles,
-        'proofing': proof_articles,
-        'proofing_assigned': proof_assigned_articles,
-        'prepubs': prepub,
-        'articles_in_workflow_plugins': articles_in_workflow_plugins,
-        'workflow': request.journal.workflow()
+        "unassigned_articles": unassigned_articles,
+        "in_review": in_review,
+        "copyediting": copyediting,
+        "production": prod_articles,
+        "production_assigned": assigned_articles,
+        "proofing": proof_articles,
+        "proofing_assigned": proof_assigned_articles,
+        "typesetting": typesetting_articles,
+        "prepubs": prepub,
+        "articles_in_workflow_plugins": articles_in_workflow_plugins,
+        "workflow": request.journal.workflow(),
     }
 
-    template = 'core/kanban.html'
+    template = "core/kanban.html"
 
     return render(request, template, context)
 
@@ -1995,7 +2317,7 @@ def delete_note(request, article_id, note_id):
     note = get_object_or_404(submission_models.Note, pk=note_id)
     note.delete()
 
-    url = reverse('kanban_home')
+    url = reverse("kanban_home")
 
     return redirect("{0}?article_id={1}".format(url, article_id))
 
@@ -2007,15 +2329,19 @@ def manage_notifications(request, notification_id=None):
     form = forms.NotificationForm()
 
     if notification_id:
-        notification = get_object_or_404(journal_models.Notifications, pk=notification_id)
+        notification = get_object_or_404(
+            journal_models.Notifications, pk=notification_id
+        )
         form = forms.NotificationForm(instance=notification)
 
     if request.POST:
-        if 'delete' in request.POST:
-            delete_id = request.POST.get('delete')
-            notification_to_delete = get_object_or_404(journal_models.Notifications, pk=delete_id)
+        if "delete" in request.POST:
+            delete_id = request.POST.get("delete")
+            notification_to_delete = get_object_or_404(
+                journal_models.Notifications, pk=delete_id
+            )
             notification_to_delete.delete()
-            return redirect(reverse('core_manager_notifications'))
+            return redirect(reverse("core_manager_notifications"))
 
         if notification:
             form = forms.NotificationForm(request.POST, instance=notification)
@@ -2027,13 +2353,13 @@ def manage_notifications(request, notification_id=None):
             save_notification.journal = request.journal
             save_notification.save()
 
-            return redirect(reverse('core_manager_notifications'))
+            return redirect(reverse("core_manager_notifications"))
 
-    template = 'core/manager/notifications/manage_notifications.html'
+    template = "core/manager/notifications/manage_notifications.html"
     context = {
-        'notifications': notifications,
-        'notification': notification,
-        'form': form,
+        "notifications": notifications,
+        "notification": notification,
+        "form": form,
     }
 
     return render(request, template, context)
@@ -2047,19 +2373,19 @@ def email_templates(request):
     :return: HttpResponse object
     """
     template_list = (
-        (setting, 'subject_%s' % setting.name)
-        for setting in models.Setting.objects.filter(group__name='email')
+        (setting, "subject_%s" % setting.name)
+        for setting in models.Setting.objects.filter(group__name="email")
     )
 
-    template = 'core/manager/email/email_templates.html'
+    template = "core/manager/email/email_templates.html"
     context = {
-        'template_list': template_list,
+        "template_list": template_list,
     }
 
     return render(request, template, context)
 
 
-@role_can_access('sections')
+@role_can_access("sections")
 def section_list(request):
     """
     Displays a list of the journals sections.
@@ -2070,8 +2396,8 @@ def section_list(request):
         journal=request.journal,
     )
 
-    if request.POST and 'delete' in request.POST:
-        section_id = request.POST.get('delete')
+    if request.POST and "delete" in request.POST:
+        section_id = request.POST.get("delete")
         section_to_delete = get_object_or_404(submission_models.Section, pk=section_id)
 
         if section_to_delete.article_count():
@@ -2079,22 +2405,22 @@ def section_list(request):
                 request,
                 messages.WARNING,
                 _(
-                    'You cannot remove a section that contains articles. Remove articles'
-                    ' from the section if you want to delete it.'
+                    "You cannot remove a section that contains articles. Remove articles"
+                    " from the section if you want to delete it."
                 ),
             )
         else:
             section_to_delete.delete()
-        return redirect(reverse('core_manager_sections'))
+        return redirect(reverse("core_manager_sections"))
 
-    template = 'core/manager/sections/section_list.html'
+    template = "core/manager/sections/section_list.html"
     context = {
-        'section_objects': section_objects,
+        "section_objects": section_objects,
     }
     return render(request, template, context)
 
 
-@role_can_access('sections')
+@role_can_access("sections")
 @GET_language_override
 def manage_section(request, section_id=None):
     """
@@ -2104,8 +2430,13 @@ def manage_section(request, section_id=None):
     :return: HttpResponse object
     """
     with translation.override(request.override_language):
-        section = get_object_or_404(submission_models.Section, pk=section_id,
-                                    journal=request.journal) if section_id else None
+        section = (
+            get_object_or_404(
+                submission_models.Section, pk=section_id, journal=request.journal
+            )
+            if section_id
+            else None
+        )
         sections = submission_models.Section.objects.filter(journal=request.journal)
 
         if section:
@@ -2114,9 +2445,10 @@ def manage_section(request, section_id=None):
             form = forms.SectionForm(request=request)
 
         if request.POST:
-
             if section:
-                form = forms.SectionForm(request.POST, instance=section, request=request)
+                form = forms.SectionForm(
+                    request.POST, instance=section, request=request
+                )
             else:
                 form = forms.SectionForm(request.POST, request=request)
 
@@ -2128,20 +2460,20 @@ def manage_section(request, section_id=None):
 
             return language_override_redirect(
                 request,
-                'core_manager_section',
-                {'section_id': section.pk if section else form_section.pk},
+                "core_manager_section",
+                {"section_id": section.pk if section else form_section.pk},
             )
 
-        template = 'core/manager/sections/manage_section.html'
+        template = "core/manager/sections/manage_section.html"
         context = {
-            'sections': sections,
-            'section': section,
-            'form': form,
+            "sections": sections,
+            "section": section,
+            "form": form,
         }
     return render(request, template, context)
 
 
-@role_can_access('sections')
+@role_can_access("sections")
 def section_articles(request, section_id):
     """
     Displays a list of articles in a given section.
@@ -2151,9 +2483,9 @@ def section_articles(request, section_id):
         pk=section_id,
         journal=request.journal,
     )
-    template = 'core/manager/sections/section_articles.html'
+    template = "core/manager/sections/section_articles.html"
     context = {
-        'section': section,
+        "section": section,
     }
     return render(request, template, context)
 
@@ -2164,34 +2496,41 @@ def pinned_articles(request):
     Allows an Editor to pin articles to the top of the article page.
     :param request: HttpRequest object
     """
-    pinned_articles = journal_models.PinnedArticle.objects.filter(journal=request.journal)
+    pinned_articles = journal_models.PinnedArticle.objects.filter(
+        journal=request.journal
+    )
     published_articles = logic.get_unpinned_articles(request, pinned_articles)
 
     if request.POST:
-        if 'pin' in request.POST:
-            article_id = request.POST.get('pin')
-            article = get_object_or_404(submission_models.Article, pk=article_id, journal=request.journal)
+        if "pin" in request.POST:
+            article_id = request.POST.get("pin")
+            article = get_object_or_404(
+                submission_models.Article, pk=article_id, journal=request.journal
+            )
             journal_models.PinnedArticle.objects.create(
                 article=article,
                 journal=request.journal,
-                sequence=request.journal.next_pa_seq())
-            messages.add_message(request, messages.INFO, 'Article pinned.')
+                sequence=request.journal.next_pa_seq(),
+            )
+            messages.add_message(request, messages.INFO, "Article pinned.")
 
-        if 'unpin' in request.POST:
-            article_id = request.POST.get('unpin')
-            pinned_article = get_object_or_404(journal_models.PinnedArticle, journal=request.journal, pk=article_id)
+        if "unpin" in request.POST:
+            article_id = request.POST.get("unpin")
+            pinned_article = get_object_or_404(
+                journal_models.PinnedArticle, journal=request.journal, pk=article_id
+            )
             pinned_article.delete()
-            messages.add_message(request, messages.INFO, 'Article unpinned.')
+            messages.add_message(request, messages.INFO, "Article unpinned.")
 
-        if 'orders[]' in request.POST:
+        if "orders[]" in request.POST:
             logic.order_pinned_articles(request, pinned_articles)
 
-        return redirect(reverse('core_pinned_articles'))
+        return redirect(reverse("core_pinned_articles"))
 
-    template = 'core/manager/pinned_articles.html'
+    template = "core/manager/pinned_articles.html"
     context = {
-        'pinned_articles': pinned_articles,
-        'published_articles': published_articles,
+        "pinned_articles": pinned_articles,
+        "published_articles": published_articles,
     }
 
     return render(request, template, context)
@@ -2215,42 +2554,28 @@ def journal_workflow(request):
     available_elements = logic.get_available_elements(journal_workflow)
 
     if request.POST:
-        if 'element_name' in request.POST:
-            element_name = request.POST.get('element_name')
+        if "element_name" in request.POST:
+            element_name = request.POST.get("element_name")
             element = logic.handle_element_post(journal_workflow, element_name, request)
             if element:
                 journal_workflow.elements.add(element)
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Element added.'
-                )
+                messages.add_message(request, messages.SUCCESS, "Element added.")
             else:
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    'Element not found.'
-                )
+                messages.add_message(request, messages.WARNING, "Element not found.")
 
-        if 'delete' in request.POST:
-            delete_id = request.POST.get('delete')
+        if "delete" in request.POST:
+            delete_id = request.POST.get("delete")
             delete_element = get_object_or_404(
-                models.WorkflowElement,
-                journal=request.journal,
-                pk=delete_id
+                models.WorkflowElement, journal=request.journal, pk=delete_id
             )
-            workflow.remove_element(
-                request,
-                journal_workflow,
-                delete_element
-            )
+            workflow.remove_element(request, journal_workflow, delete_element)
 
-        return redirect(reverse('core_journal_workflow'))
+        return redirect(reverse("core_journal_workflow"))
 
-    template = 'core/workflow.html'
+    template = "core/workflow.html"
     context = {
-        'workflow': journal_workflow,
-        'available_elements': available_elements,
+        "workflow": journal_workflow,
+        "available_elements": available_elements,
     }
 
     return render(request, template, context)
@@ -2266,14 +2591,14 @@ def order_workflow_elements(request):
     workflow = models.Workflow.objects.get(journal=request.journal)
 
     if request.POST:
-        ids = [int(_id) for _id in request.POST.getlist('element[]')]
+        ids = [int(_id) for _id in request.POST.getlist("element[]")]
 
         for element in workflow.elements.all():
             order = ids.index(element.pk)
             element.order = order
             element.save()
 
-    return HttpResponse('Thanks')
+    return HttpResponse("Thanks")
 
 
 @ensure_csrf_cookie
@@ -2284,17 +2609,17 @@ def set_session_timezone(request):
     if chosen_timezone in pytz.all_timezones_set:
         request.session["janeway_timezone"] = chosen_timezone
         status = 200
-        response_data['message'] = 'OK'
+        response_data["message"] = "OK"
         logger.debug("Timezone set to %s for this session" % chosen_timezone)
     else:
         status = 404
-        response_data['message'] = 'Timezone not found: %s' % chosen_timezone
+        response_data["message"] = "Timezone not found: %s" % chosen_timezone
     response_data = {}
 
     return HttpResponse(
-            content=json.dumps(response_data),
-            content_type='application/json',
-            status=200,
+        content=json.dumps(response_data),
+        content_type="application/json",
+        status=200,
     )
 
 
@@ -2304,12 +2629,14 @@ def request_submission_access(request):
         check = rm.RepositoryRole.objects.filter(
             repository=request.repository,
             user=request.user,
-            role__slug='author',
+            role__slug="author",
         ).exists()
     elif request.journal:
         check = request.user.is_author(request)
     else:
-        raise Http404('The Submission Access page is only accessible on Repository and Journal sites.')
+        raise Http404(
+            "The Submission Access page is only accessible on Repository and Journal sites."
+        )
 
     active_request = models.AccessRequest.objects.filter(
         user=request.user,
@@ -2317,7 +2644,7 @@ def request_submission_access(request):
         repository=request.repository,
         processed=False,
     ).first()
-    role = models.Role.objects.get(slug='author')
+    role = models.Role.objects.get(slug="author")
     form = forms.AccessRequestForm(
         journal=request.journal,
         repository=request.repository,
@@ -2336,29 +2663,25 @@ def request_submission_access(request):
         if form.is_valid():
             access_request = form.save()
             event_kwargs = {
-                'request': request,
-                'access_request': access_request,
+                "request": request,
+                "access_request": access_request,
             }
             events_logic.Events.raise_event(
-                'on_access_request',
+                "on_access_request",
                 **event_kwargs,
             )
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Access Request Sent.',
+                "Access Request Sent.",
             )
-            return redirect(
-                reverse(
-                    'request_submission_access'
-                )
-            )
+            return redirect(reverse("request_submission_access"))
 
-    template = 'admin/core/request_submission_access.html'
+    template = "admin/core/request_submission_access.html"
     context = {
-        'check': check,
-        'active_request': active_request,
-        'form': form,
+        "check": check,
+        "active_request": active_request,
+        "form": form,
     }
     return render(
         request,
@@ -2371,7 +2694,9 @@ def request_submission_access(request):
 def manage_access_requests(request):
     # If we don't have a journal or repository return a 404.
     if not request.journal and not request.repository:
-        raise Http404('The Submission Access page is only accessible on Repository and Journal sites.')
+        raise Http404(
+            "The Submission Access page is only accessible on Repository and Journal sites."
+        )
 
     active_requests = models.AccessRequest.objects.filter(
         journal=request.journal,
@@ -2379,10 +2704,10 @@ def manage_access_requests(request):
         processed=False,
     )
     if request.POST:
-        if 'approve' in request.POST:
-            pk = request.POST.get('approve')
+        if "approve" in request.POST:
+            pk = request.POST.get("approve")
             access_request = active_requests.get(pk=pk)
-            decision = 'approve'
+            decision = "approve"
 
             if request.journal:
                 access_request.user.add_account_role(
@@ -2393,40 +2718,40 @@ def manage_access_requests(request):
                 rm.RepositoryRole.objects.get_or_create(
                     repository=access_request.repository,
                     user=access_request.user,
-                    role=access_request.role
+                    role=access_request.role,
                 )
-        elif 'reject' in request.POST:
-            pk = request.POST.get('reject')
+        elif "reject" in request.POST:
+            pk = request.POST.get("reject")
             access_request = active_requests.get(pk=pk)
-            decision = 'reject'
+            decision = "reject"
 
         if access_request:
-            eval_note = request.POST.get('eval_note')
+            eval_note = request.POST.get("eval_note")
             access_request.evaluation_note = eval_note
             access_request.processed = True
             access_request.save()
             event_kwargs = {
-                'decision': decision,
-                'access_request': access_request,
-                'request': request,
+                "decision": decision,
+                "access_request": access_request,
+                "request": request,
             }
             events_logic.Events.raise_event(
-                'on_access_request_complete',
+                "on_access_request_complete",
                 **event_kwargs,
             )
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Access Request Processed.',
+                "Access Request Processed.",
             )
         return redirect(
             reverse(
-                'manage_access_requests',
+                "manage_access_requests",
             )
         )
-    template = 'admin/core/manage_access_requests.html'
+    template = "admin/core/manage_access_requests.html"
     context = {
-        'active_requests': active_requests,
+        "active_requests": active_requests,
     }
     return render(
         request,
@@ -2445,7 +2770,7 @@ def sitemap(request, path_parts):
     try:
         return files.serve_sitemap_file(path_parts)
     except FileNotFoundError:
-        logger.warning('Sitemap for {} not found.'.format(request.journal.name))
+        logger.warning("Sitemap for {} not found.".format(request.journal.name))
 
     raise Http404()
 
@@ -2455,22 +2780,23 @@ class GenericFacetedListView(generic.ListView):
     This is a generic base class for creating filterable list views
     with Janeway models.
     """
+
     form_class = forms.CBVFacetForm
     model = NotImplementedField
     template_name = NotImplementedField
-
+    paginator_class = SafePaginator
     paginate_by = 25
     facets = {}
 
     # These fields will receive a single initial value, not a list
-    single_value_fields = {'date_time', 'date', 'integer', 'search', 'boolean'}
+    single_value_fields = {"date_time", "date", "integer", "search", "boolean"}
 
     # None or integer
     action_queryset_chunk_size = None
 
     def get_paginate_by(self, queryset):
-        paginate_by = self.request.GET.get('paginate_by', self.paginate_by)
-        if paginate_by == 'all':
+        paginate_by = self.request.GET.get("paginate_by", self.paginate_by)
+        if paginate_by == "all":
             if queryset:
                 paginate_by = len(queryset)
             else:
@@ -2482,7 +2808,7 @@ class GenericFacetedListView(generic.ListView):
 
         for keyword, values in GET_data.items():
             if keyword in self.facets:
-                if self.facets[keyword]['type'] in self.single_value_fields:
+                if self.facets[keyword]["type"] in self.single_value_fields:
                     GET_data[keyword] = values[0]
 
         form = self.form_class(
@@ -2502,26 +2828,24 @@ class GenericFacetedListView(generic.ListView):
         if params_querydict and not form.is_valid():
             messages.add_message(
                 self.request,
-                    messages.ERROR,
-                    mark_safe(_("The form did not validate: ")
-                    + (f"{form.errors}")
-                   ),
-                )
-        context['paginate_by'] = params_querydict.get('paginate_by', self.paginate_by)
-        context['facet_form'] = form
+                messages.ERROR,
+                mark_safe(_("The form did not validate: ") + (f"{form.errors}")),
+            )
+        context["paginate_by"] = params_querydict.get("paginate_by", self.paginate_by)
+        context["facet_form"] = form
 
-        context['actions'] = self.get_actions()
+        context["actions"] = self.get_actions()
 
-        params_querydict.pop('action_status', '')
-        params_querydict.pop('action_error', '')
-        context['params_string'] = params_querydict.urlencode()
-        context['action_maximum_size'] = setting_handler.get_setting(
-            'Identifiers',
-            'doi_manager_action_maximum_size',
+        params_querydict.pop("action_status", "")
+        params_querydict.pop("action_error", "")
+        context["params_string"] = params_querydict.urlencode()
+        context["action_maximum_size"] = setting_handler.get_setting(
+            "Identifiers",
+            "doi_manager_action_maximum_size",
             self.request.journal if self.request.journal else None,
         ).processed_value
-        context['order_by'] = params_querydict.get('order_by', self.get_order_by())
-        context['order_by_choices'] = self.get_order_by_choices()
+        context["order_by"] = params_querydict.get("order_by", self.get_order_by())
+        context["order_by_choices"] = self.get_order_by_choices()
         return context
 
     def get_queryset(self, params_querydict=None):
@@ -2530,17 +2854,17 @@ class GenericFacetedListView(generic.ListView):
             params_querydict = self.request.GET.copy()
 
         # Clear any previous action status and error
-        params_querydict.pop('action_status', '')
-        params_querydict.pop('action_error', False)
+        params_querydict.pop("action_status", "")
+        params_querydict.pop("action_error", False)
 
         # Clear order_by, since it is handled separately
-        params_querydict.pop('order_by', '')
+        params_querydict.pop("order_by", "")
 
         facets = self.facets
         self.queryset = super().get_queryset()
 
         for facet in facets.values():
-            self.queryset = self.queryset.annotate(**facet.get('annotations', {}))
+            self.queryset = self.queryset.annotate(**facet.get("annotations", {}))
         self.queryset = self.queryset.filter(self.get_journal_filter_query())
 
         # Validate params against form ahead of filtering
@@ -2554,7 +2878,7 @@ class GenericFacetedListView(generic.ListView):
             # The following line prevents the user from passing any parameters
             # other than those specified in the facets.
             if keyword in facets and value_list:
-                if facets[keyword]['type'] == 'search' and value_list[0]:
+                if facets[keyword]["type"] == "search" and value_list[0]:
                     self.queryset, _duplicates = search_model_admin(
                         self.request,
                         self.model,
@@ -2562,9 +2886,9 @@ class GenericFacetedListView(generic.ListView):
                         queryset=self.queryset,
                     )
                     predicates = []
-                elif facets[keyword]['type'] == 'boolean' and value_list[0] != '':
+                elif facets[keyword]["type"] == "boolean" and value_list[0] != "":
                     # All = None, Yes = 1, No = 0
-                    predicates = [(f'{keyword}__exact', value_list[0])]
+                    predicates = [(f"{keyword}__exact", value_list[0])]
                 elif value_list[0]:
                     predicates = [(keyword, value) for value in value_list]
                 else:
@@ -2585,7 +2909,7 @@ class GenericFacetedListView(generic.ListView):
             return queryset
 
     def get_order_by(self):
-        chosen_order_by = self.request.GET.get('order_by', '')
+        chosen_order_by = self.request.GET.get("order_by", "")
         order_by_choices = self.get_order_by_choices()
         if chosen_order_by in dict(order_by_choices):
             return chosen_order_by
@@ -2593,17 +2917,17 @@ class GenericFacetedListView(generic.ListView):
             try:
                 return order_by_choices[0][0]
             except IndexError:
-                return ''
+                return ""
 
     def get_order_by_choices(self):
-        """ Subclass must implement to allow ordering result set
+        """Subclass must implement to allow ordering result set
         :return: A list of 2-item tuples compatible with Django choices
             eg: [("choice_a", "Choice A"), ("choice_b", "Choice B")]
         """
         return []
 
     def get_facets(self):
-        """ Subclass must implement to declare available facets"""
+        """Subclass must implement to declare available facets"""
         facets = {}
         return self.filter_facets_if_journal(facets)
 
@@ -2619,15 +2943,14 @@ class GenericFacetedListView(generic.ListView):
         return []
 
     def post(self, request, *args, **kwargs):
-
-        params_string = request.POST.get('params_string')
+        params_string = request.POST.get("params_string")
         params_querydict = QueryDict(params_string, mutable=True)
 
         actions = self.get_actions()
         if actions:
             start = time.time()
 
-            action_status = ''
+            action_status = ""
             action_error = False
 
             querysets = []
@@ -2635,17 +2958,21 @@ class GenericFacetedListView(generic.ListView):
 
             if request.journal:
                 querysets.extend(self.split_up_queryset_if_needed(queryset))
-            elif hasattr(self.model, 'journal'):
+            elif hasattr(self.model, "journal"):
                 for journal in journal_models.Journal.objects.all():
                     journal_queryset = queryset.filter(journal=journal)
                     if journal_queryset:
-                        querysets.extend(self.split_up_queryset_if_needed(journal_queryset))
+                        querysets.extend(
+                            self.split_up_queryset_if_needed(journal_queryset)
+                        )
 
             for action in actions:
-                kwargs = {'start': start}
-                if action.get('name') in request.POST:
+                kwargs = {"start": start}
+                if action.get("name") in request.POST:
                     for queryset in querysets:
-                        action_status, action_error = action.get('action')(queryset, **kwargs)
+                        action_status, action_error = action.get("action")(
+                            queryset, **kwargs
+                        )
                         messages.add_message(
                             request,
                             messages.INFO if not action_error else messages.ERROR,
@@ -2653,27 +2980,27 @@ class GenericFacetedListView(generic.ListView):
                         )
 
         if params_string:
-            return redirect(f'{request.path}?{params_string}')
+            return redirect(f"{request.path}?{params_string}")
         else:
             return redirect(request.path)
 
     def split_up_queryset_if_needed(self, queryset):
         if self.action_queryset_chunk_size:
             n = self.action_queryset_chunk_size
-            querysets = [queryset[i:i + n] for i in range(0, queryset.count(), n)]
+            querysets = [queryset[i : i + n] for i in range(0, queryset.count(), n)]
             return querysets
         else:
             return [queryset]
 
     def get_journal_filter_query(self):
-        if self.request.journal and hasattr(self.model, 'journal'):
+        if self.request.journal and hasattr(self.model, "journal"):
             return Q(journal=self.request.journal)
         else:
             return Q()
 
     def filter_facets_if_journal(self, facets):
         if self.request.journal:
-            facets.pop('journal__pk', '')
+            facets.pop("journal__pk", "")
             return facets
         else:
             return facets
@@ -2685,60 +3012,59 @@ class FilteredArticlesListView(GenericFacetedListView):
     """
 
     model = submission_models.Article
-    template_name = 'core/manager/article_list.html'
+    template_name = "core/manager/article_list.html"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         raise DeprecationWarning(
-            'This view is deprecated. Use GenericFacetedListView instead.'
+            "This view is deprecated. Use GenericFacetedListView instead."
         )
 
 
-@method_decorator(editor_user_required, name='dispatch')
+@method_decorator(editor_user_required, name="dispatch")
 class BaseUserList(GenericFacetedListView):
-
     model = core_models.Account
-    template_name = 'core/manager/users/list.html'
+    template_name = "core/manager/users/list.html"
 
     def get_facets(self):
         facets = {
-            'q': {
-                'type': 'search',
-                'field_label': 'Search',
+            "q": {
+                "type": "search",
+                "field_label": "Search",
             },
-            'is_active': {
-                'type': 'boolean',
-                'field_label': 'Active status',
-                'true_label': 'Active',
-                'false_label': 'Inactive',
+            "is_active": {
+                "type": "boolean",
+                "field_label": "Active status",
+                "true_label": "Active",
+                "false_label": "Inactive",
             },
-            'is_staff': {
-                'type': 'boolean',
-                'field_label': 'Staff member',
-                'true_label': 'Staff',
-                'false_label': 'Not staff',
+            "is_staff": {
+                "type": "boolean",
+                "field_label": "Staff member",
+                "true_label": "Staff",
+                "false_label": "Not staff",
             },
-            'accountrole__role__pk': {
-                'type': 'foreign_key',
-                'model': models.Role,
-                'field_label': 'Role',
-                'choice_label_field': 'name',
+            "accountrole__role__pk": {
+                "type": "foreign_key",
+                "model": models.Role,
+                "field_label": "Role",
+                "choice_label_field": "name",
             },
-            'accountrole__journal__pk': {
-                'type': 'foreign_key',
-                'model': journal_models.Journal,
-                'field_label': 'Journal',
-                'choice_label_field': 'name',
+            "accountrole__journal__pk": {
+                "type": "foreign_key",
+                "model": journal_models.Journal,
+                "field_label": "Journal",
+                "choice_label_field": "name",
             },
         }
         return self.filter_facets_if_journal(facets)
 
     def get_order_by_choices(self):
         return [
-            ('-date_joined', _('Newest')),
-            ('date_joined', _('Oldest')),
-            ('last_name', _('Last name A-Z')),
-            ('-last_name', _('Last name Z-A')),
+            ("-date_joined", _("Newest")),
+            ("date_joined", _("Oldest")),
+            ("last_name", _("Last name A-Z")),
+            ("-last_name", _("Last name Z-A")),
         ]
 
     def get_journal_filter_query(self):
@@ -2749,8 +3075,8 @@ class BaseUserList(GenericFacetedListView):
 
     def filter_facets_if_journal(self, facets):
         if self.request.journal:
-            facets.pop('accountrole__journal__pk', '')
-            facets.pop('is_staff', '')
+            facets.pop("accountrole__journal__pk", "")
+            facets.pop("is_staff", "")
             return facets
         else:
             return facets
@@ -2758,47 +3084,289 @@ class BaseUserList(GenericFacetedListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        roles = models.Role.objects.exclude(slug='reader')
+        roles = models.Role.objects.exclude(slug="reader")
         if not self.request.user.is_staff:
-            roles = roles.exclude(slug='journal-manager')
-        context['roles'] = roles
+            roles = roles.exclude(slug="journal-manager")
+        context["roles"] = roles
 
-        accountrole_form = forms.AccountRoleForm({
-            'journal': self.request.journal,
-        })
+        accountrole_form = forms.AccountRoleForm(
+            {
+                "journal": self.request.journal,
+            }
+        )
         if self.request.journal:
-            accountrole_form.fields['journal'].widget.choices = [
+            accountrole_form.fields["journal"].widget.choices = [
                 (self.request.journal.pk, self.request.journal.name)
             ]
         else:
             journal_names = core_models.SettingValue.objects.filter(
-                setting__group__name='general',
-                setting__name='journal_name',
+                setting__group__name="general",
+                setting__name="journal_name",
                 journal__isnull=False,
-            ).order_by('value')
-            choices = [(None, '---------')]
+            ).order_by("value")
+            choices = [(None, "---------")]
             choices.extend([(n.journal.pk, n.value) for n in journal_names])
-            accountrole_form.fields['journal'].widget.choices = choices
-        context['accountrole_form'] = accountrole_form
+            accountrole_form.fields["journal"].widget.choices = choices
+        context["accountrole_form"] = accountrole_form
 
         return context
 
     def post(self, request, *args, **kwargs):
-
-        if 'remove_accountrole' in request.POST:
+        if "remove_accountrole" in request.POST:
             accountrole = core_models.AccountRole.objects.get(
-                pk=request.POST.get('remove_accountrole')
+                pk=request.POST.get("remove_accountrole")
             )
-            message = f'{accountrole.role} role removed ' \
-                      f'from {accountrole.user} in {accountrole.journal.name}.'
+            message = (
+                f"{accountrole.role} role removed "
+                f"from {accountrole.user} in {accountrole.journal.name}."
+            )
             accountrole.delete()
             messages.success(request, message)
-        elif 'role' in request.POST:
+        elif "role" in request.POST:
             form = forms.AccountRoleForm(request.POST)
             if form.is_valid():
                 accountrole = form.save()
-                message = f'{accountrole.role} role added ' \
-                          f'for {accountrole.user} in {accountrole.journal.name}.'
+                message = (
+                    f"{accountrole.role} role added "
+                    f"for {accountrole.user} in {accountrole.journal.name}."
+                )
                 messages.success(request, message)
 
         return super().post(request, *args, **kwargs)
+
+
+@method_decorator(login_required, name="dispatch")
+class OrganizationListView(GenericFacetedListView):
+    """
+    Allows a user to search for an organization to add
+    as one of their own affiliations.
+    """
+
+    model = core_models.Organization
+    template_name = "admin/core/organization_search.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["account"] = self.request.user
+        return context
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset(*args, **kwargs)
+        # Exclude user-created organizations from search results
+        return queryset.exclude(custom_label__isnull=False)
+
+    def get_facets(self):
+        return {
+            "q": {
+                "type": "search",
+                "field_label": "Search",
+            },
+        }
+
+
+@login_required
+def organization_name_create(request):
+    """
+    Allows a user to create a custom organization name
+    if they cannot find one in ROR data.
+    """
+
+    next_url = request.GET.get("next", "")
+    form = forms.OrganizationNameForm()
+
+    if request.method == "POST":
+        org_name = logic.create_organization_name(request)
+        if org_name:
+            return redirect(
+                logic.reverse_with_next(
+                    "core_affiliation_create",
+                    next_url,
+                    kwargs={
+                        "organization_id": org_name.custom_label_for.pk,
+                    },
+                )
+            )
+    context = {
+        "account": request.user,
+        "form": form,
+    }
+    template = "admin/core/organizationname_form.html"
+    return render(request, template, context)
+
+
+@login_required
+def organization_name_update(request, organization_name_id):
+    """
+    Allows a user to update a custom organization name
+    if it is tied to their account via an affiliation.
+    """
+    next_url = request.GET.get("next", "")
+    organization_name = get_object_or_404(
+        core_models.OrganizationName,
+        pk=organization_name_id,
+        custom_label_for__controlledaffiliation__account=request.user,
+    )
+    form = forms.OrganizationNameForm(instance=organization_name)
+
+    if request.method == "POST":
+        form = forms.OrganizationNameForm(
+            request.POST,
+            instance=organization_name,
+        )
+        if form.is_valid():
+            organization = form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Custom organization updated: %(organization)s")
+                % {"organization": organization},
+            )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_edit_profile"))
+
+    template = "admin/core/organizationname_form.html"
+    context = {
+        "account": request.user,
+        "form": form,
+    }
+    return render(request, template, context)
+
+
+@login_required
+def affiliation_create(request, organization_id):
+    """
+    Allows a user to create a new affiliation for themselves.
+    """
+
+    next_url = request.GET.get("next", "")
+    organization = get_object_or_404(
+        core_models.Organization,
+        pk=organization_id,
+    )
+    user_has_affils = core_models.ControlledAffiliation.objects.filter(
+        account=request.user,
+    ).exists()
+    form = forms.AccountAffiliationForm(
+        account=request.user,
+        organization=organization,
+        initial={
+            "is_primary": not user_has_affils,
+        },
+    )
+
+    if request.method == "POST":
+        form = forms.AccountAffiliationForm(
+            request.POST,
+            account=request.user,
+            organization=organization,
+        )
+        if form.is_valid():
+            affiliation = form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Affiliation created: %(affiliation)s")
+                % {"affiliation": affiliation},
+            )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_edit_profile"))
+
+    template = "admin/core/affiliation_form.html"
+    context = {
+        "account": request.user,
+        "form": form,
+        "organization": organization,
+    }
+    return render(request, template, context)
+
+
+@login_required
+def affiliation_update(request, affiliation_id):
+    """
+    Allows a user to update one of their own affiliations.
+    """
+    next_url = request.GET.get("next", "")
+    affiliation = get_object_or_404(
+        core_models.ControlledAffiliation,
+        pk=affiliation_id,
+        account=request.user,
+    )
+
+    form = forms.AccountAffiliationForm(
+        instance=affiliation,
+        account=request.user,
+        organization=affiliation.organization,
+    )
+
+    if request.method == "POST":
+        form = forms.AccountAffiliationForm(
+            request.POST,
+            instance=affiliation,
+            account=request.user,
+            organization=affiliation.organization,
+        )
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Affiliation updated: %(affiliation)s")
+                % {"affiliation": affiliation},
+            )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_edit_profile"))
+
+    template = "admin/core/affiliation_form.html"
+    context = {
+        "account": request.user,
+        "form": form,
+        "affiliation": affiliation,
+        "organization": affiliation.organization,
+    }
+    return render(request, template, context)
+
+
+@login_required
+def affiliation_delete(request, affiliation_id):
+    """
+    Allows a user to delete one of their own affiliations.
+    """
+
+    next_url = request.GET.get("next", "")
+    affiliation = get_object_or_404(
+        core_models.ControlledAffiliation,
+        pk=affiliation_id,
+        account=request.user,
+    )
+    form = forms.ConfirmDeleteForm()
+
+    if request.method == "POST":
+        form = forms.ConfirmDeleteForm(request.POST)
+        if form.is_valid():
+            affiliation.delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Affiliation removed: %(affiliation)s")
+                % {"affiliation": affiliation},
+            )
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect(reverse("core_edit_profile"))
+
+    template = "admin/core/affiliation_confirm_remove.html"
+    context = {
+        "account": request.user,
+        "form": form,
+        "affiliation": affiliation,
+        "organization": affiliation.organization,
+        "thing_to_delete": affiliation.organization.name,
+    }
+    return render(request, template, context)

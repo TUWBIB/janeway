@@ -5,35 +5,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '9001_tuw_contact_detected_language_contact_is_spam'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='contacts',
-            name='name_es',
+            model_name="contacts",
+            name="name_es",
             field=models.CharField(max_length=300, null=True),
         ),
         migrations.AddField(
-            model_name='contacts',
-            name='role_es',
+            model_name="contacts",
+            name="role_es",
             field=models.CharField(max_length=200, null=True),
         ),
         migrations.AddField(
-            model_name='editorialgroup',
-            name='description_es',
+            model_name="editorialgroup",
+            name="description_es",
             field=core.model_utils.JanewayBleachField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='editorialgroup',
-            name='name_es',
+            model_name="editorialgroup",
+            name="name_es",
             field=models.CharField(max_length=500, null=True),
         ),
         migrations.AddField(
-            model_name='settingvalue',
-            name='value_es',
+            model_name="settingvalue",
+            name="value_es",
             field=models.TextField(blank=True, null=True),
         ),
     ]

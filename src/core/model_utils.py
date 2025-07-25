@@ -1,33 +1,38 @@
 """
 Utilities for designing and working with models
 """
+
 __copyright__ = "Copyright 2018 Birkbeck, University of London"
 __author__ = "Birkbeck Centre for Technology and Publishing"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 from contextlib import contextmanager
+from hashlib import md5
 from io import BytesIO
 import re
 import sys
+import warnings
 from bleach import clean
 
 from django import forms
 from django.apps import apps
 from django.contrib import admin
+from django.core.paginator import EmptyPage, Paginator
 from django.contrib.postgres.lookups import SearchLookup as PGSearchLookup
 from django.contrib.postgres.search import (
     SearchVector as DjangoSearchVector,
     SearchVectorField,
 )
 from django.core import validators
-from django.core.exceptions import ValidationError
-from django.db import(
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.db import (
     connection,
     IntegrityError,
     models,
     ProgrammingError,
     transaction,
 )
+from django.db.backends.utils import truncate_name
 from django.db.models import fields, Q, Manager
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.functions import Coalesce, Greatest
@@ -44,6 +49,8 @@ from django.utils.functional import cached_property
 from django.utils import translation, timezone
 from django.conf import settings
 from django.db.models.query import QuerySet
+from django.shortcuts import reverse
+
 from django_bleach.models import BleachField
 from django_bleach.forms import BleachField as BleachFormField
 
@@ -64,13 +71,14 @@ logger = get_logger(__name__)
 
 class AbstractSiteModel(models.Model):
     """Adds site-like functionality to any model"""
+
     SCHEMES = {
         True: "https",
         False: "http",
     }
+    AUTH_SUCCESS_URL = "website_index"
 
-    domain = models.CharField(
-        max_length=255, unique=True, blank=True, null=True)
+    domain = models.CharField(max_length=255, unique=True, blank=True, null=True)
     is_secure = models.BooleanField(
         default=False,
         help_text="If the site should redirect to HTTPS, mark this.",
@@ -81,7 +89,7 @@ class AbstractSiteModel(models.Model):
 
     @classmethod
     def get_by_request(cls, request):
-        """ Returns the site object relevant for the given request
+        """Returns the site object relevant for the given request
         :param request: A Django Request object
         :return: The site object and the path under which the object was matched
         """
@@ -105,13 +113,14 @@ class AbstractSiteModel(models.Model):
             obj = cls.objects.get(domain=domain)
         return obj
 
-    def site_url(self, path=None, query=''):
+    def site_url(self, path="", query=""):
         # This is here to avoid circular imports
         from utils import logic
+
         return logic.build_url(
             netloc=self.domain,
             scheme=self._get_scheme(),
-            path=path or "",
+            path=path,
             query=query,
         )
 
@@ -121,9 +130,16 @@ class AbstractSiteModel(models.Model):
             scheme = self.SCHEMES[False]
         return scheme
 
+    def auth_success_url(self, next_url=""):
+        """
+        Gets the standard redirect url for a successful authentication.
+        """
+        return next_url or reverse(self.AUTH_SUCCESS_URL)
 
-class PGCaseInsensitivedMixin():
+
+class PGCaseInsensitivedMixin:
     """Activates the citext postgres extension for the given field"""
+
     def db_type(self, connection):
         if connection.vendor == "postgresql":
             return "citext"
@@ -138,7 +154,7 @@ class PGCaseInsensitiveEmailField(PGCaseInsensitivedMixin, models.EmailField):
 
 
 def merge_models(src, dest):
-    """ Moves relations from `src` to `dest` and deletes src
+    """Moves relations from `src` to `dest` and deletes src
     :param src: Model instance to be removed
     :param dest: Model instance into which src will be merged
     """
@@ -180,10 +196,9 @@ def merge_models(src, dest):
 
 
 class JanewayMultilingualQuerySet(MultilingualQuerySet):
-
     def check_kwargs(self, **kwargs):
         for k, v in kwargs.items():
-            if k.endswith('_{}'.format(settings.LANGUAGE_CODE)):
+            if k.endswith("_{}".format(settings.LANGUAGE_CODE)):
                 return False
         return True
 
@@ -191,8 +206,8 @@ class JanewayMultilingualQuerySet(MultilingualQuerySet):
         lang = translation.get_language()
         if lang and lang != settings.LANGUAGE_CODE and self.check_kwargs(**kwargs):
             raise Exception(
-                'When creating a new translation you must provide'
-                ' a translation for the base language, {}'.format(
+                "When creating a new translation you must provide"
+                " a translation for the base language, {}".format(
                     settings.LANGUAGE_CODE
                 )
             )
@@ -216,7 +231,7 @@ class JanewayMultilingualManager(MultilingualManager):
 
 
 class M2MOrderedThroughField(ManyToManyField):
-    """ Orders m2m related objects by their 'through' Model
+    """Orders m2m related objects by their 'through' Model
 
     When a 'through' model declares an ordering in its Meta
     options, it is ignored by Django's default manager.
@@ -224,28 +239,32 @@ class M2MOrderedThroughField(ManyToManyField):
     of the manager so that if the through model declares
     an ordering logic, it will be used in the join query
     """
+
     def contribute_to_class(self, cls, *args, **kwargs):
         super_return = super().contribute_to_class(cls, *args, **kwargs)
-        setattr(cls, self.name, M2MOrderedThroughDescriptor(self.remote_field, reverse=False))
+        setattr(
+            cls,
+            self.name,
+            M2MOrderedThroughDescriptor(self.remote_field, reverse=False),
+        )
         return super_return
 
 
 class M2MOrderedThroughDescriptor(ManyToManyDescriptor):
-
     @cached_property
     def related_manager_cls(self):
         related_model = self.rel.related_model if self.reverse else self.rel.model
         related_manager = create_forward_many_to_many_manager(
-                        related_model._default_manager.__class__,
-                        self.rel,
-                        reverse=self.reverse,
+            related_model._default_manager.__class__,
+            self.rel,
+            reverse=self.reverse,
         )
         return create_m2m_ordered_through_manager(related_manager, self.rel)
 
 
 @contextmanager
 def allow_m2m_operation(through):
-    """ Enables m2m operations on through models
+    """Enables m2m operations on through models
 
     This is done by flagging the model as auto_created dynamically. It only
     works if all your extra fields on the through model have defaults declared.
@@ -271,7 +290,7 @@ def create_m2m_ordered_through_manager(related_manager, rel):
             return queryset.extra(order_by=[related_name])
 
         def get_queryset(self, *args, **kwargs):
-            """ Here is where we can finally apply our ordering logic"""
+            """Here is where we can finally apply our ordering logic"""
             qs = super().get_queryset(*args, **kwargs)
             return self._apply_ordering(qs)
 
@@ -287,13 +306,12 @@ def create_m2m_ordered_through_manager(related_manager, rel):
             with allow_m2m_operation(rel.through):
                 return super().clear()
 
-
     return M2MOrderedThroughManager
 
 
 class SVGImageField(models.ImageField):
     def formfield(self, **kwargs):
-        defaults = {'form_class': SVGImageFieldForm}
+        defaults = {"form_class": SVGImageFieldForm}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -316,13 +334,13 @@ class SVGImageFieldForm(forms.ImageField):
             return None
 
         # Data can be a readable object, a templfile or a filepath
-        if hasattr(data, 'temporary_file_path'):
+        if hasattr(data, "temporary_file_path"):
             file_obj = data.temporary_file_path()
         else:
-            if hasattr(data, 'read'):
+            if hasattr(data, "read"):
                 file_obj = BytesIO(data.read())
             else:
-                file_obj = BytesIO(data['content'])
+                file_obj = BytesIO(data["content"])
 
         try:
             # load() could spot a truncated JPEG, but it loads the entire
@@ -337,10 +355,10 @@ class SVGImageFieldForm(forms.ImageField):
             # Handle SVG here
             if not is_svg(file_obj):
                 raise ValidationError(
-                    self.error_messages['invalid_image'],
-                    code='invalid_image',
+                    self.error_messages["invalid_image"],
+                    code="invalid_image",
                 ).with_traceback(sys.exc_info()[2])
-        if hasattr(super_result, 'seek') and callable(super_result.seek):
+        if hasattr(super_result, "seek") and callable(super_result.seek):
             super_result.seek(0)
         return super_result
 
@@ -352,17 +370,17 @@ def is_svg(f):
     f.seek(0)
     tag = None
     try:
-        for event, el in et.iterparse(f, ('start',)):
+        for event, el in et.iterparse(f, ("start",)):
             tag = el.tag
             break
     except et.ParseError:
         pass
-    return tag == '{http://www.w3.org/2000/svg}svg'
+    return tag == "{http://www.w3.org/2000/svg}svg"
 
 
 class LastModifiedModelQuerySet(models.query.QuerySet):
     def update(self, *args, **kwargs):
-        kwargs['last_modified'] = timezone.now()
+        kwargs["last_modified"] = timezone.now()
         super().update(*args, **kwargs)
 
 
@@ -377,10 +395,7 @@ class AbstractLastModifiedModel(models.Model):
     _LAST_MODIFIED_FIELDS_MAP = {}
     _LAST_MODIFIED_ACCESSORS = {}
 
-    last_modified = models.DateTimeField(
-        auto_now=True,
-        editable=True
-    )
+    last_modified = models.DateTimeField(auto_now=True, editable=True)
     objects = LastModifiedModelManager()
 
     class Meta:
@@ -392,7 +407,6 @@ class AbstractLastModifiedModel(models.Model):
 
     @classmethod
     def get_last_modified_field_map(cls, visited_fields=None):
-
         # Early return of cached calculation
         if cls._LAST_MODIFIED_FIELDS_MAP:
             return cls._LAST_MODIFIED_FIELDS_MAP
@@ -404,11 +418,8 @@ class AbstractLastModifiedModel(models.Model):
         local_fields = cls._meta.get_fields()
         for field in local_fields:
             if (
-                (field.many_to_many
-                or field.one_to_many
-                or field.many_to_one)
-                and field not in visited_fields
-            ):
+                field.many_to_many or field.one_to_many or field.many_to_one
+            ) and field not in visited_fields:
                 model = field.remote_field.model
                 if issubclass(model, AbstractLastModifiedModel):
                     # Avoid infinite recursion when models are doubly linked
@@ -437,7 +448,7 @@ class AbstractLastModifiedModel(models.Model):
             # sqlite's MAX returns NULL if any value is NULL
             Coalesce(
                 f"{field}__last_modified",
-                timezone.make_aware(timezone.datetime.fromtimestamp(0))
+                timezone.make_aware(timezone.datetime.fromtimestamp(0)),
             )
             for field in field_map.keys()
         )
@@ -445,9 +456,8 @@ class AbstractLastModifiedModel(models.Model):
         cls._LAST_MODIFIED_ACCESSORS = accessors
         return cls.get_last_modified_accessors()
 
-
     def best_last_modified_date(self, visited_nodes=None):
-        """ Determines the last modified date considering all related objects
+        """Determines the last modified date considering all related objects
         Any relationship which is an instance of this class will have its
         `last_modified` date considered for calculating the last_modified date
         for the instance from which this method is called
@@ -469,42 +479,43 @@ class AbstractLastModifiedModel(models.Model):
 
 
 class SearchLookup(PGSearchLookup):
-    """ A Search lookup that works across multiple databases.
+    """A Search lookup that works across multiple databases.
     Django dropped support for the search lookup when using MySQLin 1.10
     This lookup attempts to restore some of that behaviour so that MySQL users
     can still benefit of some form of full text search. For any other vendors,
     the search performs a simple LIKE match. For Postgres, the behaviour from
     contrib.postgres.lookups.SearchLookup is preserved
     """
-    lookup_name = 'search'
+
+    lookup_name = "search"
 
     def as_mysql(self, compiler, connection):
-       lhs, lhs_params = self.process_lhs(compiler, connection)
-       rhs, rhs_params = self.process_rhs(compiler, connection)
-       params = lhs_params + rhs_params
-       return 'MATCH (%s) AGAINST (%s IN BOOLEAN MODE)' % (lhs, rhs), params
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+        rhs, rhs_params = self.process_rhs(compiler, connection)
+        params = lhs_params + rhs_params
+        return "MATCH (%s) AGAINST (%s IN BOOLEAN MODE)" % (lhs, rhs), params
 
     def as_postgresql(self, compiler, connection):
         return super().as_sql(compiler, connection)
-
 
     def as_sql(self, compiler, connection):
         lhs, lhs_params = self.process_lhs(compiler, connection)
         rhs, rhs_params = self.process_rhs(compiler, connection)
         params = lhs_params + rhs_params
-        return 'MATCH (%s) AGAINST (%s IN BOOLEAN MODE)' % (lhs, rhs), params
+        return "MATCH (%s) AGAINST (%s IN BOOLEAN MODE)" % (lhs, rhs), params
 
     def process_lhs(self, compiler, connection):
-        if connection.vendor != 'postgresql':
+        if connection.vendor != "postgresql":
             return models.Lookup.process_lhs(self, compiler, connection)
         else:
             return super().process_lhs(compiler, connection)
 
     def process_rhs(self, compiler, connection):
-        if connection.vendor != 'postgresql':
+        if connection.vendor != "postgresql":
             return models.Lookup.process_rhs(self, compiler, connection)
         else:
             return super().process_rhs(compiler, connection)
+
 
 SearchVectorField.register_lookup(SearchLookup)
 models.CharField.register_lookup(SearchLookup)
@@ -522,16 +533,13 @@ class BaseSearchManagerMixin(Manager):
             return self._search(search_term, search_filters, sort, site)
 
     def _search(self, search_term, search_filters, sort=None, site=None):
-        """ This is a copy of search from journal.views.old_search with filters
-        """
+        """This is a copy of search from journal.views.old_search with filters"""
         articles = self.get_queryset()
         if search_term:
             escaped = re.escape(search_term)
             split_term = [re.escape(word) for word in search_term.split(" ")]
             split_term.append(escaped)
-            search_regex = "^({})$".format(
-                "|".join({name for name in split_term})
-            )
+            search_regex = "^({})$".format("|".join({name for name in split_term}))
             q_object = Q()
             if search_filters.get("title"):
                 q_object = q_object | Q(title__icontains=search_term)
@@ -541,8 +549,8 @@ class BaseSearchManagerMixin(Manager):
                 q_object = q_object | Q(keywords__word=search_term)
             if search_filters.get("authors"):
                 q_object = q_object | (
-                    Q(frozenauthor__first_name__iregex=search_regex) |
-                    Q(frozenauthor__last_name__iregex=search_regex)
+                    Q(frozenauthor__first_name__iregex=search_regex)
+                    | Q(frozenauthor__last_name__iregex=search_regex)
                 )
             articles = articles.filter(q_object)
             if site:
@@ -560,8 +568,9 @@ class BaseSearchManagerMixin(Manager):
     def get_search_lookups(self):
         return self.search_lookups
 
+
 class SearchVector(DjangoSearchVector):
-    """ An Extension of SearchVector that works with SearchVectorField
+    """An Extension of SearchVector that works with SearchVectorField
 
     Django's implementation assumes that the `to_tsvector` function needs
     to be called with the provided column, except that when the field is already
@@ -571,15 +580,16 @@ class SearchVector(DjangoSearchVector):
     override under `set_source_expressions`
 
     """
+
     def set_source_expressions(self, _):
-        """ Ignore Django's implementation
+        """Ignore Django's implementation
         We don't require the expressions to be re-casted during the as_sql call
         """
         pass
 
     # Override template to ignore function
     function = None
-    template = '%(expressions)s'
+    template = "%(expressions)s"
 
 
 def search_model_admin(request, model, q=None, queryset=None):
@@ -593,7 +603,7 @@ def search_model_admin(request, model, q=None, queryset=None):
     :param queryset: a pre-existing queryset to filter by the search term
     """
     if not q:
-        q = request.POST['q'] if request.POST else request.GET['q']
+        q = request.POST["q"] if request.POST else request.GET["q"]
     if not queryset:
         queryset = model.objects.all()
     registered_admin = admin.site._registry[model]
@@ -601,7 +611,7 @@ def search_model_admin(request, model, q=None, queryset=None):
 
 
 class JanewayBleachField(BleachField):
-    """ An override of BleachField to avoid casting SafeString from db
+    """An override of BleachField to avoid casting SafeString from db
     Bleachfield automatically casts the default return type (string) into
     a SafeString, which is okay when using the value for HTML rendering but
     not when using the value elsewhere (XML encoding)
@@ -649,18 +659,18 @@ class MiniHTMLFormField(JanewayBleachFormField):
         # they will be ignored by the Django Bleach implementation of
         # BleachField.formfield
         # https://github.com/marksweb/django-bleach/blob/d675d09423ddb440b4c83c8a82bd8b853f4603c7/django_bleach/models.py#L42-L61
-        kwargs['allowed_tags'] = get_allowed_html_tags_minimal()
-        kwargs['allowed_attributes'] = get_allowed_attributes_minimal()
-        kwargs['widget'] = TinyMCE(
+        kwargs["allowed_tags"] = get_allowed_html_tags_minimal()
+        kwargs["allowed_attributes"] = get_allowed_attributes_minimal()
+        kwargs["widget"] = TinyMCE(
             mce_attrs={
-                'plugins': 'help code',
-                'menubar': '',
-                'forced_root_block': 'div',
-                'toolbar': 'help removeformat | undo redo | ' \
-                           'bold italic superscript subscript',
-                'height': '8rem',
-                'resize': True,
-                'elementpath': False,
+                "plugins": "help code",
+                "menubar": "",
+                "forced_root_block": "div",
+                "toolbar": "help removeformat | undo redo | "
+                "bold italic superscript subscript",
+                "height": "8rem",
+                "resize": True,
+                "elementpath": False,
             }
         )
         super().__init__(*args, **kwargs)
@@ -673,7 +683,7 @@ class JanewayBleachCharField(JanewayBleachField):
     """
 
     def formfield(self, *args, **kwargs):
-        defaults = {'form_class': MiniHTMLFormField}
+        defaults = {"form_class": MiniHTMLFormField}
         defaults.update(kwargs)
         return super().formfield(*args, **defaults)
 
@@ -714,17 +724,15 @@ class DynamicChoiceField(models.CharField):
         except ValidationError as e:
             # If the raised exception is for invalid choice we check if the
             # choice is in dynamic choices.
-            if e.code == 'invalid_choice':
-                potential_values = set(
-                    item[0] for item in self.dynamic_choices
-                )
+            if e.code == "invalid_choice":
+                potential_values = set(item[0] for item in self.dynamic_choices)
                 if value not in potential_values:
                     raise
 
 
 class DateTimePickerInput(forms.DateTimeInput):
-    format_key = 'DATETIME_INPUT_FORMATS'
-    template_name = 'admin/core/widgets/datetimepicker.html'
+    format_key = "DATETIME_INPUT_FORMATS"
+    template_name = "admin/core/widgets/datetimepicker.html"
 
 
 class DateTimePickerFormField(forms.DateTimeField):
@@ -733,9 +741,182 @@ class DateTimePickerFormField(forms.DateTimeField):
 
 class DateTimePickerModelField(models.DateTimeField):
     def formfield(self, **kwargs):
-        kwargs['form_class'] = DateTimePickerFormField
+        kwargs["form_class"] = DateTimePickerFormField
         return super().formfield(**kwargs)
+
 
 @property
 def NotImplementedField(self):
     raise NotImplementedError
+
+
+class SafePaginator(Paginator):
+    """
+    A paginator for avoiding an uncaught exception
+    caused by passing a page parameter that is out of range.
+    """
+
+    def validate_number(self, number):
+        try:
+            return super().validate_number(number)
+        except EmptyPage:
+            if number > 1:
+                return self.num_pages
+            else:
+                raise
+
+
+def check_exclusive_fields_constraint(model_label, fields, blank=True):
+    """
+    Checks that only one of several exclusive fields is populated.
+    For example, CreditRecord has author, frozen_author, and preprint_author,
+    but only one should be populated.
+    If blank=True, allows for all fields to be blank.
+    Set this as one of the constraints in a model's Meta.constraints.
+    :param model_label: snake-case name of model like 'credit_record'
+    :param fields: iterable of field names that should be exclusive
+    """
+    main_query = models.Q()
+
+    # Do main validation
+    for this_field in fields:
+        query_piece = models.Q()
+        query_piece &= Q((f"{this_field}__isnull", False))
+        other_fields = [field for field in fields if field != this_field]
+        for other_field in other_fields:
+            query_piece &= Q((f"{other_field}__isnull", True))
+        main_query |= Q(query_piece)
+
+    # Allow for all fields to be blank
+    if blank == True:
+        query_piece = models.Q()
+        for field in fields:
+            query_piece &= models.Q((f"{field}__isnull", True))
+            main_query |= query_piece
+    fields_str = "_".join(list(fields))
+
+    long_name = f"exclusive_fields_{model_label}_{fields_str}"
+    # Our supported databases have a max length of 64 chars for constraints
+    name = truncate_name(long_name, length=64)
+    constraint = models.CheckConstraint(
+        check=main_query,
+        name=name,
+    )
+    return constraint
+
+
+# Regex for use by AffiliationCompatibleQueryset
+AFFILIATION_COMPATIBLE_PATTERNS = (
+    (
+        # Account and FrozenAuthor had 'institution'
+        re.compile(r"^institution"),
+        "controlledaffiliation__organization__labels__value",
+    ),
+    (
+        # PreprintAuthor had 'affiliation'
+        re.compile(r"^affiliation"),
+        "controlledaffiliation__organization__labels__value",
+    ),
+    (
+        # Account and FrozenAuthor had 'department'
+        re.compile(r"^department"),
+        "controlledaffiliation__department",
+    ),
+    (
+        # Account and FrozenAuthor had 'country'
+        re.compile(r"^country"),
+        "controlledaffiliation__organization__locations__country",
+    ),
+)
+
+
+class AffiliationCompatibleQueryset(models.query.QuerySet):
+    """
+    The Account, FrozenAuthor, PreprintAuthor models used to have
+    fields like 'institution', 'affiliation', 'department', and 'country'.
+    When we migrated this data to the ControlledAffiliation model, we preserved
+    the old fields via this queryset class. It maps the old lookups to
+    new ones to provide what the caller expects on most single-instance methods.
+    Bulk methods are not supported.
+    """
+
+    # The field name on ControlledAffiliation that refers to this queryset's model
+    AFFILIATION_RELATED_NAME = NotImplementedField
+
+    def _warn_old_lookups_used(self, old_lookups):
+        object_name = self.model._meta.object_name
+        warnings.warn(
+            f"Deprecated fields were called on {object_name}: {old_lookups}",
+            DeprecationWarning,
+        )
+
+    def _pop_old_affiliation_lookups(self, kwargs):
+        """
+        Pops old affiliation-related lookups off queryset kwargs so they
+        can be handled separately in custom create() and update() methods.
+        """
+        old_kwargs = {
+            "institution": kwargs.pop("institution", "")
+            or kwargs.pop("affiliation", ""),
+            "department": kwargs.pop("department", ""),
+            "country": kwargs.pop("country", ""),
+        }
+        # Filter out empty fields
+        used_kwargs = {k: v for k, v in old_kwargs.items() if v}
+        if used_kwargs:
+            self._warn_old_lookups_used(list(used_kwargs.keys()))
+        return used_kwargs
+
+    def _remap_old_affiliation_lookups(self, kwargs):
+        """
+        Checks for old affiliation-related field names on queryset lookups
+        and remaps them to new names for get() and filter() methods.
+        """
+        old_lookups = []
+        new_kwargs = {}
+        for lookup in kwargs.keys():
+            for prog, replacement in AFFILIATION_COMPATIBLE_PATTERNS:
+                if prog.match(lookup):
+                    old_lookups.append(lookup)
+                    new_lookup = prog.sub(replacement, lookup)
+                    new_kwargs[new_lookup] = kwargs[lookup]
+        for lookup in old_lookups:
+            kwargs.pop(lookup)
+        if old_lookups:
+            self._warn_old_lookups_used(old_lookups)
+        kwargs.update(new_kwargs)
+        return kwargs
+
+    def _create_affiliation(self, affil_kwargs, obj):
+        affil_kwargs[self.AFFILIATION_RELATED_NAME] = obj
+        many_to_one = self.model._meta.fields_map["controlledaffiliation"]
+        ControlledAffiliation = many_to_one.related_model
+        affiliation, _ = ControlledAffiliation.get_or_create_without_ror(**affil_kwargs)
+        return affiliation
+
+    def get(self, *args, **kwargs):
+        kwargs = self._remap_old_affiliation_lookups(kwargs)
+        return super().get(*args, **kwargs)
+
+    def create(self, **kwargs):
+        affil_kwargs = self._pop_old_affiliation_lookups(kwargs)
+        obj = super().create(**kwargs)
+        if affil_kwargs:
+            self._create_affiliation(affil_kwargs, obj)
+        return obj
+
+    def filter(self, *args, **kwargs):
+        kwargs = self._remap_old_affiliation_lookups(kwargs)
+        return super().filter(*args, **kwargs)
+
+
+def generate_dummy_email(details):
+    """
+    :param details: a dict whose keys and values will serve as the hash seed
+    :type details: dict
+    """
+    seed = "".join([str(key) + str(val) for key, val in details.items()])
+    hashed = md5(str(seed).encode("utf-8")).hexdigest()
+    # Avoid validation bug where two @@ symbols are used in the email
+    domain = settings.DUMMY_EMAIL_DOMAIN.replace("@", "")
+    return "{0}@{1}".format(hashed, domain)

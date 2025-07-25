@@ -15,7 +15,7 @@ Unlike traditional Django applications Janeway has two settings files, they are 
 
 Global Settings
 ---------------
-The global settings file is created by the Janeway team and is managed through version control. Generally speak you should not need to change anything in this file as you can use your local `settings.py` file to override variables.
+The global settings file is created by the Janeway team and is managed through version control. Generally speaking you should not need to change anything in this file as you can use your local `settings.py` file to override variables.
 
 Local Settings
 --------------
@@ -24,7 +24,7 @@ This file is usually created during the setup process and can be based on the pr
 - DEBUG
   - Should be set to False in any environment where an external user can access the install.
 - URL_CONFIG
-  - Set to either 'domain' or 'path' dependind on whether the primary way to access sites is via individual domains for each or path based urls eg. journal.press.com or press.com/journal/.
+  - Set to either 'domain' or 'path' dependind on whether the primary way to access sites is via individual domains for each or path based urls eg. journal.press.com or press.com/journal/. Sites can always be accessed by either their path URL or their domain URL, but this setting helps you declare what is the canonical URL (the URL used for rendering links to the site in emails or cross-site links. In most production environments, you want to use domain mode, as sites without a domain will still work under their path mode equivalent. Similarly, in development, path mode is useful so you can more easily work with journals with a domain set using path mode.
 - DATABASES
   - You can set the database connection details for the install.
 - CAPTCHA_TYPE: Can be one of three different variables: 'simple_math', 'recaptcha' or 'hcaptcha'.
@@ -122,7 +122,7 @@ Theming
 --------
 Janeway includes three core themes by default:
 
-- OLH (Foudation)
+- OLH (Foundation)
 - material (Materialize)
 - clean (Bootstrap)
 
@@ -191,10 +191,13 @@ text field and text editor for each kind of text.
 There are four main field types, and there is a
 Janeway setting type for each one (`core.models.Setting`).
 
-| Display model | HTML            | No HTML           |
-| ------------- | --------------- | ----------------- |
-| Block         | Rich Text Field | Plain Text Field  |
-| Inline        | Mini HTML Field | Character Field   |
+=============   ===============   ================
+Display model   HTML              No HTML
+=============   ===============   ================
+Block           Rich Text Field   Plain Text Field
+Inline          Mini HTML Field   Character Field
+=============   ===============   ================
+
 
 Rich Text Fields
 ~~~~~~~~~~~~~~~~

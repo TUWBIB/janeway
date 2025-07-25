@@ -6,30 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('journal', '9000_tuw_add_issue_str_year_vlid'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='journal',
-            name='contact_info_cy',
-            field=models.TextField(blank=True, null=True, verbose_name='Contact Information'),
+            model_name="journal",
+            name="contact_info_cy",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Contact Information"
+            ),
         ),
         migrations.AddField(
-            model_name='journal',
-            name='contact_info_de',
-            field=models.TextField(blank=True, null=True, verbose_name='Contact Information'),
+            model_name="journal",
+            name="contact_info_de",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Contact Information"
+            ),
         ),
         migrations.AddField(
-            model_name='journal',
-            name='contact_info_en',
-            field=models.TextField(blank=True, null=True, verbose_name='Contact Information'),
+            model_name="journal",
+            name="contact_info_en",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Contact Information"
+            ),
         ),
         migrations.AddField(
-            model_name='journal',
-            name='contact_info_fr',
-            field=models.TextField(blank=True, null=True, verbose_name='Contact Information'),
+            model_name="journal",
+            name="contact_info_fr",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Contact Information"
+            ),
         ),
     ]

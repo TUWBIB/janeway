@@ -14,4 +14,4 @@ class ArticleTranslationOptions(TranslationOptions):
     fields = ('title', 'subtitle', 'abstract')
 @register(models.SubmissionConfiguration)
 class ArticleTranslationOptions(TranslationOptions):
-    fields = ('submission_file_text',)
+    fields = ("submission_file_text",)

@@ -5,13 +5,13 @@ bs4==0.0.1
 colorlog==3.1.4
 chardet==3.0.4
 crossrefapi==1.5.0
-Django==4.2.16
-django-bleach==3.0.1
+Django==4.2.22
+django-bleach==3.1.0
 django-bootstrap4==23.2
 -e git+https://github.com/BirkbeckCTP/django-foundation-form.git@284fc5f08e58d8655c7301eddb49f920fda516d2#egg=foundationform
 django-countries[pyuca]==7.5.1
 -e git+https://github.com/openlibhums/django-materializecss-form.git@be094ec283299ee8fd0a1dfe33e73a609fb2f680#egg=django-materializecss-form
-django-debug-toolbar==3.7.0
+django-debug-toolbar==5.1.0
 django-hCaptcha==0.2.0
 django-hijack==3.2.1
 -e git+https://github.com/BirkbeckCTP/django-mailgun.git@4f01799e01219e83d658f02c876764bf2260337e#egg=django_mailgun
@@ -30,6 +30,8 @@ geoip2==4.8.0
 html2text==2017.10.4
 idna==2.7
 ipaddress==1.0.16
+iso639-lang==2.6
+django-ipware==7.0.1
 more-itertools==10.1.0
 jsmin==3.0.1
 kitchen==1.2.4
@@ -52,8 +54,8 @@ python-crontab==2.2.3
 python-dateutil==2.8.1
 python-docx==0.8.11
 python-magic==0.4.13
-pytz==2024.2
-requests==2.31.0
+pytz==2025.2
+requests==2.32.4
 six==1.16.0
 sqlparse==0.4.4
 swapper==1.3.0

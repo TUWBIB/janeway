@@ -1,4 +1,5 @@
 import bleach
+
 from django.forms import (
     CharField,
     CheckboxInput,
@@ -6,10 +7,12 @@ from django.forms import (
     DateInput,
     HiddenInput,
     Form,
+    RadioSelect,
 )
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
 
 from modeltranslation import forms as mt_forms, translator
 from captcha.fields import CaptchaField
@@ -17,6 +20,7 @@ from simplemathcaptcha.fields import MathCaptchaField
 from hcaptcha.fields import hCaptchaField
 
 from submission import models as submission_models
+from utils.orcid import COMPILED_ORCID_REGEX
 
 
 ENTITIES_MAP = (("&amp;", "&"), ("&gt;", ">"), ("&lt;", "<"))
@@ -28,9 +32,14 @@ class JanewayTranslationModelForm(mt_forms.TranslationModelForm):
         opts = translator.translator.get_options_for_model(self._meta.model)
         self.translated_field_names = opts.get_field_names()
 
+        for field_name in self.translated_field_names:
+            if field_name in self.fields:
+                label = f"{self.fields[field_name].label} <small class='green'>[translatable]</small>"
+                self.fields[field_name].label = mark_safe(label)
+
 
 class FakeModelForm(ModelForm):
-    """ A form that can't be saved
+    """A form that can't be saved
 
     Usefull for rendering a sample form
     """
@@ -62,19 +71,19 @@ class KeywordModelForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            if hasattr(self.instance, 'keywords_lang_en'):
+                current_keywords = self.instance.keywords_lang_en().values_list("word", flat=True)
+                field = self.fields["keywords"]
+                field.initial = ",".join(current_keywords)
 
-        if hasattr(self.instance, 'keywords_lang_en'):
-            current_keywords = self.instance.keywords_lang_en().values_list("word", flat=True)
-            field = self.fields["keywords"]
-            field.initial = ",".join(current_keywords)
-
-        if hasattr(self.instance, 'keywords_lang_de'):
-            current_keywords = self.instance.keywords_lang_de().values_list("word", flat=True)
-            field = self.fields["keywords_de"]
-            field.initial = ",".join(current_keywords)
+            if hasattr(self.instance, 'keywords_lang_de'):
+                current_keywords = self.instance.keywords_lang_de().values_list("word", flat=True)
+                field = self.fields["keywords_de"]
+                field.initial = ",".join(current_keywords)
 
     def save(self, commit=True, *args, **kwargs):
-        posted_keywords = self.cleaned_data.get( 'keywords', '')
+        posted_keywords = self.cleaned_data.get("keywords", "")
 
         instance = super().save(commit=commit, *args, **kwargs)
         instance.keywords.clear()
@@ -115,7 +124,7 @@ class KeywordModelForm(ModelForm):
 
 
 class HTMLDateInput(DateInput):
-    input_type = 'date'
+    input_type = "date"
 
     def __init__(self, **kwargs):
         kwargs["format"] = "%Y-%m-%d"
@@ -123,7 +132,7 @@ class HTMLDateInput(DateInput):
 
 
 class HTMLSwitchInput(CheckboxInput):
-    template_name = 'admin/elements/forms/foundation_switch_input.html'
+    template_name = "admin/elements/forms/foundation_switch_input.html"
 
 
 class CaptchaForm(Form):
@@ -147,7 +156,7 @@ class CaptchaForm(Form):
 
 
 def text_sanitizer(text_value, tags=None, attrs=None, excl=ENTITIES_MAP):
-    """ A sanitizer for clearing potential harmful html/css/js from the input
+    """A sanitizer for clearing potential harmful html/css/js from the input
     :param text_value: the string to sanitize
     :param tags: A list of allowed html tags
     :param attrs: A dict of allowed html attributes
@@ -173,12 +182,48 @@ def text_sanitizer(text_value, tags=None, attrs=None, excl=ENTITIES_MAP):
 
 
 def plain_text_validator(value):
-    """ A field validator that ensures a textual input has no harmful code"""
+    """A field validator that ensures a textual input has no harmful code"""
 
     string_with_no_carriage_returns = value.replace("\r", "")
     sanitized = text_sanitizer(string_with_no_carriage_returns)
 
     if string_with_no_carriage_returns != sanitized:
-        raise ValidationError(
-            _("HTML is not allowed in this field")
-        )
+        raise ValidationError(_("HTML is not allowed in this field"))
+
+
+def clean_orcid_id(orcid):
+    """
+    Utility function that cleans an ORCID ID.
+    """
+    if orcid:
+        result = COMPILED_ORCID_REGEX.search(orcid)
+
+        if result:
+            return result.group(0)
+        else:
+            raise ValueError("ORCID is not valid.")
+
+    # ORCID is None.
+    return orcid
+
+
+class YesNoRadio(RadioSelect):
+    """
+    A drop-in radio widget to use with BooleanField
+    when the user is meant to express a simple yes/no preference.
+    Displays compactly inline.
+    """
+
+    def __init__(self, attrs=None, choices=()):
+        yes_no_attrs = {"class": "yes-no-radio"}
+        if attrs:
+            yes_no_attrs.update(attrs)
+        yes_no_choices = [
+            (True, _("Yes")),
+            (False, _("No")),
+        ]
+        if choices:
+            raise ImproperlyConfigured(
+                "The YesNoRadio widget does not expect choices from the initializer."
+            )
+        super().__init__(attrs=yes_no_attrs, choices=yes_no_choices)

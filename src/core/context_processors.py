@@ -18,7 +18,7 @@ def journal(request):
     :param request: the active request
     :return: dictionary containing a journal object under key 'journal' or None if this is a press site
     """
-    return {'journal': request.journal}
+    return {"journal": request.journal}
 
 
 def press(request):
@@ -30,9 +30,10 @@ def press(request):
     :return: dictionary containing a press object under key 'press'
     """
     return {
-        'press': request.press,
-        'display_preprint_editors': request.press.get_setting_value(
-            'Display Preprint Editors')
+        "press": request.press,
+        "display_preprint_editors": request.press.get_setting_value(
+            "Display Preprint Editors"
+        ),
     }
 
 
@@ -45,7 +46,7 @@ def journal_settings(request):
     :return: dictionary containing a dictionary of journal settings under key 'journal_settings'
     """
 
-    return {'journal_settings': logic.settings_for_context(request)}
+    return {"journal_settings": logic.settings_for_context(request)}
 
 
 def active(request):
@@ -57,10 +58,10 @@ def active(request):
     :return: the active path that corresponds to this request or an empty string if at root
     """
     try:
-        url_list = request.path.split('/')
-        return {'active': url_list[1]}
+        url_list = request.path.split("/")
+        return {"active": url_list[1]}
     except (IndexError, AttributeError):
-        return {'active': ''}
+        return {"active": ""}
 
 
 def navigation(request):
@@ -70,11 +71,15 @@ def navigation(request):
     :param request: the active request
     :return: the active path that corresponds to this request or an empty string if at root
     """
-    top_nav_items = cms_models.NavigationItem.objects \
-        .filter(content_type=request.model_content_type,object_id=request.site_type.pk,top_level_nav__isnull=True) \
-        .filter(Q(language=None) | Q(language=request.LANGUAGE_CODE)).order_by('sequence')
+    top_nav_items = cms_models.NavigationItem.objects.filter(
+            content_type=request.model_content_type,
+            object_id=request.site_type.pk,
+            top_level_nav__isnull=True,
+        ).filter(
+            Q(language=None) | Q(language=request.LANGUAGE_CODE)
+        ).order_by('sequence')
 
-    return {'navigation_items': top_nav_items}
+    return {"navigation_items": top_nav_items}
 
 
 def version(request):
@@ -84,4 +89,4 @@ def version(request):
     :param request: an HttpRequest object
     :return: a dictionary containing the current version.
     """
-    return {'version': get_janeway_version()}
+    return {"version": get_janeway_version()}

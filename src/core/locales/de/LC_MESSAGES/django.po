@@ -412,7 +412,7 @@ msgstr ""
 
 #: src/core/views.py:378
 msgid ""
-"Your account has been created, please follow theinstructions in the email "
+"Your account has been created. Please follow the instructions in the email "
 "that has been sent to you."
 msgstr ""
 
@@ -4144,8 +4144,8 @@ msgstr "Auch ein Teil von:"
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:5
 #: src/themes/TUW_ARW/templates/elements/journal/citation_modals.html:5
 #: src/themes/clean/templates/elements/journal/citation_modals.html:6
-#: src/themes/clean/templates/journal/article.html:304
-msgid "Harvard-Style Citation"
+#: src/themes/clean/templates/journal/article.html:294
+msgid "Harvard-style Citation"
 msgstr "Zitierung im Harvard-Stil"
 
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:9
@@ -4179,8 +4179,8 @@ msgstr "APA Zitierstil"
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:27
 #: src/themes/TUW_ARW/templates/elements/journal/citation_modals.html:27
 #: src/themes/clean/templates/elements/journal/citation_modals.html:28
-#: src/themes/clean/templates/journal/article.html:305
-msgid "Vancouver-Style Citation"
+#: src/themes/clean/templates/journal/article.html:295
+msgid "Vancouver-style Citation"
 msgstr "Zitierung im Vancouver-Stil"
 
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:40
@@ -4195,8 +4195,8 @@ msgstr "Harvard Zitierstil"
 #: src/themes/OLH/templates/elements/journal/citation_modals.html:49
 #: src/themes/TUW_ARW/templates/elements/journal/citation_modals.html:49
 #: src/themes/clean/templates/elements/journal/citation_modals.html:49
-#: src/themes/clean/templates/journal/article.html:306
-msgid "APA-Style Citation"
+#: src/themes/clean/templates/journal/article.html:296
+msgid "APA-style Citation"
 msgstr "Zitierung im APA-Stil"
 
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:4
