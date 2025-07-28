@@ -57,8 +57,6 @@ class BackContentAuthorForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'placeholder': 'Last name'}),
             'biography': forms.Textarea(
                 attrs={'placeholder': 'Enter biography here'}),
-            'institution': forms.TextInput(attrs={'placeholder': 'Institution'}),
-            'department': forms.TextInput(attrs={'placeholder': 'Department'}),
             'twitter': forms.TextInput(attrs={'placeholder': 'Twitter handle'}),
             'linkedin': forms.TextInput(attrs={'placeholder': 'LinkedIn profile'}),
             'impactstory': forms.TextInput(attrs={'placeholder': 'ImpactStory profile'}),
@@ -73,4 +71,3 @@ class BackContentAuthorForm(forms.ModelForm):
         self.fields['password'].required = False
         self.fields['first_name'].required = False
         self.fields['last_name'].required = False
-        self.fields['institution'].required = False
