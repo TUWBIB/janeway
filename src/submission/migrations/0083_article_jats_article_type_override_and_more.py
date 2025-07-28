@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "submission",
-            "0082_article_abstract_es_article_title_es_section_name_es_and_more",
+            "9011_tuw_remove_obsolete_fields",
         ),
     ]
 
