@@ -883,7 +883,7 @@
             "type": "char"
         },
         "value": {
-            "default": "0000-0000"
+            "default": ""
         },
         "editable_by": [
             "editor",

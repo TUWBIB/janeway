@@ -672,6 +672,8 @@ TINYMCE_CLIPBOARD_CLEANER = {
 TINYMCE_JS_URL = STATIC_URL + "/common/js/tinymce/tinymce.min.js"
 TINYMCE_COMPRESSOR = False
 
+# forced_root_block set to single space to avoid getting content wrapped in <p></p>
+
 TINYMCE_DEFAULT_CONFIG = {
     "entity_encoding": "raw",
     "width": "100%",
@@ -681,6 +683,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "promotion": False,
     "branding": False,
     "convert_urls": False,
+    'forced_root_block': " ",
     "menubar": "edit view insert format tools table help",
     "content_css": STATIC_URL + "/admin/css/admin.css",
     "plugins": "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code"
