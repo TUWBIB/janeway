@@ -887,7 +887,7 @@ def articleToMarc(article):
             elif article.journal.code == 'JFM':            
                 datafield.addSubField(SubField.createSubField("t","IFM Journal"))
             elif article.journal.code == 'ARW':            
-                datafield.addSubField(SubField.createSubField("t","Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds."))
+                datafield.addSubField(SubField.createSubField("t","Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds.)"))
             else:
                 pass
             datafield.addSubField(SubField.createSubField("d",article.primary_issue.publication_year))
