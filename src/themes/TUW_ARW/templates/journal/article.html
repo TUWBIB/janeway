@@ -364,15 +364,23 @@
                             <div class="section">
                             {% include "elements/journal/article_issue_list.html" %}
                             </div>
+
                         {% with article.get_doi_url as doi_url %}
-                        {% if doi_url %}
+                        {% with article.get_ac as ac %}
+                        {% if doi_url or ac %}
                          <div class="section">
                              <h3>{% trans "Identifiers" %}</h3>
                              <ul>
+                             {% if doi_url %}
                                  <li>DOI: <a href="{{ doi_url }}">{{ doi_url }}</a></li>
+                             {% endif %}
+                             {% if ac %}
+                                 <li>AC: <a href="https://permalink.catalogplus.tuwien.at/{{ ac }}">{{ ac }}</a></li>
+                             {% endif %}
                              </ul>
                          </div>
-                         {% endif %}
+                        {% endif %}
+                        {% endwith %}
                         {% endwith %}
 
                         {% if article.has_publication_details %}
