@@ -2251,7 +2251,11 @@ def old_search(request):
         articles = submission_models.Article.objects.filter(
                     (
                         Q(title__icontains=search_term) |
+                        Q(title_en__icontains=search_term) |
+                        Q(title_de__icontains=search_term) |
                         Q(subtitle__icontains=search_term) |
+                        Q(subtitle_en__icontains=search_term) |
+                        Q(subtitle_de__icontains=search_term) |
                         Q(id__in=identifier_ids) |
                         Q(id__in=keywords)
                     )
