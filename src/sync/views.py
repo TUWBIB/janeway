@@ -351,6 +351,11 @@ def almaCreateUpdateConfirm(article):
 
     mmsid = article.get_mmsid()
     ac = article.get_ac()
+    doi = article.get_doi()
+
+    collectionid = settings.ALMA_PORTFOLIOS.get('collection_id',None)
+    serviceid = settings.ALMA_PORTFOLIOS.get('service_id',None)
+    create_portfolio = True if not mmsid and bool(settings.ALMA_PORTFOLIOS.get('create_portfolios',False)) else False
 
     try:
         api = API(json_str=json.dumps(settings.LAAPY))
@@ -373,10 +378,10 @@ def almaCreateUpdateConfirm(article):
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-        match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
         if match:
-            mmsid_nz=match[1]
-            errors.append("can't update record; already in NZ: "+mmsid_nz)
+            mmsid_nz = match[1]
+            errors.append("can't update record; already in NZ: " + mmsid_nz)
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
@@ -402,6 +407,14 @@ def almaCreateUpdateConfirm(article):
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
     errors = logic.setMMSId(article,mmsid)
+    if errors:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
+
+    if create_portfolio and collectionid and serviceid:
+        result = api.createPortfolio(collectionid,serviceid,mmsid,f"https://doi.org/{doi}")
+
+    errors = result.errs
 
     return JsonResponse({ 'errors': errors, 'warnings': None,
         'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
