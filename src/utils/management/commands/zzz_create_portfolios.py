@@ -60,6 +60,8 @@ class Command(BaseCommand):
 
         collectionid = alma_portfolios.get('collection_id', None)
         serviceid = alma_portfolios.get('service_id', None)
+        ignore_collection_ids = alma_portfolios.get('ignore_collection_ids',[]).copy()
+        ignore_collection_ids[:] = [str(x) for x in ignore_collection_ids]
 
         if not collectionid or not serviceid:
             print("error. collectionid or serviceid not set in config")
@@ -72,12 +74,20 @@ class Command(BaseCommand):
         offset = int(offset) if offset else 0
         mmsid_to_process = options.get('mmsid', None)
         if mmsid_to_process: mmsid_to_process = str(mmsid_to_process)
+        qs = submission_models.Article.objects.all()
         if journal_code:
-            articles = submission_models.Article.objects.filter(
+            qs = qs.filter(
                 Q(journal__code = journal_code)
-                ).order_by('journal__code','id')
-        else:
-            articles = submission_models.Article.objects.all().order_by('journal__code','id')
+                )
+        if mmsid_to_process:
+            qs = qs.filter(
+                Q(identifier__id_type='mmsid',identifier__identifier=mmsid_to_process)
+                ).order_by('journal__code','id')            
+
+        articles = qs.order_by('journal__code','id')
+
+        print(f"{len(articles)} articles found")
+
 
         for i,article in enumerate(articles):
             if i < offset:
@@ -96,26 +106,43 @@ class Command(BaseCommand):
                 print(f"\t skipping, no doi")
                 continue
 
-            print(f"\t mmsid: {doi}")
+            print(f"\t mmsid: {mmsid}")
 
             if mmsid_to_process and mmsid_to_process.strip() != mmsid.strip():
                 print(f"\t skipping, mmsid not in parms")
                 continue
 
-            result = api.getPortfolios(mmsid)
-            xml = result.data
-            errs = result.errs
-            if errs:
-                for err in errs:
-                    print(err)
-                exit(1)
-            
-            match = re.search(r'<portfolios total_record_count="(\d+)"',xml)
-            if match:
-                cnt = int(match.group(1))
-                if cnt > 0:
-                    print("\t skipping, portfolio already exists")
-                    continue
+            portfolios, result = api.getPortfoliosAsObjects(mmsid)
+            if result:
+                xml = result.data
+                errs = result.errs
+                if errs:
+                    for err in errs:
+                        print(err)
+                    exit(1)
+
+            cnt_unexpected = 0
+            found = False
+            for x in portfolios:
+                if hasattr(x,'electronic_collection'):
+                    d = x.electronic_collection
+                    id_x = d.get('id').get('#text')
+                    if str(id_x) in ignore_collection_ids:
+                        pass
+                    elif str(id_x) == str(collectionid):
+                        found = True
+                    else:
+                        cnt_unexpected += 1
+                else:
+                    cnt_unexpected += 1
+
+            if found:
+                print("\t WARN: portfolio for collection id already exists")
+                continue
+
+            if cnt_unexpected > 0:
+                print("\t WARN: skipping, portfolio with unexpected id exists")
+                continue
 
             url = f"https://doi.org/{doi}"
             result = api.createPortfolio(collectionid,serviceid,mmsid,url)
