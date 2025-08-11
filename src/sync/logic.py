@@ -4,7 +4,7 @@ import json
 import lxml.etree as etree
 import datetime
 import locale
-from typing import List
+from typing import List,Tuple
 from xml.sax.saxutils import escape, unescape
 
 from django.conf import settings
@@ -19,7 +19,7 @@ from sync import models as sync_models
 from identifiers import models as identifier_models
 from utils.logger import get_logger
 from sync.datacite import api as datacite_api
-from laapy import API,MarcRecord,ControlField,DataField,SubField
+from laapy import API,MarcRecord,ControlField,DataField,SubField,stripXmlDeclaration
 
 logger = get_logger(__name__)
 
@@ -606,6 +606,49 @@ def checkArticleMarcMandatoryFields(article):
     
     return errors
 
+def checkArticleMarcDuplicates(article) -> List[str]:
+    doi = article.get_doi()
+    if not doi:
+        return []
+    
+    l_ac = []
+    try:
+        api = API(json_str=json.dumps(settings.LAAPY))
+        params = { "alma.digital_object_identifier" : article.get_doi(), }
+        result = api.sendSRURequest(**params)
+        if result and result.errs:
+            raise Exception(*result.errs)
+        l_record = MarcRecord.parseMultiple(stripXmlDeclaration(result.data))
+        for mr in l_record:
+            l_ac.append(mr.getAC())   
+    except Exception as e:
+        logger.error(f"exception={type(e).__name__}")
+        logger.error(f"stacktrace={traceback.format_exc()}")
+        raise e
+
+    return l_ac
+    
+
+# $query = [];                                                                                                                                                                             
+#    if (!empty($doi))                                                                                                                                                                        
+#        $query[] = "alma.digital_object_identifier=$doi";                                                                                                                                    
+#    if (!empty($isbn)){                                                                                                                                                                      
+#        if (is_object($isbn))                                                                                                                                                                
+#          $query[] = "alma.isbn".$isbn->value;                                                                                                                                               
+#        else                                                                                                                                                                                 
+#          $query[] = "alma.isbn=$isbn";                                                                                                                                                      
+#    }                                                                                                                                                                                        
+#    if (!empty($query)){                                                                                                                                                                     
+#        $nzdss = simplexml_load_file('https://obv-at-ubtuw.alma.exlibrisgroup.com/view/sru/43ACC_NETWORK?version=1.2&operation=searchRetrieve&'.http_build_query(['query' => implode(' or ',$query)]), 'MySimpleXMLElement');                                                                                                                                                             
+#        $nzdss->registerXPathNamespace('slim','http://www.loc.gov/MARC21/slim');                                                                                                             
+#        $f007 = $nzdss->xpath('//slim:controlfield[@tag="007"]');                                                                                                                            
+#        $f020 = $nzdss->xpath('//slim:datafield[@tag="020"]/slim:subfield[@code="a"]');                                                                                                      
+#        $f776 = $nzdss->xpath('//slim:datafield[@tag="776"]/slim:subfield[@code="z" or @code="o"]');                                                                                         
+#        $acs = $nzdss->xpath('//slim:controlfield[@tag="009"]');                                                                                                                             
+#        return(array_map(function($x){return (string)$x;}, $acs));                                                                                                                           
+#    }       
+#
+
 
 def articleToMarc(article):
     def getControlField008():
@@ -646,7 +689,7 @@ def articleToMarc(article):
     
     # 264 _1 publication
     def getDataField264():
-        datafield=DataField.createDataField("264"," ","1")
+        datafield = DataField.createDataField("264"," ","1")
         datafield.addSubField(SubField.createSubField("a","Wien"))
         if article.journal.code in ('OES','JFM'):
             datafield.addSubField(SubField.createSubField("b","Technische Universität Wien"))
@@ -659,6 +702,7 @@ def articleToMarc(article):
 
     errors = checkArticleMarcMandatoryFields(article)
     warnings = []
+    l_ac_duplicates = checkArticleMarcDuplicates(article)
     xml = ''
     l = []
 
@@ -670,26 +714,32 @@ def articleToMarc(article):
             if lang == 'deu': lang = 'ger'
 
             mr=MarcRecord()
-            mr.leader="03012naa a2200373 c 4500"
+            mr.leader = "03012naa a2200373 c 4500"
             mr.addControlField(ControlField.createControlField("007","cr#|||||||||||"))
             mr.addControlField(getControlField008())
 
-
-
             # 024 7_ doi, urn
             if article.get_doi():
-                datafield=DataField.createDataField("024","7"," ")
+                datafield = DataField.createDataField("024","7"," ")
                 datafield.addSubField(SubField.createSubField("a",article.get_doi()))
                 datafield.addSubField(SubField.createSubField("2","doi"))
                 mr.addDataField(datafield)
             if article.get_urn():
-                datafield=DataField.createDataField("024","7"," ")
+                datafield = DataField.createDataField("024","7"," ")
                 datafield.addSubField(SubField.createSubField("a",article.get_urn()))
                 datafield.addSubField(SubField.createSubField("2","urn"))
                 mr.addDataField(datafield)
 
+            # 035 if possible duplicates found
+            if l_ac_duplicates:
+                warnings.append(f"{len(l_ac_duplicates)} doi(s) matched in network zone, matching records added to 035")
+                for ac in l_ac_duplicates:
+                    datafield = DataField.createDataField("035"," "," ")
+                    datafield.addSubField(SubField.createSubField("a",f"(AT-OBV){ac}"))
+                    mr.addDataField(datafield)
+
             # 040 __ kat inst
-            datafield=DataField.createDataField("040"," "," ")
+            datafield = DataField.createDataField("040"," "," ")
             datafield.addSubField(SubField.createSubField("a","TUW"))
             datafield.addSubField(SubField.createSubField("b","ger"))
             datafield.addSubField(SubField.createSubField("c","JW"))
@@ -699,19 +749,19 @@ def articleToMarc(article):
 
             # 041 __ language
             if lang:
-                datafield=DataField.createDataField("041"," "," ")
+                datafield = DataField.createDataField("041"," "," ")
                 datafield.addSubField(SubField.createSubField("a",lang))
                 mr.addDataField(datafield)
 
             # 044 __ country code, fix
-            datafield=DataField.createDataField("044"," "," ")
+            datafield = DataField.createDataField("044"," "," ")
             datafield.addSubField(SubField.createSubField("a",'XA-AT'))
             mr.addDataField(datafield)
 
             # primary author
             author=article.frozen_authors()[0]  
             if author:
-                datafield=DataField.createDataField("100","1"," ")
+                datafield = DataField.createDataField("100","1"," ")
                 datafield.addSubField(SubField.createSubField("a",''.join([author.last_name,', ',author.first_name])))
                 datafield.addSubField(SubField.createSubField("4",'aut'))
                 if author.is_correspondence_author:
@@ -726,11 +776,11 @@ def articleToMarc(article):
             # primary language from raw field, then if
             # article language == 'deu', use english title / subtitle for subfield b
             # article language == 'eng', use german title / subtitle for subfield b
-            author=article.frozen_authors()[0]  
+            author = article.frozen_authors()[0]  
             if author:
-                datafield=DataField.createDataField("245","1","0")
+                datafield = DataField.createDataField("245","1","0")
             else:
-                datafield=DataField.createDataField("245","0","0")
+                datafield = DataField.createDataField("245","0","0")
             datafield.addSubField(SubField.createSubField("a",escape(article.getTitleRAW)))
             sf_b = ''
             if article.subtitle:
@@ -763,21 +813,21 @@ def articleToMarc(article):
             # 246 11
             if source_parallel_title == 'de':
                 if article.getTitleDE:
-                    datafield=DataField.createDataField("246","1","1")
+                    datafield = DataField.createDataField("246","1","1")
                     datafield.addSubField(SubField.createSubField("a",escape(article.getTitleDE)))
                     if article.getSubTitleDE:
                         datafield.addSubField(SubField.createSubField("b",escape(article.getSubTitleDE)))
                     mr.addDataField(datafield)
             elif source_parallel_title == 'en':
                 if article.getTitleEN:
-                    datafield=DataField.createDataField("246","1","1")
+                    datafield = DataField.createDataField("246","1","1")
                     datafield.addSubField(SubField.createSubField("a",escape(article.getTitleEN)))
                     if article.getSubTitleEN:
                         datafield.addSubField(SubField.createSubField("b",escape(article.getSubTitleEN)))
                     mr.addDataField(datafield)
 
             # 251 __ coar
-            datafield=DataField.createDataField("251"," "," ")
+            datafield = DataField.createDataField("251"," "," ")
             datafield.addSubField(SubField.createSubField("a","vor"))
             datafield.addSubField(SubField.createSubField("2","coar"))
             mr.addDataField(datafield)
@@ -786,50 +836,50 @@ def articleToMarc(article):
             mr.addDataField(getDataField264())
 
             # 300 __ physical description
-            datafield=DataField.createDataField("300"," "," ")
-            match=re.match(r'(\d+)-(\d+)',article.page_numbers)
-            no_pages=None
+            datafield = DataField.createDataField("300"," "," ")
+            match = re.match(r'(\d+)-(\d+)',article.page_numbers)
+            no_pages = None
             if match:
-                first_page=int(match[1])
-                last_page=int(match[2])
-                no_pages=last_page-first_page+1
-            sf_a="Online-Ressource"
+                first_page = int(match[1])
+                last_page = int(match[2])
+                no_pages = last_page-first_page + 1
+            sf_a = "Online-Ressource"
             if no_pages:
                 if no_pages == 1:
-                    sf_a+=" ("+str(no_pages)+" Seite)"
+                    sf_a += " ("+str(no_pages)+" Seite)"
                 else:
-                    sf_a+=" ("+str(no_pages)+" Seiten)"
+                    sf_a += " ("+str(no_pages)+" Seiten)"
             datafield.addSubField(SubField.createSubField("a",sf_a))
             datafield.addSubField(SubField.createSubField("b","Illustrationen, Diagramme"))
             mr.addDataField(datafield)
            
             # 336-338
-            datafield=DataField.createDataField("336"," "," ")
+            datafield = DataField.createDataField("336"," "," ")
             datafield.addSubField(SubField.createSubField("b","txt"))
             mr.addDataField(datafield)
 
-            datafield=DataField.createDataField("337"," "," ")
+            datafield = DataField.createDataField("337"," "," ")
             datafield.addSubField(SubField.createSubField("b","c"))
             mr.addDataField(datafield)
 
-            datafield=DataField.createDataField("338"," "," ")
+            datafield = DataField.createDataField("338"," "," ")
             datafield.addSubField(SubField.createSubField("b","cr"))
             mr.addDataField(datafield)
 
             # 347 __ digital file
-            datafield=DataField.createDataField("347"," "," ")
+            datafield = DataField.createDataField("347"," "," ")
             datafield.addSubField(SubField.createSubField("a","Textdatei"))
             datafield.addSubField(SubField.createSubField("b","PDF"))
             mr.addDataField(datafield)
 
             # 500 __ peer reviewed
             if article.peer_reviewed:
-                datafield=DataField.createDataField("500"," "," ")
+                datafield = DataField.createDataField("500"," "," ")
                 datafield.addSubField(SubField.createSubField("a","Refereed/Peer-reviewed"))
                 mr.addDataField(datafield)
 
             # 506 0_, open access, fixed
-            datafield=DataField.createDataField("506","0"," ")
+            datafield = DataField.createDataField("506","0"," ")
             datafield.addSubField(SubField.createSubField("a","Open Access"))
             datafield.addSubField(SubField.createSubField("f","Unrestricted online access"))
             datafield.addSubField(SubField.createSubField("2","star"))
@@ -838,29 +888,29 @@ def articleToMarc(article):
             # 520, abstracts
             if article.language == 'eng':
                 if article.getAbstractEN:
-                    datafield=DataField.createDataField("520"," "," ")
+                    datafield = DataField.createDataField("520"," "," ")
                     datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.getAbstractEN)))
                     mr.addDataField(datafield)
 
                 if article.getAbstractDE and article.getAbstractEN.strip() != article.getAbstractDE.strip():
-                    datafield=DataField.createDataField("520"," "," ")
+                    datafield = DataField.createDataField("520"," "," ")
                     datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.getAbstractDE)))
                     mr.addDataField(datafield)
             elif article.language == 'deu':
                 if article.getAbstractDE:
-                    datafield=DataField.createDataField("520"," "," ")
+                    datafield = DataField.createDataField("520"," "," ")
                     datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.getAbstractDE)))
                     mr.addDataField(datafield)
 
                 if article.getAbstractEN and article.getAbstractEN.strip() != article.getAbstractDE.strip():
-                    datafield=DataField.createDataField("520"," "," ")
+                    datafield = DataField.createDataField("520"," "," ")
                     datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.getAbstractEN)))
                     mr.addDataField(datafield)
 
 
             # 540, Lizenz
             if article.license is not None and article.license.short_name != 'Copyright':
-                datafield=DataField.createDataField("540"," "," ")
+                datafield = DataField.createDataField("540"," "," ")
                 datafield.addSubField(SubField.createSubField("f",article.license.short_name))
                 datafield.addSubField(SubField.createSubField("2","cc"))
                 datafield.addSubField(SubField.createSubField("u",article.license.url))
@@ -869,7 +919,7 @@ def articleToMarc(article):
             # 700 further authors
             if article.frozen_authors() and len(article.frozen_authors())>1:
                 for author in article.frozen_authors()[1:]:
-                    datafield=DataField.createDataField("700","1"," ")
+                    datafield = DataField.createDataField("700","1"," ")
                     datafield.addSubField(SubField.createSubField("a",''.join([author.last_name,', ',author.first_name])))
                     datafield.addSubField(SubField.createSubField("4",'aut'))
                     if author.is_correspondence_author:
@@ -880,7 +930,7 @@ def articleToMarc(article):
                         datafield.addSubField(SubField.createSubField("0",'(DE-588)'+author.author.gndid))
 
             # 773 08 relation
-            datafield=DataField.createDataField("773","0","8")
+            datafield = DataField.createDataField("773","0","8")
             datafield.addSubField(SubField.createSubField("i","Enthalten in"))
             if article.journal.code == 'OES':
                 datafield.addSubField(SubField.createSubField("t","Der Öffentliche Sektor - The Public Sector"))
@@ -922,7 +972,7 @@ def articleToMarc(article):
 
             # 856 link, doi
             if article.get_doi():
-                datafield=DataField.createDataField("856","4","0")
+                datafield = DataField.createDataField("856","4","0")
                 datafield.addSubField(SubField.createSubField("q",'text/html'))
                 datafield.addSubField(SubField.createSubField("u",'https://doi.org/'+article.get_doi()))
                 datafield.addSubField(SubField.createSubField("x",'TUW'))
@@ -931,7 +981,7 @@ def articleToMarc(article):
                 mr.addDataField(datafield)
 
             # 970 2_
-            datafield=DataField.createDataField("970","2"," ")
+            datafield = DataField.createDataField("970","2"," ")
             datafield.addSubField(SubField.createSubField("a",'TUW'))
             if article.journal.code in ('OES','JFM'):
                 datafield.addSubField(SubField.createSubField("d",'OA-ARTICLE'))
@@ -946,7 +996,7 @@ def articleToMarc(article):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:
-                    datafield=DataField.createDataField("971","8"," ")
+                    datafield = DataField.createDataField("971","8"," ")
                     datafield.addSubField(SubField.createSubField("a",s))
                     mr.addDataField(datafield)
 
@@ -957,12 +1007,12 @@ def articleToMarc(article):
                     kws.append(str(k))
                 s = ' / '.join(kws)
                 if s:
-                    datafield=DataField.createDataField("971","9"," ")
+                    datafield = DataField.createDataField("971","9"," ")
                     datafield.addSubField(SubField.createSubField("a",s))
                     mr.addDataField(datafield)
 
             # 996 33 reposiTUm
-            datafield=DataField.createDataField("996","3","3")
+            datafield = DataField.createDataField("996","3","3")
             datafield.addSubField(SubField.createSubField("9",'LOCAL'))
             datafield.addSubField(SubField.createSubField("a",'Gold Open Access ; Journal Hosting System'))
             if article.journal.code == 'ARW':

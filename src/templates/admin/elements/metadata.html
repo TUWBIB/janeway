@@ -348,6 +348,16 @@
                 {% endwith %}
             </tr>
         {% endif %}
+        {% for identifier in article.identifiers %}
+            {% if identifier.id_type == 'doi' %}
+            {% else %}
+            <tr>
+            <td>{{ identifier.id_type|upper }}</td>
+            <td>{{ identifier.identifier }}</td>
+            <td></td>
+            </tr>            
+            {% endif %}
+        {% endfor %}
     </table>
 </div>
 

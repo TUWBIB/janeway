@@ -19,7 +19,9 @@ from submission import views as submission_views
 from journal import views as journal_views
 from repository import views as repository_views
 from utils.logger import get_logger
+
 from sync import urls as sync_urls
+from tuw_backcontent import urls as tuw_backcontent_urls
 
 logger = get_logger(__name__)
 
@@ -55,6 +57,7 @@ urlpatterns = [
     path("workflow/", include("workflow.urls")),
     # TUW
     path('', include(sync_urls)),
+    path('', include(tuw_backcontent_urls)),    
     # Root Site URLS
     re_path(r"^$", press_views.index, name="website_index"),
     re_path(r"^journals/$", press_views.journals, name="press_journals"),
