@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'utils',
     'workflow',
     'sync',
+    'tuw_backcontent',
 
     # 3rd Party
     'mozilla_django_oidc',
@@ -153,6 +154,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'templates', 'common'),
             os.path.join(BASE_DIR, 'templates', 'admin'),
+            os.path.join(BASE_DIR, '', 'templates'),
         ]
             + plugin_installed_apps.load_plugin_templates(BASE_DIR)
             + plugin_installed_apps.load_homepage_element_templates(BASE_DIR)
