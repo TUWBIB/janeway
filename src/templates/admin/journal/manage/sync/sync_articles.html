@@ -103,17 +103,16 @@
                             <li><a href="#">Alma</a>
                                 <ul class="vertical menu nested">
                                 <li>
-                                    <a href="#" class="btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
+                                    <a href="#" class="button hollow btn_alma_create_update" id="btn_alma_create_update_{{ article.pk }}">Create / Update Record</a>
                                 </li>
                                 <li>
-                                    <a href="#" class="btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
+                                    <a href="#" class="button hollow btn_alma_push_nz" id="btn_alma_push_nz_{{ article.pk }}">Push To Network Zone</a>
                                 </li>
                                 <li>
-                                    <a href="#" class="btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
+                                    <a href="#" class="button hollow btn_alma_fetch_ac" id="btn_alma_fetch_ac_{{ article.pk }}">Fetch AC</a>
                                 </li>
-                                <hr>
                                 <li>
-                                    <a href="#" class="btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
+                                    <a href="#" class="button hollow btn_alma_view_current" id="btn_alma_view_current_{{ article.pk }}">View current marc record</a>
                                 </li>
                                 </ul>
                             </li>
@@ -205,7 +204,7 @@
                         <li><a href="#">Alma</a>
                             <ul class="vertical menu nested">
                             <li>
-                                <a href="#" class="btn_alma_create_update" id="btn_alma_issue_create_update_{{ issuee.pk }}">Create / Update Record</a>
+                                <a href="#" class="small success button btn_alma_create_update" id="btn_alma_issue_create_update_{{ issue.pk }}">Create / Update Record</a>
                             </li>
                             <li>
                                 <a href="#" class="btn_alma_push_nz" id="btn_alma_issue_push_nz_{{ issue.pk }}">Push To Network Zone</a>
@@ -263,7 +262,7 @@
 
         $(document).ready(function () 
         {
-            $(".btn_alma_create_update").on("click", function(e)
+            $(".btn_alma_create_update").on("click", function(e) 
             {
                 e.preventDefault();
 
@@ -307,11 +306,11 @@
                             }
 
                             var content = '<div class="reveal small" id="modal" data-close-on-click="false" data-close-on-esc="false"'+
-                                 '<h2>'+'Review metadata'+'</h2>';
+                                '<h2>'+'Review metadata'+'</h2>';
                             if (warnings.length>0)
                             {
                                 content+='<h3>Warnings</h3>';
-                                contentl+='<p>'
+                                content+='<p>'
                                 var i;
                                 for (i=0;i<warnings.length;++i)
                                 {
@@ -319,10 +318,10 @@
                                 }
                                 content+='</p>'
                             }
-                                   
+                                
                             content+='<p class="lead"><pre>'+_.escape(he.decode(xml))+'</pre></p>'+
-         			            '<button class="button success ok float-center">Upload to Alma</button>'+
-			    		        '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                                '<button class="button success ok float-center">Upload to Alma</button>'+
+                                '<button class="button alert cancel float-center" data-close>Cancel</button>'+
                                 '</div>';
 
                             $('body').append(content);
@@ -332,7 +331,7 @@
 
                             $('#modal').children('.ok').on('click', function() 
                             {
-			                    modal.close();
+                                modal.close();
                                 $('#modal').remove();
                                 $('.reveal-overlay').remove();
                                 almaCreateUpdateConfirm(article_id,issue_id)                                
@@ -340,8 +339,8 @@
                             
                             $('#modal').children('.cancel').on('click', function() 
                             {
-			                    modal.close();
-			                    $('#modal').remove();
+                                modal.close();
+                                $('#modal').remove();
                                 $('.reveal-overlay').remove();
                             });
                         }
