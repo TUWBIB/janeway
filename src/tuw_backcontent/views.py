@@ -89,19 +89,27 @@ def backcontent_article(request, article_id):
             if 'file' in request.FILES:
                 return handleFileUpload(request, article)
 
-            if 'publish' in request.POST:
-                handleSaveForm(request, article)
-                if not article.stage == submission_models.STAGE_PUBLISHED:
-    #                id_logic.generate_crossref_doi_with_pattern(article)
-                    article.stage = submission_models.STAGE_PUBLISHED
-                    article.save()
-                article.snapshot_authors()
+            if 'publish' or 'draft' in request.POST:
+                article_form = submission_forms.ArticleInfo(request.POST, instance=article)                
+                if article_form.is_valid():                
+                    if 'publish' in request.POST:
+                        handleSaveForm(request, article)
+                        if not article.stage == submission_models.STAGE_PUBLISHED:
+            #                id_logic.generate_crossref_doi_with_pattern(article)
+                            article.stage = submission_models.STAGE_PUBLISHED
+                            article.save()
+                        article.snapshot_authors()
 
-                return redirect(reverse('backcontent'))
+                        return redirect(reverse('backcontent'))
 
-            if 'draft' in request.POST:
-                handleSaveForm(request, article)
-                return redirect(reverse('backcontent'))
+                    if 'draft' in request.POST:
+                        handleSaveForm(request, article)
+                        return redirect(reverse('backcontent'))
+                else:
+                    l = [f'{field.name}: {field.errors.as_text()}' for field in article_form if field.errors]
+                    if l:
+                        messages.error(request,'\n'.join(l))
+
 
             if 'delete' in request.POST:
                 return redirect(reverse('backcontent_delete_article', kwargs={'article_id': article_id}))
