@@ -13,8 +13,8 @@ from django.utils import translation
 
 from journal import models as journal_models
 from submission import models as submission_models
-from sync import logic,views
-from sync.datacite import api as datacite_api
+from tuw_sync import logic,views
+from tuw_sync.datacite import api as datacite_api
 
 class Command(BaseCommand):
 

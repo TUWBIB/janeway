@@ -22,8 +22,6 @@ class DataCite(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='obsolete_prep_1',
-
     )
 
     issue = models.ForeignKey(
@@ -31,7 +29,6 @@ class DataCite(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='obsolete_prep_2',
     )
 
     status = models.CharField(max_length=20, blank=True, null=True, choices=DATACITE_STATUS_CHOICES)
@@ -42,7 +39,6 @@ class Alma(models.Model):
         'submission.Article',
         on_delete=models.CASCADE,
         null=True,
-        related_name='obsolete_prep_3',
     )
 
     issue = models.ForeignKey(
@@ -50,7 +46,6 @@ class Alma(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='obsolete_prep_4',
     )
 
     mmsid = models.CharField(max_length=50, blank=True, null=True,)

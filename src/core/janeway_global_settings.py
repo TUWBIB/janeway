@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     'workflow',
     'sync',
     'tuw_backcontent',
+    'tuw_sync',
 
     # 3rd Party
     'mozilla_django_oidc',
