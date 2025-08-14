@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('sync', '0002_alter_alma_article_alter_alma_issue_and_more'),
+        ('submission', '9011_tuw_remove_obsolete_fields'),
     ]
 
     operations = [

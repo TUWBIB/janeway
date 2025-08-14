@@ -89,7 +89,6 @@ INSTALLED_APPS = [
     'transform',
     'utils',
     'workflow',
-    'sync',
     'tuw_backcontent',
     'tuw_sync',
 
