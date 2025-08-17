@@ -25,6 +25,7 @@ from security.decorators import (
 from submission import models as submission_models
 from submission import forms as submission_forms
 from submission import logic as submission_logic
+from utils import setting_handler
 from utils import shared
 from utils.logger import get_logger
 from utils.decorators import GET_language_override
@@ -67,6 +68,11 @@ def backcontent_article(request, article_id):
             pk=article_id,
             journal=request.journal,
         )
+        submission_summary = setting_handler.get_setting(
+            'general',
+            'submission_summary',
+            request.journal,
+        ).processed_value
 
         additional_fields = submission_models.Field.objects.filter(journal=request.journal)
 
@@ -74,7 +80,7 @@ def backcontent_article(request, article_id):
             default_configuration = request.journal.submissionconfiguration
             article.license = default_configuration.default_license
 
-        article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields)
+        article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields,submission_summary=submission_summary,pop_disabled_fields=False)
         author_form = bc_forms.BackContentAuthorForm()
         pub_form = bc_forms.PublicationInfo(instance=article)
         remote_form = bc_forms.RemoteArticle(instance=article)

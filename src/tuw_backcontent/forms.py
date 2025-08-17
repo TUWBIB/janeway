@@ -7,13 +7,12 @@ from core import models as core_models
 class PublicationInfo(forms.ModelForm):
     class Meta:
         model = models.Article
-        fields = ('date_accepted', 'date_published', 'page_numbers', 'primary_issue', 'peer_reviewed', 'render_galley')
+        fields = ('date_accepted', 'date_published', 'render_galley')
 
     def __init__(self, *args, **kwargs):
         super(PublicationInfo, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             article = kwargs['instance']
-            self.fields['primary_issue'].queryset = article.journal.issue_set.all()
             self.fields['render_galley'].queryset = article.galley_set.all()
             self.fields['date_accepted'].widget.attrs['class'] = 'datepicker'
 #            self.fields['date_published'].widget.attrs['class'] = 'datepicker'
