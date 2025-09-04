@@ -16,318 +16,326 @@
 {% endblock breadcrumbs %}
 
 {% block body %}
-    <section class="content">
-        {% include "elements/translations/form_tabs.html" with object=article %}
-        <div class="row expanded">
-            <div class="large-12 columns box">
-                <form method="POST">
-                    <div class="title-area">
-                        <h2>{% trans "Add A New Article" %}</h2>
+{% can_see_pii_tag article as can_see_pii %}
+<div class="large-12 columns box">
+    <div class="row expanded">
+        <form method="POST"{% if journal_settings.general.abstract_required %} novalidate{% endif %}>
+            <div class="title-area">
+                <h2 id="edit-metadata">Edit Metadata</h2>
+                <a class="button" href="{{ return }}"><i class="fa fa-arrow-left"></i>Back</a>
+            </div>
+            <div class="content">
+                {% include "elements/forms/errors.html" with form=info_form %}
+                {% include "elements/translations/form_tabs.html" with object=article %}
+                {% csrf_token %}
+                <div class="row expanded">
+                    <div class="large-12 columns">
+                        {{ article_form.title|foundation }}
                     </div>
-                    <div class="content">
-                        <div class="large-12 columns">
-                            <label for="id_title">{% trans "Title" %}</label>
-                            {{ article_form.title }}
-                            {{ article_form.title.errors }}
-                        </div>
-
-                        {% if request.journal.submissionconfiguration.subtitle %}
-                        <div class="large-12 columns">
-                            <label for="id_subtitle">{% trans "Subtitle" %}</label>
-                            {{ article_form.subtitle }}
-                            {{ article_form.subtitle.errors }}
-                        </div>
-                        {% endif %}
-
-                        <div class="large-12 columns">
-                            <label for="id_abstract">
-                                {% trans "Abstract" %}{% if form.abstract.field.required %}*{% endif %}</label>
-                            {{ article_form.abstract }}
-                            {{ article_form.abstract.errors }}
-                        </div>
-                        <div class="large-4 columns">
-                            <label for="id_language">{% trans "Language" %}</label>
-                            {{ article_form.language }}
-                            {{ article_form.language.errors }}
-                        </div>
-                        <div class="large-4 columns">
-                            <label for="id_section">{% trans "Section" %}{% if article_form.section.field.required %}*{% endif %}</label>
-                            {{ article_form.section }}
-                            {{ article_form.section.errors }}
-                        </div>
-                        <div class="large-4 columns error">
-                            <label for="id_license">{% trans "License" %}{% if article_form.license.field.required %}*{% endif %}</label>
-                            {{ article_form.license }}
-                            {{ article_form.license.errors }}
-                        </div>
-                        <div class="large-12 columns">
-                            <label for="id_keywords">{% trans "Keywords" context "bc" %}</label>
-                            <input type="text" id="id_keywords" name="keywords" value="
-                                    {% if article_form.cleaned_data.keywords %}{{ article_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords_lang_en.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                                    {% trans "Hit Enter to add a new keyword." context "bc" %}
-                        </div>
-                        <div class="large-12 columns">
-                            <label for="id_keywords_de">{% trans "Keywords (German)" context "bc" %}</label>
-                            <input type="text" id="id_keywords_de" name="keywords_de" value="
-                                    {% if article_form.cleaned_data.keywords_de %}{{ article_form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_lang_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                                    {% trans "Hit Enter to add a new keyword." context "bc" %}
-                        </div>
+                </div>
+                <div class="row expanded">
+                    <div class="large-12 columns">
+                        {{ article_form.subtitle|foundation }}
                     </div>
-
-                    <div class="clearfix"></div>
-                        
-                    {% if additional_fields %}
-                        <div class="title-area">
-                            <h2>{% trans "Additional Fields" %}</h2>
-                        </div>
-                        <div class="content">
-                        {% for additional_field in additional_fields %}
-                            {% get_form_field article_form additional_field.name as field %}
-                            <div class="{{ field.field.widget.attrs.div_class }} columns">
-                                {{ field|foundation }}
-                            </div>
-                        {% endfor %}
-                        </div>
+                </div>
+                    <div class="large-12 columns end">
+                        {{ article_form.abstract|foundation }}
+                    </div>
+                </div>
+                <div class="row expanded">
+                    {% if journal_settings.general.submission_summary %}
+                    <div class="large-12 columns end">
+                        {{ article_form.non_specialist_summary|foundation }}
+                    </div>
                     {% endif %}
-
-
-                    <div class="title-area">
-                        <h2>{% trans "Article Authors" %}</h2>
+                </div>
+                <div class="row expanded">
+                    <div class="large-3 columns">
+                        {{ article_form.language|foundation }}
                     </div>
-                    <div class="content" data-equalizer data-equalize-on="medium">
-                        <div class="large-7 columns" data-equalizer-watch>
-                            <p>{% trans "You can add an author by clicking the button below. This will open a popup modal for you to complete their details." %}</p>
-                            <p>{% trans "If you know of an existing author, complete only the email field and they will be added as an author." %}</p>
-                            <a href="#" id="add_author_dialog" data-open="author" class="small success button">{% trans "Add New Author" %}</a>
-                            <hr/>
-                            <p>{% trans "Search for a user using email address or ORCiD. If a user is matched, they will be automatically added as an author. This search only returns exact matches." %}</p>
-                            <input form="other" id="add_author_searchvalue" class="form-control" name="author_search_text" style="width: 100%;" value=""
-                            placeholder="{% trans "Search by email address or ORCiD" %}.">
-                            <p></p>
-                            <a href="#" id="add_author" class="small success button">{% trans "Add New Author" %}</a>
-                        </div>
-                        <div class="large-5 columns" data-equalizer-watch>
-                            <h4>{% trans "Current Authors" %}</h4>
-                            <div class="row">
-                                <div class="large-12 columns">
-                                    <table id="author_table">
-                                        <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>{% trans "Name" %}</th>
-                                            <th>{% trans "Email" %}</th>
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="sortable">
-                                        {% for order in article.articleauthororder_set.all %}
-                                        <tr id="authors-{{ order.author.pk }}">
-                                            <td><i class="fa fa-sort"></i></td>
-                                            <td>{{ order.author.full_name }}</td>
-                                            <td>{{ order.author.email }}</td>
-                                            <td><a href="{% url 'backcontent_delete_author' article.pk order.author.pk %}"><i
-                                                    class="fa fa-trash">
-                                                &nbsp;</i></a></td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="3">{% trans "No authors yet, add one!" %}</td>
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                    <hr/>
-                                    <p>{% trans "You may select a main author, this author will receive the communications regarding your articles process through our systems. This does not have to be you." %}</p>
-                                    <label for="main-author">{% trans "Select main author" %}:</label>
-                                    <select class="form-control" id="main-author" name="main-author">
-                                        <option value="">---------</option>
-                                        {% for author in article.authors.all %}
-                                            <option value="{{ author.pk }}"
-                                                    {% if article.correspondence_author.pk == author.pk %}selected{% endif %}>{{ author.full_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>      
-                    <div class="title-area">
-                        <h2>{% trans "Galleys" %}</h2>
+                    <div class="large-3 columns">
+                        {{ article_form.section|foundation }}
                     </div>
-                    <div class="content">
-                        <table id="upload-table" class="table table-bordered table-condensed small">
-                            <tr style="text-align: left">
-                                <th>{% trans "Label" %}</th>
-                                <th width="25%">{% trans "Filename" %}</th>
-                                <th>{% trans "Type" %}</th>
-                                <th>{% trans "Edit" %}</th>
-                                <th>{% trans "Download" %}</th>
-                                <th>{% trans "Replace" %}</th>
-                                <th>{% trans "History" %}</th>
-                                <th>{% trans "Create PDF" %}</th>
-                                <th>{% trans "Create EPUB" %}</th>
-                            </tr>
-                            {% for galley in galleys %}
-                                {% can_view_file galley.file as can_view_file_flag %}
-                                {% can_edit_file galley.file article as can_edit_file_flag %}
-                                {% can_view_file_history galley.file article as can_view_file_history_flag %}
+                    <div class="large-3 columns">
+                        {{ article_form.license|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ article_form.article_number|foundation }}
+                    </div>
+                </div>
+                <div class="row expanded">
+                    <div class="large-3 columns">
+                        {{ article_form.first_page|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ article_form.last_page|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ article_form.page_numbers|foundation }}
+                    </div>
+                    <div class="large-3 columns">
+                        {{ article_form.total_pages|foundation }}
+                    </div>
+                </div>
+                <div class="row expanded">
+                    <div class="large-3 columns">
+                        <div class="large-12 columns">
+                            <label>{{ article_form.peer_reviewed.label }}</label>
+                            {{ article_form.peer_reviewed }} Check if this article is reviewed
+                        </div>
+                    </div>
+                    <div class="large-3 columns">
+                        <div class="large-12 columns">
+                            <label>{{ article_form.is_remote.label }}</label>
+                            {{ article_form.is_remote }} {{ article_form.is_remote.field.help_text }}
+                        </div>
+                    </div>
+                    <div class="large-3 columns">
+                        {{ article_form.remote_url|foundation }}
+                    </div>
+                    <div class="large-3 columns end">
+                        {{ article_form.primary_issue|foundation }}
+                    </div>
+                </div>
+                {% if request.journal.submissionconfiguration.competing_interests %}
+                    <div class="large-10 columns">
+                        {{ article_form.competing_interests|foundation }}
+                    </div>
+                {% endif %}
+                <div class="large-10 columns">
+                    {{ article_form.custom_how_to_cite|foundation }}
+                </div>
+                <div class="large-10 columns">
+                    {{ article_form.rights|foundation }}
+                </div>
+
+                <div class="large-12 columns">
+                    <label for="id_keywords">{% trans "Keywords" context "bc" %}</label>
+                    <input type="text" id="id_keywords" name="keywords" value="
+                            {% if article_form.cleaned_data.keywords %}{{ article_form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords_lang_en.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                            {% trans "Hit Enter to add a new keyword." context "bc" %}
+                </div>
+                <div class="large-12 columns">
+                    <label for="id_keywords_de">{% trans "Keywords (German)" context "bc" %}</label>
+                    <input type="text" id="id_keywords_de" name="keywords_de" value="
+                            {% if article_form.cleaned_data.keywords_de %}{{ article_form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_lang_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
+                            {% trans "Hit Enter to add a new keyword." context "bc" %}
+                </div>
+            </div>
+
+            {% include "admin/elements/submission/additional_fields.html" with form=article_form additional_fields=additional_fields %}    
+
+            <div class="title-area">
+                <h2>{% trans "Article Authors" %}</h2>
+            </div>
+            <div class="content" data-equalizer data-equalize-on="medium">
+                <div class="large-7 columns" data-equalizer-watch>
+                    <p>{% trans "You can add an author by clicking the button below. This will open a popup modal for you to complete their details." %}</p>
+                    <p>{% trans "If you know of an existing author, complete only the email field and they will be added as an author." %}</p>
+                    <a href="#" id="add_author_dialog" data-open="author" class="small success button">{% trans "Add New Author" %}</a>
+                    <hr/>
+                    <p>{% trans "Search for a user using email address or ORCiD. If a user is matched, they will be automatically added as an author. This search only returns exact matches." %}</p>
+                    <input form="other" id="add_author_searchvalue" class="form-control" name="author_search_text" style="width: 100%;" value=""
+                    placeholder="{% trans "Search by email address or ORCiD" %}.">
+                    <p></p>
+                    <a href="#" id="add_author" class="small success button">{% trans "Add New Author" %}</a>
+                </div>
+                <div class="large-5 columns" data-equalizer-watch>
+                    <h4>{% trans "Current Authors" %}</h4>
+                    <div class="row">
+                        <div class="large-12 columns">
+                            <table id="author_table">
+                                <thead>
                                 <tr>
-                                    <td>{{ galley.label }}</td>
-                                    <td>{{ galley.file.original_filename|truncatechars:40 }} {% if galley.label == 'XML' %}
-                                        &nbsp;
-                                        <small><a target="_blank"
-                                                    href="{% url 'backcontent_preview_xml_galley' article.pk galley.pk %}"><i
-                                                class="fa fa-search" aria-hidden="true">&nbsp;</i>Preview</a>
-                                        </small>{% endif %}</td>
-                                    <td>Galley</td>
-                                    <td><a href="{% url 'pm_edit_galley' article.pk galley.pk %}?return={{ request.path|urlencode }}" class="fa fa-edit"></a>
-                                    </td>
-                                    <td>{% if can_view_file_flag %}
-                                        <a href="{% url 'article_file_download' 'id' article.pk galley.file.pk %}"><i
-                                                class="fa fa-download">&nbsp;</i></a>{% endif %}
-                                    </td>
-                                    <td>{% if can_edit_file_flag %}
-                                        <a href="{% url 'article_file_replace' 'id' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
-                                                class="fa fa-cloud-upload">&nbsp;</i></a>{% endif %}
-                                    </td>
-                                    <td>{% if can_view_file_history_flag %}
-                                        <a href="{% url 'file_history' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
-                                                class="fa fa-history">
-                                            &nbsp;</i></a>{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
-                                            <a href="{% url 'cassius_generate' galley.pk %}?return={{ request.path|urlencode }}">
-                                                <i class="fa fa-file-text-o">&nbsp;</i>
-                                            </a>
-                                        {% elif not galley.file.mime_type == 'application/xml' %}
-                                            Function for XML only.
-                                        {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
-                                            <p><span data-tooltip aria-haspopup="true" class="has-tip top"
-                                                        data-disable-hover="false"
-                                                        tabindex="2"
-                                                        title="{% has_missing_supplements galley %}">Missing Supplements</span>
-                                            </p>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
-                                            <a href="{% url 'epub_generate' galley.pk %}?return={{ request.path|urlencode }}">
-                                                <i class="fa fa-book">&nbsp;</i>
-                                            </a>
-                                        {% elif not galley.file.mime_type == 'application/xml' %}
-                                            Function for XML only.
-                                        {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
-                                            <p><span data-tooltip aria-haspopup="true" class="has-tip top"
-                                                        data-disable-hover="false"
-                                                        tabindex="2"
-                                                        title="{% has_missing_supplements galley %}">Missing Supplements</span>
-                                            </p>
-                                        {% endif %}
-                                    </td>
+                                    <th></th>
+                                    <th>{% trans "Name" %}</th>
+                                    <th>{% trans "Email" %}</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody id="sortable">
+                                {% for order in article.articleauthororder_set.all %}
+                                <tr id="authors-{{ order.author.pk }}">
+                                    <td><i class="fa fa-sort"></i></td>
+                                    <td>{{ order.author.full_name }}</td>
+                                    <td>{{ order.author.email }}</td>
+                                    <td><a href="{% url 'backcontent_delete_author' article.pk order.author.pk %}"><i
+                                            class="fa fa-trash">
+                                        &nbsp;</i></a></td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9">{% trans "No galleys have been uploaded." %}</td>
+                                    <td colspan="3">{% trans "No authors yet, add one!" %}</td>
                                 </tr>
-                            {% endfor %}
-                        </table>
-                        <a class="button success float-right" data-open="uploadbox"><i class="fa fa-cloud-upload">
-                            &nbsp;</i>{% trans "Upload a new galley" %}</a>
-                    </div>
-                    <div class="reveal" id="uploadbox" data-reveal data-animation-in="slide-in-up"
-                    data-animation-out="slide-out-down">
-                        <div class="card">
-                            <div class="card-divider">
-                                <h4><i class="fa fa-upload">&nbsp;</i>Upload Galley</h4>
-                            </div>
-                        </div>
-                        <div class="card-section">
-                            {% if error %}
-                                <div class="alert alert-warning" role="alert">{{ error }}</div>
-                            {% endif %}
-                            <button class="close-button" data-close aria-label="Close modal" type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            {% csrf_token %}
-
-                           <p class="help-text">Galley labels are displayed in download links and have the format "Download Label" eg. if you set the label to be PDF the link will be Download PDF. If you want Janeway to set a label for you, leave it blank.</p>
-                           <div class="clearfix">
-                               <div>
-                                   {{ galley_form|foundation }}
-                                   <button type="submit" class="button success float-right" name="other"><i
-                                           class="fa fa-upload">
-                                       &nbsp;</i>Upload
-                                   </button>
-                               </div>
-                           </div>
-                        </div>
-                    </div>                    
-
-                    <div class="title-area">
-                        <h2>{% trans "Publication Info" %}</h2>
-                    </div>
-                    <div class="content">
-                        <div class="large-4 columns">
-                            {{ pub_form.date_published|foundation }}
-                        </div>
-                        <div class="large-4 columns">
-                            {{ pub_form.date_accepted|foundation }}
-                        </div>
-                        <div class="large-4 columns">
-                            {{ pub_form.render_galley|foundation }}
-                        </div>
-                        <div class="large-4 columns">
-                            {{ pub_form.primary_issue|foundation }}
-                        </div>
-                        <div class="large-4 columns">
-                            {{ pub_form.page_numbers|foundation }}
-                        </div>
-                        <div class="large-4 columns">
-                            <br/>
-                            {{ pub_form.peer_reviewed|foundation }}
-                        </div>
-                        <div class="large-12 columns">
-                            {% if article and article.date_published %}
-                            <p>{% trans "More Pub Info is available on the" %} <a href="{% url 'publish_article' article.pk %}">{% trans "Pre Publication Checklist" %}</a>.</p>
-                            {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr/>
+                            <p>{% trans "You may select a main author, this author will receive the communications regarding your articles process through our systems. This does not have to be you." %}</p>
+                            <label for="main-author">{% trans "Select main author" %}:</label>
+                            <select class="form-control" id="main-author" name="main-author">
+                                <option value="">---------</option>
+                                {% for author in article.authors.all %}
+                                    <option value="{{ author.pk }}"
+                                            {% if article.correspondence_author.pk == author.pk %}selected{% endif %}>{{ author.full_name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div class="title-area">
-                        <h2>{% trans "Remote" %}</h2>
-                    </div>
-                    <div class="content">
-                        <p>{% trans "If your article is remote, you can fill the required details here. If the remote article has a DOI, you should use it for full resolution." %}</p>
-                        <div class="row expanded">
-                            <div class="large-6 columns">
-                                {{ remote_form.is_remote|foundation }}
-                            </div>
-                            <div class="large-6 columns">
-                                {{ remote_form.remote_url|foundation }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="title-area">
-                        <h2>{% trans "Publish" %}</h2>
-                    </div>
-                    <div class="content">
-                        <p>{% trans "When you are ready to publish your article, press the publish button and it will be published." %}</p>
-                        <div class="large-12 columns">
-                            {% csrf_token %}
-                            <button class="success button pull-right" type="submit" name="publish">
-                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Publish" %}
-                            </button>
-                            <button class="success button pull-right" type="submit" name="draft" formnovalidate>
-                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Save as Draft" %}
-                            </button>
-                            <button class="success button pull-right" type="submit" name="delete" formnovalidate>
-                                <i class="fa fa-check-circle">&nbsp;</i>{% trans "Delete" %}
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                </div>
+            </div>      
+                
+            <div class="title-area">
+                <h2>{% trans "Galleys" %}</h2>
             </div>
-        </div>
-    </section>
+            <div class="content">
+                <table id="upload-table" class="table table-bordered table-condensed small">
+                    <tr style="text-align: left">
+                        <th>{% trans "Label" %}</th>
+                        <th width="25%">{% trans "Filename" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Edit" %}</th>
+                        <th>{% trans "Download" %}</th>
+                        <th>{% trans "Replace" %}</th>
+                        <th>{% trans "History" %}</th>
+                        <th>{% trans "Create PDF" %}</th>
+                        <th>{% trans "Create EPUB" %}</th>
+                    </tr>
+                    {% for galley in galleys %}
+                        {% can_view_file galley.file as can_view_file_flag %}
+                        {% can_edit_file galley.file article as can_edit_file_flag %}
+                        {% can_view_file_history galley.file article as can_view_file_history_flag %}
+                        <tr>
+                            <td>{{ galley.label }}</td>
+                            <td>{{ galley.file.original_filename|truncatechars:40 }} {% if galley.label == 'XML' %}
+                                &nbsp;
+                                <small><a target="_blank"
+                                            href="{% url 'backcontent_preview_xml_galley' article.pk galley.pk %}"><i
+                                        class="fa fa-search" aria-hidden="true">&nbsp;</i>Preview</a>
+                                </small>{% endif %}</td>
+                            <td>Galley</td>
+                            <td><a href="{% url 'pm_edit_galley' article.pk galley.pk %}?return={{ request.path|urlencode }}" class="fa fa-edit"></a>
+                            </td>
+                            <td>{% if can_view_file_flag %}
+                                <a href="{% url 'article_file_download' 'id' article.pk galley.file.pk %}"><i
+                                        class="fa fa-download">&nbsp;</i></a>{% endif %}
+                            </td>
+                            <td>{% if can_edit_file_flag %}
+                                <a href="{% url 'article_file_replace' 'id' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
+                                        class="fa fa-cloud-upload">&nbsp;</i></a>{% endif %}
+                            </td>
+                            <td>{% if can_view_file_history_flag %}
+                                <a href="{% url 'file_history' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
+                                        class="fa fa-history">
+                                    &nbsp;</i></a>{% endif %}
+                            </td>
+                            <td>
+                                {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
+                                    <a href="{% url 'cassius_generate' galley.pk %}?return={{ request.path|urlencode }}">
+                                        <i class="fa fa-file-text-o">&nbsp;</i>
+                                    </a>
+                                {% elif not galley.file.mime_type == 'application/xml' %}
+                                    Function for XML only.
+                                {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
+                                    <p><span data-tooltip aria-haspopup="true" class="has-tip top"
+                                                data-disable-hover="false"
+                                                tabindex="2"
+                                                title="{% has_missing_supplements galley %}">Missing Supplements</span>
+                                    </p>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if galley.file.mime_type == 'application/xml' and not galley.has_missing_image_files %}
+                                    <a href="{% url 'epub_generate' galley.pk %}?return={{ request.path|urlencode }}">
+                                        <i class="fa fa-book">&nbsp;</i>
+                                    </a>
+                                {% elif not galley.file.mime_type == 'application/xml' %}
+                                    Function for XML only.
+                                {% elif galley.file.mime_type == 'application/xml' and galley.has_missing_image_files %}
+                                    <p><span data-tooltip aria-haspopup="true" class="has-tip top"
+                                                data-disable-hover="false"
+                                                tabindex="2"
+                                                title="{% has_missing_supplements galley %}">Missing Supplements</span>
+                                    </p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9">{% trans "No galleys have been uploaded." %}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <a class="button success float-right" data-open="uploadbox"><i class="fa fa-cloud-upload">
+                    &nbsp;</i>{% trans "Upload a new galley" %}</a>
+            </div>
+            <div class="reveal" id="uploadbox" data-reveal data-animation-in="slide-in-up" data-animation-out="slide-out-down">
+                <div class="card">
+                    <div class="card-divider">
+                        <h4><i class="fa fa-upload">&nbsp;</i>Upload Galley</h4>
+                    </div>
+                </div>
+                <div class="card-section">
+                    {% if error %}
+                        <div class="alert alert-warning" role="alert">{{ error }}</div>
+                    {% endif %}
+                    <button class="close-button" data-close aria-label="Close modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {% csrf_token %}
+
+                    <p class="help-text">Galley labels are displayed in download links and have the format "Download Label" eg. if you set the label to be PDF the link will be Download PDF. If you want Janeway to set a label for you, leave it blank.</p>
+                    <div class="clearfix">
+                        <div>
+                            {{ galley_form|foundation }}
+                            <button type="submit" class="button success float-right" name="other"><i
+                                    class="fa fa-upload">
+                                &nbsp;</i>Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>                    
+            <div class="title-area">
+                <h2>{% trans "Publication Info" %}</h2>
+            </div>
+            <div class="content">
+                <div class="large-4 columns">
+                    {{ pub_form.date_published|foundation }}
+                </div>
+                <div class="large-4 columns">
+                    {{ pub_form.date_accepted|foundation }}
+                </div>
+                <div class="large-4 columns">
+                    {{ pub_form.render_galley|foundation }}
+                </div>
+                <div class="large-12 columns">
+                    {% if article and article.date_published %}
+                    <p>{% trans "More Pub Info is available on the" %} <a href="{% url 'publish_article' article.pk %}">{% trans "Pre Publication Checklist" %}</a>.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="title-area">
+                <h2>{% trans "Publish" %}</h2>
+            </div>
+            <div class="content">
+                <p>{% trans "When you are ready to publish your article, press the publish button and it will be published." %}</p>
+                <div class="large-12 columns">
+                    {% csrf_token %}
+                    <button class="success button pull-right" type="submit" name="publish">
+                        <i class="fa fa-check-circle">&nbsp;</i>{% trans "Publish" %}
+                    </button>
+                    <button class="success button pull-right" type="submit" name="draft" formnovalidate>
+                        <i class="fa fa-check-circle">&nbsp;</i>{% trans "Save as Draft" %}
+                    </button>
+                    <button class="success button pull-right" type="submit" name="delete" formnovalidate>
+                        <i class="fa fa-check-circle">&nbsp;</i>{% trans "Delete" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
     {% include "tuw_backcontent/submission_author.html" %}
 {% endblock %}

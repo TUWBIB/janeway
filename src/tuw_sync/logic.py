@@ -15,10 +15,10 @@ from django.utils.translation import activate
 
 from submission import models as submission_models
 from journal import models as journal_models
-from sync import models as sync_models
+from tuw_sync import models as sync_models
 from identifiers import models as identifier_models
 from utils.logger import get_logger
-from sync.datacite import api as datacite_api
+from tuw_sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField,stripXmlDeclaration
 
 logger = get_logger(__name__)

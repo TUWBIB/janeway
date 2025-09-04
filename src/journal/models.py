@@ -60,7 +60,7 @@ from utils.function_cache import cache, mutable_cached_property
 from utils.logger import get_logger
 from review import models as review_models
 from identifiers import models as identifier_models
-from sync import models as sync_models
+from tuw_sync import models as tuw_sync_models
 
 logger = get_logger(__name__)
 
@@ -1357,7 +1357,7 @@ class Issue(AbstractLastModifiedModel):
 
     @property
     def datacite(self):
-        datacite = sync_models.DataCite.objects.get(issue=self)
+        datacite = tuw_sync_models.DataCite.objects.get(issue=self)
         return datacite
 
     @property

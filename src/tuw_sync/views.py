@@ -1,3 +1,6 @@
+from django.shortcuts import render
+
+# Create your views here.
 import json
 import traceback
 import re
@@ -28,10 +31,10 @@ from django.template import RequestContext, loader
 from security.decorators import has_journal, editor_user_required
 from submission import models as submission_models
 from journal import models as journal_models
-from sync import models as sync_models
 from utils.logger import get_logger
-from sync import logic
-from sync.datacite import api as datacite_api
+from tuw_sync import models as sync_models
+from tuw_sync import logic
+from tuw_sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,stripXmlDeclaration
 
 logger = get_logger(__name__)
@@ -135,7 +138,7 @@ def sync(request):
         
         return response
 
-    template = 'journal/manage/sync/sync_articles.html'
+    template = 'tuw_sync/sync_articles.html'
     context = {
         'articles': articles,
         'issues': issues,

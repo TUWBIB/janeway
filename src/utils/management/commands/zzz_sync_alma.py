@@ -10,8 +10,8 @@ from django.utils import translation
 from press import models as press_models
 from journal import models as journal_models
 from submission import models as submission_models
-from sync.alma import api as alma_api,marc as alma_marc,alma as alma
-
+from tuw_sync import logic
+from laapy import api as alma_api
 
 class Command(BaseCommand):
     help = "Syncs a record with Alma"
@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
         api=alma_api.API()
         api.setAPITarget("sandbox")
-        xml=alma.toMarc(article_id)
+        xml,errors,warnings=logic.articleToMarc(article)
         print (xml)
         xml=api.addXmlDeclaration(xml)
         print (xml)
