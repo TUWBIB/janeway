@@ -446,13 +446,17 @@ class Journal(AbstractSiteModel):
 
     def site_url(self, path="", query=""):
         if self.domain and not settings.URL_CONFIG == "path":
-            return logic.build_url(
-                netloc=self.domain,
-                scheme=self._get_scheme(),
-                port=None,
-                path=path,
-                query=query,
-            )
+            # TUW
+            # this doesn't work in development environments with non-standard-ports
+            #
+#            return logic.build_url(
+#                netloc=self.domain,
+#                scheme=self._get_scheme(),
+#                port=None,
+#                path=path,
+#                query=query,
+#            )
+            return logic.build_url_for_request(path=path,query=query)
         else:
             return self.press.site_path_url(self, path, query=query)
 
