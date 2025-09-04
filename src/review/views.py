@@ -1026,6 +1026,7 @@ def do_review(request, assignment_id):
             decision_required = True
         form = forms.GeneratedForm(
             request.POST,
+            request.FILES,
             review_assignment=assignment,
             fields_required=fields_required,
         )
@@ -1038,7 +1039,7 @@ def do_review(request, assignment_id):
 
         if form.is_valid() and decision_form.is_valid():
             decision_form.save()
-            assignment.save_review_form(form, assignment)
+            assignment.save_review_form(form, assignment, request.FILES)
             if "save_progress" in request.POST:
                 messages.add_message(
                     request,
@@ -1482,12 +1483,16 @@ def edit_review_answer(request, article_id, review_id, answer_id):
     form = forms.GeneratedForm(answer=answer)
 
     if request.POST:
-        form = forms.GeneratedForm(request.POST, answer=answer)
+        form = forms.GeneratedForm(request.POST, request.FILES, answer=answer)
         if form.is_valid():
             # Form element keys are posted as str
             element_key = str(answer.element.pk)
             answer.edited_answer = form.cleaned_data[element_key]
             answer.save()
+            if request.FILES and element_key in request.FILES:
+                answer.save_file(
+                    request.FILES[element_key],
+                )
 
             return redirect(
                 reverse(
@@ -3344,3 +3349,13 @@ def reviewer_shared_review_download(request, article_id, review_id):
             )
 
     raise Http404("You do not have permission to download this file.")
+
+
+def review_attachment_download(request, assignment_id, file_uuid):
+    answer_file = get_object_or_404(
+        models.ReviewAssignmentAnswerFile,
+        answer__assignment__id=assignment_id,
+        file__uuid_filename=file_uuid,
+    )
+
+    return files.serve_file_to_browser(answer_file.file_path, answer_file.file)
