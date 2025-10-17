@@ -171,6 +171,15 @@ class Journal(AbstractSiteModel):
                           'editorial team pages when the user has no set '
                           'profile image.'),
     )
+    under_construction_image = models.ImageField(
+        upload_to=cover_images_upload_path,
+        null=True,
+        blank=True,
+        storage=fs,
+        help_text=gettext('Image shown for frontend when initial data input is still work in progress'),
+    )
+
+
     # DEPRECATED "description" in favour of "journal_description" setting
     description = JanewayBleachField(null=True, blank=True, verbose_name="Journal Description")
     contact_info = JanewayBleachField(null=True, blank=True, verbose_name="Contact Information")

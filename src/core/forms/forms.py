@@ -414,7 +414,7 @@ class JournalImageForm(forms.ModelForm):
         fields = (
             'header_image', 'default_cover_image',
             'default_large_image', 'favicon', 'press_image_override',
-            'default_profile_image',
+            'default_profile_image', 'under_construction_image',
         )
 
 

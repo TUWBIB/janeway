@@ -92,5 +92,15 @@
         </div>
         <hr/>
 
+
+        <div class="large-8 columns">
+            {% include "admin/elements/forms/field.html" with field=attr_form.under_construction_image %}
+        </div>
+        <div class="large-4 columns">
+            {% if request.journal.under_construction_image %}
+                <img src="{{ request.journal.under_construction_image.url }}" class="thumbnail float-right">
+            {% endif %}
+        </div>
+        <hr/>
     </div>
 </div>
