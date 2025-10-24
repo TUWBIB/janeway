@@ -52,7 +52,7 @@ def sync(request):
     issues = journal_models.Issue.objects.filter(journal=request.journal)
     sync_settings = settings.DATACITE['journals'][request.journal.code]
     view_settings = {}
-    view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM','ARW') else False
+    view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM','ARW','IOTW','EF') else False
     view_settings['alma_issue_sync'] = False
     view_settings['datacite_article_sync'] = True if 'pattern_article' in sync_settings else False
     view_settings['datacite_issue_sync'] = True if 'pattern_issue' in sync_settings else False

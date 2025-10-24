@@ -205,7 +205,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(article.primary_issue.publication_year)
                 l.append('</publicationYear>')
 
-                if article.journal.code == 'ARW':
+                if article.journal.code in ['ARW','IOTW','EF',]:
                     l.append('<dates>')
                     l.append('<date dateType="Issued">')
                     l.append(article.date_published.strftime('%Y-%m-%d'))
@@ -228,7 +228,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
 
                 if article.license is not None and article.license.short_name != 'Copyright':
-                    if article.journal.code == 'ARW':
+                    if article.journal.code ['ARW','IOTW','EF',]:
                         l.append('<rightsList>')
                         l.append('<rights xml:lang="en" schemeURI="https://spdx.org/licenses/" rightsIdentifierScheme="SPDX" ')
                         l.append(f'rightsIdentifier="{article.license.short_name.replace(' ','-')}" ')
@@ -247,7 +247,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append('</rightsList>')
                         
 
-                if article.journal.code == 'ARW':
+                if article.journal.code in ['ARW','IOTW','EF',]:
                     l.append('<resourceType resourceTypeGeneral="ConferencePaper">Conference Paper</resourceType>')
                 else:
                     l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
@@ -255,7 +255,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
 
 
-                if article.journal.code == 'ARW':
+                if article.journal.code in ['ARW','IOTW','EF',]:
                     if article.journal.issn or article.issue.doi:
                         l.append('<relatedIdentifiers>')
                         if article.journal.issn:
@@ -385,6 +385,10 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('<publisher>')
                 if issue.journal.code == 'ARW':
                     l.append('Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien')
+                elif issue.journal.code == 'IOTW':
+                    pass
+                elif issue.journal.code == 'EF':
+                    pass
                 l.append('</publisher>')
 
                 l.append('<publicationYear>')
@@ -951,7 +955,7 @@ def articleToMarc(article):
                 s += 'Heft '+ article.primary_issue.issue + ', '
                 s += 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
-            elif article.journal.code == 'ARW':
+            elif article.journal.code in ['ARW','IOTW','EF',]:
                 s = 'Seiten '+article.page_numbers
                 datafield.addSubField(SubField.createSubField("g",s))
             else:
@@ -985,7 +989,7 @@ def articleToMarc(article):
             datafield.addSubField(SubField.createSubField("a",'TUW'))
             if article.journal.code in ('OES','JFM'):
                 datafield.addSubField(SubField.createSubField("d",'OA-ARTICLE'))
-            elif article.journal.code == 'ARW':
+            elif article.journal.code in ['ARW','IOTW','EF',]:
                 datafield.addSubField(SubField.createSubField("d",'OA-BOOKPART'))
             mr.addDataField(datafield)
 
@@ -1015,7 +1019,7 @@ def articleToMarc(article):
             datafield = DataField.createDataField("996","3","3")
             datafield.addSubField(SubField.createSubField("9",'LOCAL'))
             datafield.addSubField(SubField.createSubField("a",'Gold Open Access ; Journal Hosting System'))
-            if article.journal.code == 'ARW':
+            if article.journal.code in ['ARW','IOTW','EF',]:
                 datafield.addSubField(SubField.createSubField("b",'Konferenzbeitrag'))
                 datafield.addSubField(SubField.createSubField("c",'Full-Paper-Beitrag'))
             mr.addDataField(datafield)
