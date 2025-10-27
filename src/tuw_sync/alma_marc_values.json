@@ -1,0 +1,26 @@
+[
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 773 08. Contained in relation, description / name of containing publication, subfield t.",
+            "is_translatable": true,
+            "name": "marc_773_08",
+            "pretty_name": "Marc Field 773 08 contained in text",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "IFM Journal",
+            "OES": "Der Öffentliche Sektor - The Public Sector",
+            "ARW": "Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds.)",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    }
+]
