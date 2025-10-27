@@ -4,10 +4,10 @@
             "name": "tuw-alma"
         },
         "setting": {
-            "description": "Marc field 773 08. Contained in relation, description / name of containing publication, subfield t.",
-            "is_translatable": true,
-            "name": "marc_773_08",
-            "pretty_name": "Marc Field 773 08 contained in text",
+            "description": "Marc field 773 08 subfield t host item entry, title - value",
+            "is_translatable": false,
+            "name": "marc_773_08_t",
+            "pretty_name": "Marc Field 773 08 subfield t - value",
             "type": "rich-text"
         },
         "value": {
@@ -17,6 +17,174 @@
             "ARW": "Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds.)",
             "IOTW": "",
             "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 773 08 subfield d host item entry, publication info - mode",
+            "is_translatable": false,
+            "name": "marc_773_08_d",
+            "pretty_name": "Marc Field 773 08 subfield d - mode",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "volume - issue - pages",
+            "OES": "volume_year - issue - pages",
+            "ARW": "pages",
+            "IOTW": "pages",
+            "EF": "pages"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 773 08 subfield d host item entry, publication info - mode",
+            "is_translatable": false,
+            "name": "marc_773_08_d",
+            "pretty_name": "Marc Field 773 08 subfield d - mode",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "volume - issue - pages",
+            "OES": "volume_year - issue - pages",
+            "ARW": "pages",
+            "IOTW": "pages",
+            "EF": "pages"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 773 08 subfield k host item entry, series data - value",
+            "is_translatable": false,
+            "name": "marc_773_08_k",
+            "pretty_name": "Marc Field 773 08 subfield k - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "ARW Proceedings",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 773 08 subfield w host item entry, ac number - value",
+            "is_translatable": false,
+            "name": "marc_773_08_w",
+            "pretty_name": "Marc Field 773 08 subfield w - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "(AT-OBV)AC13348910",
+            "OES": "(AT-OBV)AC10863779",
+            "ARW": "(AT-OBV)AC17596176",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 970 2# subfield d obv specific, cv-list - value",
+            "is_translatable": false,
+            "name": "marc_970_2#_d",
+            "pretty_name": "Marc Field 970 2# subfield d - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "OA-ARTICLE",
+            "OES": "OA-ARTICLE",
+            "ARW": "OA-BOOKPART",
+            "IOTW": "OA-BOOKPART",
+            "EF": "OA-BOOKPART"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 996 33 subfield b repositum extra - value",
+            "is_translatable": false,
+            "name": "marc_996_33_b",
+            "pretty_name": "Marc Field 996 33 subfield b - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "Konferenzbeitrag",
+            "IOTW": "Konferenzbeitrag",
+            "EF": "Konferenzbeitrag"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 996 33 subfield c repositum extra - value",
+            "is_translatable": false,
+            "name": "marc_996_33_c",
+            "pretty_name": "Marc Field 996 33 subfield c - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "Full-Paper-Beitrag",
+            "IOTW": "Full-Paper-Beitrag",
+            "EF": "Full-Paper-Beitrag"
         },
         "editable_by": [
             "editor",
