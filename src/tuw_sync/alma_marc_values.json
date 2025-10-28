@@ -4,6 +4,54 @@
             "name": "tuw-alma"
         },
         "setting": {
+            "description": "Marc controlfield 008 position 29 conference publication - value",
+            "is_translatable": false,
+            "name": "marc_008_29",
+            "pretty_name": "Marc controlfield 008 position 29 - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "0",
+            "OES": "0",
+            "ARW": "1",
+            "IOTW": "1",
+            "EF": "1"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
+            "description": "Marc field 264 #1 subfield b publication info - value",
+            "is_translatable": false,
+            "name": "marc_264__1_b",
+            "pretty_name": "Marc Field 264 #1 subfield b - value",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "Technische Universität Wien",
+            "OES": "Technische Universität Wien",
+            "ARW": "Gesellschaft für Mess-, Automatisierungs- und Robotertechnik – GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-alma"
+        },
+        "setting": {
             "description": "Marc field 773 08 subfield t host item entry, title - value",
             "is_translatable": false,
             "name": "marc_773_08_t",
@@ -28,34 +76,10 @@
             "name": "tuw-alma"
         },
         "setting": {
-            "description": "Marc field 773 08 subfield d host item entry, publication info - mode",
+            "description": "Marc field 773 08 subfield g host item entry, related parts - mode",
             "is_translatable": false,
-            "name": "marc_773_08_d",
-            "pretty_name": "Marc Field 773 08 subfield d - mode",
-            "type": "rich-text"
-        },
-        "value": {
-            "default": "",
-            "JFM": "volume - issue - pages",
-            "OES": "volume_year - issue - pages",
-            "ARW": "pages",
-            "IOTW": "pages",
-            "EF": "pages"
-        },
-        "editable_by": [
-            "editor",
-            "journal-manager"
-        ]
-    },
-    {
-        "group": {
-            "name": "tuw-alma"
-        },
-        "setting": {
-            "description": "Marc field 773 08 subfield d host item entry, publication info - mode",
-            "is_translatable": false,
-            "name": "marc_773_08_d",
-            "pretty_name": "Marc Field 773 08 subfield d - mode",
+            "name": "marc_773_08_g",
+            "pretty_name": "Marc Field 773 08 subfield g - mode",
             "type": "rich-text"
         },
         "value": {
@@ -126,7 +150,7 @@
         "setting": {
             "description": "Marc field 970 2# subfield d obv specific, cv-list - value",
             "is_translatable": false,
-            "name": "marc_970_2#_d",
+            "name": "marc_970_2__d",
             "pretty_name": "Marc Field 970 2# subfield d - value",
             "type": "rich-text"
         },
