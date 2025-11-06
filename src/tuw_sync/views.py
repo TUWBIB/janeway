@@ -8,6 +8,7 @@ from typing import List
 import lxml.etree as etree
 import time
 
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.conf import settings
 from django.contrib import messages
@@ -38,6 +39,16 @@ from tuw_sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,stripXmlDeclaration
 
 logger = get_logger(__name__)
+
+
+def debug(request):
+    html = f"<h1>Debug Info</h1>"
+    html += f"<p>request.scheme: {request.scheme}</p>"
+    html += f"<p>request.is_secure(): {request.is_secure()}</p>"
+    html += f"<p>request.get_host(): {request.get_host()}</p>"
+    html += f"<p>META headers: {request.META}</p>"
+    return HttpResponse(html)
+
 
 ## sync
 
