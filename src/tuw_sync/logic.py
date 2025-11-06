@@ -206,19 +206,22 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(article.primary_issue.publication_year)
                 l.append('</publicationYear>')
 
-                if article.journal.code in ['ARW','IOTW','EF',]:
+
+                value = setting_handler.get_setting('tuw-datacite','date_published',article.journal).value
+                if value == 'article_date_published':
                     l.append('<dates>')
                     l.append('<date dateType="Issued">')
                     l.append(article.date_published.strftime('%Y-%m-%d'))
                     l.append('</date>')
                     l.append('</dates>')
-                else:
+                elif value == 'primary_issue_publication_year':
                     l.append('<dates>')
                     l.append('<date dateType="Issued">')
                     l.append(article.primary_issue.publication_year)
                     l.append('</date>')
                     l.append('</dates>')
-
+                else:
+                    pass
 
                 if article.get_urn() is not None:
                     l.append('<alternateIdentifiers>')
@@ -227,9 +230,9 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('</alternateIdentifier>')
                     l.append('</alternateIdentifiers>')
 
-
+                value = setting_handler.get_setting('tuw-datacite','rights_list',article.journal).value
                 if article.license is not None and article.license.short_name != 'Copyright':
-                    if article.journal.code ['ARW','IOTW','EF',]:
+                    if value == 'include_scheme':
                         l.append('<rightsList>')
                         l.append('<rights xml:lang="en" schemeURI="https://spdx.org/licenses/" rightsIdentifierScheme="SPDX" ')
                         l.append(f'rightsIdentifier="{article.license.short_name.replace(' ','-')}" ')
@@ -238,7 +241,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append(article.license.name)
                         l.append('</rights>')
                         l.append('</rightsList>')
-                    else:
+                    elif value == 'no_scheme':
                         l.append('<rightsList>')
                         l.append('<rights rightsURI="')
                         l.append(article.license.url)
@@ -246,17 +249,19 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append(article.license.name)
                         l.append('</rights>')
                         l.append('</rightsList>')
+                    else:
+                        pass
                         
-
-                if article.journal.code in ['ARW','IOTW','EF',]:
+                value = setting_handler.get_setting('tuw-datacite','resource_type',article.journal).value
+                if value == 'conference paper / conference paper':
                     l.append('<resourceType resourceTypeGeneral="ConferencePaper">Conference Paper</resourceType>')
-                else:
+                elif value == 'text / journal article':
                     l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
+                else:
+                    pass
 
-
-
-
-                if article.journal.code in ['ARW','IOTW','EF',]:
+                value = setting_handler.get_setting('tuw-datacite','relation_type',article.journal).value
+                if value == 'is_published_in':
                     if article.journal.issn or article.issue.doi:
                         l.append('<relatedIdentifiers>')
                         if article.journal.issn:
@@ -264,11 +269,13 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         if article.issue.doi:
                             l.append('<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPublishedIn" resourceTypeGeneral="ConferenceProceeding">' + article.issue.doi + '</relatedIdentifier>')
                         l.append('</relatedIdentifiers>')
-                else:
+                elif value == 'is_part_of':
                     if article.journal.issn:
                         l.append('<relatedIdentifiers>')
                         l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">' + article.journal.issn + '</relatedIdentifier>')
                         l.append('</relatedIdentifiers>')
+                else:
+                    pass
 
                 l.append('<descriptions>')
                 if article.getAbstractEN or article.getAbstractDE:
@@ -285,10 +292,10 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 else:
                     warnings.append("neither english nor german abstract")
 
-                if article.journal.code == 'JFM':
-                    pass
-                elif article.journal.code == 'OES':
-                    l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
+                value = setting_handler.get_setting('tuw-datacite','series_information',article.journal).value
+                if value:
+                    l.append('<description descriptionType="SeriesInformation">')
+                    l.append(value + ' ')
                     l.append(str(article.primary_issue.volume))
                     l.append('(')
                     l.append(str(article.primary_issue.issue))
@@ -327,74 +334,45 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(doi)
                 l.append('</identifier>')
 
-                l.append('<creators>')
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Kubinger, Wilfried")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Wilfried')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Kubinger')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-6965-7794')
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
+                value = setting_handler.get_setting('tuw-datacite','issuelevel__editors',issue.journal).value
+                l_values = json.loads(value)
+                if l_values:
+                    l.append('<creators>')
+                    for d in l_values:
+                        print(l)
 
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Kranzer, Simon")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Simon')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Kranzer')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-5907-4624')
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
-
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Vincze, Markus")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Markus')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Vincze')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-2799-491X')                         
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
-
-                l.append('</creators>')
+                        l.append('<creator>')
+                        l.append('<creatorName nameType="Personal">')
+                        l.append(d["full_name"])
+                        l.append('</creatorName>')
+                        l.append('<givenName>')
+                        l.append(d["given_name"])
+                        l.append('</givenName>')
+                        l.append('<familyName>')
+                        l.append(d["family_name"])
+                        l.append('</familyName>')
+                        l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
+                        l.append(d["orcid"])
+                        l.append('</nameIdentifier>')
+                        l.append('</creator>')
+                    l.append('</creators>')
 
                 l.append('<titles>')
                 l.append('<title>')
                 l.append(escape(issue.issue_title))
                 l.append('</title>')
-                l.append('</titles>')                
+                l.append('</titles>')
 
-
-
-                l.append('<publisher>')
-                if issue.journal.code == 'ARW':
-                    l.append('Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien')
-                elif issue.journal.code == 'IOTW':
-                    pass
-                elif issue.journal.code == 'EF':
-                    pass
-                l.append('</publisher>')
+                value = setting_handler.get_setting('tuw-datacite','issuelevel__publisher',issue.journal).value                             
+                if value:
+                    l.append('<publisher>')
+                    l.append(value)
+                    l.append('</publisher>')
 
                 l.append('<publicationYear>')
                 l.append(str(issue.date.year))
                 l.append('</publicationYear>')
+
                 l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
                 l.append("---to be 𝄞 determined---'")
                 l.append('</resourceType>')

@@ -65,6 +65,10 @@ class Command(BaseCommand):
                                 setting.editable_by.add(v)
                             setting.save()
                         setting_value,_ = core_models.SettingValue.objects.get_or_create(setting=setting,journal=journal)
+
+                        if not isinstance(value,str):
+                            value = json.dumps(value,ensure_ascii=False)
+
                         setting_value.value = value
                         setting_value.save()
                         print (f"setting saved, {setting_name} for {journal_code} with {value}")

@@ -1,0 +1,174 @@
+[
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Date dublished",
+            "is_translatable": false,
+            "name": "date_published",
+            "pretty_name": "Which value to use for date published",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "primary_issue_publication_year",
+            "OES": "primary_issue_publication_year",
+            "ARW": "article_date_published",
+            "IOTW": "article_date_published",
+            "EF": "article_date_published"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Rights list",
+            "is_translatable": false,
+            "name": "rights_list",
+            "pretty_name": "Use more details within rights list, include identifier scheme",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "no_scheme",
+            "OES": "no_scheme",
+            "ARW": "include_scheme",
+            "IOTW": "include_scheme",
+            "EF": "include_scheme"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Resource type",
+            "is_translatable": false,
+            "name": "resource_type",
+            "pretty_name": "Which combination to use for resource type",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "text / journal article",
+            "OES": "text / journal article",
+            "ARW": "conference paper / conference paper",
+            "IOTW": "conference paper / conference paper",
+            "EF": "conference paper / conference paper"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Relation Type",
+            "is_translatable": false,
+            "name": "relation_type",
+            "pretty_name": "Which value to use for relation_type",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "is_part_of",
+            "OES": "is_part_of",
+            "ARW": "is_published_in",
+            "IOTW": "is_published_in",
+            "EF": "is_published_in"
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Series Information",
+            "is_translatable": false,
+            "name": "series_information",
+            "pretty_name": "Add Series information, label and article details",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "Der Öffentliche Sektor - The Public Sector",
+            "ARW": "",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Series Editors, json for person data",
+            "is_translatable": false,
+            "name": "issuelevel__editors",
+            "pretty_name": "Series Editors",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": [ { "orcid" : "0000-0002-6965-7794", "full_name": "Kubinger, Wilfried", "given_name": "Wilfried", "family_name": "Kubinger" }, { "orcid" : "0000-0002-5907-4624", "full_name": "Kranzer, Simon", "given_name": "Simon", "family_name": "Kranzer" }, { "orcid" : "0000-0002-2799-491X", "full_name": "Vincze, Markus", "given_name": "Markus", "family_name": "Vincze" } ],
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Publisher",
+            "is_translatable": false,
+            "name": "issuelevel__publisher",
+            "pretty_name": "Publisher",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
+    }
+]
+
+
+
+
