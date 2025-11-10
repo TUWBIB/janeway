@@ -111,7 +111,7 @@
             "JFM": "",
             "OES": "Der Öffentliche Sektor - The Public Sector",
             "ARW": "",
-            "IOTW": "",
+            "IOTW": "Proceedings of the International Conference on the Internet of Things (IoT) Workshops [ISSN: 3061-1008]",
             "EF": ""
         },
         "editable_by": [
@@ -135,7 +135,7 @@
             "JFM": "",
             "OES": "",
             "ARW": [ { "orcid" : "0000-0002-6965-7794", "full_name": "Kubinger, Wilfried", "given_name": "Wilfried", "family_name": "Kubinger" }, { "orcid" : "0000-0002-5907-4624", "full_name": "Kranzer, Simon", "given_name": "Simon", "family_name": "Kranzer" }, { "orcid" : "0000-0002-2799-491X", "full_name": "Vincze, Markus", "given_name": "Markus", "family_name": "Vincze" } ],
-            "IOTW": "",
+            "IOTW": [ { "orcid": "0000-0001-6901-7714", "full_name": "Frangoudis, Pantelis", "given_name": "Pantelis", "family_name": "Fragoudis" }, { "orcid": "0000-0001-5933-3246", "full_name": "Kimovski, Dragi", "given_name": "Dragi", "family_name": "Kimovski" } ],
             "EF": ""
         },
         "editable_by": [
@@ -159,7 +159,7 @@
             "JFM": "",
             "OES": "",
             "ARW": "Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
-            "IOTW": "",
+            "IOTW": "Institute of Information Systems Engineering, TU Wien",
             "EF": ""
         },
         "editable_by": [
@@ -168,7 +168,3 @@
         ]
     }
 ]
-
-
-
-
