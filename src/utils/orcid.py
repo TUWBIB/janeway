@@ -60,8 +60,10 @@ def build_redirect_uri(site, action='login'):
     """
     request = logic.get_current_request()
 
-    return request.site_type.site_url(reverse("core_login_orcid"),
-                                      query={'state': action})
+    return request.site_type.site_url(reverse("core_login_orcid"))
+    
+#    return request.site_type.site_url(reverse("core_login_orcid"),
+#                                      query={'state': action})
 
 def get_orcid_record(orcid):
     try:
