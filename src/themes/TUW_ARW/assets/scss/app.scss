@@ -1081,7 +1081,7 @@ button.list-group-item-danger.active:focus {
 
 .dyslexia-friendly {
     font-family: Verdana !important;
-    color: #4c4c4c;
+    color: #000 !important;
     font-size: 14px;
     background-color: #F5F5DC;
 
@@ -1092,22 +1092,26 @@ button.list-group-item-danger.active:focus {
     h5,
     h6 {
       font-family: Verdana !important;
-      color: #4c4c4c;
+      color: #000 !important;
     }
 
-    i, em {
+    i, em, strong {
         font-style: normal;
+        color: #000 !important;
         background-color: #FAFAC8;
     }
 
-    .summary {
+    // with dyslexia mode the summary is made all but invisible
+    // for now don't change background color
+
+/*    .summary {
         .top {
             background-color: #F5F5DC;
         }
         .bottom {
             background-color: #F5F5DC;
         }
-    }
+    }*/
 }
 
 .pagination-block {
