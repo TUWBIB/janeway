@@ -1331,3 +1331,11 @@ button.list-group-item-danger.active:focus {
   text-decoration: underline;
 }
 
+// spacing issues with long section titles in facets
+.tuw-facets input[type="checkbox"] {
+  margin: 0px 0px 0px 0px;
+}
+
+.tuw-facets div {
+  margin-bottom: 10px;
+}
