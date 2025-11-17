@@ -511,6 +511,7 @@ class JournalImageForm(forms.ModelForm):
             "favicon",
             "press_image_override",
             "default_profile_image",
+            'under_construction_image',
         )
 
 

@@ -222,7 +222,7 @@ def articles(request):
     # TUW_ARW based on OLH, can use new function based view, redirect
     # todo:
     # TUWJFM missing templates, use old code
-    if request.journal.code == 'ARW':
+    if request.journal.code in ['ARW','IOTW','EF',]:
         return PublishedArticlesListView.as_view()(request)        
 
     if request.POST and 'clear' in request.POST:

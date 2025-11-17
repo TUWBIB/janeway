@@ -17,6 +17,7 @@ from submission import models as submission_models
 from journal import models as journal_models
 from tuw_sync import models as sync_models
 from identifiers import models as identifier_models
+from utils import setting_handler
 from utils.logger import get_logger
 from tuw_sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField,stripXmlDeclaration
@@ -205,19 +206,22 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(article.primary_issue.publication_year)
                 l.append('</publicationYear>')
 
-                if article.journal.code == 'ARW':
+
+                value = setting_handler.get_setting('tuw-datacite','date_published',article.journal).value
+                if value == 'article_date_published':
                     l.append('<dates>')
                     l.append('<date dateType="Issued">')
                     l.append(article.date_published.strftime('%Y-%m-%d'))
                     l.append('</date>')
                     l.append('</dates>')
-                else:
+                elif value == 'primary_issue_publication_year':
                     l.append('<dates>')
                     l.append('<date dateType="Issued">')
                     l.append(article.primary_issue.publication_year)
                     l.append('</date>')
                     l.append('</dates>')
-
+                else:
+                    pass
 
                 if article.get_urn() is not None:
                     l.append('<alternateIdentifiers>')
@@ -226,9 +230,9 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('</alternateIdentifier>')
                     l.append('</alternateIdentifiers>')
 
-
+                value = setting_handler.get_setting('tuw-datacite','rights_list',article.journal).value
                 if article.license is not None and article.license.short_name != 'Copyright':
-                    if article.journal.code == 'ARW':
+                    if value == 'include_scheme':
                         l.append('<rightsList>')
                         l.append('<rights xml:lang="en" schemeURI="https://spdx.org/licenses/" rightsIdentifierScheme="SPDX" ')
                         l.append(f'rightsIdentifier="{article.license.short_name.replace(' ','-')}" ')
@@ -237,7 +241,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append(article.license.name)
                         l.append('</rights>')
                         l.append('</rightsList>')
-                    else:
+                    elif value == 'no_scheme':
                         l.append('<rightsList>')
                         l.append('<rights rightsURI="')
                         l.append(article.license.url)
@@ -245,17 +249,19 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append(article.license.name)
                         l.append('</rights>')
                         l.append('</rightsList>')
+                    else:
+                        pass
                         
-
-                if article.journal.code == 'ARW':
+                value = setting_handler.get_setting('tuw-datacite','resource_type',article.journal).value
+                if value == 'conference paper / conference paper':
                     l.append('<resourceType resourceTypeGeneral="ConferencePaper">Conference Paper</resourceType>')
-                else:
+                elif value == 'text / journal article':
                     l.append('<resourceType resourceTypeGeneral="Text">Journal Article</resourceType>')
+                else:
+                    pass
 
-
-
-
-                if article.journal.code == 'ARW':
+                value = setting_handler.get_setting('tuw-datacite','relation_type',article.journal).value
+                if value == 'is_published_in':
                     if article.journal.issn or article.issue.doi:
                         l.append('<relatedIdentifiers>')
                         if article.journal.issn:
@@ -263,11 +269,13 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         if article.issue.doi:
                             l.append('<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPublishedIn" resourceTypeGeneral="ConferenceProceeding">' + article.issue.doi + '</relatedIdentifier>')
                         l.append('</relatedIdentifiers>')
-                else:
+                elif value == 'is_part_of':
                     if article.journal.issn:
                         l.append('<relatedIdentifiers>')
                         l.append('<relatedIdentifier relatedIdentifierType="ISSN" relationType="IsPartOf">' + article.journal.issn + '</relatedIdentifier>')
                         l.append('</relatedIdentifiers>')
+                else:
+                    pass
 
                 l.append('<descriptions>')
                 if article.getAbstractEN or article.getAbstractDE:
@@ -284,10 +292,10 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 else:
                     warnings.append("neither english nor german abstract")
 
-                if article.journal.code == 'JFM':
-                    pass
-                elif article.journal.code == 'OES':
-                    l.append('<description descriptionType="SeriesInformation">Der Öffentliche Sektor - The Public Sector ')
+                value = setting_handler.get_setting('tuw-datacite','series_information',article.journal).value
+                if value:
+                    l.append('<description descriptionType="SeriesInformation">')
+                    l.append(value + ' ')
                     l.append(str(article.primary_issue.volume))
                     l.append('(')
                     l.append(str(article.primary_issue.issue))
@@ -326,70 +334,45 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(doi)
                 l.append('</identifier>')
 
-                l.append('<creators>')
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Kubinger, Wilfried")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Wilfried')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Kubinger')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-6965-7794')
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
+                value = setting_handler.get_setting('tuw-datacite','issuelevel__editors',issue.journal).value
+                l_values = json.loads(value)
+                if l_values:
+                    l.append('<creators>')
+                    for d in l_values:
+                        print(l)
 
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Kranzer, Simon")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Simon')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Kranzer')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-5907-4624')
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
-
-                l.append('<creator>')
-                l.append('<creatorName nameType="Personal">')
-                l.append("Vincze, Markus")
-                l.append('</creatorName>')
-                l.append('<givenName>')
-                l.append('Markus')
-                l.append('</givenName>')
-                l.append('<familyName>')
-                l.append('Vincze')
-                l.append('</familyName>')
-                l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
-                l.append('0000-0002-2799-491X')                         
-                l.append('</nameIdentifier>')
-                l.append('</creator>')
-
-                l.append('</creators>')
+                        l.append('<creator>')
+                        l.append('<creatorName nameType="Personal">')
+                        l.append(d["full_name"])
+                        l.append('</creatorName>')
+                        l.append('<givenName>')
+                        l.append(d["given_name"])
+                        l.append('</givenName>')
+                        l.append('<familyName>')
+                        l.append(d["family_name"])
+                        l.append('</familyName>')
+                        l.append('<nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">')
+                        l.append(d["orcid"])
+                        l.append('</nameIdentifier>')
+                        l.append('</creator>')
+                    l.append('</creators>')
 
                 l.append('<titles>')
                 l.append('<title>')
                 l.append(escape(issue.issue_title))
                 l.append('</title>')
-                l.append('</titles>')                
+                l.append('</titles>')
 
-
-
-                l.append('<publisher>')
-                if issue.journal.code == 'ARW':
-                    l.append('Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien')
-                l.append('</publisher>')
+                value = setting_handler.get_setting('tuw-datacite','issuelevel__publisher',issue.journal).value                             
+                if value:
+                    l.append('<publisher>')
+                    l.append(value)
+                    l.append('</publisher>')
 
                 l.append('<publicationYear>')
                 l.append(str(issue.date.year))
                 l.append('</publicationYear>')
+
                 l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
                 l.append("---to be 𝄞 determined---'")
                 l.append('</resourceType>')
@@ -652,60 +635,46 @@ def checkArticleMarcDuplicates(article) -> List[str]:
 
 def articleToMarc(article):
     def getControlField008():
+        value = setting_handler.get_setting('tuw-alma','marc_008_29',article.journal).value
+        if not value:
+            value = ' '
         lang=article.language
         if lang=='deu':
             lang = 'ger'
 
-        if article.journal.code in ('OES','JFM'):
-            now = datetime.datetime.now()
-            s = ''
-            s += now.strftime('%y%m%d')
-            s += '|'
-            s += article.primary_issue.publication_year
-            s += '    |||     o     ||| 0 '
-
-            if lang:
-                s += lang    
-            else:
-                s += '   '
-
-            s += ' c'
-        elif article.journal.code in 'ARW':
-            now = datetime.datetime.now()
-            s = ''
-            s += now.strftime('%y%m%d')
-            s += 's'
-            s += article.primary_issue.publication_year
-            s += '    |||     o     ||| 1 '
-
-            if lang:
-                s += lang    
-            else:
-                s += '   '
-
-            s += ' c'
+        now = datetime.datetime.now()
+        s = ''
+        s += now.strftime('%y%m%d')
+        s += '|'
+        s += article.primary_issue.publication_year
+        s += '    |||     o     ||| '
+        s += value
+        s += ' '
+        if lang:
+            s += lang    
+        else:
+            s += '   '
+        s += ' c'
         
         return ControlField.createControlField("008",s)
     
     # 264 _1 publication
     def getDataField264():
+        value = setting_handler.get_setting('tuw-alma','marc_264__1_b',article.journal).value      
         datafield = DataField.createDataField("264"," ","1")
         datafield.addSubField(SubField.createSubField("a","Wien"))
-        if article.journal.code in ('OES','JFM'):
-            datafield.addSubField(SubField.createSubField("b","Technische Universität Wien"))
-        elif article.journal.code == 'ARW':
-            datafield.addSubField(SubField.createSubField("b","Gesellschaft für Mess-, Automatisierungs- und Robotertechnik – GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien"))
+        datafield.addSubField(SubField.createSubField("b",value))
         datafield.addSubField(SubField.createSubField("c",article.primary_issue.publication_year))
         
         return datafield
-    
+   
 
     errors = checkArticleMarcMandatoryFields(article)
     warnings = []
     l_ac_duplicates = checkArticleMarcDuplicates(article)
     xml = ''
     l = []
-
+    
     if not errors:
         try:
             source_parallel_title = ''
@@ -932,42 +901,33 @@ def articleToMarc(article):
             # 773 08 relation
             datafield = DataField.createDataField("773","0","8")
             datafield.addSubField(SubField.createSubField("i","Enthalten in"))
-            if article.journal.code == 'OES':
-                datafield.addSubField(SubField.createSubField("t","Der Öffentliche Sektor - The Public Sector"))
-            elif article.journal.code == 'JFM':            
-                datafield.addSubField(SubField.createSubField("t","IFM Journal"))
-            elif article.journal.code == 'ARW':            
-                datafield.addSubField(SubField.createSubField("t","Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds.)"))
-            else:
-                pass
+            value  = setting_handler.get_setting('tuw-alma','marc_773_08_t',article.journal).value
+            datafield.addSubField(SubField.createSubField("t",value))
             datafield.addSubField(SubField.createSubField("d",article.primary_issue.publication_year))
-            if article.journal.code in 'OES':
+
+            mode = setting_handler.get_setting('tuw-alma','marc_773_08_g',article.journal).value
+            s = ""
+            if mode == 'volume_year - issue - pages':
                 s = 'Jahrgang '+str(article.primary_issue.volume) + ' ('+ article.primary_issue.publication_year + '), '
                 s += 'Heft '+ article.primary_issue.issue + ', '
                 s += 'Seiten '+article.page_numbers
-                datafield.addSubField(SubField.createSubField("g",s))
-            elif article.journal.code == 'JFM':
+            elif mode == 'volume - issue - pages':
                 s = 'Jahrgang ('+ article.primary_issue.publication_year + '), '
                 s += 'Heft '+ article.primary_issue.issue + ', '
                 s += 'Seiten '+article.page_numbers
-                datafield.addSubField(SubField.createSubField("g",s))
-            elif article.journal.code == 'ARW':
+            elif mode == 'pages':
                 s = 'Seiten '+article.page_numbers
-                datafield.addSubField(SubField.createSubField("g",s))
-            else:
-                pass
+            if s:
+                datafield.addSubField(SubField.createSubField("g",s))                
 
-            if article.journal.code == 'ARW':
-                datafield.addSubField(SubField.createSubField("k",'ARW Proceedings'))
-        
-            if article.journal.code == 'OES':
-                datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC10863779"))
-            elif article.journal.code == 'JFM':
-                datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC13348910"))
-            elif article.journal.code == 'ARW':
-                datafield.addSubField(SubField.createSubField("w","(AT-OBV)AC17596176"))
-            else:
-                pass
+            value = setting_handler.get_setting('tuw-alma','marc_773_08_k',article.journal).value
+            if value:
+                datafield.addSubField(SubField.createSubField("k",value))
+
+            value = setting_handler.get_setting('tuw-alma','marc_773_08_w',article.journal).value
+            if value:
+                datafield.addSubField(SubField.createSubField("w",value))
+
             mr.addDataField(datafield)            
 
             # 856 link, doi
@@ -983,10 +943,9 @@ def articleToMarc(article):
             # 970 2_
             datafield = DataField.createDataField("970","2"," ")
             datafield.addSubField(SubField.createSubField("a",'TUW'))
-            if article.journal.code in ('OES','JFM'):
-                datafield.addSubField(SubField.createSubField("d",'OA-ARTICLE'))
-            elif article.journal.code == 'ARW':
-                datafield.addSubField(SubField.createSubField("d",'OA-BOOKPART'))
+            value = setting_handler.get_setting('tuw-alma','marc_970_2__d',article.journal).value
+            if value:
+                datafield.addSubField(SubField.createSubField("d",value))
             mr.addDataField(datafield)
 
             # 971 8_ keywords_de
@@ -1015,9 +974,12 @@ def articleToMarc(article):
             datafield = DataField.createDataField("996","3","3")
             datafield.addSubField(SubField.createSubField("9",'LOCAL'))
             datafield.addSubField(SubField.createSubField("a",'Gold Open Access ; Journal Hosting System'))
-            if article.journal.code == 'ARW':
-                datafield.addSubField(SubField.createSubField("b",'Konferenzbeitrag'))
-                datafield.addSubField(SubField.createSubField("c",'Full-Paper-Beitrag'))
+            value = setting_handler.get_setting('tuw-alma','marc_996_33_b',article.journal).value
+            if value:
+                datafield.addSubField(SubField.createSubField("b",value))
+            value = setting_handler.get_setting('tuw-alma','marc_996_33_c',article.journal).value
+            if value:
+                datafield.addSubField(SubField.createSubField("c",value))
             mr.addDataField(datafield)
 
             xml = mr.toXML()

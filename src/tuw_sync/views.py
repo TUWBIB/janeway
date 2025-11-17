@@ -8,6 +8,7 @@ from typing import List
 import lxml.etree as etree
 import time
 
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.conf import settings
 from django.contrib import messages
@@ -39,6 +40,16 @@ from laapy import API,MarcRecord,stripXmlDeclaration
 
 logger = get_logger(__name__)
 
+
+def debug(request):
+    html = f"<h1>Debug Info</h1>"
+    html += f"<p>request.scheme: {request.scheme}</p>"
+    html += f"<p>request.is_secure(): {request.is_secure()}</p>"
+    html += f"<p>request.get_host(): {request.get_host()}</p>"
+    html += f"<p>META headers: {request.META}</p>"
+    return HttpResponse(html)
+
+
 ## sync
 
 @has_journal
@@ -52,7 +63,7 @@ def sync(request):
     issues = journal_models.Issue.objects.filter(journal=request.journal)
     sync_settings = settings.DATACITE['journals'][request.journal.code]
     view_settings = {}
-    view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM','ARW') else False
+    view_settings['alma_article_sync'] = True if request.journal.code in ('OES','JFM','ARW','IOTW','EF') else False
     view_settings['alma_issue_sync'] = False
     view_settings['datacite_article_sync'] = True if 'pattern_article' in sync_settings else False
     view_settings['datacite_issue_sync'] = True if 'pattern_issue' in sync_settings else False

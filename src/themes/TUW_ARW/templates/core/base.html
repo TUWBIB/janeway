@@ -1,3 +1,18 @@
+
+{% if request.journal.under_construction_image and request.path == '/' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ request.journal.name }}</title>
+</head>
+<body>
+<img src="{{ request.journal.under_construction_image.url }}" alt="{{ request.journal.name }} under construction" style="width: 100%;"></img>
+</body>
+</html>
+{% else %}
 {% load static %}
 {% load press_url from press_url %}
 {% load svg from press_url %}
@@ -260,3 +275,4 @@
 {% block js %}{% endblock %}
 </body>
 </html>
+{% endif %}

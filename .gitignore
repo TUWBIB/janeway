@@ -163,3 +163,4 @@ api.json
 api.json.devel
 api.json.test
 api.json.prod
+tuw_tools/drop_all_except_session.sql
