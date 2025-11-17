@@ -461,7 +461,10 @@ def register(request, orcid_token=None):
             else:
                 new_user = form.save()
 
-            if request.journal:
+            submission_limited = request.journal.get_setting(
+                "general", "limit_access_to_submission"
+            )
+            if request.journal and not submission_limited:
                 new_user.add_account_role("author", request.journal)
             logic.send_confirmation_link(request, new_user)
 
@@ -857,7 +860,8 @@ def dashboard(request):
         "is_reviewer": request.user.is_reviewer(request),
         "section_editor_articles": section_editor_articles,
         "active_submission_count": submission_models.Article.objects.filter(
-            owner=request.user, journal=request.journal
+            frozenauthor__author=request.user,
+            journal=request.journal,
         )
         .exclude(stage=submission_models.STAGE_UNSUBMITTED)
         .count(),
@@ -936,7 +940,8 @@ def dashboard(request):
             typesetter=request.user,
         ).count(),
         "active_submissions": submission_models.Article.objects.filter(
-            owner=request.user, journal=request.journal
+            frozenauthor__author=request.user,
+            journal=request.journal,
         )
         .exclude(
             stage__in=[
@@ -3016,9 +3021,7 @@ class FilteredArticlesListView(GenericFacetedListView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        raise DeprecationWarning(
-            "This view is deprecated. Use GenericFacetedListView instead."
-        )
+        warnings.warn("This view is deprecated. Use GenericFacetedListView instead.")
 
 
 @method_decorator(editor_user_required, name="dispatch")
