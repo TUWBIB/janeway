@@ -147,6 +147,7 @@ dockerfiles/lando_local.env
 !/src/themes/OLH/
 !/src/themes/TUWJFM/
 !/src/themes/TUW_ARW/
+!/src/themes/TUW_SHOWCASE/
 
 # Static files
 /src/static/*
