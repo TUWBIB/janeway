@@ -40,11 +40,14 @@
         {% comment "disable contact" %}
         <li><a href="{% url 'contact' %}">{% trans "Contact" %}</a></li>
         {% endcomment %}
-        {% if not request.user.is_authenticated %}<li><a href="{% url 'core_login' %}">{% trans 'Login' %}</a></li>{% endif %}
+        {% if not request.user.is_authenticated %}
+          <li>
+            <a href="{% url 'core_login' %}">
+              {% trans 'Log in' %}
+            </a>
+          </li>
+        {% endif %}
 
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% get_language_info_list for LANGUAGES as languages %}
         {% if journal_settings.general.switch_language %}
         <li>
             <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
@@ -53,7 +56,6 @@
                     {% get_current_language as LANGUAGE_CODE %}
                     {% get_available_languages as LANGUAGES %}
                     {% get_language_info_list for LANGUAGES as languages %}
-                    
                     {% for language in languages %}
                         {% if language.code in request.available_languages %}
                         <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
