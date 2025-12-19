@@ -2,24 +2,24 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Janeway\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-20 17:00+0200\n"
+"POT-Creation-Date: 2025-11-17 18:22+0100\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
-#: src/cms/models.py:21 src/core/janeway_global_settings.py:264
+#: src/cms/models.py:21 src/core/janeway_global_settings.py:266
 #: src/core/settings.py:45
 msgid "English"
 msgstr "Englisch"
 
-#: src/cms/models.py:22 src/core/janeway_global_settings.py:267
+#: src/cms/models.py:22 src/core/janeway_global_settings.py:269
 #: src/core/settings.py:48
 msgid "German"
 msgstr "Deutsch"
 
-#: src/cms/models.py:23 src/core/janeway_global_settings.py:266
+#: src/cms/models.py:23 src/core/janeway_global_settings.py:268
 msgid "French"
 msgstr "Französisch"
 
@@ -58,8 +58,6 @@ msgstr ""
 #: src/core/forms/forms.py:113 src/core/forms/forms.py:142
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:32
 #: src/themes/OLH/templates/press/core/login.html:33
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:32
-#: src/themes/TUW_ARW/templates/press/core/login.html:33
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:24
 #: src/themes/clean/templates/core/login.html:34
 msgid "Password"
@@ -70,18 +68,16 @@ msgid "Repeat Password"
 msgstr "Passwort wiederholen"
 
 #: src/core/forms/forms.py:133 src/core/models.py:236
-#: src/templates/admin/journal/manage/backcontent/submission.html:121
 #: src/templates/admin/repository/article.html:213
 #: src/templates/admin/repository/author_article.html:92
 #: src/templates/admin/repository/submit/authors.html:77
 #: src/templates/admin/submission/submit_authors.html:70
+#: src/templates/tuw_backcontent/submission.html:152
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:29
 #: src/themes/OLH/templates/press/core/login.html:30
 #: src/themes/TUWJFM/templates/core/accounts/get_reset_token.html:16
 #: src/themes/TUWJFM/templates/journal/newsletter.html:18
 #: src/themes/TUWJFM/templates/preprints/authors.html:63
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:29
-#: src/themes/TUW_ARW/templates/press/core/login.html:30
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:21
 msgid "Email"
 msgstr "Email"
@@ -145,19 +141,19 @@ msgstr ""
 msgid "Issues and Collections"
 msgstr "Ausgaben und Sammlungen"
 
-#: src/core/janeway_global_settings.py:265
+#: src/core/janeway_global_settings.py:267
 msgid "English (US)"
 msgstr "Englisch (US)"
 
-#: src/core/janeway_global_settings.py:268
+#: src/core/janeway_global_settings.py:270
 msgid "Dutch"
 msgstr "Niederländisch"
 
-#: src/core/janeway_global_settings.py:269
+#: src/core/janeway_global_settings.py:271
 msgid "Welsh"
 msgstr "Walisisch"
 
-#: src/core/janeway_global_settings.py:270
+#: src/core/janeway_global_settings.py:272
 msgid "Spanish"
 msgstr ""
 
@@ -227,7 +223,6 @@ msgstr ""
 
 #: src/core/models.py:275
 #: src/themes/OLH/templates/core/accounts/public_profile.html:46
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:46
 #: src/themes/clean/templates/core/accounts/public_profile.html:19
 #: src/themes/material/templates/core/accounts/public_profile.html:19
 msgid "Biography"
@@ -259,7 +254,6 @@ msgstr "Linkedin Profil"
 
 #: src/core/models.py:293
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:3
-#: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:3
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:3
 msgid "Website"
 msgstr "Website"
@@ -278,7 +272,6 @@ msgstr ""
 
 #: src/core/models.py:308
 #: src/themes/OLH/templates/core/accounts/public_profile.html:41
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:41
 #: src/themes/clean/templates/core/accounts/public_profile.html:15
 #: src/themes/material/templates/core/accounts/public_profile.html:15
 msgid "Country"
@@ -313,10 +306,10 @@ msgid "Article PK"
 msgstr "Artikel PK"
 
 #: src/core/models.py:941 src/core/models.py:1219 src/repository/models.py:848
-#: src/templates/admin/journal/manage/backcontent/submission.html:162
 #: src/templates/admin/submission/submit_files.html:46
 #: src/templates/admin/submission/submit_files.html:86
 #: src/templates/admin/submission/submit_review.html:168
+#: src/templates/tuw_backcontent/submission.html:194
 #: src/themes/TUWJFM/templates/preprints/review.html:77
 #: src/themes/TUWJFM/templates/preprints/review.html:96
 #: src/themes/TUWJFM/templates/preprints/submit_files.html:41
@@ -344,8 +337,6 @@ msgstr ""
 #: src/themes/OLH/templates/journal/contact.html:30
 #: src/themes/OLH/templates/press/journal/contact.html:22
 #: src/themes/TUWJFM/templates/journal/contact.html:30
-#: src/themes/TUW_ARW/templates/journal/contact.html:30
-#: src/themes/TUW_ARW/templates/press/journal/contact.html:22
 #: src/themes/clean/templates/journal/contact.html:27
 msgid "Who would you like to contact?"
 msgstr "Wen möchten Sie kontaktieren?"
@@ -458,11 +449,11 @@ msgstr ""
 msgid "The form did not validate: "
 msgstr ""
 
-#: src/core/views.py:2738 src/journal/forms.py:24 src/journal/views.py:3000
+#: src/core/views.py:2738 src/journal/forms.py:24 src/journal/views.py:3004
 msgid "Newest"
 msgstr "Neueste"
 
-#: src/core/views.py:2739 src/journal/forms.py:25 src/journal/views.py:3001
+#: src/core/views.py:2739 src/journal/forms.py:25 src/journal/views.py:3005
 msgid "Oldest"
 msgstr "Älteste"
 
@@ -483,11 +474,11 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: src/journal/forms.py:22 src/journal/views.py:3002
+#: src/journal/forms.py:22 src/journal/views.py:3006
 msgid "Titles A-Z"
 msgstr "Titel A-Z"
 
-#: src/journal/forms.py:23 src/journal/views.py:3003
+#: src/journal/forms.py:23 src/journal/views.py:3007
 msgid "Titles Z-A"
 msgstr "Titel Z-A"
 
@@ -576,108 +567,110 @@ msgid ""
 "user has no set profile image."
 msgstr ""
 
-#: src/journal/models.py:187
+#: src/journal/models.py:179
+msgid ""
+"Image shown for frontend when initial data input is still work in progress"
+msgstr ""
+
+#: src/journal/models.py:196
 msgid "This field has been deprecated in v1.4.3"
 msgstr ""
 
-#: src/journal/models.py:197
+#: src/journal/models.py:206
 msgid "When enabled, the journal is marked as not hosted in Janeway."
 msgstr ""
 
-#: src/journal/models.py:208
+#: src/journal/models.py:217
 msgid "If the journal is remote you can link to its submission page."
 msgstr ""
 
-#: src/journal/models.py:213
+#: src/journal/models.py:222
 msgid "If the journal is remote you can link to its home page."
 msgstr ""
 
-#: src/journal/models.py:217
+#: src/journal/models.py:226
 msgid "Enables a \"View PDF\" link on article pages."
 msgstr ""
 
-#: src/journal/models.py:259
+#: src/journal/models.py:268
 msgid ""
 "Whether to display article numbers. Article numbers are distinct from "
 "article ID and can be set in Edit Metadata."
 msgstr ""
 
-#: src/journal/models.py:610
+#: src/journal/models.py:619
 msgid "Please add as much detail as you can."
 msgstr ""
 
-#: src/journal/models.py:738
+#: src/journal/models.py:747
 msgid "Autogenerated cache of the display format of an issue title"
 msgstr ""
 
-#: src/journal/models.py:753
+#: src/journal/models.py:762
 msgid "Image representing the cover of a printed issue or volume"
 msgstr ""
 
-#: src/journal/models.py:759
+#: src/journal/models.py:768
 msgid "landscape hero image used in the carousel and issue page"
 msgstr ""
 
-#: src/journal/models.py:778
+#: src/journal/models.py:787
 msgid ""
 "An optional alphanumeric code (Slug) used to generate a verbose  url for "
 "this issue. e.g: 'winter-special-issue'."
 msgstr ""
 
-#: src/journal/models.py:784
+#: src/journal/models.py:793
 msgid "publication year (as claimed in issue) different from actual issue date"
 msgstr ""
 
-#: src/journal/models.py:806
+#: src/journal/models.py:815
 msgid ""
 "An ISBN is relevant for non-serial collections such as conference proceedings"
 msgstr ""
 
-#: src/journal/models.py:847
+#: src/journal/models.py:856
 #: src/themes/OLH/templates/press/press_journals.html:71
-#: src/themes/TUW_ARW/templates/press/press_journals.html:71
 #: src/themes/clean/templates/press/press_journals.html:42
 #: src/themes/material/templates/press/press_journals.html:46
 msgid "Current Issue"
 msgstr "Aktuelle Ausgabe"
 
-#: src/journal/models.py:877 src/journal/models.py:947
-#: src/journal/views.py:3005
+#: src/journal/models.py:886 src/journal/models.py:956
+#: src/journal/views.py:3009
 msgid "Volume"
 msgstr "Band"
 
-#: src/journal/models.py:884
+#: src/journal/models.py:893
 msgctxt "fe_oes"
 msgid "Issue"
 msgstr "Ausgabe"
 
-#: src/journal/models.py:886 src/journal/models.py:949
-#: src/templates/admin/journal/manage/backcontent/articles.html:43
-#: src/templates/admin/journal/manage/sync/sync_articles.html:35
-#: src/templates/admin/journal/manage/sync/sync_articles.html:39
+#: src/journal/models.py:895 src/journal/models.py:958
 #: src/templates/common/elements/journal/article_issue_list.html:4
+#: src/templates/tuw_backcontent/articles.html:43
+#: src/templates/tuw_sync/sync_articles.html:35
+#: src/templates/tuw_sync/sync_articles.html:39
 #: src/themes/OLH/templates/403.html:4
 #: src/themes/OLH/templates/journal/issue.html:9
-#: src/themes/TUW_ARW/templates/403.html:4
-#: src/themes/TUW_ARW/templates/journal/issue.html:9
 #: src/themes/clean/templates/journal/issue.html:8
 #: src/themes/material/templates/elements/journal/issue_sidebar.html:8
 #: src/themes/material/templates/journal/issue.html:8
 msgid "Issue"
 msgstr "Ausgabe"
 
-#: src/journal/models.py:955 src/themes/OLH/templates/journal/article.html:6
+#: src/journal/models.py:964 src/themes/OLH/templates/journal/article.html:6
 #: src/themes/TUW_ARW/templates/journal/article.html:6
 #: src/themes/material/templates/journal/article.html:7
 msgid "Article"
 msgstr "Artikel"
 
-#: src/journal/models.py:961
+#: src/journal/models.py:970
 #: src/themes/TUWJFM/templates/journal/article.html:149
 msgid "pages"
 msgstr "Seiten"
 
-#: src/journal/models.py:963
+#: src/journal/models.py:972
 msgid "page"
 msgstr "Seite"
 
@@ -733,7 +726,7 @@ msgstr "Redakteur:in der Ausgabe kann nicht gefunden werden."
 msgid "No Issue Editor ID supplied."
 msgstr "Es wurde keine ID angegeben für Redakteur:in der Ausgabe."
 
-#: src/journal/views.py:1898 src/journal/views.py:3361
+#: src/journal/views.py:1898 src/tuw_backcontent/views.py:384
 msgid "Uploaded file is not UTF-8 encoded"
 msgstr "Geladene Datei ist nicht im UTF-8 Format kodiert."
 
@@ -765,55 +758,53 @@ msgstr "Sie sind jetzt Gutachter:in."
 msgid "Your message has been sent."
 msgstr "Ihre Nachricht wurde versendet."
 
-#: src/journal/views.py:2574
+#: src/journal/views.py:2578
 msgid "Manuscript file uploaded."
 msgstr "Manuskriptdatei wurde hochgeladen."
 
-#: src/journal/views.py:2591
+#: src/journal/views.py:2595
 msgid "Data/figure file uploaded."
 msgstr ""
 
-#: src/journal/views.py:2602
+#: src/journal/views.py:2606
 msgid "Production file uploaded."
 msgstr "Produktionsdatei wurde hochgeladen."
 
-#: src/journal/views.py:2612
+#: src/journal/views.py:2616
 msgid "Galley file uploaded."
 msgstr "Galley Datei hochgeladen"
 
-#: src/journal/views.py:2648
+#: src/journal/views.py:2652
 msgid "Proofing file uploaded."
 msgstr "Datei für den Prüfdruck (Proof) wurde hochgeladen."
 
-#: src/journal/views.py:2654
+#: src/journal/views.py:2658
 msgid "Saved file."
 msgstr "Datei gespeicher"
 
-#: src/journal/views.py:2664
+#: src/journal/views.py:2668
 msgid "Supplementary file uploaded."
 msgstr "Zusätzliche Dateien hochgeladen"
 
-#: src/journal/views.py:2674
+#: src/journal/views.py:2678
 msgid "Typesetting source file uploaded."
 msgstr "Datei für Typesetting wurde hochgeladen."
 
-#: src/journal/views.py:2983
+#: src/journal/views.py:2987
 msgid "Published after"
 msgstr "Veröffentlicht nach"
 
-#: src/journal/views.py:2987
+#: src/journal/views.py:2991
 msgid "Published before"
 msgstr "Veröffentlicht vor"
 
-#: src/journal/views.py:2992
-#: src/templates/admin/journal/manage/backcontent/articles.html:40
-#: src/templates/admin/journal/manage/backcontent/submission.html:54
+#: src/journal/views.py:2996
 #: src/templates/admin/submission/submit_review.html:90
+#: src/templates/tuw_backcontent/articles.html:40
 msgid "Section"
 msgstr "Rubrik"
 
-#: src/journal/views.py:3004 src/themes/OLH/templates/repository/list.html:77
-#: src/themes/TUW_ARW/templates/repository/list.html:77
+#: src/journal/views.py:3008 src/themes/OLH/templates/repository/list.html:77
 #: src/themes/material/templates/preprints/list.html:80
 #: src/themes/material/templates/repository/list.html:61
 msgid "Author Name"
@@ -829,18 +820,16 @@ msgstr "Beschreibung gespeichert."
 
 #: src/repository/forms.py:42 src/submission/forms.py:86
 #: src/templates/admin/core/manager/sections/section_articles.html:30
-#: src/templates/admin/journal/manage/backcontent/articles.html:37
-#: src/templates/admin/journal/manage/backcontent/submission.html:29
-#: src/templates/admin/journal/manage/sync/sync_articles.html:32
-#: src/templates/admin/journal/manage/sync/sync_articles.html:146
 #: src/templates/admin/submission/submit_review.html:51
+#: src/templates/tuw_backcontent/articles.html:37
+#: src/templates/tuw_sync/sync_articles.html:32
+#: src/templates/tuw_sync/sync_articles.html:145
 #: src/themes/OLH/templates/elements/journal/article_filter_form.html:21
 #: src/themes/OLH/templates/repository/list.html:75
 #: src/themes/TUWJFM/templates/journal/article.html:101
 #: src/themes/TUWJFM/templates/journal/articles.html:69
 #: src/themes/TUWJFM/templates/journal/newsletter.html:36
 #: src/themes/TUW_ARW/templates/elements/journal/article_filter_form.html:39
-#: src/themes/TUW_ARW/templates/repository/list.html:75
 #: src/themes/clean/templates/journal/articles.html:65
 #: src/themes/material/templates/journal/articles.html:90
 #: src/themes/material/templates/preprints/list.html:78
@@ -950,7 +939,6 @@ msgid "Submission is disabled for this journal."
 msgstr "Abgabe ist für diese Zeitschrift deaktiviert. "
 
 #: src/submission/forms.py:87
-#: src/templates/admin/journal/manage/backcontent/submission.html:36
 #: src/templates/admin/submission/submit_review.html:53
 #: src/themes/TUWJFM/templates/preprints/review.html:27
 msgid "Subtitle"
@@ -1179,7 +1167,6 @@ msgstr "Rubrik hinzufügen"
 #: src/templates/admin/core/manager/sections/section_articles.html:12
 #: src/themes/OLH/templates/elements/section_block.html:1
 #: src/themes/TUWJFM/templates/journal/submissions.html:69
-#: src/themes/TUW_ARW/templates/elements/section_block.html:1
 #: src/themes/clean/templates/elements/sections_block.html:1
 msgid "Sections"
 msgstr "Rubriken"
@@ -1192,10 +1179,6 @@ msgstr "Rubriken"
 #: src/themes/OLH/templates/press/nav.html:48
 #: src/themes/OLH/templates/repository/elements/right_hand_menu.html:7
 #: src/themes/TUW_ARW/templates/core/nav.html:58
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:13
-#: src/themes/TUW_ARW/templates/press/elements/right_hand_menu.html:7
-#: src/themes/TUW_ARW/templates/press/nav.html:48
-#: src/themes/TUW_ARW/templates/repository/elements/right_hand_menu.html:7
 #: src/themes/clean/templates/core/nav.html:91
 #: src/themes/clean/templates/press/nav.html:66
 #: src/themes/material/templates/core/nav.html:154
@@ -1216,7 +1199,6 @@ msgstr "Manager"
 #: src/themes/TUWJFM/templates/core/nav.html:143
 #: src/themes/TUWJFM/templates/journal/articles.html:7
 #: src/themes/TUWJFM/templates/journal/articles.html:9
-#: src/themes/TUW_ARW/templates/journal/search.html:29
 #: src/themes/clean/templates/core/nav.html:22
 #: src/themes/clean/templates/journal/article_list.html:7
 #: src/themes/clean/templates/journal/article_list.html:12
@@ -1255,13 +1237,12 @@ msgid "Stage"
 msgstr ""
 
 #: src/templates/admin/core/manager/sections/section_articles.html:33
-#: src/templates/admin/journal/manage/backcontent/articles.html:39
+#: src/templates/tuw_backcontent/articles.html:39
 msgid "Main Author"
 msgstr "Hauptautor:in"
 
 #: src/templates/admin/core/manager/sections/section_articles.html:34
 #: src/themes/OLH/templates/repository/list.html:84
-#: src/themes/TUW_ARW/templates/repository/list.html:84
 msgid "Editors"
 msgstr "Herausgeber:innen"
 
@@ -1332,7 +1313,6 @@ msgstr ""
 
 #: src/templates/admin/elements/accounts/user_form.html:4
 #: src/themes/OLH/templates/elements/accounts/user_form.html:5
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:5
 #: src/themes/clean/templates/elements/accounts/user_form.html:5
 #: src/themes/material/templates/elements/accounts/user_form.html:6
 msgid "Core Data"
@@ -1340,7 +1320,6 @@ msgstr "Kerndaten"
 
 #: src/templates/admin/elements/accounts/user_form.html:64
 #: src/themes/OLH/templates/elements/accounts/user_form.html:68
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:68
 #: src/themes/clean/templates/elements/accounts/user_form.html:65
 #: src/themes/material/templates/elements/accounts/user_form.html:66
 msgid "Biography and Signature"
@@ -1348,7 +1327,6 @@ msgstr "Biographie und Signatur"
 
 #: src/templates/admin/elements/accounts/user_form.html:73
 #: src/themes/OLH/templates/elements/accounts/user_form.html:77
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:77
 #: src/themes/clean/templates/elements/accounts/user_form.html:74
 #: src/themes/material/templates/elements/accounts/user_form.html:75
 msgid "Review Interests"
@@ -1356,7 +1334,6 @@ msgstr "Interessen prüfen"
 
 #: src/templates/admin/elements/accounts/user_form.html:74
 #: src/themes/OLH/templates/elements/accounts/user_form.html:78
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:78
 #: src/themes/clean/templates/elements/accounts/user_form.html:75
 #: src/themes/material/templates/elements/accounts/user_form.html:76
 msgid "Hit Enter to add a new interest"
@@ -1365,7 +1342,6 @@ msgstr ""
 
 #: src/templates/admin/elements/accounts/user_form.html:78
 #: src/themes/OLH/templates/elements/accounts/user_form.html:82
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:82
 #: src/themes/clean/templates/elements/accounts/user_form.html:79
 #: src/themes/material/templates/elements/accounts/user_form.html:80
 msgid "Profile Image"
@@ -1509,7 +1485,7 @@ msgid "Add funder"
 msgstr "Fördermittelquelle hinzufügen"
 
 #: src/templates/admin/elements/history_modal.html:8
-#: src/templates/admin/journal/manage/backcontent/submission.html:168
+#: src/templates/tuw_backcontent/submission.html:200
 msgid "History"
 msgstr ""
 
@@ -1545,7 +1521,6 @@ msgid "Clear all"
 msgstr "Filter löschen"
 
 #: src/templates/admin/elements/metadata.html:47
-#: src/templates/admin/journal/manage/backcontent/submission.html:44
 #: src/templates/admin/submission/submit_review.html:63
 #: src/themes/OLH/templates/journal/article.html:178
 #: src/themes/OLH/templates/journal/print.html:30
@@ -1557,8 +1532,6 @@ msgstr "Filter löschen"
 #: src/themes/TUWJFM/templates/preprints/article.html:38
 #: src/themes/TUWJFM/templates/preprints/review.html:34
 #: src/themes/TUW_ARW/templates/journal/article.html:180
-#: src/themes/TUW_ARW/templates/journal/print.html:30
-#: src/themes/TUW_ARW/templates/repository/preprint.html:45
 #: src/themes/clean/templates/journal/article.html:78
 #: src/themes/clean/templates/journal/print.html:30
 #: src/themes/material/templates/journal/article.html:73
@@ -1579,11 +1552,6 @@ msgstr "Abstract"
 #: src/themes/TUWJFM/templates/journal/print.html:113
 #: src/themes/TUWJFM/templates/journal/search.html:46
 #: src/themes/TUW_ARW/templates/journal/article.html:183
-#: src/themes/TUW_ARW/templates/journal/keywords.html:6
-#: src/themes/TUW_ARW/templates/journal/keywords.html:12
-#: src/themes/TUW_ARW/templates/journal/print.html:33
-#: src/themes/TUW_ARW/templates/journal/search.html:40
-#: src/themes/TUW_ARW/templates/repository/list.html:76
 #: src/themes/clean/templates/journal/article.html:82
 #: src/themes/clean/templates/journal/full-text-search.html:44
 #: src/themes/clean/templates/journal/keywords.html:4
@@ -1668,31 +1636,28 @@ msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
 
 #: src/templates/admin/elements/repository/metadata_form.html:50
 #: src/templates/admin/elements/submission/additional_fields.html:4
-#: src/templates/admin/journal/manage/backcontent/submission.html:84
 #: src/templates/admin/submission/submit_review.html:128
 msgid "Additional Fields"
 msgstr "Weitere Felder"
 
 #: src/templates/admin/elements/submit/author.html:8
-#: src/templates/admin/journal/manage/backcontent/submission.html:104
-#: src/templates/admin/journal/manage/backcontent/submission.html:110
-#: src/templates/admin/journal/manage/backcontent/submission_author.html:8
 #: src/templates/admin/repository/submit/authors.html:62
 #: src/templates/admin/repository/submit/authors.html:113
 #: src/templates/admin/repository/submit/authors.html:120
 #: src/templates/admin/submission/submit_authors.html:54
+#: src/templates/tuw_backcontent/submission.html:135
+#: src/templates/tuw_backcontent/submission.html:141
+#: src/templates/tuw_backcontent/submission_author.html:8
 #: src/themes/OLH/templates/elements/submit/author.html:8
 #: src/themes/TUWJFM/templates/elements/submit/author.html:10
 #: src/themes/TUWJFM/templates/preprints/authors.html:49
-#: src/themes/TUW_ARW/templates/elements/submit/author.html:8
 msgid "Add New Author"
 msgstr "Autor:in neu hinzufügen"
 
 #: src/templates/admin/elements/submit/author.html:67
-#: src/templates/admin/journal/manage/backcontent/submission_author.html:67
+#: src/templates/tuw_backcontent/submission_author.html:67
 #: src/themes/OLH/templates/elements/submit/author.html:64
 #: src/themes/TUWJFM/templates/elements/submit/author.html:68
-#: src/themes/TUW_ARW/templates/elements/submit/author.html:64
 msgid "Add Author"
 msgstr "Autor:in hinzufügen"
 
@@ -1701,8 +1666,6 @@ msgstr "Autor:in hinzufügen"
 #: src/themes/OLH/templates/elements/submit/preprint_file.html:6
 #: src/themes/TUWJFM/templates/elements/submit/file.html:8
 #: src/themes/TUWJFM/templates/elements/submit/preprint_file.html:8
-#: src/themes/TUW_ARW/templates/elements/submit/file.html:6
-#: src/themes/TUW_ARW/templates/elements/submit/preprint_file.html:6
 msgid "Add New File"
 msgstr "Neue Datei hinzufügen"
 
@@ -1711,8 +1674,6 @@ msgstr "Neue Datei hinzufügen"
 #: src/themes/OLH/templates/elements/submit/preprint_file.html:25
 #: src/themes/TUWJFM/templates/elements/submit/file.html:32
 #: src/themes/TUWJFM/templates/elements/submit/preprint_file.html:33
-#: src/themes/TUW_ARW/templates/elements/submit/file.html:25
-#: src/themes/TUW_ARW/templates/elements/submit/preprint_file.html:25
 msgid "Add File"
 msgstr "Datei hinzufügen"
 
@@ -1729,7 +1690,6 @@ msgstr "%(user)s freigeben"
 #: src/templates/admin/journal/contact.html:18
 #: src/themes/OLH/templates/journal/contact.html:12
 #: src/themes/TUWJFM/templates/journal/contact.html:13
-#: src/themes/TUW_ARW/templates/journal/contact.html:12
 #: src/themes/material/templates/journal/contact.html:14
 msgid "Journal Representatives"
 msgstr "Herausgeber:innen und Redaktion"
@@ -1737,8 +1697,6 @@ msgstr "Herausgeber:innen und Redaktion"
 #: src/templates/admin/journal/contact.html:20
 #: src/themes/OLH/templates/journal/contact.html:14
 #: src/themes/OLH/templates/press/journal/contact.html:11
-#: src/themes/TUW_ARW/templates/journal/contact.html:14
-#: src/themes/TUW_ARW/templates/press/journal/contact.html:11
 #: src/themes/material/templates/journal/contact.html:16
 msgid "Press Representatives"
 msgstr "Verlagskontakt"
@@ -1746,7 +1704,6 @@ msgstr "Verlagskontakt"
 #: src/templates/admin/journal/contact.html:27
 #: src/themes/OLH/templates/journal/contact.html:21
 #: src/themes/TUWJFM/templates/journal/contact.html:19
-#: src/themes/TUW_ARW/templates/journal/contact.html:21
 #: src/themes/clean/templates/journal/contact.html:16
 #: src/themes/material/templates/journal/contact.html:25
 msgid "Contact Information"
@@ -1766,12 +1723,6 @@ msgstr "Kontaktinformationen"
 #: src/themes/TUWJFM/templates/journal/contact.html:24
 #: src/themes/TUW_ARW/templates/core/nav.html:42
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:41
-#: src/themes/TUW_ARW/templates/journal/contact.html:5
-#: src/themes/TUW_ARW/templates/journal/contact.html:26
-#: src/themes/TUW_ARW/templates/press/elements/press_footer.html:14
-#: src/themes/TUW_ARW/templates/press/journal/contact.html:5
-#: src/themes/TUW_ARW/templates/press/journal/contact.html:18
-#: src/themes/TUW_ARW/templates/press/nav.html:40
 #: src/themes/clean/templates/core/nav.html:69
 #: src/themes/clean/templates/elements/journal_footer.html:39
 #: src/themes/clean/templates/elements/press_footer.html:17
@@ -1792,8 +1743,6 @@ msgstr "Kontakt"
 #: src/themes/OLH/templates/journal/contact.html:39
 #: src/themes/OLH/templates/press/journal/contact.html:30
 #: src/themes/TUWJFM/templates/journal/contact.html:40
-#: src/themes/TUW_ARW/templates/journal/contact.html:39
-#: src/themes/TUW_ARW/templates/press/journal/contact.html:30
 #: src/themes/clean/templates/journal/contact.html:37
 #: src/themes/material/templates/journal/contact.html:45
 msgid "Send Message"
@@ -1831,302 +1780,6 @@ msgid ""
 "article will move back to the %(stage)s stage."
 msgstr ""
 
-#: src/templates/admin/journal/manage/backcontent/articles.html:20
-#: src/templates/admin/journal/manage/backcontent/submission.html:15
-msgid "New Article"
-msgstr "Neuer Artikel"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:23
-msgid "To submit an article, click the start button below"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:26
-#: src/templates/admin/journal/submissions.html:38
-#: src/templates/admin/submission/start.html:77
-#: src/themes/OLH/templates/core/nav.html:45
-#: src/themes/OLH/templates/journal/submissions.html:32
-#: src/themes/TUWJFM/templates/journal/submissions.html:27
-#: src/themes/TUW_ARW/templates/core/nav.html:44
-#: src/themes/TUW_ARW/templates/journal/submissions.html:32
-#: src/themes/clean/templates/core/nav.html:72
-#: src/themes/clean/templates/journal/submissions.html:19
-#: src/themes/material/templates/journal/submissions.html:35
-msgid "Start Submission"
-msgstr "Einreichung beginnen"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:30
-msgid "Existing Articles"
-msgstr "Vorhandene Artikel"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:36
-#: src/templates/admin/journal/manage/sync/sync_articles.html:31
-#: src/templates/admin/journal/manage/sync/sync_articles.html:145
-msgid "Id"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:38
-msgid "Submitted"
-msgstr "Eingereicht"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:45
-#: src/templates/admin/journal/manage/sync/sync_articles.html:37
-msgctxt "oes"
-msgid "Issue"
-msgstr "Ausgabe"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:49
-msgid "Actions"
-msgstr "Aktionen"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:67
-#: src/themes/OLH/templates/press/press_journals.html:61
-#: src/themes/OLH/templates/press/press_journals.html:68
-#: src/themes/TUW_ARW/templates/press/press_journals.html:61
-#: src/themes/TUW_ARW/templates/press/press_journals.html:68
-#: src/themes/clean/templates/journal/article.html:194
-#: src/themes/clean/templates/press/press_journals.html:32
-#: src/themes/clean/templates/press/press_journals.html:39
-#: src/themes/material/templates/journal/article.html:283
-#: src/themes/material/templates/press/press_journals.html:36
-#: src/themes/material/templates/press/press_journals.html:43
-msgid "View"
-msgstr "Ansehen"
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:68
-#: src/templates/admin/journal/manage/backcontent/submission.html:326
-#: src/templates/admin/repository/article.html:216
-#: src/templates/admin/repository/submit/authors.html:79
-#: src/templates/admin/submission/submit_funding.html:77
-msgid "Delete"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/articles.html:74
-msgid "No articles in this stage"
-msgstr "Keine Artikel für die Anzeige"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:25
-msgid "Add A New Article"
-msgstr "Neuem Artikel hinzufügen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:49
-#: src/templates/admin/submission/submit_review.html:88
-#: src/themes/TUWJFM/templates/preprints/review.html:40
-msgid "Language"
-msgstr "Sprache"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:60
-#: src/themes/OLH/templates/journal/article.html:287
-#: src/themes/OLH/templates/repository/preprint.html:127
-#: src/themes/TUWJFM/templates/journal/article.html:243
-#: src/themes/TUWJFM/templates/preprints/article.html:103
-#: src/themes/TUW_ARW/templates/journal/article.html:289
-#: src/themes/TUW_ARW/templates/repository/preprint.html:127
-#: src/themes/clean/templates/journal/article.html:255
-#: src/themes/material/templates/preprints/article.html:124
-#: src/themes/material/templates/repository/preprint.html:189
-msgid "License"
-msgstr "Lizenz"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:67
-msgctxt "bc"
-msgid "Keywords"
-msgstr "Schlagwörter"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:70
-#: src/templates/admin/journal/manage/backcontent/submission.html:76
-msgctxt "bc"
-msgid "Hit Enter to add a new keyword."
-msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:73
-msgctxt "bc"
-msgid "Keywords (German)"
-msgstr "Schlagwörter"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:98
-msgid "Article Authors"
-msgstr "Artikel Autor:innen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:102
-msgid ""
-"You can add an author by clicking the button below. This will open a popup "
-"modal for you to complete their details."
-msgstr ""
-"Wenn Sie den Autor:innen-Datensatz nicht durch Suchen finden können und Sie "
-"nicht Einzelautor:in sind, können Sie jemanden hinzufügen, indem Sie auf die "
-"Schaltfläche unten klicken. Dies öffnet eine Eingabemaske für Sie, um ihre "
-"Details zu vervollständigen."
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:103
-msgid ""
-"If you know of an existing author, complete only the email field and they "
-"will be added as an author."
-msgstr ""
-"If you know of an existing author, complete only the email field and they "
-"will be added as an author."
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:106
-#: src/templates/admin/submission/submit_authors.html:30
-#: src/themes/TUWJFM/templates/preprints/authors.html:25
-msgid ""
-"Search for a user using email address or ORCiD. If a user is matched, they "
-"will be automatically added as an author. This search only returns exact "
-"matches."
-msgstr ""
-"Suchen Sie nach Benutzer:in mit E-Mail-Adresse oder ORCiD. Wenn eine "
-"Übereinstimmung gefunden wird, werden diese automatisch als Autor:in "
-"hinzugefügt. Diese Suche gibt nur exakte Übereinstimmungen zurück."
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:108
-#: src/templates/admin/submission/submit_authors.html:36
-#: src/themes/TUWJFM/templates/preprints/authors.html:31
-msgid "Search by email address or ORCiD"
-msgstr "Suche nach E-Mail-Adresse oder ORCiD"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:113
-#: src/templates/admin/submission/submit_authors.html:60
-#: src/themes/TUWJFM/templates/preprints/authors.html:55
-msgid "Current Authors"
-msgstr "Aktuelle Autor:innen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:120
-#: src/templates/admin/repository/article.html:212
-#: src/templates/admin/repository/author_article.html:91
-#: src/templates/admin/repository/submit/authors.html:76
-#: src/templates/admin/submission/submit_authors.html:69
-#: src/templates/admin/submission/submit_funding.html:72
-#: src/templates/common/elements/funder_info_for_readers.html:4
-#: src/themes/TUWJFM/templates/preprints/authors.html:62
-msgid "Name"
-msgstr "Name"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:137
-#: src/templates/admin/submission/submit_authors.html:86
-#: src/themes/TUWJFM/templates/preprints/authors.html:78
-msgid "No authors yet, add one!"
-msgstr "Noch keine Autor:innen vorhanden, fügen Sie jemanden hinzu!"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:143
-msgid ""
-"You may select a main author, this author will receive the communications "
-"regarding your articles process through our systems. This does not have to "
-"be you."
-msgstr ""
-"Bitte Hauptautor:in (corresponding author) auswählen. Diese Person erhält "
-"die Mitteilungen bezüglich des Artikelprozesses durch unsere Systeme. Sie "
-"müssen sich nicht selbst nennen."
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:144
-#: src/templates/admin/submission/submit_authors.html:94
-msgid "Select main author"
-msgstr "Hauptautor:in wählen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:157
-msgid "Galleys"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:163
-msgid "Filename"
-msgstr "Dateiname"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:164
-msgid "Type"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:165
-#: src/templates/admin/press/edit_press_journal_description.html:11
-#: src/templates/admin/press/edit_press_journal_description.html:17
-#: src/templates/admin/repository/article.html:215
-#: src/templates/admin/review/unassigned_article.html:120
-#: src/templates/admin/review/view_review.html:112
-#: src/templates/admin/submission/submit_funding.html:76
-#: src/themes/OLH/templates/elements/edit_author.html:4
-#: src/themes/TUW_ARW/templates/elements/edit_author.html:4
-msgid "Edit"
-msgstr "Editieren"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:166
-#: src/themes/OLH/templates/journal/article.html:139
-#: src/themes/OLH/templates/journal/article.html:213
-#: src/themes/OLH/templates/journal/article.html:339
-#: src/themes/TUWJFM/templates/journal/article.html:205
-#: src/themes/TUWJFM/templates/preprints/article.html:92
-#: src/themes/TUWJFM/templates/preprints/article.html:96
-#: src/themes/TUWJFM/templates/preprints/article.html:118
-#: src/themes/TUW_ARW/templates/journal/article.html:141
-#: src/themes/TUW_ARW/templates/journal/article.html:142
-#: src/themes/TUW_ARW/templates/journal/article.html:215
-#: src/themes/TUW_ARW/templates/journal/article.html:341
-#: src/themes/clean/templates/journal/article.html:104
-#: src/themes/clean/templates/journal/article.html:190
-#: src/themes/clean/templates/journal/article.html:308
-#: src/themes/clean/templates/journal/article.html:311
-#: src/themes/material/templates/elements/journal/issue_sidebar.html:8
-#: src/themes/material/templates/journal/article.html:127
-#: src/themes/material/templates/journal/article.html:279
-#: src/themes/material/templates/preprints/article.html:113
-#: src/themes/material/templates/preprints/article.html:117
-#: src/themes/material/templates/preprints/article.html:139
-msgid "Download"
-msgstr "Herunterladen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:167
-msgid "Replace"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:169
-msgid "Create PDF"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:170
-msgid "Create EPUB"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:233
-msgid "No galleys have been uploaded."
-msgstr "Keine Galley-Dateien hochgeladen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:238
-msgid "Upload a new galley"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:270
-msgid "Publication Info"
-msgstr "Publikationsinfo"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:294
-msgid "More Pub Info is available on the"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:294
-msgid "Pre Publication Checklist"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:299
-msgid "Remote"
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:302
-msgid ""
-"If your article is remote, you can fill the required details here. If the "
-"remote article has a DOI, you should use it for full resolution."
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:313
-#: src/templates/admin/journal/manage/backcontent/submission.html:320
-msgid "Publish"
-msgstr "Veröffentlichen"
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:316
-msgid ""
-"When you are ready to publish your article, press the publish button and it "
-"will be published."
-msgstr ""
-
-#: src/templates/admin/journal/manage/backcontent/submission.html:323
-msgid "Save as Draft"
-msgstr "Als Draft speichern"
-
 #: src/templates/admin/journal/manage/issues.html:86
 msgid "Issue date is in the future."
 msgstr ""
@@ -2143,18 +1796,6 @@ msgid ""
 "                 "
 msgstr ""
 
-#: src/templates/admin/journal/manage/sync/sync_articles.html:126
-#, fuzzy
-#| msgid "Sort Articles"
-msgid "No articles"
-msgstr "Artikel sortieren"
-
-#: src/templates/admin/journal/manage/sync/sync_articles.html:228
-#, fuzzy
-#| msgid "Issues"
-msgid "No Issues"
-msgstr "Ausgaben"
-
 #: src/templates/admin/journal/submissions.html:35
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:48
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:50
@@ -2167,14 +1808,8 @@ msgstr "Ausgaben"
 #: src/themes/TUWJFM/templates/core/accounts/register.html:5
 #: src/themes/TUWJFM/templates/core/accounts/register.html:32
 #: src/themes/TUWJFM/templates/journal/submissions.html:25
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:48
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:50
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:5
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:96
-#: src/themes/TUW_ARW/templates/core/base.html:142
+#: src/themes/TUW_ARW/templates/core/base.html:157
 #: src/themes/TUW_ARW/templates/core/nav.html:77
-#: src/themes/TUW_ARW/templates/journal/submissions.html:30
-#: src/themes/TUW_ARW/templates/press/nav.html:58
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:41
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:43
 #: src/themes/clean/templates/core/accounts/register.html:5
@@ -2207,16 +1842,9 @@ msgstr "Registrieren"
 #: src/themes/TUWJFM/templates/core/login.html:5
 #: src/themes/TUWJFM/templates/journal/become_reviewer.html:13
 #: src/themes/TUWJFM/templates/journal/submissions.html:26
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:28
-#: src/themes/TUW_ARW/templates/core/base.html:142
-#: src/themes/TUW_ARW/templates/core/login.html:6
+#: src/themes/TUW_ARW/templates/core/base.html:157
 #: src/themes/TUW_ARW/templates/core/nav.html:76
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:43
-#: src/themes/TUW_ARW/templates/journal/become_reviewer.html:16
-#: src/themes/TUW_ARW/templates/journal/submissions.html:31
-#: src/themes/TUW_ARW/templates/press/core/login.html:5
-#: src/themes/TUW_ARW/templates/press/elements/press_footer.html:15
-#: src/themes/TUW_ARW/templates/press/nav.html:57
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:19
 #: src/themes/clean/templates/core/login.html:5
 #: src/themes/clean/templates/core/nav.html:104
@@ -2237,6 +1865,19 @@ msgstr "Registrieren"
 msgid "Login"
 msgstr "Anmeldung"
 
+#: src/templates/admin/journal/submissions.html:38
+#: src/templates/admin/submission/start.html:77
+#: src/templates/tuw_backcontent/articles.html:26
+#: src/themes/OLH/templates/core/nav.html:45
+#: src/themes/OLH/templates/journal/submissions.html:32
+#: src/themes/TUWJFM/templates/journal/submissions.html:27
+#: src/themes/TUW_ARW/templates/core/nav.html:44
+#: src/themes/clean/templates/core/nav.html:72
+#: src/themes/clean/templates/journal/submissions.html:19
+#: src/themes/material/templates/journal/submissions.html:35
+msgid "Start Submission"
+msgstr "Einreichung beginnen"
+
 #: src/templates/admin/journal/submissions.html:40
 msgid "Contact Us"
 msgstr "Kontaktieren Sie uns"
@@ -2244,14 +1885,12 @@ msgstr "Kontaktieren Sie uns"
 #: src/templates/admin/journal/submissions.html:47
 #: src/themes/OLH/templates/journal/submissions.html:39
 #: src/themes/TUWJFM/templates/journal/submissions.html:55
-#: src/themes/TUW_ARW/templates/journal/submissions.html:39
 msgid "Licences"
 msgstr "Lizenzen"
 
 #: src/templates/admin/journal/submissions.html:48
 #: src/templates/admin/submission/submit_info.html:120
 #: src/themes/OLH/templates/journal/submissions.html:40
-#: src/themes/TUW_ARW/templates/journal/submissions.html:40
 #: src/themes/clean/templates/journal/submissions.html:27
 #: src/themes/material/templates/journal/submissions.html:46
 msgid "The following licences are allowed:"
@@ -2261,6 +1900,17 @@ msgstr "Erlaubt sind die folgenden Lizenzen:"
 #: src/templates/admin/press/edit_press_journal_description.html:6
 msgid "Journal Description for Press Site"
 msgstr ""
+
+#: src/templates/admin/press/edit_press_journal_description.html:11
+#: src/templates/admin/press/edit_press_journal_description.html:17
+#: src/templates/admin/repository/article.html:215
+#: src/templates/admin/review/unassigned_article.html:120
+#: src/templates/admin/review/view_review.html:112
+#: src/templates/admin/submission/submit_funding.html:76
+#: src/templates/tuw_backcontent/submission.html:197
+#: src/themes/OLH/templates/elements/edit_author.html:4
+msgid "Edit"
+msgstr "Editieren"
 
 #: src/templates/admin/press/edit_press_journal_description.html:11
 #: src/templates/admin/press/edit_press_journal_description.html:17
@@ -2292,17 +1942,35 @@ msgstr "Jede Prüfkdruckrunde (Proof) ist beschränkt auf"
 msgid "proofreaders"
 msgstr "Korrektor:innen des Prüfdrucks (Proof)"
 
+#: src/templates/admin/repository/article.html:212
+#: src/templates/admin/repository/author_article.html:91
+#: src/templates/admin/repository/submit/authors.html:76
+#: src/templates/admin/submission/submit_authors.html:69
+#: src/templates/admin/submission/submit_funding.html:72
+#: src/templates/common/elements/funder_info_for_readers.html:4
+#: src/templates/tuw_backcontent/submission.html:151
+#: src/themes/TUWJFM/templates/preprints/authors.html:62
+msgid "Name"
+msgstr "Name"
+
 #: src/templates/admin/repository/article.html:214
 #: src/templates/admin/repository/author_article.html:93
 #: src/templates/admin/repository/submit/authors.html:78
 #: src/templates/admin/submission/submit_review.html:150
 #: src/themes/OLH/templates/core/accounts/public_profile.html:38
 #: src/themes/TUWJFM/templates/journal/newsletter.html:64
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:38
 #: src/themes/clean/templates/core/accounts/public_profile.html:14
 #: src/themes/material/templates/core/accounts/public_profile.html:14
 msgid "Affiliation"
 msgstr "Zugehörigkeit"
+
+#: src/templates/admin/repository/article.html:216
+#: src/templates/admin/repository/submit/authors.html:79
+#: src/templates/admin/submission/submit_funding.html:77
+#: src/templates/tuw_backcontent/articles.html:68
+#: src/templates/tuw_backcontent/submission.html:332
+msgid "Delete"
+msgstr ""
 
 #: src/templates/admin/repository/article.html:239
 #: src/templates/admin/repository/submit/authors.html:94
@@ -2407,11 +2075,6 @@ msgstr ""
 #: src/themes/TUW_ARW/templates/journal/article.html:63
 #: src/themes/TUW_ARW/templates/journal/article.html:163
 #: src/themes/TUW_ARW/templates/journal/article.html:315
-#: src/themes/TUW_ARW/templates/journal/authors.html:4
-#: src/themes/TUW_ARW/templates/journal/authors.html:5
-#: src/themes/TUW_ARW/templates/journal/authors.html:11
-#: src/themes/TUW_ARW/templates/journal/print.html:15
-#: src/themes/TUW_ARW/templates/repository/preprint.html:33
 #: src/themes/clean/templates/journal/article.html:37
 #: src/themes/clean/templates/journal/article.html:153
 #: src/themes/clean/templates/journal/authors.html:9
@@ -2482,7 +2145,6 @@ msgstr "Einreichung gestartet"
 #: src/templates/admin/repository/submit/start.html:36
 #: src/themes/OLH/templates/repository/preprint.html:122
 #: src/themes/TUWJFM/templates/preprints/article.html:100
-#: src/themes/TUW_ARW/templates/repository/preprint.html:122
 #: src/themes/material/templates/preprints/article.html:121
 msgid "Metadata"
 msgstr "Metadaten"
@@ -2893,7 +2555,7 @@ msgstr "Urheberrechtshinweis"
 
 #: src/templates/admin/submission/start.html:71
 #: src/themes/OLH/templates/journal/article.html:419
-#: src/themes/TUW_ARW/templates/journal/article.html:421
+#: src/themes/TUW_ARW/templates/journal/article.html:429
 #: src/themes/clean/templates/journal/article.html:265
 #: src/themes/material/templates/journal/article.html:400
 msgid "Competing Interests"
@@ -2911,6 +2573,24 @@ msgstr "Informationen zum Autor / zur Autorin"
 msgid "Search for Existing Authors"
 msgstr "Suche nach vorhandenen Autor:innen"
 
+#: src/templates/admin/submission/submit_authors.html:30
+#: src/templates/tuw_backcontent/submission.html:137
+#: src/themes/TUWJFM/templates/preprints/authors.html:25
+msgid ""
+"Search for a user using email address or ORCiD. If a user is matched, they "
+"will be automatically added as an author. This search only returns exact "
+"matches."
+msgstr ""
+"Suchen Sie nach Benutzer:in mit E-Mail-Adresse oder ORCiD. Wenn eine "
+"Übereinstimmung gefunden wird, werden diese automatisch als Autor:in "
+"hinzugefügt. Diese Suche gibt nur exakte Übereinstimmungen zurück."
+
+#: src/templates/admin/submission/submit_authors.html:36
+#: src/templates/tuw_backcontent/submission.html:139
+#: src/themes/TUWJFM/templates/preprints/authors.html:31
+msgid "Search by email address or ORCiD"
+msgstr "Suche nach E-Mail-Adresse oder ORCiD"
+
 #: src/templates/admin/submission/submit_authors.html:40
 #: src/themes/OLH/templates/core/base.html:154
 #: src/themes/OLH/templates/journal/full-text-search.html:8
@@ -2922,11 +2602,7 @@ msgstr "Suche nach vorhandenen Autor:innen"
 #: src/themes/TUWJFM/templates/journal/search.html:7
 #: src/themes/TUWJFM/templates/journal/search.html:9
 #: src/themes/TUWJFM/templates/preprints/authors.html:35
-#: src/themes/TUW_ARW/templates/core/base.html:154
-#: src/themes/TUW_ARW/templates/journal/full-text-search.html:8
-#: src/themes/TUW_ARW/templates/journal/full-text-search.html:10
-#: src/themes/TUW_ARW/templates/journal/full-text-search.html:70
-#: src/themes/TUW_ARW/templates/journal/search.html:8
+#: src/themes/TUW_ARW/templates/core/base.html:169
 #: src/themes/clean/templates/journal/article_list.html:26
 #: src/themes/clean/templates/journal/article_list.html:50
 #: src/themes/clean/templates/journal/full-text-search.html:8
@@ -2949,9 +2625,21 @@ msgstr "Suche"
 msgid "Add Authors"
 msgstr "Fügen Sie Autor:innen hinzu"
 
+#: src/templates/admin/submission/submit_authors.html:60
+#: src/templates/tuw_backcontent/submission.html:144
+#: src/themes/TUWJFM/templates/preprints/authors.html:55
+msgid "Current Authors"
+msgstr "Aktuelle Autor:innen"
+
 #: src/templates/admin/submission/submit_authors.html:62
 msgid "Drag and drop an author to re-order them."
 msgstr "Autor:innen durch Ziehen und Ablegen neu anordnen"
+
+#: src/templates/admin/submission/submit_authors.html:86
+#: src/templates/tuw_backcontent/submission.html:168
+#: src/themes/TUWJFM/templates/preprints/authors.html:78
+msgid "No authors yet, add one!"
+msgstr "Noch keine Autor:innen vorhanden, fügen Sie jemanden hinzu!"
 
 #: src/templates/admin/submission/submit_authors.html:93
 msgid ""
@@ -2962,6 +2650,11 @@ msgstr ""
 "Bitte Hauptautor:in (corresponding author) auswählen. Diese Person erhält "
 "die Mitteilungen bezüglich des Artikelprozesses durch unsere Systeme. Sie "
 "müssen sich nicht selbst nennen."
+
+#: src/templates/admin/submission/submit_authors.html:94
+#: src/templates/tuw_backcontent/submission.html:175
+msgid "Select main author"
+msgstr "Hauptautor:in wählen"
 
 #: src/templates/admin/submission/submit_authors.html:104
 #: src/templates/admin/submission/submit_files.html:118
@@ -3105,6 +2798,11 @@ msgstr "Checkliste Einreichung"
 msgid "Agreed to Copyright statement"
 msgstr ""
 
+#: src/templates/admin/submission/submit_review.html:88
+#: src/themes/TUWJFM/templates/preprints/review.html:40
+msgid "Language"
+msgstr "Sprache"
+
 #: src/templates/admin/submission/submit_review.html:92
 #: src/themes/TUWJFM/templates/preprints/review.html:42
 #: src/themes/material/templates/journal/article.html:389
@@ -3202,8 +2900,6 @@ msgstr "Informationen zum Artikel"
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:31
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:36
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:38
-#: src/themes/TUW_ARW/templates/press/elements/press_footer.html:9
-#: src/themes/TUW_ARW/templates/press/elements/press_footer.html:11
 #: src/themes/clean/templates/elements/journal_footer.html:33
 #: src/themes/clean/templates/elements/journal_footer.html:37
 #: src/themes/clean/templates/elements/press_footer.html:11
@@ -3223,8 +2919,6 @@ msgstr ""
 #: src/themes/TUWJFM/templates/core/nav.html:147
 #: src/themes/TUWJFM/templates/journal/issues.html:8
 #: src/themes/TUWJFM/templates/journal/issues.html:17
-#: src/themes/TUW_ARW/templates/journal/issues.html:5
-#: src/themes/TUW_ARW/templates/journal/issues.html:7
 #: src/themes/clean/templates/core/nav.html:25
 #: src/themes/clean/templates/journal/issues.html:6
 #: src/themes/material/templates/core/nav.html:33
@@ -3288,34 +2982,218 @@ msgstr[1] ""
 "                    %(result_count)s Einträge\n"
 "                "
 
-#: src/themes/OLH/templates/403.html:13
-#: src/themes/TUW_ARW/templates/403.html:13
-#: src/themes/clean/templates/403.html:11
+#: src/templates/tuw_backcontent/articles.html:20
+#: src/templates/tuw_backcontent/submission.html:15
+msgid "New Article"
+msgstr "Neuer Artikel"
+
+#: src/templates/tuw_backcontent/articles.html:23
+msgid "To submit an article, click the start button below"
+msgstr ""
+
+#: src/templates/tuw_backcontent/articles.html:30
+msgid "Existing Articles"
+msgstr "Vorhandene Artikel"
+
+#: src/templates/tuw_backcontent/articles.html:36
+#: src/templates/tuw_sync/sync_articles.html:31
+#: src/templates/tuw_sync/sync_articles.html:144
+msgid "Id"
+msgstr ""
+
+#: src/templates/tuw_backcontent/articles.html:38
+msgid "Submitted"
+msgstr "Eingereicht"
+
+#: src/templates/tuw_backcontent/articles.html:45
+#: src/templates/tuw_sync/sync_articles.html:37
+msgctxt "oes"
+msgid "Issue"
+msgstr "Ausgabe"
+
+#: src/templates/tuw_backcontent/articles.html:49
+msgid "Actions"
+msgstr "Aktionen"
+
+#: src/templates/tuw_backcontent/articles.html:67
+#: src/themes/OLH/templates/press/press_journals.html:61
+#: src/themes/OLH/templates/press/press_journals.html:68
+#: src/themes/clean/templates/journal/article.html:194
+#: src/themes/clean/templates/press/press_journals.html:32
+#: src/themes/clean/templates/press/press_journals.html:39
+#: src/themes/material/templates/journal/article.html:283
+#: src/themes/material/templates/press/press_journals.html:36
+#: src/themes/material/templates/press/press_journals.html:43
+msgid "View"
+msgstr "Ansehen"
+
+#: src/templates/tuw_backcontent/articles.html:74
+msgid "No articles in this stage"
+msgstr "Keine Artikel für die Anzeige"
+
+#: src/templates/tuw_backcontent/submission.html:113
+msgctxt "bc"
+msgid "Keywords"
+msgstr "Schlagwörter"
+
+#: src/templates/tuw_backcontent/submission.html:116
+#: src/templates/tuw_backcontent/submission.html:122
+msgctxt "bc"
+msgid "Hit Enter to add a new keyword."
+msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
+
+#: src/templates/tuw_backcontent/submission.html:119
+msgctxt "bc"
+msgid "Keywords (German)"
+msgstr "Schlagwörter"
+
+#: src/templates/tuw_backcontent/submission.html:129
+msgid "Article Authors"
+msgstr "Artikel Autor:innen"
+
+#: src/templates/tuw_backcontent/submission.html:133
+msgid ""
+"You can add an author by clicking the button below. This will open a popup "
+"modal for you to complete their details."
+msgstr ""
+"Wenn Sie den Autor:innen-Datensatz nicht durch Suchen finden können und Sie "
+"nicht Einzelautor:in sind, können Sie jemanden hinzufügen, indem Sie auf die "
+"Schaltfläche unten klicken. Dies öffnet eine Eingabemaske für Sie, um ihre "
+"Details zu vervollständigen."
+
+#: src/templates/tuw_backcontent/submission.html:134
+msgid ""
+"If you know of an existing author, complete only the email field and they "
+"will be added as an author."
+msgstr ""
+"If you know of an existing author, complete only the email field and they "
+"will be added as an author."
+
+#: src/templates/tuw_backcontent/submission.html:174
+msgid ""
+"You may select a main author, this author will receive the communications "
+"regarding your articles process through our systems. This does not have to "
+"be you."
+msgstr ""
+"Bitte Hauptautor:in (corresponding author) auswählen. Diese Person erhält "
+"die Mitteilungen bezüglich des Artikelprozesses durch unsere Systeme. Sie "
+"müssen sich nicht selbst nennen."
+
+#: src/templates/tuw_backcontent/submission.html:189
+msgid "Galleys"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:195
+msgid "Filename"
+msgstr "Dateiname"
+
+#: src/templates/tuw_backcontent/submission.html:196
+msgid "Type"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:198
+#: src/themes/OLH/templates/journal/article.html:139
+#: src/themes/OLH/templates/journal/article.html:213
+#: src/themes/OLH/templates/journal/article.html:339
+#: src/themes/TUWJFM/templates/journal/article.html:205
+#: src/themes/TUWJFM/templates/preprints/article.html:92
+#: src/themes/TUWJFM/templates/preprints/article.html:96
+#: src/themes/TUWJFM/templates/preprints/article.html:118
+#: src/themes/TUW_ARW/templates/journal/article.html:141
+#: src/themes/TUW_ARW/templates/journal/article.html:142
+#: src/themes/TUW_ARW/templates/journal/article.html:215
+#: src/themes/TUW_ARW/templates/journal/article.html:341
+#: src/themes/clean/templates/journal/article.html:104
+#: src/themes/clean/templates/journal/article.html:190
+#: src/themes/clean/templates/journal/article.html:308
+#: src/themes/clean/templates/journal/article.html:311
+#: src/themes/material/templates/elements/journal/issue_sidebar.html:8
+#: src/themes/material/templates/journal/article.html:127
+#: src/themes/material/templates/journal/article.html:279
+#: src/themes/material/templates/preprints/article.html:113
+#: src/themes/material/templates/preprints/article.html:117
+#: src/themes/material/templates/preprints/article.html:139
+msgid "Download"
+msgstr "Herunterladen"
+
+#: src/templates/tuw_backcontent/submission.html:199
+msgid "Replace"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:201
+msgid "Create PDF"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:202
+msgid "Create EPUB"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:265
+msgid "No galleys have been uploaded."
+msgstr "Keine Galley-Dateien hochgeladen"
+
+#: src/templates/tuw_backcontent/submission.html:270
+msgid "Upload a new galley"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:300
+msgid "Publication Info"
+msgstr "Publikationsinfo"
+
+#: src/templates/tuw_backcontent/submission.html:314
+msgid "More Pub Info is available on the"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:314
+msgid "Pre Publication Checklist"
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:319
+#: src/templates/tuw_backcontent/submission.html:326
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+#: src/templates/tuw_backcontent/submission.html:322
+msgid ""
+"When you are ready to publish your article, press the publish button and it "
+"will be published."
+msgstr ""
+
+#: src/templates/tuw_backcontent/submission.html:329
+msgid "Save as Draft"
+msgstr "Als Draft speichern"
+
+#: src/templates/tuw_sync/sync_articles.html:125
+#, fuzzy
+#| msgid "Sort Articles"
+msgid "No articles"
+msgstr "Artikel sortieren"
+
+#: src/templates/tuw_sync/sync_articles.html:227
+#, fuzzy
+#| msgid "Issues"
+msgid "No Issues"
+msgstr "Ausgaben"
+
+#: src/themes/OLH/templates/403.html:13 src/themes/clean/templates/403.html:11
 msgid "Maintenance Mode"
 msgstr ""
 
-#: src/themes/OLH/templates/403.html:16
-#: src/themes/TUW_ARW/templates/403.html:16
-#: src/themes/clean/templates/403.html:14
+#: src/themes/OLH/templates/403.html:16 src/themes/clean/templates/403.html:14
 msgid "Permission Denied"
 msgstr "Zugang verweigert"
 
-#: src/themes/OLH/templates/404.html:9 src/themes/TUW_ARW/templates/404.html:9
-#: src/themes/clean/templates/404.html:12
+#: src/themes/OLH/templates/404.html:9 src/themes/clean/templates/404.html:12
 #: src/themes/material/templates/404.html:9
 msgid "Page Not Found"
 msgstr "Seite nicht gefunden"
 
-#: src/themes/OLH/templates/404.html:10
-#: src/themes/TUW_ARW/templates/404.html:10
-#: src/themes/clean/templates/404.html:13
+#: src/themes/OLH/templates/404.html:10 src/themes/clean/templates/404.html:13
 #: src/themes/material/templates/404.html:10
 msgid "Sorry, the page you were looking for was not found."
 msgstr "Entschuldigung, die von Ihnen gesuchte Seite wurde nicht gefunden."
 
 #: src/themes/OLH/templates/500.html:10 src/themes/OLH/templates/500.html:28
-#: src/themes/TUW_ARW/templates/500.html:10
-#: src/themes/TUW_ARW/templates/500.html:28
 #: src/themes/clean/templates/500.html:11
 #: src/themes/clean/templates/500.html:26
 #: src/themes/material/templates/500.html:9
@@ -3324,13 +3202,11 @@ msgid "Server Error"
 msgstr "Serverfehler"
 
 #: src/themes/OLH/templates/500.html:29
-#: src/themes/TUW_ARW/templates/500.html:29
 #: src/themes/material/templates/500.html:25
 msgid "A server error has occurred"
 msgstr ""
 
 #: src/themes/OLH/templates/cms/page.html:22
-#: src/themes/TUW_ARW/templates/cms/page.html:22
 #: src/themes/clean/templates/cms/page.html:19
 #: src/themes/clean/templates/journal/article.html:331
 #: src/themes/material/templates/cms/page.html:25
@@ -3342,9 +3218,6 @@ msgstr "Inhaltsverzeichnis"
 #: src/themes/OLH/templates/core/accounts/activate_account.html:5
 #: src/themes/OLH/templates/core/accounts/activate_account.html:22
 #: src/themes/OLH/templates/core/accounts/activate_account.html:26
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:5
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:22
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:26
 #: src/themes/clean/templates/core/accounts/activate_account.html:5
 #: src/themes/clean/templates/core/accounts/activate_account.html:13
 #: src/themes/clean/templates/core/accounts/activate_account.html:17
@@ -3355,7 +3228,6 @@ msgid "Activate Account"
 msgstr "Konto aktivieren"
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:25
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:25
 #: src/themes/clean/templates/core/accounts/activate_account.html:16
 #: src/themes/material/templates/core/accounts/activate_account.html:17
 msgid "You can complete the activation process by clicking the button below."
@@ -3364,14 +3236,12 @@ msgstr ""
 "Schaltfläche unten klicken."
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:29
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:29
 #: src/themes/clean/templates/core/accounts/activate_account.html:20
 #: src/themes/material/templates/core/accounts/activate_account.html:23
 msgid "Error"
 msgstr "Fehler"
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:31
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:31
 msgid ""
 "There was no inactive account with this activation code found. It is "
 "possible that your account is already active, you can check by attempting to"
@@ -3381,14 +3251,12 @@ msgstr ""
 "Sie"
 
 #: src/themes/OLH/templates/core/accounts/activate_account.html:32
-#: src/themes/TUW_ARW/templates/core/accounts/activate_account.html:32
 #: src/themes/clean/templates/core/accounts/activate_account.html:22
 #: src/themes/material/templates/core/accounts/activate_account.html:26
 msgid "login"
 msgstr "Anmeldung"
 
 #: src/themes/OLH/templates/core/accounts/edit_profile.html:4
-#: src/themes/TUW_ARW/templates/core/accounts/edit_profile.html:4
 #: src/themes/clean/templates/core/accounts/edit_profile.html:5
 #: src/themes/material/templates/core/accounts/edit_profile.html:4
 msgid "Edit Profile"
@@ -3396,8 +3264,6 @@ msgstr "Profil bearbeiten"
 
 #: src/themes/OLH/templates/core/accounts/get_reset_token.html:5
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:86
-#: src/themes/TUW_ARW/templates/core/accounts/get_reset_token.html:5
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:86
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:105
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:100
 msgid "Update"
@@ -3405,7 +3271,6 @@ msgstr "Aktualisieren"
 
 #: src/themes/OLH/templates/core/accounts/get_reset_token.html:25
 #: src/themes/TUWJFM/templates/core/accounts/get_reset_token.html:15
-#: src/themes/TUW_ARW/templates/core/accounts/get_reset_token.html:25
 #: src/themes/clean/templates/core/accounts/get_reset_token.html:16
 #: src/themes/material/templates/core/accounts/get_reset_token.html:16
 msgid "Enter your email address to begin the reset process"
@@ -3413,7 +3278,6 @@ msgstr "Geben Sie Ihre E-Mail-Adresse ein, um mit dem Zurücksetzen zu beginnen"
 
 #: src/themes/OLH/templates/core/accounts/get_reset_token.html:27
 #: src/themes/TUWJFM/templates/core/accounts/get_reset_token.html:21
-#: src/themes/TUW_ARW/templates/core/accounts/get_reset_token.html:27
 #: src/themes/clean/templates/core/accounts/get_reset_token.html:20
 #: src/themes/material/templates/core/accounts/get_reset_token.html:21
 msgid "Request Token"
@@ -3421,15 +3285,12 @@ msgstr "Anfrage-Token"
 
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:5
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:19
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:5
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:19
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:4
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:9
 msgid "Unregistered ORCiD"
 msgstr "Nicht registrierte ORCiD"
 
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:20
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:20
 msgid ""
 "The ORCiD you logged in with is not currently linked with an account in our "
 "system. You can either register a new account, or login with an existing "
@@ -3442,16 +3303,12 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:36
 #: src/themes/OLH/templates/press/core/login.html:36
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:36
-#: src/themes/TUW_ARW/templates/press/core/login.html:36
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:29
 msgid "Log In"
 msgstr "Einloggen"
 
 #: src/themes/OLH/templates/core/accounts/orcid_registration.html:37
 #: src/themes/OLH/templates/press/core/login.html:37
-#: src/themes/TUW_ARW/templates/core/accounts/orcid_registration.html:37
-#: src/themes/TUW_ARW/templates/press/core/login.html:37
 msgid "Forgot your password?"
 msgstr "Passwort vergessen?"
 
@@ -3461,12 +3318,7 @@ msgstr "Passwort vergessen?"
 #: src/themes/OLH/templates/press/elements/right_hand_menu.html:12
 #: src/themes/OLH/templates/press/nav.html:54
 #: src/themes/OLH/templates/repository/elements/right_hand_menu.html:10
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:5
 #: src/themes/TUW_ARW/templates/core/nav.html:73
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:38
-#: src/themes/TUW_ARW/templates/press/elements/right_hand_menu.html:12
-#: src/themes/TUW_ARW/templates/press/nav.html:54
-#: src/themes/TUW_ARW/templates/repository/elements/right_hand_menu.html:10
 #: src/themes/clean/templates/core/accounts/public_profile.html:4
 #: src/themes/clean/templates/core/nav.html:99
 #: src/themes/clean/templates/press/nav.html:71
@@ -3479,31 +3331,26 @@ msgid "Profile"
 msgstr "Profil"
 
 #: src/themes/OLH/templates/core/accounts/public_profile.html:15
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:15
 #: src/themes/clean/templates/core/accounts/public_profile.html:13
 #: src/themes/material/templates/core/accounts/public_profile.html:13
 msgid "Roles"
 msgstr "Rollen"
 
 #: src/themes/OLH/templates/core/accounts/public_profile.html:23
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:23
 msgid "Editorial groups"
 msgstr "Herausgeber:innen"
 
 #: src/themes/OLH/templates/core/accounts/public_profile.html:31
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:31
 msgid "Staff roles"
 msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/public_profile.html:52
-#: src/themes/TUW_ARW/templates/core/accounts/public_profile.html:52
 #: src/themes/clean/templates/core/accounts/public_profile.html:25
 #: src/themes/material/templates/core/accounts/public_profile.html:25
 msgid "Publications"
 msgstr "Publikationen"
 
 #: src/themes/OLH/templates/core/accounts/register.html:25
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:25
 #: src/themes/clean/templates/core/accounts/register.html:17
 #: src/themes/material/templates/core/accounts/register.html:15
 msgid "Register for an account with"
@@ -3511,8 +3358,6 @@ msgstr "Ein Konto registrieren"
 
 #: src/themes/OLH/templates/core/accounts/register.html:27
 #: src/themes/OLH/templates/core/accounts/reset_password.html:27
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:27
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:27
 #: src/themes/clean/templates/core/accounts/register.html:18
 #: src/themes/clean/templates/core/accounts/reset_password.html:17
 #: src/themes/material/templates/core/accounts/register.html:20
@@ -3522,15 +3367,12 @@ msgstr "Passwort-Regeln"
 
 #: src/themes/OLH/templates/core/accounts/register.html:31
 #: src/themes/OLH/templates/core/accounts/reset_password.html:32
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:31
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:32
 msgid ""
 "For more information read our <a href=\"#\" data-open=\"password-"
 "modal\">password guide</a>."
 msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:87
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:87
 #: src/themes/clean/templates/core/accounts/register.html:27
 #: src/themes/material/templates/core/accounts/register.html:33
 msgid "By registering an account you agree to our"
@@ -3538,8 +3380,6 @@ msgstr "Mit der Registrierung eines Kontos stimmen Sie unseren Bedingungen zu"
 
 #: src/themes/OLH/templates/core/accounts/register.html:106
 #: src/themes/OLH/templates/core/accounts/reset_password.html:48
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:106
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:48
 #: src/themes/clean/templates/core/accounts/register.html:50
 #: src/themes/clean/templates/core/accounts/reset_password.html:43
 #: src/themes/material/templates/core/accounts/register.html:49
@@ -3549,8 +3389,6 @@ msgstr "Passwort-Anleitung"
 
 #: src/themes/OLH/templates/core/accounts/register.html:107
 #: src/themes/OLH/templates/core/accounts/reset_password.html:49
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:107
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:49
 #: src/themes/clean/templates/core/accounts/reset_password.html:49
 #: src/themes/material/templates/core/accounts/register.html:50
 #: src/themes/material/templates/core/accounts/reset_password.html:40
@@ -3561,8 +3399,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:108
 #: src/themes/OLH/templates/core/accounts/reset_password.html:50
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:108
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:50
 #: src/themes/material/templates/core/accounts/register.html:51
 #: src/themes/material/templates/core/accounts/reset_password.html:41
 msgid ""
@@ -3575,8 +3411,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:109
 #: src/themes/OLH/templates/core/accounts/reset_password.html:51
-#: src/themes/TUW_ARW/templates/core/accounts/register.html:109
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:51
 msgid ""
 "We recommend selecting a long, but easy to remember password such as our "
 "awesome moon base rocks which would take an estimated septillion years to "
@@ -3594,8 +3428,6 @@ msgstr ""
 #: src/themes/TUWJFM/templates/core/accounts/get_reset_token.html:4
 #: src/themes/TUWJFM/templates/core/accounts/reset_password.html:5
 #: src/themes/TUWJFM/templates/core/accounts/reset_password.html:25
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:6
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:38
 #: src/themes/clean/templates/core/accounts/get_reset_token.html:4
 #: src/themes/clean/templates/core/accounts/reset_password.html:5
 #: src/themes/clean/templates/core/accounts/reset_password.html:29
@@ -3607,7 +3439,6 @@ msgstr "Passwort zurücksetzen"
 
 #: src/themes/OLH/templates/core/accounts/reset_password.html:26
 #: src/themes/TUWJFM/templates/core/accounts/reset_password.html:16
-#: src/themes/TUW_ARW/templates/core/accounts/reset_password.html:26
 #: src/themes/clean/templates/core/accounts/reset_password.html:16
 #: src/themes/material/templates/core/accounts/reset_password.html:16
 msgid "Enter your new password twice to complete the reset process"
@@ -3620,11 +3451,8 @@ msgstr ""
 #: src/themes/OLH/templates/press/nav.html:6
 #: src/themes/OLH/templates/press/press_index.html:5
 #: src/themes/OLH/templates/repository/nav.html:3
-#: src/themes/TUW_ARW/templates/core/base.html:61
+#: src/themes/TUW_ARW/templates/core/base.html:76
 #: src/themes/TUW_ARW/templates/core/nav.html:8
-#: src/themes/TUW_ARW/templates/press/nav.html:6
-#: src/themes/TUW_ARW/templates/press/press_index.html:5
-#: src/themes/TUW_ARW/templates/repository/nav.html:3
 #: src/themes/clean/templates/core/nav.html:17
 #: src/themes/clean/templates/press/nav.html:14
 #: src/themes/material/templates/core/nav.html:24
@@ -3639,15 +3467,12 @@ msgstr "Start"
 #: src/themes/OLH/templates/core/login.html:27
 #: src/themes/OLH/templates/press/core/login.html:25
 #: src/themes/TUWJFM/templates/core/login.html:14
-#: src/themes/TUW_ARW/templates/core/login.html:27
-#: src/themes/TUW_ARW/templates/press/core/login.html:25
 #: src/themes/clean/templates/core/login.html:14
 msgid "Log in with your account"
 msgstr "Melden Sie sich mit Ihrem Konto an"
 
 #: src/themes/OLH/templates/core/login.html:28
 #: src/themes/TUWJFM/templates/core/login.html:16
-#: src/themes/TUW_ARW/templates/core/login.html:28
 #: src/themes/clean/templates/core/login.html:16
 #: src/themes/material/templates/core/login.html:18
 msgid "Log in with ORCiD"
@@ -3655,8 +3480,6 @@ msgstr "Anmelden mit ORCiD"
 
 #: src/themes/OLH/templates/core/login.html:31
 #: src/themes/OLH/templates/press/core/login.html:28
-#: src/themes/TUW_ARW/templates/core/login.html:31
-#: src/themes/TUW_ARW/templates/press/core/login.html:28
 #: src/themes/clean/templates/core/login.html:20
 #: src/themes/material/templates/core/login.html:22
 msgid "Login with"
@@ -3664,20 +3487,17 @@ msgstr "Einloggen mit"
 
 #: src/themes/OLH/templates/core/login.html:43
 #: src/themes/TUWJFM/templates/core/login.html:33
-#: src/themes/TUW_ARW/templates/core/login.html:43
 #: src/themes/clean/templates/core/login.html:40
 msgid "Log in"
 msgstr "Anmelden"
 
 #: src/themes/OLH/templates/core/login.html:44
 #: src/themes/TUWJFM/templates/core/login.html:37
-#: src/themes/TUW_ARW/templates/core/login.html:44
 #: src/themes/clean/templates/core/login.html:44
 msgid "Forgotten your password?"
 msgstr "Passwort vergessen?"
 
 #: src/themes/OLH/templates/core/login.html:45
-#: src/themes/TUW_ARW/templates/core/login.html:45
 #: src/themes/clean/templates/core/login.html:48
 msgid "Register a new account"
 msgstr "Ein neues Konto eröffnen"
@@ -3690,9 +3510,6 @@ msgstr "Ein neues Konto eröffnen"
 #: src/themes/TUWJFM/templates/journal/become_reviewer.html:5
 #: src/themes/TUWJFM/templates/journal/become_reviewer.html:17
 #: src/themes/TUW_ARW/templates/core/nav.html:45
-#: src/themes/TUW_ARW/templates/journal/become_reviewer.html:5
-#: src/themes/TUW_ARW/templates/journal/become_reviewer.html:10
-#: src/themes/TUW_ARW/templates/journal/become_reviewer.html:20
 #: src/themes/clean/templates/core/nav.html:75
 #: src/themes/clean/templates/journal/become_reviewer.html:4
 #: src/themes/clean/templates/journal/become_reviewer.html:5
@@ -3708,7 +3525,6 @@ msgstr "Werden Sie Gutachter:in"
 #: src/themes/OLH/templates/core/nav.html:49
 #: src/themes/OLH/templates/press/nav.html:43
 #: src/themes/TUW_ARW/templates/core/nav.html:48
-#: src/themes/TUW_ARW/templates/press/nav.html:43
 #: src/themes/clean/templates/press/nav.html:61
 #: src/themes/material/templates/core/nav.html:73
 #: src/themes/material/templates/core/nav.html:128
@@ -3722,8 +3538,6 @@ msgstr "Konto"
 #: src/themes/OLH/templates/elements/right_hand_menu.html:4
 #: src/themes/OLH/templates/repository/elements/right_hand_menu.html:5
 #: src/themes/TUW_ARW/templates/core/nav.html:51
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:4
-#: src/themes/TUW_ARW/templates/repository/elements/right_hand_menu.html:5
 #: src/themes/clean/templates/core/nav.html:86
 #: src/themes/material/templates/core/nav.html:149
 #: src/themes/material/templates/core/nav.html:170
@@ -3737,9 +3551,6 @@ msgstr "Dashboard"
 #: src/themes/OLH/templates/press/press_journals.html:58
 #: src/themes/OLH/templates/press/press_journals.html:65
 #: src/themes/TUW_ARW/templates/core/nav.html:53
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:8
-#: src/themes/TUW_ARW/templates/press/press_journals.html:58
-#: src/themes/TUW_ARW/templates/press/press_journals.html:65
 #: src/themes/clean/templates/core/nav.html:87
 #: src/themes/clean/templates/press/press_journals.html:29
 #: src/themes/clean/templates/press/press_journals.html:36
@@ -3755,7 +3566,6 @@ msgstr "Einreichen"
 #: src/themes/OLH/templates/core/nav.html:58
 #: src/themes/OLH/templates/elements/right_hand_menu.html:5
 #: src/themes/TUW_ARW/templates/core/nav.html:57
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:5
 #: src/themes/clean/templates/core/nav.html:90
 #: src/themes/material/templates/core/nav.html:153
 #: src/themes/material/templates/core/nav.html:171
@@ -3765,7 +3575,6 @@ msgstr "Kanban"
 #: src/themes/OLH/templates/core/nav.html:61
 #: src/themes/OLH/templates/elements/right_hand_menu.html:25
 #: src/themes/TUW_ARW/templates/core/nav.html:60
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:25
 #: src/themes/clean/templates/core/nav.html:93
 #: src/themes/material/templates/core/nav.html:156
 #: src/themes/material/templates/core/nav.html:188
@@ -3775,7 +3584,6 @@ msgstr "Artikel bearbeiten"
 #: src/themes/OLH/templates/core/nav.html:64
 #: src/themes/OLH/templates/elements/right_hand_menu.html:28
 #: src/themes/TUW_ARW/templates/core/nav.html:63
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:28
 #: src/themes/material/templates/core/nav.html:159
 #: src/themes/material/templates/core/nav.html:191
 msgid "Edit Issue"
@@ -3784,7 +3592,6 @@ msgstr "Ausgabe bearbeiten"
 #: src/themes/OLH/templates/core/nav.html:67
 #: src/themes/OLH/templates/elements/right_hand_menu.html:31
 #: src/themes/TUW_ARW/templates/core/nav.html:66
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:31
 #: src/themes/material/templates/core/nav.html:194
 msgid "Edit News Item"
 msgstr "Aktuelle Meldung bearbeiten"
@@ -3795,10 +3602,6 @@ msgstr "Aktuelle Meldung bearbeiten"
 #: src/themes/OLH/templates/press/nav.html:51
 #: src/themes/OLH/templates/repository/elements/right_hand_menu.html:9
 #: src/themes/TUW_ARW/templates/core/nav.html:70
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:35
-#: src/themes/TUW_ARW/templates/press/elements/right_hand_menu.html:8
-#: src/themes/TUW_ARW/templates/press/nav.html:51
-#: src/themes/TUW_ARW/templates/repository/elements/right_hand_menu.html:9
 #: src/themes/clean/templates/core/nav.html:97
 #: src/themes/clean/templates/press/nav.html:69
 #: src/themes/material/templates/core/nav.html:163
@@ -3816,10 +3619,6 @@ msgstr "Administrator"
 #: src/themes/OLH/templates/press/nav.html:55
 #: src/themes/OLH/templates/repository/elements/right_hand_menu.html:11
 #: src/themes/TUW_ARW/templates/core/nav.html:74
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:39
-#: src/themes/TUW_ARW/templates/press/elements/right_hand_menu.html:13
-#: src/themes/TUW_ARW/templates/press/nav.html:55
-#: src/themes/TUW_ARW/templates/repository/elements/right_hand_menu.html:11
 #: src/themes/clean/templates/core/nav.html:100
 #: src/themes/clean/templates/press/nav.html:72
 #: src/themes/material/templates/core/nav.html:166
@@ -3832,7 +3631,6 @@ msgid "Logout"
 msgstr "Ausloggen"
 
 #: src/themes/OLH/templates/core/news/index.html:12
-#: src/themes/TUW_ARW/templates/core/news/index.html:12
 #: src/themes/material/templates/core/news/index.html:12
 #: src/themes/material/templates/press/core/news/index.html:11
 msgid "Filtering tag"
@@ -3844,12 +3642,7 @@ msgstr "Filter-Tag"
 #: src/themes/OLH/templates/press/core/news/index.html:23
 #: src/themes/OLH/templates/press/core/news/item.html:25
 #: src/themes/OLH/templates/press/core/news/item.html:34
-#: src/themes/TUW_ARW/templates/core/news/index.html:25
 #: src/themes/TUW_ARW/templates/core/news/item.html:27
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:28
-#: src/themes/TUW_ARW/templates/press/core/news/index.html:23
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:25
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:34
 #: src/themes/material/templates/core/news/index.html:31
 #: src/themes/material/templates/core/news/item.html:31
 #: src/themes/material/templates/press/core/news/index.html:21
@@ -3861,9 +3654,6 @@ msgstr "an"
 #: src/themes/OLH/templates/journal/homepage_elements/news.html:30
 #: src/themes/OLH/templates/press/core/news/index.html:25
 #: src/themes/TUWJFM/templates/journal/homepage_elements/news.html:16
-#: src/themes/TUW_ARW/templates/core/news/index.html:27
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:30
-#: src/themes/TUW_ARW/templates/press/core/news/index.html:25
 #: src/themes/clean/templates/core/news/index.html:17
 #: src/themes/clean/templates/press/core/news/index.html:17
 #: src/themes/material/templates/core/news/index.html:35
@@ -3873,7 +3663,6 @@ msgid "Read More"
 msgstr "Weiterlesen"
 
 #: src/themes/OLH/templates/core/news/index.html:34
-#: src/themes/TUW_ARW/templates/core/news/index.html:34
 #: src/themes/material/templates/press/core/news/index.html:30
 msgid "This journal currently has no news items to display."
 msgstr "Diese Zeitschrift hat momentan keine aktuellen Meldungen zum Anzeigen."
@@ -3900,14 +3689,12 @@ msgid "List"
 msgstr ""
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:7
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:7
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:8
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:8
 msgid "Change Your Email Address"
 msgstr "Ändern Sie Ihre Email-Adresse"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:8
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:8
 msgid ""
 "\n"
 "                <p>If you want to change your email address you may do so "
@@ -3928,34 +3715,29 @@ msgstr ""
 "                "
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:13
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:13
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:14
 msgid "Current Email Address"
 msgstr "Aktuelle E-Mail-Addresse"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:16
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:16
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:20
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:18
 msgid "New Email Address"
 msgstr "Neue E-Mail-Addresse"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:18
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:18
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:27
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:20
 msgid "Update Email Address"
 msgstr "Aktualisierung der Email-Adresse"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:28
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:28
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:40
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:29
 msgid "Register for Article Notifications"
 msgstr "Registrieren für Artikel-Benachrichtigungen"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:31
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:31
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:43
 msgid ""
 "Use the button below to register to receive notifications of new articles\n"
@@ -3963,14 +3745,12 @@ msgid ""
 msgstr ""
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:37
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:37
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:49
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:39
 msgid "Unsubscribe from Article Notifications"
 msgstr ""
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:41
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:41
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:53
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:43
 msgid "Subscribe to Article Notifications"
@@ -3978,8 +3758,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:52
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:70
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:52
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:70
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:67
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:87
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:65
@@ -3988,7 +3766,6 @@ msgid "Update Password"
 msgstr "Passwort aktualisieren"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:53
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:53
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:66
 msgid ""
 "You can update your password by entering your existing password plus your "
@@ -3998,26 +3775,22 @@ msgstr ""
 "neues Passwort eingeben."
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:58
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:58
 #: src/themes/clean/templates/elements/accounts/edit_profile_body_block.html:73
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:72
 msgid "Current Password"
 msgstr "Aktuelles Passwort"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:62
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:62
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:76
 msgid "New Password"
 msgstr "Neues Passwort"
 
 #: src/themes/OLH/templates/elements/accounts/edit_profile_body_block.html:66
-#: src/themes/TUW_ARW/templates/elements/accounts/edit_profile_body_block.html:66
 #: src/themes/material/templates/elements/accounts/edit_profile_body_block.html:80
 msgid "Enter Password Again"
 msgstr "Passwort erneut eingeben"
 
 #: src/themes/OLH/templates/elements/accounts/user_form.html:41
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:41
 #: src/themes/clean/templates/elements/accounts/user_form.html:38
 #: src/themes/material/templates/elements/accounts/user_form.html:39
 msgid "Social Media and Accounts"
@@ -4026,7 +3799,6 @@ msgstr "Social Media und Konten"
 #: src/themes/OLH/templates/elements/accounts/user_form.html:98
 #: src/themes/OLH/templates/journal/article.html:107
 #: src/themes/OLH/templates/journal/article.html:108
-#: src/themes/TUW_ARW/templates/elements/accounts/user_form.html:98
 #: src/themes/TUW_ARW/templates/journal/article.html:107
 #: src/themes/TUW_ARW/templates/journal/article.html:108
 #: src/themes/clean/templates/elements/accounts/user_form.html:95
@@ -4035,12 +3807,10 @@ msgid "Options"
 msgstr "Optionen"
 
 #: src/themes/OLH/templates/elements/edit_author.html:5
-#: src/themes/TUW_ARW/templates/elements/edit_author.html:5
 msgid "NB."
 msgstr ""
 
 #: src/themes/OLH/templates/elements/edit_author.html:5
-#: src/themes/TUW_ARW/templates/elements/edit_author.html:5
 msgid ""
 "You are editing the frozen metadata record for this author, not their live "
 "user profile."
@@ -4049,18 +3819,15 @@ msgstr ""
 "Autor:in, nicht das aktive Profil"
 
 #: src/themes/OLH/templates/elements/edit_author.html:10
-#: src/themes/TUW_ARW/templates/elements/edit_author.html:10
 msgid "Save Metadata"
 msgstr "Metadaten speichern"
 
 #: src/themes/OLH/templates/elements/forms/errors.html:2
-#: src/themes/TUW_ARW/templates/elements/forms/errors.html:2
 #: src/themes/material/templates/elements/forms/errors.html:2
 msgid "Form errors"
 msgstr ""
 
 #: src/themes/OLH/templates/elements/forms/errors.html:5
-#: src/themes/TUW_ARW/templates/elements/forms/errors.html:5
 #: src/themes/material/templates/elements/forms/errors.html:5
 msgid "Non Field Errors"
 msgstr ""
@@ -4104,9 +3871,6 @@ msgstr "Datum"
 #: src/themes/TUW_ARW/templates/elements/journal/article_filter_form.html:44
 #: src/themes/TUW_ARW/templates/elements/journal/article_filter_form.html:53
 #: src/themes/TUW_ARW/templates/elements/journal/article_list_filters.html:6
-#: src/themes/TUW_ARW/templates/elements/journal/search_form.html:19
-#: src/themes/TUW_ARW/templates/press/press_journals.html:93
-#: src/themes/TUW_ARW/templates/press/press_journals.html:94
 #: src/themes/clean/templates/elements/journal/article_list_filters.html:7
 #: src/themes/clean/templates/journal/articles.html:82
 #: src/themes/clean/templates/journal/full-text-search.html:54
@@ -4127,14 +3891,13 @@ msgid "Clear Filters"
 msgstr "Filter löschen"
 
 #: src/themes/OLH/templates/elements/journal/authors_block.html:4
-#: src/themes/TUW_ARW/templates/elements/journal/authors_block.html:4
 #: src/themes/clean/templates/elements/article_listing.html:27
 #: src/themes/clean/templates/elements/journal/authors_block.html:4
 #: src/themes/material/templates/elements/article_listing.html:25
 msgid "and"
 msgstr ""
 
-#: src/themes/OLH/templates/elements/journal/box_article.html:30
+#: src/themes/OLH/templates/elements/journal/box_article.html:32
 #: src/themes/TUW_ARW/templates/elements/journal/box_article.html:30
 #: src/themes/clean/templates/elements/article_listing.html:40
 #: src/themes/material/templates/elements/article_listing.html:41
@@ -4200,26 +3963,22 @@ msgid "APA-style Citation"
 msgstr "Zitierung im APA-Stil"
 
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:4
-#: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:4
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:4
 #: src/themes/clean/templates/journal/article.html:293
 msgid "Twitter"
 msgstr "Twitter"
 
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:5
-#: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:5
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:5
 msgid "Facebook"
 msgstr "Facebook"
 
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:6
-#: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:6
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:6
 msgid "Github"
 msgstr "Github"
 
 #: src/themes/OLH/templates/elements/journal/editorial_social_content.html:7
-#: src/themes/TUW_ARW/templates/elements/journal/editorial_social_content.html:7
 #: src/themes/clean/templates/elements/journal/editorial_social_content.html:7
 msgid "Linkedin"
 msgstr "Linkedin"
@@ -4235,12 +3994,10 @@ msgid "items"
 msgstr "Elemente"
 
 #: src/themes/OLH/templates/elements/journal/issue_list.html:24
-#: src/themes/TUW_ARW/templates/elements/journal/issue_list.html:24
 msgid "There are no issues published in this journal yet."
 msgstr "In dieser Zeitschrift sind noch keine Ausgaben veröffentlicht."
 
 #: src/themes/OLH/templates/elements/journal/issue_list_by_decade.html:3
-#: src/themes/TUW_ARW/templates/elements/journal/issue_list_by_decade.html:3
 #: src/themes/material/templates/elements/journal/issue_list_by_decade.html:3
 msgid ""
 "\n"
@@ -4262,8 +4019,6 @@ msgstr ""
 #: src/themes/TUW_ARW/templates/journal/article.html:212
 #: src/themes/TUW_ARW/templates/journal/article.html:248
 #: src/themes/TUW_ARW/templates/journal/article.html:336
-#: src/themes/TUW_ARW/templates/repository/preprint.html:114
-#: src/themes/TUW_ARW/templates/repository/preprint.html:152
 #: src/themes/clean/templates/elements/journal/issue_sidebar.html:6
 #: src/themes/clean/templates/journal/article.html:101
 #: src/themes/clean/templates/journal/article.html:184
@@ -4291,7 +4046,6 @@ msgid "Issue Archive"
 msgstr "Ausgabenarchiv"
 
 #: src/themes/OLH/templates/elements/journal/keywords_block.html:4
-#: src/themes/TUW_ARW/templates/elements/journal/keywords_block.html:4
 #: src/themes/clean/templates/elements/journal/keywords_block.html:4
 msgid ""
 "Keywords used by articles in this journal are listed below. Select a keyword "
@@ -4302,27 +4056,22 @@ msgstr ""
 "werden, die es verwenden."
 
 #: src/themes/OLH/templates/elements/journal/keywords_block.html:10
-#: src/themes/TUW_ARW/templates/elements/journal/keywords_block.html:10
 #: src/themes/clean/templates/elements/journal/keywords_block.html:10
 msgid "This journal has no keywords to display."
 msgstr "In dieser Zeitschrift sind keine Schlagwörter zur Anzeige hinterlegt."
 
 #: src/themes/OLH/templates/elements/journal/search_form.html:6
-#: src/themes/TUW_ARW/templates/elements/journal/search_form.html:6
 #: src/themes/clean/templates/journal/search.html:38
 msgid "Search titles, keywords, and authors"
 msgstr ""
 
 #: src/themes/OLH/templates/elements/journal/search_form.html:9
-#: src/themes/TUW_ARW/templates/elements/journal/search_form.html:9
 #: src/themes/clean/templates/journal/full-text-search.html:39
 msgid "You are currently browsing by keyword"
 msgstr "Sie betrachten derzeit per Schlagwort ausgewählte Artikel"
 
 #: src/themes/OLH/templates/elements/journal/search_form.html:10
 #: src/themes/OLH/templates/journal/full-text-search.html:64
-#: src/themes/TUW_ARW/templates/elements/journal/search_form.html:10
-#: src/themes/TUW_ARW/templates/journal/full-text-search.html:64
 #: src/themes/clean/templates/journal/article_list.html:36
 #: src/themes/clean/templates/journal/full-text-search.html:39
 #: src/themes/clean/templates/journal/search.html:42
@@ -4331,7 +4080,6 @@ msgstr "Nach einem Artikel suchen"
 
 #: src/themes/OLH/templates/elements/journal/search_form.html:14
 #: src/themes/TUWJFM/templates/journal/search.html:55
-#: src/themes/TUW_ARW/templates/elements/journal/search_form.html:14
 #: src/themes/clean/templates/journal/search.html:55
 #: src/themes/material/templates/journal/new_search.html:36
 #: src/themes/material/templates/journal/search.html:44
@@ -4340,8 +4088,7 @@ msgstr "Artikel sortieren nach"
 
 #: src/themes/OLH/templates/elements/journal/summary_modal.html:3
 #: src/themes/OLH/templates/journal/article.html:428
-#: src/themes/TUW_ARW/templates/elements/journal/summary_modal.html:3
-#: src/themes/TUW_ARW/templates/journal/article.html:430
+#: src/themes/TUW_ARW/templates/journal/article.html:438
 #: src/themes/clean/templates/elements/journal/summary_modal.html:6
 #: src/themes/clean/templates/journal/article.html:260
 #: src/themes/material/templates/elements/summary_modal.html:5
@@ -4350,7 +4097,6 @@ msgid "Non Specialist Summary"
 msgstr "Nichtfachliche Zusammenfassung"
 
 #: src/themes/OLH/templates/elements/journal/summary_modal.html:7
-#: src/themes/TUW_ARW/templates/elements/journal/summary_modal.html:7
 #: src/themes/clean/templates/elements/journal/summary_modal.html:15
 #: src/themes/material/templates/elements/summary_modal.html:9
 msgid "This article has no summary"
@@ -4365,7 +4111,6 @@ msgid "Published by"
 msgstr "Veröffentlicht von"
 
 #: src/themes/OLH/templates/elements/public_reviews.html:21
-#: src/themes/TUW_ARW/templates/elements/public_reviews.html:21
 #, python-format
 msgid ""
 "\n"
@@ -4377,40 +4122,33 @@ msgid ""
 msgstr ""
 
 #: src/themes/OLH/templates/elements/right_hand_menu.html:15
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:15
 #: src/themes/material/templates/core/nav.html:178
 msgid "Edit Submissions Page"
 msgstr "Einreichungsseite bearbeiten"
 
 #: src/themes/OLH/templates/elements/right_hand_menu.html:16
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:16
 #: src/themes/material/templates/core/nav.html:179
 msgid "Edit Journal Info"
 msgstr "Informationen zur Zeitschrift bearbeiten"
 
 #: src/themes/OLH/templates/elements/right_hand_menu.html:19
 #: src/themes/OLH/templates/press/elements/right_hand_menu.html:10
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:19
-#: src/themes/TUW_ARW/templates/press/elements/right_hand_menu.html:10
 #: src/themes/material/templates/core/nav.html:182
 msgid "Edit Page"
 msgstr "Seite bearbeiten"
 
 #: src/themes/OLH/templates/elements/right_hand_menu.html:22
-#: src/themes/TUW_ARW/templates/elements/right_hand_menu.html:22
 #: src/themes/material/templates/core/nav.html:185
 msgid "Manage Editorial Team"
 msgstr "Redaktionsteam verwalten"
 
 #: src/themes/OLH/templates/elements/section_block.html:6
-#: src/themes/TUW_ARW/templates/elements/section_block.html:6
 #: src/themes/clean/templates/elements/sections_block.html:7
 #: src/themes/material/templates/elements/sections_display.html:5
 msgid "Section or article type"
 msgstr "Abschnitt oder Artikel-Typ"
 
 #: src/themes/OLH/templates/elements/section_block.html:9
-#: src/themes/TUW_ARW/templates/elements/section_block.html:9
 #: src/themes/clean/templates/elements/sections_block.html:8
 #: src/themes/material/templates/elements/sections_display.html:8
 msgid "Public Submissions"
@@ -4418,7 +4156,6 @@ msgstr "Öffentliche Einreichungen"
 
 #: src/themes/OLH/templates/elements/section_block.html:12
 #: src/themes/OLH/templates/journal/article.html:279
-#: src/themes/TUW_ARW/templates/elements/section_block.html:12
 #: src/themes/TUW_ARW/templates/journal/article.html:281
 #: src/themes/clean/templates/elements/sections_block.html:9
 #: src/themes/clean/templates/journal/article.html:252
@@ -4427,7 +4164,6 @@ msgid "Peer Reviewed"
 msgstr "Begutachtet"
 
 #: src/themes/OLH/templates/elements/section_block.html:15
-#: src/themes/TUW_ARW/templates/elements/section_block.html:15
 #: src/themes/clean/templates/elements/sections_block.html:10
 #: src/themes/material/templates/elements/sections_display.html:14
 msgid "Indexed"
@@ -4436,9 +4172,6 @@ msgstr "Indexiert"
 #: src/themes/OLH/templates/elements/section_block.html:27
 #: src/themes/OLH/templates/elements/section_block.html:36
 #: src/themes/OLH/templates/elements/section_block.html:45
-#: src/themes/TUW_ARW/templates/elements/section_block.html:27
-#: src/themes/TUW_ARW/templates/elements/section_block.html:36
-#: src/themes/TUW_ARW/templates/elements/section_block.html:45
 #: src/themes/material/templates/elements/sections_display.html:26
 #: src/themes/material/templates/elements/sections_display.html:35
 #: src/themes/material/templates/elements/sections_display.html:44
@@ -4448,9 +4181,6 @@ msgstr ""
 #: src/themes/OLH/templates/elements/section_block.html:29
 #: src/themes/OLH/templates/elements/section_block.html:38
 #: src/themes/OLH/templates/elements/section_block.html:47
-#: src/themes/TUW_ARW/templates/elements/section_block.html:29
-#: src/themes/TUW_ARW/templates/elements/section_block.html:38
-#: src/themes/TUW_ARW/templates/elements/section_block.html:47
 #: src/themes/material/templates/elements/sections_display.html:28
 #: src/themes/material/templates/elements/sections_display.html:37
 #: src/themes/material/templates/elements/sections_display.html:46
@@ -4459,7 +4189,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/submit/file.html:8
 #: src/themes/TUWJFM/templates/elements/submit/file.html:17
-#: src/themes/TUW_ARW/templates/elements/submit/file.html:8
 msgid ""
 "Please supply any original figure files or supporting information. The "
 "journal urges you to submit this document to a repository such as Figshare "
@@ -4472,7 +4201,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/submit/file.html:11
 #: src/themes/TUWJFM/templates/elements/submit/file.html:20
-#: src/themes/TUW_ARW/templates/elements/submit/file.html:11
 msgid ""
 "Please upload your manuscript file, it should be in PDF, RTF, ODT or DOC/X "
 "format. LaTeX may be accepted later in the process but a simple, readable "
@@ -4484,7 +4212,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/submit/file.html:13
 #: src/themes/TUWJFM/templates/elements/submit/file.html:22
-#: src/themes/TUW_ARW/templates/elements/submit/file.html:13
 msgid ""
 "Please upload your manuscript file, it should be in RTF, ODT or DOC/X "
 "format. LaTeX may be accepted later in the process but a simple, readable "
@@ -4496,13 +4223,11 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/submit/preprint_file.html:8
 #: src/themes/TUWJFM/templates/elements/submit/preprint_file.html:17
-#: src/themes/TUW_ARW/templates/elements/submit/preprint_file.html:8
 msgid "Please supply any supporting information or data files."
 msgstr "Bitte geben Sie unterstützende Informationen oder Dateien an."
 
 #: src/themes/OLH/templates/elements/submit/preprint_file.html:11
 #: src/themes/TUWJFM/templates/elements/submit/preprint_file.html:20
-#: src/themes/TUW_ARW/templates/elements/submit/preprint_file.html:11
 msgid "Please upload your manuscript file, it should be in PDF format."
 msgstr ""
 "Bitte laden Sie Ihre Manuskriptdatei hoch, sie sollte im PDF-Format "
@@ -4510,7 +4235,6 @@ msgstr ""
 
 #: src/themes/OLH/templates/elements/submit/preprint_file.html:13
 #: src/themes/TUWJFM/templates/elements/submit/preprint_file.html:22
-#: src/themes/TUW_ARW/templates/elements/submit/preprint_file.html:13
 msgid ""
 "Please upload your manuscript file, it should be in PDF, RTF, ODT or DOC/X "
 "format."
@@ -4533,7 +4257,6 @@ msgstr "Preprint"
 #: src/themes/TUW_ARW/templates/journal/article.html:28
 #: src/themes/TUW_ARW/templates/journal/article.html:64
 #: src/themes/TUW_ARW/templates/journal/article.html:164
-#: src/themes/TUW_ARW/templates/journal/print.html:15
 #: src/themes/clean/templates/journal/article.html:38
 #: src/themes/clean/templates/journal/print.html:15
 msgid "Author"
@@ -4605,7 +4328,6 @@ msgstr " Herunterladen"
 #: src/themes/OLH/templates/journal/print.html:35
 #: src/themes/TUWJFM/templates/journal/print.html:115
 #: src/themes/TUW_ARW/templates/journal/article.html:188
-#: src/themes/TUW_ARW/templates/journal/print.html:35
 #: src/themes/clean/templates/journal/article.html:89
 #: src/themes/clean/templates/journal/print.html:35
 #: src/themes/material/templates/journal/article.html:91
@@ -4648,7 +4370,6 @@ msgstr ""
 #: src/themes/OLH/templates/repository/preprint.html:151
 #: src/themes/TUWJFM/templates/preprints/article.html:111
 #: src/themes/TUW_ARW/templates/journal/article.html:242
-#: src/themes/TUW_ARW/templates/repository/preprint.html:151
 #: src/themes/clean/templates/journal/article.html:290
 #: src/themes/material/templates/journal/article.html:163
 #: src/themes/material/templates/preprints/article.html:132
@@ -4673,58 +4394,69 @@ msgstr "Zitierungen"
 msgid "Published on"
 msgstr "Veröffentlicht am"
 
+#: src/themes/OLH/templates/journal/article.html:287
+#: src/themes/OLH/templates/repository/preprint.html:127
+#: src/themes/TUWJFM/templates/journal/article.html:243
+#: src/themes/TUWJFM/templates/preprints/article.html:103
+#: src/themes/TUW_ARW/templates/journal/article.html:289
+#: src/themes/clean/templates/journal/article.html:255
+#: src/themes/material/templates/preprints/article.html:124
+#: src/themes/material/templates/repository/preprint.html:189
+msgid "License"
+msgstr "Lizenz"
+
 #: src/themes/OLH/templates/journal/article.html:359
 #: src/themes/TUW_ARW/templates/journal/article.html:361
 msgid "Downloads are not available until this article is published "
 msgstr ""
 
 #: src/themes/OLH/templates/journal/article.html:368
-#: src/themes/TUW_ARW/templates/journal/article.html:370
+#: src/themes/TUW_ARW/templates/journal/article.html:372
 #: src/themes/material/templates/journal/article.html:410
 msgid "Identifiers"
 msgstr ""
 
 #: src/themes/OLH/templates/journal/article.html:378
-#: src/themes/TUW_ARW/templates/journal/article.html:380
+#: src/themes/TUW_ARW/templates/journal/article.html:388
 #: src/themes/material/templates/journal/article.html:308
 msgid "Publication details"
 msgstr "Publikationsdetails"
 
 #: src/themes/OLH/templates/journal/article.html:381
-#: src/themes/TUW_ARW/templates/journal/article.html:383
+#: src/themes/TUW_ARW/templates/journal/article.html:391
 #: src/themes/clean/templates/journal/article.html:237
 #: src/themes/material/templates/journal/article.html:312
 msgid "Pages"
 msgstr "Seiten"
 
 #: src/themes/OLH/templates/journal/article.html:384
-#: src/themes/TUW_ARW/templates/journal/article.html:386
+#: src/themes/TUW_ARW/templates/journal/article.html:394
 #: src/themes/clean/templates/journal/article.html:240
 msgid "Article Number"
 msgstr "Artikelnummer"
 
 #: src/themes/OLH/templates/journal/article.html:387
-#: src/themes/TUW_ARW/templates/journal/article.html:389
+#: src/themes/TUW_ARW/templates/journal/article.html:397
 #: src/themes/clean/templates/journal/article.html:243
 #: src/themes/material/templates/journal/article.html:324
 msgid "Publisher"
 msgstr ""
 
 #: src/themes/OLH/templates/journal/article.html:390
-#: src/themes/TUW_ARW/templates/journal/article.html:392
+#: src/themes/TUW_ARW/templates/journal/article.html:400
 #: src/themes/clean/templates/journal/article.html:246
 msgid "Original Publication"
 msgstr "Original-Publikationen"
 
 #: src/themes/OLH/templates/journal/article.html:393
-#: src/themes/TUW_ARW/templates/journal/article.html:395
+#: src/themes/TUW_ARW/templates/journal/article.html:403
 #: src/themes/clean/templates/journal/article.html:249
 #: src/themes/material/templates/journal/article.html:336
 msgid "Original ISSN"
 msgstr ""
 
 #: src/themes/OLH/templates/journal/article.html:396
-#: src/themes/TUW_ARW/templates/journal/article.html:398
+#: src/themes/TUW_ARW/templates/journal/article.html:406
 #: src/themes/clean/templates/journal/article.html:223
 #: src/themes/material/templates/journal/article.html:342
 msgid "Submitted on"
@@ -4732,14 +4464,14 @@ msgstr "Eingereicht am"
 
 #: src/themes/OLH/templates/journal/article.html:399
 #: src/themes/TUWJFM/templates/journal/article.html:136
-#: src/themes/TUW_ARW/templates/journal/article.html:401
+#: src/themes/TUW_ARW/templates/journal/article.html:409
 #: src/themes/clean/templates/journal/article.html:228
 #: src/themes/material/templates/journal/article.html:348
 msgid "Accepted on"
 msgstr "Akzeptiert am"
 
 #: src/themes/OLH/templates/journal/article.html:407
-#: src/themes/TUW_ARW/templates/journal/article.html:409
+#: src/themes/TUW_ARW/templates/journal/article.html:417
 #: src/themes/clean/templates/journal/article.html:211
 #: src/themes/material/templates/journal/article.html:368
 #: src/themes/material/templates/repository/preprint.html:138
@@ -4747,25 +4479,25 @@ msgid "Supplementary Files"
 msgstr "Zusätzliche Dateien"
 
 #: src/themes/OLH/templates/journal/article.html:430
-#: src/themes/TUW_ARW/templates/journal/article.html:432
+#: src/themes/TUW_ARW/templates/journal/article.html:440
 #: src/themes/material/templates/journal/article.html:383
 msgid "View Summary"
 msgstr "Zusammenfassung anzeigen"
 
 #: src/themes/OLH/templates/journal/article.html:437
-#: src/themes/TUW_ARW/templates/journal/article.html:439
+#: src/themes/TUW_ARW/templates/journal/article.html:447
 msgid "Jump to"
 msgstr "Gehe zu"
 
 #: src/themes/OLH/templates/journal/article.html:463
-#: src/themes/TUW_ARW/templates/journal/article.html:465
+#: src/themes/TUW_ARW/templates/journal/article.html:473
 #: src/themes/clean/templates/journal/article.html:315
 #: src/themes/material/templates/journal/article.html:454
 msgid "File Checksums"
 msgstr "Dateiprüfsummen"
 
 #: src/themes/OLH/templates/journal/article.html:473
-#: src/themes/TUW_ARW/templates/journal/article.html:475
+#: src/themes/TUW_ARW/templates/journal/article.html:483
 #: src/themes/clean/templates/journal/article.html:325
 #: src/themes/material/templates/journal/article.html:465
 msgid "File Checksums are not available for this article."
@@ -4773,7 +4505,7 @@ msgstr ""
 
 #: src/themes/OLH/templates/journal/article.html:480
 #: src/themes/TUWJFM/templates/journal/submissions.html:41
-#: src/themes/TUW_ARW/templates/journal/article.html:482
+#: src/themes/TUW_ARW/templates/journal/article.html:490
 #: src/themes/material/templates/journal/article.html:422
 msgid "Peer Review"
 msgstr "Peer Review"
@@ -4807,7 +4539,6 @@ msgstr "Bislang wurden in dieser Zeitschrift noch keine Artikel veröffentlicht"
 
 #: src/themes/OLH/templates/journal/collections.html:28
 #: src/themes/OLH/templates/journal/issue.html:7
-#: src/themes/TUW_ARW/templates/journal/collections.html:28
 #: src/themes/TUW_ARW/templates/journal/issue.html:7
 #: src/themes/clean/templates/journal/issue.html:6
 #: src/themes/material/templates/elements/journal/issue_sidebar.html:8
@@ -4817,13 +4548,10 @@ msgstr "Sammlung"
 
 #: src/themes/OLH/templates/journal/collections.html:29
 #: src/themes/OLH/templates/repository/preprint.html:124
-#: src/themes/TUW_ARW/templates/journal/collections.html:29
-#: src/themes/TUW_ARW/templates/repository/preprint.html:124
 msgid "Published"
 msgstr "Veröffentlicht"
 
 #: src/themes/OLH/templates/journal/full-text-search.html:26
-#: src/themes/TUW_ARW/templates/journal/full-text-search.html:26
 #: src/themes/clean/templates/journal/articles.html:24
 #: src/themes/clean/templates/journal/full-text-search.html:26
 #: src/themes/clean/templates/journal/search.html:26
@@ -4832,7 +4560,6 @@ msgstr "Keine Artikel für die Anzeige"
 
 #: src/themes/OLH/templates/journal/homepage_elements/featured.html:6
 #: src/themes/TUWJFM/templates/journal/homepage_elements/featured.html:6
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/featured.html:6
 #: src/themes/clean/templates/journal/homepage_elements/featured.html:6
 #: src/themes/clean/templates/journal/homepage_elements/popular.html:9
 #: src/themes/material/templates/journal/homepage_elements/featured.html:6
@@ -4841,8 +4568,6 @@ msgstr "Vorgestellte Artikel"
 
 #: src/themes/OLH/templates/journal/homepage_elements/journals.html:5
 #: src/themes/OLH/templates/press/homepage_elements/journals_and_html.html:7
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/journals.html:5
-#: src/themes/TUW_ARW/templates/press/homepage_elements/journals_and_html.html:7
 #: src/themes/clean/templates/journal/homepage_elements/journals.html:4
 #: src/themes/clean/templates/press/homepage_elements/journals_and_html.html:4
 #: src/themes/material/templates/journal/homepage_elements/journals.html:6
@@ -4853,21 +4578,16 @@ msgstr "Vorgestellte Zeitschriften"
 #: src/themes/OLH/templates/journal/homepage_elements/journals.html:23
 #: src/themes/OLH/templates/journal/homepage_elements/journals.html:28
 #: src/themes/OLH/templates/press/homepage_elements/journals_and_html.html:30
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/journals.html:23
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/journals.html:28
-#: src/themes/TUW_ARW/templates/press/homepage_elements/journals_and_html.html:30
 msgid "Unnamed Journal"
 msgstr "Unbenannte Zeitschrift"
 
 #: src/themes/OLH/templates/journal/homepage_elements/news.html:10
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:10
 #: src/themes/clean/templates/journal/homepage_elements/news.html:8
 #: src/themes/material/templates/journal/homepage_elements/news.html:12
 msgid "Latest"
 msgstr "Neueste"
 
 #: src/themes/OLH/templates/journal/homepage_elements/news.html:10
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:10
 #: src/themes/clean/templates/journal/homepage_elements/news.html:8
 #: src/themes/material/templates/journal/homepage_elements/news.html:12
 msgid "Posts"
@@ -4875,13 +4595,11 @@ msgstr ""
 
 #: src/themes/OLH/templates/journal/homepage_elements/news.html:36
 #: src/themes/TUWJFM/templates/journal/homepage_elements/news.html:19
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/news.html:36
 #: src/themes/clean/templates/press/core/news/index.html:21
 msgid "This journal currently has no news items to display"
 msgstr "Diese Zeitschrift hat derzeit keine aktuellen Meldungen zum Anzeigen"
 
 #: src/themes/OLH/templates/journal/homepage_elements/popular.html:6
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/popular.html:6
 #: src/themes/clean/templates/journal/homepage_elements/popular.html:7
 #: src/themes/material/templates/journal/homepage_elements/popular.html:6
 msgid "Most Popular Articles"
@@ -4889,7 +4607,6 @@ msgstr "Beliebteste Artikel"
 
 #: src/themes/OLH/templates/journal/homepage_elements/preprints.html:6
 #: src/themes/TUWJFM/templates/journal/homepage_elements/preprints.html:6
-#: src/themes/TUW_ARW/templates/journal/homepage_elements/preprints.html:6
 #: src/themes/clean/templates/journal/homepage_elements/preprints.html:6
 msgid "Featured Preprints"
 msgstr "Vorgestellte Preprints"
@@ -4897,9 +4614,6 @@ msgstr "Vorgestellte Preprints"
 #: src/themes/OLH/templates/journal/keyword.html:6
 #: src/themes/OLH/templates/journal/keyword.html:12
 #: src/themes/OLH/templates/journal/search.html:23
-#: src/themes/TUW_ARW/templates/journal/keyword.html:6
-#: src/themes/TUW_ARW/templates/journal/keyword.html:12
-#: src/themes/TUW_ARW/templates/journal/search.html:23
 #: src/themes/clean/templates/journal/keyword.html:4
 #: src/themes/clean/templates/journal/keyword.html:5
 #: src/themes/material/templates/journal/full-text-search.html:17
@@ -4910,21 +4624,18 @@ msgid "Keyword"
 msgstr "Schlagwort"
 
 #: src/themes/OLH/templates/journal/keyword.html:14
-#: src/themes/TUW_ARW/templates/journal/keyword.html:14
 #: src/themes/clean/templates/journal/keyword.html:10
 #: src/themes/material/templates/journal/keyword.html:9
 msgid "Back to Keywords List"
 msgstr "Zurück zur Liste der Schlagwörter"
 
 #: src/themes/OLH/templates/journal/keyword.html:16
-#: src/themes/TUW_ARW/templates/journal/keyword.html:16
 #: src/themes/clean/templates/journal/keyword.html:12
 #: src/themes/material/templates/journal/keyword.html:10
 msgid "Articles that use this keyword are listed below."
 msgstr "Artikel, die dieses Schlagwort nutzen, sind in Folgenden aufgelistet."
 
 #: src/themes/OLH/templates/journal/search.html:21
-#: src/themes/TUW_ARW/templates/journal/search.html:21
 #: src/themes/material/templates/journal/full-text-search.html:15
 #: src/themes/material/templates/journal/new_search.html:12
 #: src/themes/material/templates/journal/search.html:12
@@ -4935,8 +4646,6 @@ msgstr "Suche nach"
 #: src/themes/OLH/templates/journal/submissions.html:22
 #: src/themes/TUWJFM/templates/journal/submissions.html:5
 #: src/themes/TUWJFM/templates/journal/submissions.html:21
-#: src/themes/TUW_ARW/templates/journal/submissions.html:5
-#: src/themes/TUW_ARW/templates/journal/submissions.html:22
 #: src/themes/clean/templates/journal/submissions.html:5
 #: src/themes/clean/templates/journal/submissions.html:10
 #: src/themes/material/templates/journal/submissions.html:6
@@ -4945,7 +4654,6 @@ msgid "Submissions"
 msgstr "Einreichungen"
 
 #: src/themes/OLH/templates/press/core/login.html:26
-#: src/themes/TUW_ARW/templates/press/core/login.html:26
 msgid "Login with ORCiD"
 msgstr "Einloggen mit ORCiD"
 
@@ -4953,9 +4661,6 @@ msgstr "Einloggen mit ORCiD"
 #: src/themes/OLH/templates/press/core/news/index.html:11
 #: src/themes/OLH/templates/press/core/news/item.html:6
 #: src/themes/TUWJFM/templates/core/nav.html:140
-#: src/themes/TUW_ARW/templates/press/core/news/index.html:6
-#: src/themes/TUW_ARW/templates/press/core/news/index.html:11
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:6
 #: src/themes/clean/templates/press/core/news/index.html:9
 #: src/themes/clean/templates/press/nav.html:16
 #: src/themes/material/templates/core/nav.html:88
@@ -4966,42 +4671,35 @@ msgid "News"
 msgstr "Aktuelles"
 
 #: src/themes/OLH/templates/press/core/news/index.html:32
-#: src/themes/TUW_ARW/templates/press/core/news/index.html:32
 msgid "This press currently has no news items to display."
 msgstr "Diese Seite hat derzeit keine aktuellen Meldungen zum Anzeigen."
 
 #: src/themes/OLH/templates/press/core/news/item.html:34
 #: src/themes/TUWJFM/templates/journal/homepage_elements/news.html:13
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:34
 #: src/themes/material/templates/press/core/news/index.html:21
 #: src/themes/material/templates/press/core/news/item.html:18
 msgid "Posted by"
 msgstr "Erstellt von"
 
 #: src/themes/OLH/templates/press/core/news/item.html:41
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:41
 #: src/themes/material/templates/core/news/item.html:36
 #: src/themes/material/templates/press/core/news/item.html:23
 msgid "Tags"
 msgstr "Tags"
 
 #: src/themes/OLH/templates/press/core/news/item.html:46
-#: src/themes/TUW_ARW/templates/press/core/news/item.html:46
 #: src/themes/clean/templates/press/core/news/item.html:18
 #: src/themes/material/templates/press/core/news/item.html:31
 msgid "Back to News List"
 msgstr "Zurück zu den aktuellen Meldungen"
 
 #: src/themes/OLH/templates/press/elements/press_footer.html:13
-#: src/themes/TUW_ARW/templates/press/elements/press_footer.html:13
 #: src/themes/clean/templates/elements/press_footer.html:16
 msgid "Sitemap"
 msgstr "Sitemap"
 
 #: src/themes/OLH/templates/press/nav.html:23
 #: src/themes/OLH/templates/press/press_journals.html:5
-#: src/themes/TUW_ARW/templates/press/nav.html:23
-#: src/themes/TUW_ARW/templates/press/press_journals.html:5
 #: src/themes/clean/templates/press/nav.html:37
 #: src/themes/clean/templates/press/press_journals.html:10
 #: src/themes/material/templates/press/press_journals.html:9
@@ -5009,12 +4707,10 @@ msgid "Journals"
 msgstr "Zeitschriften"
 
 #: src/themes/OLH/templates/press/nav.html:26
-#: src/themes/TUW_ARW/templates/press/nav.html:26
 msgid "Conferences"
 msgstr "Konferenzen"
 
 #: src/themes/OLH/templates/press/nav.html:30
-#: src/themes/TUW_ARW/templates/press/nav.html:30
 #: src/themes/clean/templates/press/nav.html:43
 #: src/themes/material/templates/press/nav.html:46
 #: src/themes/material/templates/press/nav.html:97
@@ -5022,22 +4718,18 @@ msgid "Repositories"
 msgstr ""
 
 #: src/themes/OLH/templates/press/nav.html:39
-#: src/themes/TUW_ARW/templates/press/nav.html:39
 #: src/themes/material/templates/preprints/editors.html:5
 #: src/themes/material/templates/preprints/editors.html:6
 msgid "Editorial Team"
 msgstr "Herausgeber:innen"
 
 #: src/themes/OLH/templates/press/press_journals.html:48
-#: src/themes/TUW_ARW/templates/press/press_journals.html:48
 msgid "Disciplines"
 msgstr "Disziplinen"
 
 #: src/themes/OLH/templates/repository/about.html:15
 #: src/themes/OLH/templates/repository/nav.html:4
 #: src/themes/TUWJFM/templates/journal/submissions.html:31
-#: src/themes/TUW_ARW/templates/repository/about.html:15
-#: src/themes/TUW_ARW/templates/repository/nav.html:4
 #: src/themes/material/templates/preprints/about.html:4
 #: src/themes/material/templates/preprints/about.html:9
 #: src/themes/material/templates/repository/about.html:4
@@ -5048,52 +4740,42 @@ msgid "About"
 msgstr "Über"
 
 #: src/themes/OLH/templates/repository/home.html:29
-#: src/themes/TUW_ARW/templates/repository/home.html:29
 #: src/themes/material/templates/repository/home.html:37
 msgid "Read about"
 msgstr "Lesen über"
 
 #: src/themes/OLH/templates/repository/home.html:30
-#: src/themes/TUW_ARW/templates/repository/home.html:30
 #: src/themes/material/templates/repository/home.html:38
 msgid "or view list of"
 msgstr "oder Liste anzeigen von"
 
 #: src/themes/OLH/templates/repository/home.html:36
-#: src/themes/TUW_ARW/templates/repository/home.html:36
 msgid "Latest Preprints"
 msgstr "Neueste Preprints"
 
 #: src/themes/OLH/templates/repository/home.html:43
 #: src/themes/OLH/templates/repository/list.html:95
-#: src/themes/TUW_ARW/templates/repository/home.html:43
-#: src/themes/TUW_ARW/templates/repository/list.html:95
 msgid "Filter by Subject"
 msgstr "Nach Thema filtern"
 
 #: src/themes/OLH/templates/repository/list.html:7
-#: src/themes/TUW_ARW/templates/repository/list.html:7
 msgid "All"
 msgstr "Alles"
 
 #: src/themes/OLH/templates/repository/list.html:69
-#: src/themes/TUW_ARW/templates/repository/list.html:69
 msgid "Search preprints"
 msgstr "Suche Preprints"
 
 #: src/themes/OLH/templates/repository/list.html:73
-#: src/themes/TUW_ARW/templates/repository/list.html:73
 msgid "Searching by"
 msgstr "Suche nach"
 
 #: src/themes/OLH/templates/repository/list.html:78
-#: src/themes/TUW_ARW/templates/repository/list.html:78
 #: src/themes/material/templates/repository/list.html:62
 msgid "Author Affiliation"
 msgstr "Zugehörigkeit Autor:in"
 
 #: src/themes/OLH/templates/repository/nav.html:6
-#: src/themes/TUW_ARW/templates/repository/nav.html:6
 #: src/themes/material/templates/repository/nav.html:21
 #: src/themes/material/templates/repository/nav.html:45
 #: src/themes/material/templates/repository/preprint.html:166
@@ -5101,27 +4783,23 @@ msgid "Subjects"
 msgstr "Themen"
 
 #: src/themes/OLH/templates/repository/preprint.html:53
-#: src/themes/TUW_ARW/templates/repository/preprint.html:53
 #: src/themes/material/templates/preprints/article.html:51
 msgid "Preprint Body"
 msgstr "Preprint Body"
 
 #: src/themes/OLH/templates/repository/preprint.html:60
 #: src/themes/TUWJFM/templates/preprints/article.html:49
-#: src/themes/TUW_ARW/templates/repository/preprint.html:60
 #: src/themes/material/templates/preprints/article.html:63
 #: src/themes/material/templates/repository/preprint.html:85
 msgid "Comments"
 msgstr "Kommentare"
 
 #: src/themes/OLH/templates/repository/preprint.html:66
-#: src/themes/TUW_ARW/templates/repository/preprint.html:66
 #: src/themes/material/templates/preprints/article.html:69
 msgid "Add Comment"
 msgstr "Neuer Kommentare"
 
 #: src/themes/OLH/templates/repository/preprint.html:104
-#: src/themes/TUW_ARW/templates/repository/preprint.html:104
 msgid ""
 "There are no comments or no comments have been made public for this article."
 msgstr ""
@@ -5129,25 +4807,21 @@ msgstr ""
 "veröffentlicht."
 
 #: src/themes/OLH/templates/repository/preprint.html:125
-#: src/themes/TUW_ARW/templates/repository/preprint.html:125
 msgid "Last Updated"
 msgstr "zuletzt aktualisiert"
 
 #: src/themes/OLH/templates/repository/preprint.html:138
 #: src/themes/TUWJFM/templates/preprints/article.html:114
-#: src/themes/TUW_ARW/templates/repository/preprint.html:138
 #: src/themes/material/templates/preprints/article.html:135
 msgid "Versions"
 msgstr "Versionen"
 
 #: src/themes/OLH/templates/repository/preprint.html:143
-#: src/themes/TUW_ARW/templates/repository/preprint.html:143
 msgid "This is the only version of the preprint."
 msgstr "Dies ist die einzige Version des Preprints."
 
 #: src/themes/OLH/templates/repository/preprint.html:149
 #: src/themes/TUWJFM/templates/preprints/article.html:109
-#: src/themes/TUW_ARW/templates/repository/preprint.html:149
 #: src/themes/clean/templates/journal/article.html:288
 #: src/themes/material/templates/preprints/article.html:130
 #: src/themes/material/templates/repository/preprint.html:201
@@ -5157,7 +4831,6 @@ msgstr "Metriken"
 #: src/themes/OLH/templates/repository/preprint.html:156
 #: src/themes/TUWJFM/templates/preprints/list.html:6
 #: src/themes/TUWJFM/templates/preprints/list.html:14
-#: src/themes/TUW_ARW/templates/repository/preprint.html:156
 #: src/themes/material/templates/preprints/article.html:152
 #: src/themes/material/templates/preprints/list.html:6
 #: src/themes/material/templates/preprints/list.html:14
@@ -5203,13 +4876,13 @@ msgid "Imprint"
 msgstr "Imprint"
 
 #: src/themes/TUWJFM/templates/core/base.html:121
-#: src/themes/TUW_ARW/templates/core/base.html:207
+#: src/themes/TUW_ARW/templates/core/base.html:222
 msgctxt "fe-agplv3"
 msgid "Janeway developed by BirkbeckCTP"
 msgstr "Janeway entwickelt von BirkbeckCTP"
 
 #: src/themes/TUWJFM/templates/core/base.html:123
-#: src/themes/TUW_ARW/templates/core/base.html:209
+#: src/themes/TUW_ARW/templates/core/base.html:224
 msgctxt "fe-agplv3"
 msgid "The modified source code is available on GitHub:"
 msgstr "Der angepasste Quellcode ist auf GitHub verfügbar:"
@@ -5396,9 +5069,17 @@ msgid "Contributions"
 msgstr "Beiträge"
 
 #: src/themes/TUW_ARW/templates/core/nav.html:26
+#: src/themes/TUW_ARW/templates/journal/issues.html:5
+#: src/themes/TUW_ARW/templates/journal/issues.html:7
+#: src/themes/TUW_ARW/templates/journal/issues.html:14
 msgctxt "fe-arw"
 msgid "Volumes"
 msgstr "Bände"
+
+#: src/themes/TUW_ARW/templates/elements/journal/issue_list.html:24
+msgctxt "fe-arw"
+msgid "There are no volumes in this conference proceedings series yet."
+msgstr "Es gibt noch keine Bände in dieser Konferenzbandreihe."
 
 #: src/themes/TUW_ARW/templates/elements/journal/issue_sidebar.html:8
 msgctxt "fe-arw"
@@ -5409,6 +5090,11 @@ msgstr "Band herunterladen"
 msgctxt "fe-arw"
 msgid "Volume Archive"
 msgstr "Bändearchiv"
+
+#: src/themes/TUW_ARW/templates/journal/issue.html:9
+msgctxt "fe-arw"
+msgid "Volume"
+msgstr "Band"
 
 #: src/themes/clean/templates/403.html:18
 msgid "You do not have permission to view this page"
@@ -5852,6 +5538,9 @@ msgstr "Akzeptiert"
 #: src/utils/transactional_emails.py:395
 msgid "declined"
 msgstr "abgelehnt"
+
+#~ msgid "Add A New Article"
+#~ msgstr "Neuem Artikel hinzufügen"
 
 #~ msgid "Parallel title"
 #~ msgstr "Paralleltitel"
