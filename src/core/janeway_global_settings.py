@@ -106,6 +106,8 @@ INSTALLED_APPS = [
     'hijack',
     'hcaptcha',
     'django_bleach',
+    'django_altcha',
+    'django_extensions',
 
     # Forms
     'django.forms',

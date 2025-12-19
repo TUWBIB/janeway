@@ -10,11 +10,13 @@ from django.forms import (
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse_lazy
 
 from modeltranslation import forms as mt_forms, translator
 from captcha.fields import CaptchaField
 from simplemathcaptcha.fields import MathCaptchaField
 from hcaptcha.fields import hCaptchaField
+from django_altcha import AltchaField
 
 from submission import models as submission_models
 
@@ -140,6 +142,8 @@ class CaptchaForm(Form):
             captcha = hCaptchaField()
         elif settings.CAPTCHA_TYPE == 'simple-captcha':
             captcha = CaptchaField()
+        elif settings.CAPTCHA_TYPE == 'altcha':
+            captcha = AltchaField(challengeurl=reverse_lazy("altcha_challenge"))
         else:
             captcha = CharField(widget=HiddenInput, required=False)
 

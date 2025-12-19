@@ -10,6 +10,8 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.views.static import serve
 
+from django_altcha import AltchaChallengeView
+
 from press import views as press_views
 from core import error_views
 from utils.logger import get_logger
@@ -24,6 +26,7 @@ urlpatterns = [
     path('summernote/', include('django_summernote.urls')),
     path('', include('core.include_urls')),
     path('captcha/', include('captcha.urls')),
+    path('altcha/challenge', AltchaChallengeView.as_view(),name='altcha_challenge'),
 ]
 
 try:
