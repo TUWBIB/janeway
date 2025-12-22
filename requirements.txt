@@ -72,6 +72,3 @@ django-simple-captcha==0.6.0
 lingua-language-detector 
 xlsxwriter
 django-altcha
-django-extensions
-Werkzeug
-pyOpenSSL
