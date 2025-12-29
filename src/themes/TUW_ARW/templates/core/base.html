@@ -72,13 +72,6 @@
         <div class="main top-bar">
             <div class="top-bar-left header-image-bar border-right">
                 {% if request.journal %}
-                    {% if request.journal.header_image %}
-                    <a title="{% trans 'Home' %}" href="{{ request.journal.site_url }}">
-                        {% svg_or_image request.journal.header_image css_class='header-image top-bar-image' %}
-                    </a>
-                    {% else %}
-                        <a href="{{ request.journal.site_url }}"><img src="{% static "common/img/sample/janeway.png" %}"></a>
-                    {% endif %}
                 {% elif request.repository %}
                     {% if request.repository.logo %}
                         {% svg_or_image request.repository.logo %}
