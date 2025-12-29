@@ -1264,38 +1264,37 @@ button.list-group-item-danger.active:focus {
   background-color:transparent;
 }
 
+// tuw changed
 #journal-title {
     padding: 0px;
-    height:100%;
+    display: flex;
+    align-items: center;
+    @include breakpoint(medium down){
+      max-width:80%;
+      h1 {
+        font-size: 100%;
+        font-weight: bold;        
+      }
+    }
     @include breakpoint(large down){
       max-width: 550px;
       h1 {
-        padding-top: 0px;
-        font-size:1.5vw;
+        font-size:1.50rem;
+        font-weight: bold;
       }
-    }
-    @include breakpoint(medium down){
-      max-width:80%; // Avoid running over the search and burger menus
-      padding-top: 0.7rem;
-      h1 {
-        font-size: 100%;
-      }
-    }
-    @include breakpoint(large){
-      float: right; // Aligns title to the right of the logo
     }
     @include breakpoint(xlarge){
       max-width: 800px;
       h1 {
-        padding-top: 0px;
-        font-size:1.6vw;
+        font-size:1.70rem;
+        font-weight: bold;
       }
     }
     @include breakpoint(xxlarge){
       max-width: 1000px;
       h1 {
-        padding-top: 0px;
-        font-size:1.70rem;
+        font-size:1.90rem;
+        font-weight: bold;
       }
     }
 }
