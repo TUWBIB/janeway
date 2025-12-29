@@ -1343,3 +1343,16 @@ button.list-group-item-danger.active:focus {
 .tuw-facets div {
   margin-bottom: 10px;
 }
+
+.tuw-logo-right {
+  width: 60px;
+  height: 60px;
+  @include breakpoint(medium up){
+      width:75px;
+      height:75px;
+    }
+  @include breakpoint(large up){
+      width:90px;
+      height:90px;
+    }
+  }
