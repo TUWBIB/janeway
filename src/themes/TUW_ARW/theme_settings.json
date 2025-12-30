@@ -1,0 +1,25 @@
+[
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Determines if the language toggles are visible for a given journal, allowed values 'none','header','footer','both'. Other values disable both toggles. If the setting is missing 'both' is assmumed",
+            "is_translatable": false,
+            "name": "tuw_language_toggle_visibility",
+            "pretty_name": "Language toggles",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "both",
+            "JFM": "",
+            "OES": "",
+            "ARW": "both",
+            "IOTW": "both",
+            "EF": "both"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
+    }
+]
