@@ -21,5 +21,28 @@
         "editable_by": [
             "journal-manager"
         ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "(!wip) Determines if self registration is possible 'no','direct','orcid','both'. If the setting is missing 'no' is assumed. Work in progress: for now only hides link, doesn't deactivate self-registration for real",
+            "is_translatable": false,
+            "name": "tuw_self_registration",
+            "pretty_name": "Self registration",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "both",
+            "JFM": "",
+            "OES": "",
+            "ARW": "both",
+            "IOTW": "both",
+            "EF": "both"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
     }
 ]

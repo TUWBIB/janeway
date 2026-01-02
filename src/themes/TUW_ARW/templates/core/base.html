@@ -153,7 +153,13 @@
                             {% endif %}
                         </li>
                     {% else %}
-                        <li><p><a href="{% url 'core_login' %}">{% trans "Login" %} </a>|<a href="{% url 'core_register' %}"> {% trans "Register" %}</a></p></li>
+                        <li><p><a href="{% url 'core_login' %}">{% trans "Login" %}</a>
+                            {% if journal_settings.general.tuw_self_registration is not None %} 
+                            {% if journal_settings.general.tuw_self_registration == 'direct' or journal_settings.general.tuw_self_registration == 'orcid' or journal_settings.general.tuw_self_registration == 'both' %}
+                            |<a href="{% url 'core_register' %}"> {% trans "Register" %}</a>
+                            {% endif %}
+                            {% endif %}
+                        </p></li>
                     {% endif %}
                 </ul>
             </div>
