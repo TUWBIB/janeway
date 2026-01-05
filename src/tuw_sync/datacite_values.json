@@ -166,5 +166,29 @@
             "editor",
             "journal-manager"
         ]
+    },
+    {
+        "group": {
+            "name": "tuw-datacite"
+        },
+        "setting": {
+            "description": "Resource Type",
+            "is_translatable": false,
+            "name": "issuelevel__resourcetype",
+            "pretty_name": "Resource Type",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "",
+            "IOTW": "",
+            "EF": ""
+        },
+        "editable_by": [
+            "editor",
+            "journal-manager"
+        ]
     }
 ]

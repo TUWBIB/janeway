@@ -339,8 +339,6 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 if l_values:
                     l.append('<creators>')
                     for d in l_values:
-                        print(l)
-
                         l.append('<creator>')
                         l.append('<creatorName nameType="Personal">')
                         l.append(d["full_name"])
@@ -373,10 +371,12 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append(str(issue.date.year))
                 l.append('</publicationYear>')
 
-                l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
-                l.append("---to be 𝄞 determined---'")
-                l.append('</resourceType>')
-                l.append('</resource>')
+                value = setting_handler.get_setting('tuw-datacite','issuelevel__resourcetype',issue.journal).value
+                if value:                        
+                    l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
+                    l.append(escape(value))
+                    l.append('</resourceType>')
+                    l.append('</resource>')
 
                 xml = ''.join(l)
                 x = etree.fromstring(xml)
