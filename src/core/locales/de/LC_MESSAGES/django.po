@@ -2,24 +2,24 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Janeway\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 18:22+0100\n"
+"POT-Creation-Date: 2026-01-05 13:45+0100\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
-#: src/cms/models.py:21 src/core/janeway_global_settings.py:266
-#: src/core/settings.py:45
+#: src/cms/models.py:21 src/core/janeway_global_settings.py:268
+#: src/core/settings.py:52
 msgid "English"
 msgstr "Englisch"
 
-#: src/cms/models.py:22 src/core/janeway_global_settings.py:269
-#: src/core/settings.py:48
+#: src/cms/models.py:22 src/core/janeway_global_settings.py:271
+#: src/core/settings.py:55
 msgid "German"
 msgstr "Deutsch"
 
-#: src/cms/models.py:23 src/core/janeway_global_settings.py:268
+#: src/cms/models.py:23 src/core/janeway_global_settings.py:270
 msgid "French"
 msgstr "Französisch"
 
@@ -141,19 +141,19 @@ msgstr ""
 msgid "Issues and Collections"
 msgstr "Ausgaben und Sammlungen"
 
-#: src/core/janeway_global_settings.py:267
+#: src/core/janeway_global_settings.py:269
 msgid "English (US)"
 msgstr "Englisch (US)"
 
-#: src/core/janeway_global_settings.py:270
+#: src/core/janeway_global_settings.py:272
 msgid "Dutch"
 msgstr "Niederländisch"
 
-#: src/core/janeway_global_settings.py:271
+#: src/core/janeway_global_settings.py:273
 msgid "Welsh"
 msgstr "Walisisch"
 
-#: src/core/janeway_global_settings.py:272
+#: src/core/janeway_global_settings.py:274
 msgid "Spanish"
 msgstr ""
 
@@ -377,91 +377,91 @@ msgid ""
 msgstr ""
 "MIME Typ {mimetype} ist nicht zulässig. Zulässig sind: {validator.mimetypes}"
 
-#: src/core/views.py:81
+#: src/core/views.py:82
 msgid "You have been banned from logging in due to failed attempts."
 msgstr ""
 
-#: src/core/views.py:125
+#: src/core/views.py:126
 msgid ""
 "Password reset process has been initiated, please check your inbox for a "
 "reset request link."
 msgstr ""
 
-#: src/core/views.py:135
+#: src/core/views.py:136
 msgid ""
 "Wrong email/password combination or your email address has not been "
 "confirmed yet."
 msgstr ""
 
-#: src/core/views.py:227
+#: src/core/views.py:228
 msgid "You have been logged out."
 msgstr ""
 
-#: src/core/views.py:250
+#: src/core/views.py:251
 msgid "If your account was found, an email has been sent to you."
 msgstr ""
 
-#: src/core/views.py:378
+#: src/core/views.py:397
 msgid ""
 "Your account has been created, please follow theinstructions in the email "
 "that has been sent to you."
 msgstr ""
 
-#: src/core/views.py:421
+#: src/core/views.py:440
 msgid "Account activated"
 msgstr ""
 
-#: src/core/views.py:470
+#: src/core/views.py:489
 msgid "An account with that email address already exists."
 msgstr ""
 
-#: src/core/views.py:476
+#: src/core/views.py:495
 msgid "Email address is not valid."
 msgstr ""
 
-#: src/core/views.py:491
+#: src/core/views.py:510
 msgid "Password updated."
 msgstr "Passwort-Anleitung"
 
-#: src/core/views.py:495
+#: src/core/views.py:514
 msgid "Passwords do not match"
 msgstr ""
 
-#: src/core/views.py:498
+#: src/core/views.py:517
 msgid "Old password is not correct."
 msgstr ""
 
-#: src/core/views.py:508
+#: src/core/views.py:527
 msgid "Successfully subscribed to article notifications."
 msgstr ""
 
-#: src/core/views.py:519
+#: src/core/views.py:538
 msgid "Successfully unsubscribed from article notifications."
 msgstr ""
 
-#: src/core/views.py:2082
+#: src/core/views.py:2101
 msgid ""
 "You cannot remove a section that contains articles. Remove articles from the "
 "section if you want to delete it."
 msgstr ""
 
-#: src/core/views.py:2506
+#: src/core/views.py:2525
 msgid "The form did not validate: "
 msgstr ""
 
-#: src/core/views.py:2738 src/journal/forms.py:24 src/journal/views.py:3004
+#: src/core/views.py:2757 src/journal/forms.py:24 src/journal/views.py:3004
 msgid "Newest"
 msgstr "Neueste"
 
-#: src/core/views.py:2739 src/journal/forms.py:25 src/journal/views.py:3005
+#: src/core/views.py:2758 src/journal/forms.py:25 src/journal/views.py:3005
 msgid "Oldest"
 msgstr "Älteste"
 
-#: src/core/views.py:2740
+#: src/core/views.py:2759
 msgid "Last name A-Z"
 msgstr "Nachname A-Z"
 
-#: src/core/views.py:2741
+#: src/core/views.py:2760
 msgid "Last name Z-A"
 msgstr "Nachname Z-A"
 
@@ -1119,8 +1119,6 @@ msgid "License saved."
 msgstr "Lizenz gespeichert."
 
 #: src/submission/views.py:1027
-#, fuzzy, python-brace-format
-#| msgid "License {license_name} deleted."
 msgid "License {license_name} deleted."
 msgstr "Lizenz {license name} entfernt."
 
@@ -1629,8 +1627,8 @@ msgstr "Hinweis der Herausgeber:innen speichern"
 #: src/templates/admin/submission/edit/metadata.html:109
 #: src/templates/admin/submission/edit/metadata.html:116
 #: src/templates/admin/submission/submit_info.html:80
-#: src/templates/admin/submission/submit_info.html:90 src/utils/forms.py:59
-#: src/utils/forms.py:61
+#: src/templates/admin/submission/submit_info.html:90 src/utils/forms.py:61
+#: src/utils/forms.py:63
 msgid "Hit Enter to add a new keyword."
 msgstr "Drücken Sie die Eingabetaste, um ein neues Schlagwort hinzuzufügen."
 
@@ -1808,7 +1806,9 @@ msgstr ""
 #: src/themes/TUWJFM/templates/core/accounts/register.html:5
 #: src/themes/TUWJFM/templates/core/accounts/register.html:32
 #: src/themes/TUWJFM/templates/journal/submissions.html:25
-#: src/themes/TUW_ARW/templates/core/base.html:157
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:5
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:106
+#: src/themes/TUW_ARW/templates/core/base.html:159
 #: src/themes/TUW_ARW/templates/core/nav.html:77
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:41
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:43
@@ -1842,7 +1842,7 @@ msgstr "Registrieren"
 #: src/themes/TUWJFM/templates/core/login.html:5
 #: src/themes/TUWJFM/templates/journal/become_reviewer.html:13
 #: src/themes/TUWJFM/templates/journal/submissions.html:26
-#: src/themes/TUW_ARW/templates/core/base.html:157
+#: src/themes/TUW_ARW/templates/core/base.html:156
 #: src/themes/TUW_ARW/templates/core/nav.html:76
 #: src/themes/TUW_ARW/templates/elements/journal_footer.html:43
 #: src/themes/clean/templates/core/accounts/orcid_registration.html:19
@@ -2602,7 +2602,7 @@ msgstr "Suche nach E-Mail-Adresse oder ORCiD"
 #: src/themes/TUWJFM/templates/journal/search.html:7
 #: src/themes/TUWJFM/templates/journal/search.html:9
 #: src/themes/TUWJFM/templates/preprints/authors.html:35
-#: src/themes/TUW_ARW/templates/core/base.html:169
+#: src/themes/TUW_ARW/templates/core/base.html:174
 #: src/themes/clean/templates/journal/article_list.html:26
 #: src/themes/clean/templates/journal/article_list.html:50
 #: src/themes/clean/templates/journal/full-text-search.html:8
@@ -3164,14 +3164,10 @@ msgid "Save as Draft"
 msgstr "Als Draft speichern"
 
 #: src/templates/tuw_sync/sync_articles.html:125
-#, fuzzy
-#| msgid "Sort Articles"
 msgid "No articles"
 msgstr "Artikel sortieren"
 
 #: src/templates/tuw_sync/sync_articles.html:227
-#, fuzzy
-#| msgid "Issues"
 msgid "No Issues"
 msgstr "Ausgaben"
 
@@ -3358,6 +3354,7 @@ msgstr "Ein Konto registrieren"
 
 #: src/themes/OLH/templates/core/accounts/register.html:27
 #: src/themes/OLH/templates/core/accounts/reset_password.html:27
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:36
 #: src/themes/clean/templates/core/accounts/register.html:18
 #: src/themes/clean/templates/core/accounts/reset_password.html:17
 #: src/themes/material/templates/core/accounts/register.html:20
@@ -3367,12 +3364,14 @@ msgstr "Passwort-Regeln"
 
 #: src/themes/OLH/templates/core/accounts/register.html:31
 #: src/themes/OLH/templates/core/accounts/reset_password.html:32
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:40
 msgid ""
 "For more information read our <a href=\"#\" data-open=\"password-"
 "modal\">password guide</a>."
 msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:87
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:94
 #: src/themes/clean/templates/core/accounts/register.html:27
 #: src/themes/material/templates/core/accounts/register.html:33
 msgid "By registering an account you agree to our"
@@ -3380,6 +3379,7 @@ msgstr "Mit der Registrierung eines Kontos stimmen Sie unseren Bedingungen zu"
 
 #: src/themes/OLH/templates/core/accounts/register.html:106
 #: src/themes/OLH/templates/core/accounts/reset_password.html:48
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:117
 #: src/themes/clean/templates/core/accounts/register.html:50
 #: src/themes/clean/templates/core/accounts/reset_password.html:43
 #: src/themes/material/templates/core/accounts/register.html:49
@@ -3389,6 +3389,7 @@ msgstr "Passwort-Anleitung"
 
 #: src/themes/OLH/templates/core/accounts/register.html:107
 #: src/themes/OLH/templates/core/accounts/reset_password.html:49
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:118
 #: src/themes/clean/templates/core/accounts/reset_password.html:49
 #: src/themes/material/templates/core/accounts/register.html:50
 #: src/themes/material/templates/core/accounts/reset_password.html:40
@@ -3399,6 +3400,7 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:108
 #: src/themes/OLH/templates/core/accounts/reset_password.html:50
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:119
 #: src/themes/material/templates/core/accounts/register.html:51
 #: src/themes/material/templates/core/accounts/reset_password.html:41
 msgid ""
@@ -3411,6 +3413,7 @@ msgstr ""
 
 #: src/themes/OLH/templates/core/accounts/register.html:109
 #: src/themes/OLH/templates/core/accounts/reset_password.html:51
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:120
 msgid ""
 "We recommend selecting a long, but easy to remember password such as our "
 "awesome moon base rocks which would take an estimated septillion years to "
@@ -3451,7 +3454,6 @@ msgstr ""
 #: src/themes/OLH/templates/press/nav.html:6
 #: src/themes/OLH/templates/press/press_index.html:5
 #: src/themes/OLH/templates/repository/nav.html:3
-#: src/themes/TUW_ARW/templates/core/base.html:76
 #: src/themes/TUW_ARW/templates/core/nav.html:8
 #: src/themes/clean/templates/core/nav.html:17
 #: src/themes/clean/templates/press/nav.html:14
@@ -4876,13 +4878,13 @@ msgid "Imprint"
 msgstr "Imprint"
 
 #: src/themes/TUWJFM/templates/core/base.html:121
-#: src/themes/TUW_ARW/templates/core/base.html:222
+#: src/themes/TUW_ARW/templates/core/base.html:227
 msgctxt "fe-agplv3"
 msgid "Janeway developed by BirkbeckCTP"
 msgstr "Janeway entwickelt von BirkbeckCTP"
 
 #: src/themes/TUWJFM/templates/core/base.html:123
-#: src/themes/TUW_ARW/templates/core/base.html:224
+#: src/themes/TUW_ARW/templates/core/base.html:229
 msgctxt "fe-agplv3"
 msgid "The modified source code is available on GitHub:"
 msgstr "Der angepasste Quellcode ist auf GitHub verfügbar:"
@@ -5058,6 +5060,10 @@ msgstr ""
 #: src/themes/TUWJFM/templates/preprints/submit_files.html:26
 msgid "Manuscript File"
 msgstr "Manuskriptdatei"
+
+#: src/themes/TUW_ARW/templates/core/accounts/register.html:25
+msgid "Register for an account"
+msgstr "Konto registrieren"
 
 #: src/themes/TUW_ARW/templates/core/nav.html:25
 #: src/themes/TUW_ARW/templates/journal/article_list.html:6
@@ -5517,17 +5523,15 @@ msgstr "Neue Einreichung beginnen"
 msgid "Add a Comment"
 msgstr "Neuer Kommentar"
 
-#: src/utils/forms.py:137
-#, fuzzy, python-format
-#| msgid "What is %(num1)i %(operator)s %(num2)i? "
+#: src/utils/forms.py:139
 msgid "What is %(num1)i %(operator)s %(num2)i? "
 msgstr "Was ist% (num1) i% (Operator) s% (num2) i?"
 
-#: src/utils/forms.py:138
+#: src/utils/forms.py:140
 msgid "Answer this question: "
 msgstr "Beantworten Sie diese Frage:"
 
-#: src/utils/forms.py:183
+#: src/utils/forms.py:187
 msgid "HTML is not allowed in this field"
 msgstr ""
 
