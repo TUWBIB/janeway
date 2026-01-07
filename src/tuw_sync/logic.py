@@ -376,7 +376,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('<resourceType resourceTypeGeneral="ConferenceProceeding">')
                     l.append(escape(value))
                     l.append('</resourceType>')
-                    l.append('</resource>')
+                l.append('</resource>')
 
                 xml = ''.join(l)
                 x = etree.fromstring(xml)
