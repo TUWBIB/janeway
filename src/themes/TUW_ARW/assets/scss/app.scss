@@ -710,7 +710,7 @@ footer {
   .logo-wrapper {
     padding-top: rem-calc(12px);
     padding-bottom: rem-calc(12px);
-    height: calc($footer-height-30px);
+    height: calc(#{$footer-height} - 30px);
   }
   p {
     font-family: $header-font-family;
@@ -1354,4 +1354,15 @@ button.list-group-item-danger.active:focus {
       width:90px;
       height:90px;
     }
+  }
+
+  .tuw-janeway-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(#{$footer-height} / 2);
+  }
+
+  .tuw-janeway-logo {
+    height: 50%;
   }

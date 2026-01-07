@@ -1,4 +1,10 @@
 {% load i18n %}
+<div class="row expanded">
+<div class="large-2 columns">
+<a class="tuw-janeway-logo-container" alt="Janeway Logo" data-open="myModal">
+    <img src="static/common/img/sample/janeway.svg" class="tuw-janeway-logo">
+</a>        
+</div>
 <div class="large-7 columns">
     <p>
     {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}
@@ -75,3 +81,4 @@
         {{ request.journal.press.journal_footer_text|safe }}
     </div>
 {% endif %}
+</div>
