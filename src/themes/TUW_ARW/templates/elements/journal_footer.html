@@ -9,6 +9,7 @@
     {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}
     {% if request.journal.print_issn %}Print ISSN: {{ request.journal.print_issn }} <br> {% endif %}
     {% if journal_settings.general.publisher_name %} {% trans 'Published by' %} {% if journal_settings.general.publisher_url %}<a href="{{ journal_settings.general.publisher_url}}">{% endif %}{{ journal_settings.general.publisher_name }}{% if journal_settings.general.publisher_url %}</a>{% endif %} {% endif %}
+    {% if journal_settings.general.tuw_infrastructure_footer_text %} <br> {{ journal_settings.general.tuw_infrastructure_footer_text }} {% endif %}
     </p>
 </div>
 <div class="large-3 columns large-text-right tuw-footer-right">

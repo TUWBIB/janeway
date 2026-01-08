@@ -44,5 +44,29 @@
         "editable_by": [
             "journal-manager"
         ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Footer Infrastructure Text",
+            "is_translatable": true,
+            "name": "tuw_infrastructure_footer_text",
+            "pretty_name": "Footer Infrastructure Text",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "",
+            "JFM": "",
+            "OES": "",
+            "ARW": "Infrastructure provided by TU Wien Bibliothek",
+            "IOTW": "Infrastructure provided by TU Wien Bibliothek",
+            "EF": "Infrastructure provided by TU Wien Bibliothek"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
     }
+
 ]
