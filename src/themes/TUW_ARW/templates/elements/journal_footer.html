@@ -4,18 +4,16 @@
     <img src="static/common/img/sample/janeway.svg" class="tuw-janeway-logo">
 </a>        
 </div>
-<div class="large-7 columns">
+<div class="large-7 columns tuw-footer-middle">
     <p>
     {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}
     {% if request.journal.print_issn %}Print ISSN: {{ request.journal.print_issn }} <br> {% endif %}
     {% if journal_settings.general.publisher_name %} {% trans 'Published by' %} {% if journal_settings.general.publisher_url %}<a href="{{ journal_settings.general.publisher_url}}">{% endif %}{{ journal_settings.general.publisher_name }}{% if journal_settings.general.publisher_url %}</a>{% endif %} {% endif %}
     </p>
 </div>
-<div class="large-3 columns large-text-right">
-    <ul class="inline-list">
+<div class="large-3 columns large-text-right tuw-footer-right">
         {% for item in journal.press.navigation_items %}
             {% if item.for_footer and item.extend_to_journals %}
-                <li>
                     <a
                         href="{{ item.link }}"
                         {% if item.is_external %}
@@ -23,29 +21,30 @@
                         {% endif %}>
                         {{ item.link_name }}
                     </a>
-                </li>
             {% endif %}
         {% endfor %}
 
-
         {% comment "hardcode privacy link" %}
-
         {% if journal_settings.general.privacy_policy_url %}
-        <li><a href="{{ journal_settings.general.privacy_policy_url }}">{% trans "Privacy Policy" %}</a></li>
-      {% else %}
-        <li><a href="{% url 'cms_page' "privacy" %}">{% trans "Privacy Policy" %}</a></li>
-      {% endif %}
+        <a href="{{ journal_settings.general.privacy_policy_url }}">{% trans "Privacy Policy" %}</a>
+        {% else %}
+        <a href="{% url 'cms_page' "privacy" %}">{% trans "Privacy Policy" %}</a><
+        {% endif %}
         {% endcomment %}    
+   
         {% get_current_language as LANGUAGE_CODE %}
         {% if LANGUAGE_CODE == 'de' %}
-        <li><a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Dokumente/Datenschutzerkl%C3%A4rungen%20Sonstige/Datenschutzinformation_Bibliothek.pdf">{% trans "Privacy Policy" %}</a></li>
+        <a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Dokumente/Datenschutzerkl%C3%A4rungen%20Sonstige/Datenschutzinformation_Bibliothek.pdf">{% trans "Privacy Policy" %}</a>
         {% else %}
-        <li><a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Documents/Data%20Protection%20Declaration%20Other/Data%20Protection%20Information_Bibliothek.pdf">{% trans "Privacy Policy" %}</a></li>
+        <a href="https://www.tuwien.at/index.php?eID=dms&s=4&path=Documents/Data%20Protection%20Declaration%20Other/Data%20Protection%20Information_Bibliothek.pdf">{% trans "Privacy Policy" %}</a>
         {% endif %}
+        
+        
         {% comment "disable contact" %}
         <li><a href="{% url 'contact' %}">{% trans "Contact" %}</a></li>
         {% endcomment %}
-        {% if not request.user.is_authenticated %}<li><a href="{% url 'core_login' %}">{% trans 'Login' %}</a></li>{% endif %}
+
+        {% if not request.user.is_authenticated %}<a href="{% url 'core_login' %}">{% trans 'Login' %}</a>{% endif %}
 
 
         {% if journal_settings.general.switch_language %}
@@ -53,7 +52,6 @@
             {% get_current_language as LANGUAGE_CODE %}
             {% get_available_languages as LANGUAGES %}
             {% get_language_info_list for LANGUAGES as languages %}
-            <li>
                 <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
                     <input name="next" type="hidden" value="{{ request.PATH }}" />
                     <select name="language" onchange="this.form.submit()" autocomplete="off">
@@ -70,10 +68,8 @@
                         {% endfor %}
                     </select>
                 </form>
-            </li>
         {% endif %}
         {% endif %}
-    </ul>
 </div>
 {% if request.journal.press.journal_footer_text %}
     <div id="presswide_footer_text" class="large-10 columns text-left">

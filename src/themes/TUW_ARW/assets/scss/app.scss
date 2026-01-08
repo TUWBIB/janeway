@@ -718,10 +718,10 @@ footer {
     color: #333;
     margin: 0;
   }
-  .columns:not(.logo-wrapper) {
+/*  .columns:not(.logo-wrapper) {
     margin-top: rem-calc(12px);
     margin-bottom: rem-calc(12px);
-  }
+  }*/
   #presswide_footer_text {
     margin-top: 0;
   }
@@ -1366,3 +1366,28 @@ button.list-group-item-danger.active:focus {
   .tuw-janeway-logo {
     height: 50%;
   }
+
+  .tuw-footer-middle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(#{$footer-height} / 2);
+  }
+
+.tuw-footer-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(#{$footer-height} / 2);
+  }
+
+.tuw-footer-right a {
+    margin-right: 12px;
+    color: black;
+  }
+
+.tuw-footer-right select {
+    margin: 0px !important;
+    padding: 0px !important;
+  }
+
