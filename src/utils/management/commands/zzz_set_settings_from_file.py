@@ -38,8 +38,6 @@ class Command(BaseCommand):
         """
         translation.activate('en')
 
-        print(options)
-
         filename = options.get('filename',None)
         ignore_settings = options.get('ignore_settings',None)
         ignore_settings = [] if ignore_settings is None else ignore_settings.split(',') 
@@ -89,6 +87,7 @@ class Command(BaseCommand):
                             setting.description = o['setting']['description']
                             setting.is_translatable = o['setting']['is_translatable']
                             setting.pretty_name = o['setting']['pretty_name']
+                            setting.types = o['setting']['types']
                             setting.editable_by.clear()
                             for v in l_role:
                                 setting.editable_by.add(v)
