@@ -1,15 +1,17 @@
 {% load i18n %}
 <div class="large-2 columns">
-<a class="tuw-janeway-logo-container" alt="Janeway Logo" data-open="myModal">
-    <img src="static/common/img/sample/janeway.svg" class="tuw-janeway-logo">
+{% if journal_settings.styling.tuw_show_janeway_logo == 'on' %}    
+<a class="tuw-janeway-logo-container" alt="Janeway Logo" data-open="janeway-info-modal">
+    <img src="/static/common/img/sample/janeway.svg" class="tuw-janeway-logo">
 </a>        
+{% endif %}
 </div>
 <div class="large-7 columns tuw-footer-middle">
     <p>
     {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}
     {% if request.journal.print_issn %}Print ISSN: {{ request.journal.print_issn }} <br> {% endif %}
     {% if journal_settings.general.publisher_name %} {% trans 'Published by' %} {% if journal_settings.general.publisher_url %}<a href="{{ journal_settings.general.publisher_url}}">{% endif %}{{ journal_settings.general.publisher_name }}{% if journal_settings.general.publisher_url %}</a>{% endif %} {% endif %}
-    {% if journal_settings.general.tuw_infrastructure_footer_text %} <br> {{ journal_settings.general.tuw_infrastructure_footer_text }} {% endif %}
+    {% if journal_settings.styling.tuw_infrastructure_footer_text %} <br> {{ journal_settings.styling.tuw_infrastructure_footer_text|safe }} {% endif %}
     </p>
 </div>
 <div class="large-3 columns large-text-right tuw-footer-right">
@@ -77,3 +79,19 @@
         {{ request.journal.press.journal_footer_text|safe }}
     </div>
 {% endif %}
+
+
+
+<div class="reveal" id="janeway-info-modal" data-reveal>
+        <div class="modal-body">
+           <div style="line-height: 30px;">
+           {% trans "Janeway developed by BirkbeckCTP" context "fe-agplv3" %}<br>
+           <a href="https://janeway.systems">https://janeway.systems</a><br>
+           {% trans "The modified source code is available on GitHub:" context "fe-agplv3" %}<br>
+           <a href="https://github.com/TUWBIB/janeway">https://github.com/TUWBIB/janeway</a><br>
+            <button class="close-button" data-close aria-label="Close modal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+          </div>
+        </div>
+  </div>
