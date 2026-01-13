@@ -34,12 +34,12 @@
             "type": "boolean"
         },
         "value": {
-            "default": "off",
-            "JFM": "off",
-            "OES": "off",
-            "ARW": "off",
-            "IOTW": "off",
-            "EF": "off"
+            "default": null,
+            "JFM": null,
+            "OES": null,
+            "ARW": null,
+            "IOTW": null,
+            "EF": null
         },
         "editable_by": [
             "journal-manager"
@@ -50,7 +50,7 @@
             "name": "general"
         },
         "setting": {
-            "description": "(!wip) Determines if self registration is possible 'no','direct','orcid','both'. If the setting is missing 'no' is assumed. Work in progress: for now only hides link, doesn't deactivate self-registration for real",
+            "description": "Determines if self registration is possible 'no','direct','orcid','both'. If the setting is missing 'no' is assumed. Work in progress: for now only hides link, doesn't deactivate self-registration for real",
             "is_translatable": false,
             "name": "tuw_self_registration",
             "pretty_name": "Self registration",
@@ -83,9 +83,9 @@
             "default": "",
             "JFM": "",
             "OES": "",
-            "ARW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open="janeway-info-modal">Janeway</a>",
-            "IOTW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open="janeway-info-modal">Janeway</a>",
-            "EF": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open="janeway-info-modal">Janeway</a>"
+            "ARW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+            "IOTW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+            "EF": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
         },
         "editable_by": [
             "journal-manager"

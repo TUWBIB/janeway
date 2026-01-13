@@ -1,11 +1,11 @@
 {% load i18n %}
+{% if journal_settings.styling.tuw_show_janeway_logo %}    
 <div class="large-2 columns">
-{% if journal_settings.styling.tuw_show_janeway_logo == 'on' %}    
-<a class="tuw-janeway-logo-container" alt="Janeway Logo" data-open="janeway-info-modal">
-    <img src="/static/common/img/sample/janeway.svg" class="tuw-janeway-logo">
-</a>        
-{% endif %}
+<a class="tuw-janeway-logo-container" alt="Janeway Logo" data-open="janeway-info-modal"><img src="/static/common/img/sample/janeway.svg" class="tuw-janeway-logo"></a>
 </div>
+{% else %}
+<div class="large-2 columns tuw-janeway-logo-container"></div>
+{% endif %}
 <div class="large-7 columns tuw-footer-middle">
     <p>
     {% if request.journal.issn %}ISSN: {{ request.journal.issn }} | {% endif %}

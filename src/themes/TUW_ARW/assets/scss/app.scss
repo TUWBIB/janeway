@@ -1369,7 +1369,7 @@ button.list-group-item-danger.active:focus {
 
   .tuw-footer-middle {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     height: calc(#{$footer-height} / 2);
   }
