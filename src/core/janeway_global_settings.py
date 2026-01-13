@@ -313,7 +313,9 @@ BLEACH_ALLOWED_ATTRIBUTES = [
     "src", "href", # These are sanitized by scheme to avoid XSS
     "alt", "title", "width", "height", "type",
     "name", "value", "placeholder", "disabled", "readonly",
-    "required", "target", "checked", "selected"
+    "required", "target", "checked", "selected",
+    # TUW
+    "data-open"
 ]
 
 BLEACH_ALLOWED_PROTOCOLS = ["http", "https", "mailto"]

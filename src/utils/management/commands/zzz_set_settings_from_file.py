@@ -33,7 +33,8 @@ class Command(BaseCommand):
 
         # 3. Define 'download' mode
         delete_parser = subparsers.add_parser("delete", help="Delete specified settings")
-        delete_parser.add_argument("--settings", default=[], required=True)
+        delete_parser.add_argument("--settings", default='', required=False)
+        delete_parser.add_argument("--ids", default='', required=False)
 
     def handle(self, *args, **options):
         """Synchronizes settings to journals.
@@ -56,6 +57,8 @@ class Command(BaseCommand):
         journal_codes = [] if journal_codes is None else journal_codes.split(',') 
         settings_to_delete = options.get('settings',None)
         settings_to_delete = [] if settings_to_delete is None else settings_to_delete.split(',')
+        ids_to_delete = options.get('ids',None)
+        ids_to_delete = [] if ids_to_delete is None else ids_to_delete.split(',')
 
         if mode == 'update':
             with codecs.open(filename, 'r+', encoding='utf-8') as json_data:
@@ -120,8 +123,16 @@ class Command(BaseCommand):
 
         elif mode == 'delete':
             with transaction.atomic():
-                for setting_name in settings_to_delete:
-                    print (setting_name)
-                    setting = core_models.Setting.objects.get(name=setting_name)
-                    setting.delete()
-                        
+                if ids_to_delete:
+                    for id in ids_to_delete:
+                        setting = core_models.Setting.objects.get(pk=int(id))
+                        setting.delete()
+                        print(f"deleted setting {setting.name} with id {setting.pk}")
+
+                elif settings_to_delete:
+                    for setting_name in settings_to_delete:
+                        setting = core_models.Setting.objects.get(name=setting_name)
+                        setting.delete()
+                        print(f"deleted setting {setting.name} with id {setting.pk}")
+                else:
+                    pass                        
