@@ -126,13 +126,15 @@ class Command(BaseCommand):
                 if ids_to_delete:
                     for id in ids_to_delete:
                         setting = core_models.Setting.objects.get(pk=int(id))
+                        id = setting.id
                         setting.delete()
-                        print(f"deleted setting {setting.name} with id {setting.pk}")
+                        print(f"deleted setting {setting.name} with id {id}")
 
                 elif settings_to_delete:
                     for setting_name in settings_to_delete:
                         setting = core_models.Setting.objects.get(name=setting_name)
+                        id = setting.id
                         setting.delete()
-                        print(f"deleted setting {setting.name} with id {setting.pk}")
+                        print(f"deleted setting {setting.name} with id {id}")
                 else:
                     pass                        
