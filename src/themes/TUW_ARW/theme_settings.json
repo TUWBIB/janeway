@@ -77,7 +77,7 @@
             "is_translatable": true,
             "name": "tuw_infrastructure_footer_text",
             "pretty_name": "Footer Infrastructure Text",
-            "type": "mini-html"
+            "type": "rich-text"
         },
         "value": {
             "default": "",
