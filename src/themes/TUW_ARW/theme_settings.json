@@ -80,16 +80,27 @@
             "type": "rich-text"
         },
         "value": {
-            "default": "",
-            "JFM": "",
-            "OES": "",
-            "ARW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
-            "IOTW": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
-            "EF": "Infrastructure provided by TU Wien Bibliothek powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            "default": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "JFM": null,
+            "OES": null,
+            "ARW": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "IOTW": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "EF": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            }
         },
         "editable_by": [
             "journal-manager"
         ]
     }
-
 ]
