@@ -73,3 +73,4 @@ lingua-language-detector  # dependency on numpy not picked up by pip3?
 numpy
 xlsxwriter
 django-altcha
+django-extensions

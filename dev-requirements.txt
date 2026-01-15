@@ -7,7 +7,6 @@ freezegun
 snakeviz
 django-browser-reload
 # TUW
-django-extensions
 Werkzeug
 pyOpenSSL
 
