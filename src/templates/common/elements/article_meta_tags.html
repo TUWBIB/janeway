@@ -5,6 +5,7 @@
 
     <!-- <meta name="DC.Coverage.temporal" xml:lang="en" content="long-eighteenth century"/> -->
 
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
     {% if article.date_published %}<meta name="DC.Date.created" scheme="ISO8601" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
     {% if article.date_submitted %}<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="{{ article.date_submitted|date:"Y-m-d" }}"/>{% endif %}
