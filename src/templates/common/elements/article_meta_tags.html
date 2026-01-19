@@ -1,35 +1,15 @@
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
-    <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" />
+{#    <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" /> #}
     <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
-    {% comment %}}
-    <!-- Commented out meta fields are TODO -->
-    <!-- <meta name="DC.Coverage.spatial" xml:lang="en" content="London"/> -->
-    <!-- <meta name="DC.Coverage.temporal" xml:lang="en" content="long-eighteenth century"/> -->
-    {% endcomment %}
-
-
-    {% if article.date_published %}<meta name="DC.Date.created" scheme="ISO8601" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
-    {% if article.date_submitted %}<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="{{ article.date_submitted|date:"Y-m-d" }}"/>{% endif %}
-    {% if article.date_published %}<meta name="DC.Date.issued" scheme="ISO8601" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
-    {% if article.date_published %}<meta name="DC.Date.modified" scheme="ISO8601" content="{{ article.date_published|date:"Y-m-d"  }}"/>{% endif %}
-
-
-    <meta name="DC.Description" xml:lang="en" content="{{ article.abstract | striptags }}"/>
-
-    <meta name="DC.Format" content="application/pdf"/>
-    {% if article.page_number %}<meta name="DC.Identifier.pageNumber" content="{{ article.page_number }}"/>{% endif %}
-    {% if article.identifier.id_type == "doi" %}<meta name="DC.Identifier" content="https://doi.org/{{ article.identifier.identifier }}"/>{% endif %}
-
-    <meta name="DC.Identifier" content="{{ article.url }}"/>
-    <meta name="DC.Language" scheme="ISO639-1" content="{{ article.language }}"/>
-    <meta name="DC.Rights" content="{{ article.licence.text | striptags }}"/>
-    <meta name="DC.Source" content="{{ journal_settings.general.journal_name }}"/>
-    <meta name="DC.Source.ISSN" content="{{ article.journal.issn }}"/>
-    {% if article.issue.isbn %}<meta name="DC.Source.ISBN" content="{{ article.issue.isbn }}"/>{% endif %}
-    {% if article.issue.issue %}<meta name="DC.Source.Issue" content="{{ article.issue.issue }}"/>{% endif %}
-    {% if article.issue.volume %}<meta name="DC.Source.Volume" content="{{ article.issue.volume }}"/>{% endif %}
-    <meta name="DC.Source.URI" content="{% journal_url 'website_index' %}"/>
-    <meta name="DC.Title" content="{{ article.title | striptags }}"/>
+    {% if article.date_published %}<meta name="DC.date" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
+    <meta name="DC.description" xml:lang="en" content="{{ article.abstract | striptags }}"/>
+    <meta name="DC.format" content="application/pdf"/>
+    <meta name="DC.identifier" content="{{ article.url }}"/>
+    {% if article.get_doi %}<meta name="DC.identifier" content="https://doi.org/{{ article.get_doi }}"/>{% endif %}
+    <meta name="DC.language" scheme="ISO639-1" content="{{ article.iso6391 }}"/>
+    <meta name="DC.rights" content="{{ article.licence.text | striptags }}"/>
+    <meta name="DC.source" content="{{ journal_settings.general.journal_name }}"/>
+    <meta name="DC.title" content="{{ article.title | striptags }}"/>
     {# Highwire Press Metadata, Google Scholar #}
     {% if article.publisher_name %}<meta name="citation_publisher" content="{{ article.publisher_name }}"/>
     {% elif journal_settings.general.publisher_name %}<meta name="citation_publisher" content="{{ journal_settings.general.publisher_name }}"/>
