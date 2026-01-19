@@ -1,13 +1,13 @@
-    <link rel="canonical" href="{{ request.build_absolute_uri }}">
-{#    <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" /> #}
-    <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+    <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+    <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/"/> 
+    <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"/>
     {% if article.date_published %}<meta name="DC.date" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
     <meta name="DC.description" xml:lang="en" content="{{ article.abstract | striptags }}"/>
     <meta name="DC.format" content="application/pdf"/>
     <meta name="DC.identifier" content="{{ article.url }}"/>
     {% if article.get_doi %}<meta name="DC.identifier" content="https://doi.org/{{ article.get_doi }}"/>{% endif %}
     <meta name="DC.language" scheme="ISO639-1" content="{{ article.iso6391 }}"/>
-    <meta name="DC.rights" content="{{ article.licence.text | striptags }}"/>
+    <meta name="DC.rights" content="{{ article.license.url }}" scheme="DCTERMS.URI"/>
     <meta name="DC.source" content="{{ journal_settings.general.journal_name }}"/>
     <meta name="DC.title" content="{{ article.title | striptags }}"/>
     {# Highwire Press Metadata, Google Scholar #}
