@@ -84,6 +84,41 @@ def checkArticleMandatoryFields(article):
     
     return errors
 
+def normalizeValues(article):
+    title_raw = article.getTitleRAW
+    title_en = article.getTitleEN
+    title_de = article.getTitleDE
+    subtitle_raw = article.getSubTitleRAW
+    subtitle_en = article.getSubTitleEN
+    subtitle_de = article.getSubTitleDE
+    abstract_raw = article.getAbstractRAW
+    abstract_en = article.getAbstractEN
+    abstract_de = article.getAbstractDE
+    if title_raw is None: title_raw = ''
+    if title_en is None: title_en = ''
+    if title_de is None: title_de = ''
+    if subtitle_raw is None: subtitle_raw = ''
+    if subtitle_en is None: subtitle_en = ''
+    if subtitle_de is None: subtitle_de = ''
+    if abstract_raw is None: abstract_raw = ''
+    if abstract_en is None: abstract_en = ''
+    if abstract_de is None: abstract_de = ''
+    title_raw = title_raw.strip()
+    title_en = title_en.strip()
+    title_de = title_de.strip()
+    subtitle_raw = subtitle_raw.strip()
+    subtitle_en = subtitle_en.strip()
+    subtitle_de = subtitle_de.strip()
+    abstract_raw = abstract_raw.strip()
+    abstract_en = abstract_en.strip()
+    abstract_de = abstract_de.strip()
+
+    return (
+        title_raw,title_en,title_de,
+        subtitle_raw,subtitle_en,subtitle_de,
+        abstract_raw,abstract_en,abstract_de,
+    )
+
 def dataciteMetadata(article_id=None,issue_id=None):
     xml: str = ''
     errors: List[str] = []
@@ -94,8 +129,8 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
+        (title_raw,title_en,title_de,subtitle_raw,subtitle_en,subtitle_de,abstract_raw,abstract_en,abstract_de,) = normalizeValues(article)
         api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-
         errors = checkArticleMandatoryFields(article)
 
         l = []
@@ -134,56 +169,62 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     l.append('</creator>')
                 l.append('</creators>')
 
+                # assume english
+                language = article.language if article.language else "eng"
+
                 l.append('<titles>')
-                if article.language is not None:
-                    l.append('<title')
-                    l.append(' xml:lang="')
-                    l.append(article.language[0:2])
-                    l.append('">')
-                    l.append(escape(article.getTitleRAW))
-                    l.append('</title>')
-                else:
-                    l.append('<title>')
-                    l.append(escape(article.getTitleRAW))
-                    l.append('</title>')
-                    warnings.append("article language not set")
-
-                if article.getSubTitleRAW:
-                    if article.language is not None:
-                        l.append('<title titleType="Subtitle"')
-                        l.append(' xml:lang="')
-                        l.append(article.language[0:2])
-                        l.append('">')
-                        l.append(escape(article.getSubTitleRAW))
-                        l.append('</title>')
-                    else:
-                        l.append('<title>')
-                        l.append(escape(article.getSubTitleRAW))
+                if language == 'eng':
+                    if title_en or title_de:
+                        l.append('<title xml:lang="en">')
+                        if title_en:                        
+                            l.append(escape(title_en))
+                        else:
+                            l.append(escape(title_de))
                         l.append('</title>')
 
-                if article.language == 'eng':
-                    if article.getTitleDE and article.getTitleDE.strip() != article.getTitleEN.strip():
-                        l.append('<title titleType="AlternativeTitle">')
-                        l.append(escape(article.getTitleDE))
+                        if title_de and title_en and title_de != title_en:
+                            l.append('<title xml:lang="de" titleType="TranslatedTitle">')
+                            l.append(escape(title_de))
+                            l.append('</title>')
+
+                    if subtitle_en or subtitle_de:
+                        l.append('<title xml:lang="en" titleType="Subtitle">')
+                        if subtitle_en:
+                            l.append(escape(subtitle_en))
+                        else:
+                            l.append(escape(subtitle_de))                            
                         l.append('</title>')
 
-                    if article.getSubTitleDE and article.getSubTitleDE.strip() != article.getSubTitleEN.strip():
-                        l.append('<title titleType="Other">')
-                        l.append(escape(article.getSubTitleDE))
+                        if subtitle_de and subtitle_en and subtitle_de != subtitle_en:
+                            l.append('<title xml:lang="de" titleType="Subtitle">')
+                            l.append(escape(subtitle_de))                            
+                            l.append('</title>')
+                else: 
+                    if title_en or title_de:
+                        l.append('<title xml:lang="de">')
+                        if title_de:                        
+                            l.append(escape(title_de))
+                        else:
+                            l.append(escape(title_en))
                         l.append('</title>')
 
-                if article.language == 'deu':
-                    if article.getTitleEN and article.getTitleDE.strip() != article.getTitleEN.strip():
-                        l.append('<title titleType="AlternativeTitle">')
-                        l.append(escape(article.getTitleEN))
+                        if title_en and title_de and title_en != title_de:
+                            l.append('<title xml:lang="de" titleType="TranslatedTitle">')
+                            l.append(escape(title_en))
+                            l.append('</title>')
+
+                    if subtitle_en or subtitle_de:
+                        l.append('<title xml:lang="de" titleType="Subtitle">')
+                        if subtitle_de:
+                            l.append(escape(subtitle_de))
+                        else:
+                            l.append(escape(subtitle_en))                            
                         l.append('</title>')
 
-                    if article.getSubTitleEN and article.getSubTitleDE.strip() != article.getSubTitleEN.strip():
-                        l.append('<title titleType="Other">')
-                        l.append(escape(article.getSubTitleEN))
-                        l.append('</title>')
-                
-
+                        if subtitle_en and subtitle_de and subtitle_en != subtitle_de:
+                            l.append('<title xml:lang="en" titleType="Subtitle">')
+                            l.append(escape(subtitle_en))                            
+                            l.append('</title>')
                 l.append('</titles>')
 
                 if article.keywords:
@@ -245,7 +286,7 @@ def dataciteMetadata(article_id=None,issue_id=None):
                         l.append('<rightsList>')
                         l.append('<rights rightsURI="')
                         l.append(article.license.url)
-                        l.append('" xml:lang="en-US">')
+                        l.append('" xml:lang="en">')
                         l.append(article.license.name)
                         l.append('</rights>')
                         l.append('</rightsList>')
@@ -278,16 +319,16 @@ def dataciteMetadata(article_id=None,issue_id=None):
                     pass
 
                 l.append('<descriptions>')
-                if article.getAbstractEN or article.getAbstractDE:
-                    if article.getAbstractEN:
+                if abstract_en or abstract_de:
+                    if abstract_en:
                         l.append('<description xml:lang="')
                         l.append('en" descriptionType="Abstract">')
-                        l.append(escape(article.getAbstractEN))
+                        l.append(escape(abstract_en))
                         l.append('</description>')
-                    if article.getAbstractDE and article.getAbstractDE.strip() != article.getAbstractEN.strip():
+                    if abstract_de and abstract_de != abstract_en:
                         l.append('<description xml:lang="')
                         l.append('de" descriptionType="Abstract">')
-                        l.append(escape(article.getAbstractDE))
+                        l.append(escape(abstract_de))
                         l.append('</description>')
                 else:
                     warnings.append("neither english nor german abstract")
@@ -676,6 +717,7 @@ def articleToMarc(article):
     l = []
     
     if not errors:
+        (title_raw,title_en,title_de,subtitle_raw,subtitle_en,subtitle_de,abstract_raw,abstract_en,abstract_de,) = normalizeValues(article)
         try:
             source_parallel_title = ''
 
@@ -750,24 +792,24 @@ def articleToMarc(article):
                 datafield = DataField.createDataField("245","1","0")
             else:
                 datafield = DataField.createDataField("245","0","0")
-            datafield.addSubField(SubField.createSubField("a",escape(article.getTitleRAW)))
+            datafield.addSubField(SubField.createSubField("a",escape(title_raw)))
             sf_b = ''
-            if article.subtitle:
-                sf_b += article.getSubTitleRAW
+            if subtitle_raw:
+                sf_b += subtitle_raw
 
             if article.language == 'deu':
-                if article.getTitleEN and article.getTitleEN.strip() != article.getTitleDE.strip():
+                if title_en and title_en != title_de:
                     source_parallel_title = 'en'
-                    sf_b += ' = '+article.getTitleEN
-                if article.getSubTitleEN:
-                    sf_b += ' : '+article.getSubTitleEN
+                    sf_b += ' = ' + title_en
+                if subtitle_en:
+                    sf_b += ' : ' + subtitle_en
 
             elif article.language == 'eng':
-                if article.getTitleDE and article.getTitleEN.strip() != article.getTitleDE.strip():
+                if title_de and title_de != title_en:
                     source_parallel_title = 'de'
-                    sf_b += ' = '+article.getTitleDE
-                if article.getSubTitleDE:
-                    sf_b += ' : '+article.getSubTitleDE
+                    sf_b += ' = ' + title_de
+                if subtitle_de:
+                    sf_b += ' : '+ subtitle_de
            
             if sf_b:
                 datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
@@ -781,18 +823,18 @@ def articleToMarc(article):
 
             # 246 11
             if source_parallel_title == 'de':
-                if article.getTitleDE:
+                if title_de:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(article.getTitleDE)))
-                    if article.getSubTitleDE:
-                        datafield.addSubField(SubField.createSubField("b",escape(article.getSubTitleDE)))
+                    datafield.addSubField(SubField.createSubField("a",escape(title_de)))
+                    if subtitle_de:
+                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_de)))
                     mr.addDataField(datafield)
             elif source_parallel_title == 'en':
-                if article.getTitleEN:
+                if title_en:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(article.getTitleEN)))
-                    if article.getSubTitleEN:
-                        datafield.addSubField(SubField.createSubField("b",escape(article.getSubTitleEN)))
+                    datafield.addSubField(SubField.createSubField("a",escape(title_en)))
+                    if subtitle_en:
+                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_en)))
                     mr.addDataField(datafield)
 
             # 251 __ coar
@@ -856,24 +898,24 @@ def articleToMarc(article):
 
             # 520, abstracts
             if article.language == 'eng':
-                if article.getAbstractEN:
+                if abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.getAbstractEN)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
                     mr.addDataField(datafield)
 
-                if article.getAbstractDE and article.getAbstractEN.strip() != article.getAbstractDE.strip():
+                if abstract_de and abstract_de != abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.getAbstractDE)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
                     mr.addDataField(datafield)
             elif article.language == 'deu':
-                if article.getAbstractDE:
+                if abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(article.getAbstractDE)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
                     mr.addDataField(datafield)
 
-                if article.getAbstractEN and article.getAbstractEN.strip() != article.getAbstractDE.strip():
+                if abstract_en and abstract_en != abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(article.getAbstractEN)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
                     mr.addDataField(datafield)
 
 
