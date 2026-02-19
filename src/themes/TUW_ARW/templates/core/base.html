@@ -70,15 +70,8 @@
 <div class="wrapper">
     <header class="main-header" role="banner">
         <div class="main top-bar">
-            <div class="top-bar-left header-image-bar border-right">
+            <div class="top-bar-left border-right">
                 {% if request.journal %}
-                    {% if request.journal.header_image %}
-                    <a title="{% trans 'Home' %}" href="{{ request.journal.site_url }}">
-                        {% svg_or_image request.journal.header_image css_class='header-image top-bar-image' %}
-                    </a>
-                    {% else %}
-                        <a href="{{ request.journal.site_url }}"><img src="{% static "common/img/sample/janeway.png" %}"></a>
-                    {% endif %}
                 {% elif request.repository %}
                     {% if request.repository.logo %}
                         {% svg_or_image request.repository.logo %}
@@ -92,9 +85,9 @@
                         <a href="/"><img class="top-bar-image" src="{% url 'press_cover_download' %}" alt="{{ request.press.name }}"></a>
                     {% endif %}
                 {% endif %}
-            {% if request.journal  and journal_settings.styling.display_journal_title %}
-            <div class="hide-for-medium-only{% if journal_settings.general.switch_language %} border-right{% endif %}" id="journal-title">
-                <h1 class="menu-text">{{ request.journal.name }}</h1>
+            {% if request.journal and journal_settings.styling.display_journal_title %}
+            <div class="top-bar-left border-right" id="journal-title">
+                <h1>{{ request.journal.name }}</h1>
             </div>
             {% endif %}
 
@@ -113,12 +106,12 @@
             </div>
 
             {% if journal_settings.general.switch_language %}
+            {% if journal_settings.styling.tuw_language_toggle_visibility is None or journal_settings.styling.tuw_language_toggle_visibility == 'both' or journal_settings.styling.tuw_language_toggle_visibility == 'header' %}
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                {% get_language_info_list for LANGUAGES as languages %}
                 <div class="top-bar-left">
-                <ul class="menu language-menu">
-                    {% get_current_language as LANGUAGE_CODE %}
-                    {% get_available_languages as LANGUAGES %}
-                    {% get_language_info_list for LANGUAGES as languages %}
-
+                    <ul class="menu language-menu">
                     {% for language in languages %}
                         {% if language.code in request.available_languages %}
                         <li>
@@ -136,10 +129,16 @@
                         </li>
                         {% endif %}
                     {% endfor %}
-
                 </ul>
                 </div>
             {% endif %}
+            {% endif %}
+            <div class="top-bar-right">
+                <a href="https://tuwien.at">
+                    <img class="tuw-logo-right" src="/static/common/img/TU_Signet_blau.svg" alt="TU Wien"">
+                </a>
+            </div>
+
             <div class="top-bar-right border-left hide-for-small-only">
                 <ul class="dropdown menu" data-dropdown-menu>
                     {% if request.user.is_authenticated %}
@@ -154,7 +153,13 @@
                             {% endif %}
                         </li>
                     {% else %}
-                        <li><p><a href="{% url 'core_login' %}">{% trans "Login" %} </a>|<a href="{% url 'core_register' %}"> {% trans "Register" %}</a></p></li>
+                        <li><p><a href="{% url 'core_login' %}">{% trans "Login" %}</a>
+                            {% if journal_settings.general.tuw_self_registration is not None %} 
+                            {% if journal_settings.general.tuw_self_registration == 'direct' or journal_settings.general.tuw_self_registration == 'orcid' or journal_settings.general.tuw_self_registration == 'both' %}
+                            |<a href="{% url 'core_register' %}"> {% trans "Register" %}</a>
+                            {% endif %}
+                            {% endif %}
+                        </p></li>
                     {% endif %}
                 </ul>
             </div>
@@ -204,32 +209,12 @@
             {% endif %}
         </div>
     {% endcomment %}
-        <div class="large-2 columns text-center logo-wrapper">
-            <a alt="Janeway Logo" data-open="myModal">{% svg "static/common/img/sample/janeway.svg" %}</a>
-        </div>
-
-
         {% if request.journal %}
         {% include "elements/journal_footer.html" %}
         {% else %}
         {% include "press/elements/press_footer.html" %}
         {% endif %}
 </footer>
-
-<div class="reveal" id="myModal" data-reveal>
-        <div class="modal-body">
-           <div style="line-height: 30px;">
-           {% trans "Janeway developed by BirkbeckCTP" context "fe-agplv3" %}<br>
-           <a href="https://janeway.systems">https://janeway.systems</a><br>
-           {% trans "The modified source code is available on GitHub:" context "fe-agplv3" %}<br>
-           <a href="https://github.com/TUWBIB/janeway">https://github.com/TUWBIB/janeway</a><br>
-            <button class="close-button" data-close aria-label="Close modal" type="button">
-            <span aria-hidden="true">&times;</span>
-        </button>
-          </div>
-        </div>
-  </div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.5.1/js/foundation.min.js"></script>

@@ -88,23 +88,28 @@ INSTALLED_APPS = [
     'typesetting',
     'utils',
     'workflow',
-    # TUW
+    # TUW added
     'tuw_backcontent',
     'tuw_sync',
+    # -- TUW added
     # 3rd Party
-    "mozilla_django_oidc",
-    "django_summernote",
-    "tinymce",
-    "bootstrap4",
-    "rest_framework",
-    "foundationform",
-    "materializecssform",
-    "captcha",
-    "simplemathcaptcha",
-    "simple_history",
-    "hijack",
-    "hcaptcha",
-    "django_bleach",
+    'mozilla_django_oidc',
+    'django_summernote',
+    'tinymce',
+    'bootstrap4',
+    'rest_framework',
+    'foundationform',
+    'materializecssform',
+    'captcha',
+    'simplemathcaptcha',
+    'simple_history',
+    'hijack',
+    'hcaptcha',
+    'django_bleach',
+    # TUW    
+    'django_altcha',
+    'django_extensions',
+    # -- TUW added
     # Forms
     "django.forms",
 ]
@@ -325,6 +330,10 @@ BLEACH_ALLOWED_ATTRIBUTES = [
     "target",
     "checked",
     "selected",
+    # TUW added
+    # hack to be able to use html code in settings that uses the data-open attribute
+    "data-open"
+    # -- TUW added
 ]
 
 BLEACH_ALLOWED_PROTOCOLS = ["http", "https", "mailto"]

@@ -8,3 +8,8 @@ snakeviz
 django-browser-reload
 tox
 ruff
+# TUW
+Werkzeug
+pyOpenSSL
+
+

@@ -36,6 +36,7 @@ from django.utils.html import mark_safe
 from django.utils import translation
 from django.db.models import Q, OuterRef, Subquery, Count, Avg
 from django.views import generic
+from django.http import HttpResponseNotFound
 
 from core import models, forms, logic, workflow, files, models as core_models
 from core.model_utils import NotImplementedField, SafePaginator, search_model_admin
@@ -396,6 +397,24 @@ def register(request, orcid_token=None):
     :param orcid_token: str UUID4 belonging to an active OrcidToken
     :return: HttpResponse object
     """
+
+    try:
+        tuw_self_registration = setting_handler.get_setting(
+                'general',
+                'tuw_self_registration',
+                request.journal
+            ).value
+    except:
+        tuw_self_registration = 'both'
+
+    print("tuw_self_registration",tuw_self_registration)
+
+
+    if tuw_self_registration not in ['direct','orcid','both']:
+        return HttpResponseNotFound()
+
+    # 'no','direct','orcid','both'. If 
+
     context = {}
     initial = {}
 

@@ -1,0 +1,106 @@
+[
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Determines if the language toggles are visible for a given journal, allowed values 'none','header','footer','both'. Other values disable both toggles. If the setting is missing 'both' is assmumed",
+            "is_translatable": false,
+            "name": "tuw_language_toggle_visibility",
+            "pretty_name": "Language toggles",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "header",
+            "JFM": "",
+            "OES": "",
+            "ARW": "header",
+            "IOTW": "header",
+            "EF": "header"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Determines if the Janeway logo is shown in the footer",
+            "is_translatable": false,
+            "name": "tuw_show_janeway_logo",
+            "pretty_name": "Show Janeway logo",
+            "type": "boolean"
+        },
+        "value": {
+            "default": null,
+            "JFM": null,
+            "OES": null,
+            "ARW": null,
+            "IOTW": null,
+            "EF": null
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "general"
+        },
+        "setting": {
+            "description": "Determines if self registration is possible 'no','direct','orcid','both'. If the setting is missing 'no' is assumed. Work in progress: for now only hides link, doesn't deactivate self-registration for real",
+            "is_translatable": false,
+            "name": "tuw_self_registration",
+            "pretty_name": "Self registration",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "no",
+            "JFM": "",
+            "OES": "",
+            "ARW": "no",
+            "IOTW": "no",
+            "EF": "no"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Footer Infrastructure Text",
+            "is_translatable": true,
+            "name": "tuw_infrastructure_footer_text",
+            "pretty_name": "Footer Infrastructure Text",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "JFM": null,
+            "OES": null,
+            "ARW": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "IOTW": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "EF": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            }
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
+    }
+]

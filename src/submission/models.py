@@ -1362,6 +1362,11 @@ class Article(AbstractLastModifiedModel):
     def getAbstractDE(self):
         return self.__dict__.get('abstract_de','')
 
+    def iso6391(self):
+        if self.language == 'eng': return 'en'
+        if self.language == 'deu': return 'de'
+        return self.language
+
     class Meta:
         ordering = ("-date_published", "title")
 
