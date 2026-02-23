@@ -59,7 +59,8 @@
     {% if kw_de.all %}
     <meta name="citation_keywords" xml:lang="de" content="{% for kw in kw_de.all %}{{ kw.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
     {% endif %}
-
+    {% if article.pdfs.exists %}<meta name="citation_pdf_url" content="{% journal_url 'serve_article_pdf' 'id' article.id %}"/>{% endif %}
+    
     {% for pdf in pdfs %}
         <meta name="citation_pdf_url" content="{% url 'article_file_download' identifier_type identifier pdf.id %}"/>
     {% endfor %}
