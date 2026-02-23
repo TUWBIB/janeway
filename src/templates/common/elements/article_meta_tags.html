@@ -1,4 +1,6 @@
     <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+
+    {% comment "using dublin core together with highwire not recommended for Google Scholar?" %}
     <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/"/> 
     <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"/>
     {% if article.date_published %}<meta name="DC.date" content="{{ article.date_published|date:"Y-m-d" }}"/>{% endif %}
@@ -10,6 +12,7 @@
     <meta name="DC.rights" content="{{ article.license.url }}" scheme="DCTERMS.URI"/>
     <meta name="DC.source" content="{{ journal_settings.general.journal_name }}"/>
     <meta name="DC.title" content="{{ article.title | striptags }}"/>
+    {% endcomment %}
     {# Highwire Press Metadata, Google Scholar #}
     {% if article.publisher_name %}<meta name="citation_publisher" content="{{ article.publisher_name }}"/>
     {% elif journal_settings.general.publisher_name %}<meta name="citation_publisher" content="{{ journal_settings.general.publisher_name }}"/>
