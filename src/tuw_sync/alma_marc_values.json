@@ -16,7 +16,10 @@
             "OES": "0",
             "ARW": "1",
             "IOTW": "1",
-            "EF": "1"
+            "EF": "1",
+            "AIROV": "1",
+            "ISVCS": "1"
+            
         },
         "editable_by": [
             "editor",
@@ -40,7 +43,10 @@
             "OES": "Technische Universität Wien",
             "ARW": "Gesellschaft für Mess-, Automatisierungs- und Robotertechnik – GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
             "IOTW": "",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
+
         },
         "editable_by": [
             "editor",
@@ -64,7 +70,9 @@
             "OES": "Der Öffentliche Sektor - The Public Sector",
             "ARW": "Proceedings of the Austrian Robotics Workshop 2025 / Wilfried Kubinger, Simon Kranzer and Markus Vincze (eds.)",
             "IOTW": "",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
@@ -88,7 +96,10 @@
             "OES": "volume_year - issue - pages",
             "ARW": "pages",
             "IOTW": "pages",
-            "EF": "pages"
+            "EF": "pages",
+            "AIROV": "pages",
+            "ISVCS": "pages"
+
         },
         "editable_by": [
             "editor",
@@ -112,7 +123,9 @@
             "OES": "",
             "ARW": "ARW Proceedings",
             "IOTW": "",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
@@ -136,7 +149,10 @@
             "OES": "(AT-OBV)AC10863779",
             "ARW": "(AT-OBV)AC17596176",
             "IOTW": "",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
+
         },
         "editable_by": [
             "editor",
@@ -160,7 +176,10 @@
             "OES": "OA-ARTICLE",
             "ARW": "OA-BOOKPART",
             "IOTW": "OA-BOOKPART",
-            "EF": "OA-BOOKPART"
+            "EF": "OA-BOOKPART",
+            "AIROV": "OA-BOOKPART",
+            "ISVCS": "OA-BOOKPART"
+
         },
         "editable_by": [
             "editor",
@@ -184,7 +203,10 @@
             "OES": "",
             "ARW": "Konferenzbeitrag",
             "IOTW": "Konferenzbeitrag",
-            "EF": "Konferenzbeitrag"
+            "EF": "Konferenzbeitrag",
+            "AIROV": "Konferenzbeitrag",
+            "ISVCS": "Konferenzbeitrag"
+
         },
         "editable_by": [
             "editor",
@@ -208,7 +230,9 @@
             "OES": "",
             "ARW": "Full-Paper-Beitrag",
             "IOTW": "Full-Paper-Beitrag",
-            "EF": "Full-Paper-Beitrag"
+            "EF": "Full-Paper-Beitrag",
+            "AIROV": "Full-Paper-Beitrag",
+            "ISVCS": "Full-Paper-Beitrag"
         },
         "editable_by": [
             "editor",
