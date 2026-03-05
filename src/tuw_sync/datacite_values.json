@@ -16,7 +16,9 @@
             "OES": "primary_issue_publication_year",
             "ARW": "article_date_published",
             "IOTW": "article_date_published",
-            "EF": "article_date_published"
+            "EF": "article_date_published",
+            "AIROV": "article_date_published",
+            "ISVCS": "article_date_published"
         },
         "editable_by": [
             "editor",
@@ -40,7 +42,9 @@
             "OES": "no_scheme",
             "ARW": "include_scheme",
             "IOTW": "include_scheme",
-            "EF": "include_scheme"
+            "EF": "include_scheme",
+            "AIROV": "include_scheme",
+            "ISVCS": "include_scheme"
         },
         "editable_by": [
             "editor",
@@ -64,7 +68,9 @@
             "OES": "text / journal article",
             "ARW": "conference paper / conference paper",
             "IOTW": "conference paper / conference paper",
-            "EF": "conference paper / conference paper"
+            "EF": "conference paper / conference paper",
+            "AIROV": "conference paper / conference paper",
+            "ISVCS": "conference paper / conference paper"
         },
         "editable_by": [
             "editor",
@@ -88,7 +94,9 @@
             "OES": "is_part_of",
             "ARW": "is_published_in",
             "IOTW": "is_published_in",
-            "EF": "is_published_in"
+            "EF": "is_published_in",
+            "AIROV": "is_published_in",
+            "ISVCS": "is_published_in"
         },
         "editable_by": [
             "editor",
@@ -112,7 +120,9 @@
             "OES": "Der Öffentliche Sektor - The Public Sector",
             "ARW": "",
             "IOTW": "Proceedings of the International Conference on the Internet of Things (IoT) Workshops [ISSN: 3061-1008]",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
@@ -136,7 +146,9 @@
             "OES": "",
             "ARW": [ { "orcid" : "0000-0002-6965-7794", "full_name": "Kubinger, Wilfried", "given_name": "Wilfried", "family_name": "Kubinger" }, { "orcid" : "0000-0002-5907-4624", "full_name": "Kranzer, Simon", "given_name": "Simon", "family_name": "Kranzer" }, { "orcid" : "0000-0002-2799-491X", "full_name": "Vincze, Markus", "given_name": "Markus", "family_name": "Vincze" } ],
             "IOTW": [ { "orcid": "0000-0001-6901-7714", "full_name": "Frangoudis, Pantelis", "given_name": "Pantelis", "family_name": "Fragoudis" }, { "orcid": "0000-0001-5933-3246", "full_name": "Kimovski, Dragi", "given_name": "Dragi", "family_name": "Kimovski" } ],
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
@@ -160,7 +172,9 @@
             "OES": "",
             "ARW": "Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
             "IOTW": "Institute of Information Systems Engineering, TU Wien",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
@@ -184,7 +198,9 @@
             "OES": "",
             "ARW": "",
             "IOTW": "",
-            "EF": ""
+            "EF": "",
+            "AIROV": "",
+            "ISVCS": ""
         },
         "editable_by": [
             "editor",
