@@ -17,53 +17,26 @@
             <dc:title>{{ article.title }}{% if article.subtitle %}:{{ article.subtitle }}{% endif %}</dc:title>
 
             {% for author in article.authors.all %}
-                <dc:creator>{{author.last_name}}, {{author.first_name}}</dc:creator>
+            <dc:creator>{{author.last_name}}, {{author.first_name}}</dc:creator>
             {% endfor %}
 
-            {% if article.language == 'eng' %}
-                {% if article.keywords %}
-                    {% for x in article.keywords_lang_en %}
-                        <dc:subject>{{ x }}</dc:subject>
-                    {% endfor %}
-                {% else %}
-                    {% for x in article.keywords_lang_de %}
-                        <dc:subject>{{ x }}</dc:subject>
-                    {% endfor %}
-                {% endif %}
+            {% for x in article.keywords_lang_en %}
+            <dc:subject xml:lang="en">{{ x }}</dc:subject>
+            {% endfor %}
+
+            {% for x in article.keywords_lang_de %}
+            <dc:subject xml:lang="de">{{ x }}</dc:subject>
+            {% endfor %}
+
+            {% if article.getNormalizedValues.abstract_en %}
+            <dc:description xml:lang="en">{{ article.getNormalizedValues.abstract_en }}</dc:description>
             {% endif %}
 
-            {% if article.language == 'deu' %}
-                {% if article.keywords_de %}
-                    {% for x in article.keywords_lang_de %}
-                        <dc:subject>{{ x }}</dc:subject>
-                    {% endfor %}
-                {% else %}
-                    {% for x in article.keywords.lang_en %}
-                        <dc:subject>{{ x }}</dc:subject>
-                    {% endfor %}
-                {% endif %}
+            {% if article.getNormalizedValues.abstract_de %}
+            <dc:description xml:lang="de">{{ article.getNormalizedValues.abstract_de }}</dc:description>
             {% endif %}
 
-            {% if article.language == 'deu' %}
-                {% if article.abstract_de_tuw %}
-                    <dc:description>{{ article.abstract_de_tuw }}</dc:description>
-                {% else %}
-                    {% if article.abstract %}
-                        <dc:description>{{ article.abstract }}</dc:description>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
 
-            {% if article.language == 'eng' %}
-                {% if article.abstract %}
-                    <dc:description>{{ article.abstract }}</dc:description>
-                {% else %}
-                    {% if article.abstract_de_tuw %}
-                        <dc:description>{{ article.abstract_de_tuw }}</dc:description>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-                        
             {% if journal.code == 'JFM' %}
                 <dc:publisher>IFM - Real Estate and Facility Management, Institute of Management Science, Vienna University of Technology</dc:publisher>
             {% endif %}
