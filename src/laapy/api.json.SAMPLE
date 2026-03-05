@@ -1,0 +1,59 @@
+{ 
+    "options": 
+    { 
+        "error_threshold": 0,
+        "error_die": 1,
+        "timeout": 2,
+        "loglevel": "WARNING"
+    },
+    "keys":
+    {
+        "production": "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "sandbox": "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "analytics": "apikey l7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "cache":
+    {
+        "__comment": [
+            "WARNING!",
+            "cache use only intended for specific controlled use cases",
+            "- functionality highly untested",
+            "- its interaction with database request logging is questionable",
+            "- no cleanup of cached data implemented",
+            "YOU HAVE BEEN WARNED",
+            "cache applies to all http methods for the urlpatterns configured",
+            "GET: tries to fetch a record from cache; if it isn't found, executes the GET and puts the entry into the cache",
+            "PUT, DELETE: cache entries get invalidated",
+            "cache gets turned off in case any error occurs when accessing the cache"
+        ],        
+        "dir": "<dir for cache>",
+        "validity": 186400,
+        "active": "true",
+        "urlpatterns": [
+            "bibs/\\d+$",
+            "bibs/\\d+/holdings/\\d+$",
+            "bibs/\\d+/holdings(/)?$",
+            "bibs/\\d+/holdings/\\d+/items/\\d+$",
+            "bibs/\\d+/holdings/\\d+/items(/)?.+$"
+        ],
+        "ignore":
+        {
+            "urlpatterns": [
+            "bibs/\\d+/holdings/\\d+/items/\\?offset=0&limit=0$",
+            "bibs/\\d+/holdings/\\d+/items/\\?limit=0&offset=0$"
+            ]
+        }
+    },    
+    "database": 
+    {
+       "host": "127.0.0.1",
+       "port": 3306,
+       "database": "<database>",
+       "user": "<user>",
+       "password": "<password>",
+       "label": "<label for log entries>",
+       "active": "false"
+    }
+}
+    
+
