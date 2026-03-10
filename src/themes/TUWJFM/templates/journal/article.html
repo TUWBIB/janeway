@@ -8,14 +8,15 @@
     {{ journal_settings.general.journal_name | striptags }} {% endblock %}
 
 {% block head %}
-
+    <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+{% comment "using dublin core together with highwire not recommended for Google Scholar?" %}    
     <!-- Commented out meta fields are TODO -->
 
     <!-- <meta name="DC.Coverage.spatial" xml:lang="en" content="London"/> -->
 
     <!-- <meta name="DC.Coverage.temporal" xml:lang="en" content="long-eighteenth century"/> -->
 
-
+    
     <meta name="DC.Date.created" scheme="ISO8601" content="{{ article.date_published }}"/>
     <meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="{{ article.date_submitted }}"/>
     <meta name="DC.Date.issued" scheme="ISO8601" content="{{ article.date_published }}"/>
@@ -37,7 +38,9 @@
     <meta name="DC.Source.Volume" content="{{ article.issue.volume }}"/>
     <meta name="DC.Source.URI" content="{% journal_url 'website_index' %}"/>
     <meta name="DC.Title" content="{{ article.title | striptags }}"/>
-
+    {% endcomment %}    
+    
+    {# Highwire Press Metadata, Google Scholar #}
     <meta name="citation_journal_title" content="{{ journal_settings.general.journal_name }}"/>
     <meta name="citation_issn" content="{{ journal_settings.general.issn }}"/>
     {% for author in article.frozen_authors.all %}
@@ -59,17 +62,13 @@
     {% if kw_de.all %}
     <meta name="citation_keywords" xml:lang="de" content="{% for kw in kw_de.all %}{{ kw.word }}{% if not forloop.last %}, {% endif %}{% endfor %}"/>
     {% endif %}
-
-    {% for pdf in pdfs %}
-        <meta name="citation_pdf_url" content="{% url 'article_file_download' identifier_type identifier pdf.id %}"/>
-    {% endfor %}
+    {% if article.pdfs.exists %}<meta name="citation_pdf_url" content="{% journal_url 'serve_article_pdf' 'id' article.id %}"/>{% endif %}
     {% comment "twitter, facebook" %}
     {% include "elements/journal/social_meta.html" %}
     {% endcomment %}    
 {% endblock %}
 
 {% block body %}
-    
     <div class="row">
         <div class="col-4"> 
             {% for galley in galleys %}

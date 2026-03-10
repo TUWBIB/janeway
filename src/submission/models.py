@@ -1372,6 +1372,58 @@ class Article(AbstractLastModifiedModel):
         if self.language == 'deu': return 'de'
         return self.language
 
+    # normalizes values for metadata exports
+    # tries to avoid 
+    def getNormalizedValues(self):
+        lang = self.iso6391()
+        if lang is None or lang not in ('en','de'): lang = 'en'
+
+        title_raw = self.getTitleRAW
+        title_en = self.getTitleEN
+        title_de = self.getTitleDE
+        subtitle_raw = self.getSubTitleRAW
+        subtitle_en = self.getSubTitleEN
+        subtitle_de = self.getSubTitleDE
+        abstract_raw = self.getAbstractRAW
+        abstract_en = self.getAbstractEN
+        abstract_de = self.getAbstractDE
+        if title_raw is None: title_raw = ''
+        if title_en is None: title_en = ''
+        if title_de is None: title_de = ''
+        if subtitle_raw is None: subtitle_raw = ''
+        if subtitle_en is None: subtitle_en = ''
+        if subtitle_de is None: subtitle_de = ''
+        if abstract_raw is None: abstract_raw = ''
+        if abstract_en is None: abstract_en = ''
+        if abstract_de is None: abstract_de = ''
+        title_raw = title_raw.strip()
+        title_en = title_en.strip()
+        title_de = title_de.strip()
+        subtitle_raw = subtitle_raw.strip()
+        subtitle_en = subtitle_en.strip()
+        subtitle_de = subtitle_de.strip()
+        abstract_raw = abstract_raw.strip()
+        abstract_en = abstract_en.strip()
+        abstract_de = abstract_de.strip()
+
+        if lang == 'en':
+            if abstract_de == abstract_en: abstract_de = ''
+        elif lang == 'de':
+            if abstract_de == abstract_en: abstract_en = ''            
+
+        return {
+            "title_raw": title_raw,
+            "title_en": title_en,
+            "title_de": title_de,
+            "subtitle_raw": subtitle_raw,
+            "subtitle_en": subtitle_en,
+            "subtitle_de": subtitle_de,
+            "abstract_raw": abstract_raw,
+            "abstract_en": abstract_en,
+            "abstract_de": abstract_de,
+        }
+
+
     class Meta:
         ordering = ("-date_published", "title")
 

@@ -634,21 +634,22 @@ def checkArticleMarcDuplicates(article) -> List[str]:
     doi = article.get_doi()
     if not doi:
         return []
-    
+
     l_ac = []
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-        params = { "alma.digital_object_identifier" : article.get_doi(), }
-        result = api.sendSRURequest(**params)
-        if result and result.errs:
-            raise Exception(*result.errs)
-        l_record = MarcRecord.parseMultiple(stripXmlDeclaration(result.data))
-        for mr in l_record:
-            l_ac.append(mr.getAC())   
-    except Exception as e:
-        logger.error(f"exception={type(e).__name__}")
-        logger.error(f"stacktrace={traceback.format_exc()}")
-        raise e
+    if not hasattr(settings,'ALMA_DISABLE_DOI_DUPLICATE_CHECK') or not settings.ALMA_DISABLE_DOI_DUPLICATE_CHECK:
+        try:
+            api = API(json_str=json.dumps(settings.LAAPY))
+            params = { "alma.digital_object_identifier" : article.get_doi(), }
+            result = api.sendSRURequest(**params)
+            if result and result.errs:
+                raise Exception(*result.errs)
+            l_record = MarcRecord.parseMultiple(stripXmlDeclaration(result.data))
+            for mr in l_record:
+                l_ac.append(mr.getAC())   
+        except Exception as e:
+            logger.error(f"exception={type(e).__name__}")
+            logger.error(f"stacktrace={traceback.format_exc()}")
+            raise e
 
     return l_ac
     
