@@ -42,6 +42,7 @@ def all_review_decisions():
         (RD.DECISION_MAJOR.value, "Major Revisions Required"),
         (RD.DECISION_REJECT.value, "Reject"),
         (RD.DECISION_NO_RECOMMENDATION.value, "No Recommendation"),
+        (RD.DECISION_WITHDRAWN.value, "Withdrawn"),
     )
 
 
@@ -400,7 +401,11 @@ class ReviewAssignment(models.Model):
 
     def request_decision_status(self):
         if self.decision == RD.DECISION_WITHDRAWN.value:
-            return f"Withdrawn {self.date_complete.date()}"
+            if self.date_complete:
+                date = self.date_complete.date()
+            else:
+                date = "[unknown date]"
+            return f"Withdrawn {date}"
         elif self.date_complete and self.date_accepted:
             return f"Complete {self.date_complete.date()}"
         elif self.date_accepted:

@@ -29,7 +29,7 @@ from core import (
 )
 from events import logic as event_logic
 from review import models, logic, forms, hypothesis
-from review.const import(
+from review.const import (
     EditorialDecisions as ED,
     ReviewerDecisions as RD,
 )
@@ -1682,11 +1682,6 @@ def withdraw_review(request, article_id, review_id):
             request=request,
         )
         if form.is_valid() or skip:
-            review.date_complete = timezone.now()
-            review.decision = models.RD.DECISION_WITHDRAWN.value
-            review.is_complete = True
-            review.save()
-
             kwargs = {
                 "review_assignment": review,
                 "request": request,
@@ -1697,7 +1692,7 @@ def withdraw_review(request, article_id, review_id):
                 event_logic.Events.ON_REVIEW_WITHDRAWL,
                 **kwargs,
             )
-
+            review.withdraw()
             messages.add_message(request, messages.SUCCESS, "Review withdrawn")
             return redirect(
                 reverse(
@@ -2024,9 +2019,16 @@ def request_revisions(request, article_id):
     review_round = models.ReviewRound.latest_article_round(
         article=article,
     )
-    pending_approval = review_round.active_reviews().filter(
-        is_complete=True,
-        for_author_consumption=False,
+    pending_approval = (
+        review_round.active_reviews()
+        .filter(
+            is_complete=True,
+            for_author_consumption=False,
+            date_declined__isnull=True,
+        )
+        .exclude(
+            decision=RD.DECISION_WITHDRAWN.value,
+        )
     )
     incomplete = review_round.active_reviews().filter(
         is_complete=False,
