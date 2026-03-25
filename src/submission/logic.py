@@ -457,6 +457,7 @@ def add_author_affiliation_from_orcid(author, orcid_details, request):
             orcid_affiliation=orcid_affils[0],
             tzinfo=tzinfo,
             data={"frozen_author": author},
+            journal=request.journal,
         )
         if orcid_affil_form.is_valid():
             affiliation = orcid_affil_form.save()
@@ -622,3 +623,26 @@ def remove_credit_role(request, article):
         },
     )
     return author
+
+
+def get_current_authors(article, request):
+    authors = []
+    for author, credits in article.authors_and_credits().items():
+        # Prepare CREDiT form
+        credit_form = get_credit_form(request, author)
+
+        # Detected unlinked accounts
+        unlinked_account = None
+        if author.email and not author.author:
+            try:
+                unlinked_account = core_models.Account.objects.get(
+                    email__iexact=author.email,
+                    accountrole__role__slug="author",
+                )
+            except (
+                core_models.Account.DoesNotExist,
+                core_models.Account.MultipleObjectsReturned,
+            ):
+                pass
+        authors.append((author, credits, credit_form, unlinked_account))
+    return authors

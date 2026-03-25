@@ -11,6 +11,7 @@ import json
 import re
 from datetime import timedelta
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 import pytz
 from hijack.signals import hijack_started, hijack_ended
 from iso639 import Lang
@@ -20,6 +21,7 @@ import tqdm
 import zipfile
 
 from bs4 import BeautifulSoup
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -852,14 +854,29 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def snapshot_affiliations(self, frozen_author):
         """
         Delete any outdated affiliations on the frozen author and then
-        assign copies of account affiliations to the frozen author.
+        create copies of account affiliations for the frozen author.
         """
+        # Avoid circular imports
+        from submission.forms import AuthorAffiliationForm
+
+        request = utils_logic.get_current_request()
         frozen_author.affiliations.delete()
         for affiliation in self.affiliations:
-            affiliation.pk = None
-            affiliation.account = None
-            affiliation.frozen_author = frozen_author
-            affiliation.save()
+            form = AuthorAffiliationForm(
+                {
+                    "frozen_author": frozen_author,
+                    "title": affiliation.title,
+                    "department": affiliation.department,
+                    "organization": affiliation.organization,
+                    "start": affiliation.start,
+                    "end": affiliation.end,
+                },
+                journal=request.journal if request else None,
+                frozen_author=frozen_author,
+                organization=affiliation.organization,
+            )
+            if form.is_valid():
+                form.save()
 
     def snapshot_self(self, article, force_update=True, reorder=True):
         """
@@ -1720,7 +1737,7 @@ class Galley(AbstractLastModifiedModel):
             # iterate over all found elements of each type in the elements dictionary
             for idx, val in enumerate(images):
                 # attempt to pull a URL from the specified attribute
-                url = os.path.basename(val.get(attribute, None))
+                url = os.path.basename(val.get(attribute, ""))
 
                 if show_all:
                     missing_elements.append(url)
@@ -3075,10 +3092,46 @@ class ControlledAffiliation(models.Model):
         ]
         ordering = ["-is_primary", "-pk"]
 
+    @property
+    def journal(self):
+        if self.frozen_author and self.frozen_author.article:
+            return self.frozen_author.article.journal
+
+    @property
+    def title_display(self):
+        if self.journal and not self.journal.get_setting(
+            "metadata", "author_job_title"
+        ):
+            return ""
+        else:
+            return self.title
+
+    @property
+    def department_display(self):
+        if self.journal and not self.journal.get_setting(
+            "metadata", "author_department"
+        ):
+            return ""
+        else:
+            return self.department
+
+    @property
+    def date_display(self):
+        if self.journal and not self.journal.get_setting(
+            "metadata", "author_affiliation_dates"
+        ):
+            return ""
+        elif not self.start and not self.end:
+            return ""
+        else:
+            start = self.start.strftime("%b %Y") if self.start else ""
+            end = self.end.strftime("%b %Y") if self.end else ""
+            return mark_safe(f"{start}&ndash;{end}")
+
     def title_department(self):
         elements = [
-            self.title,
-            self.department,
+            self.title_display,
+            self.department_display,
         ]
         return ", ".join([element for element in elements if element])
 
