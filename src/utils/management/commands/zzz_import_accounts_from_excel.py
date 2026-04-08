@@ -94,11 +94,11 @@ class Command(BaseCommand):
                         account.first_name = account.first_name.strip()
                         account.last_name = groups[2]
                         account.last_name = account.last_name.strip()
-                        account.affiliation = groups[3]
-                        account.affiliation = account.affiliation.replace('(','')
-                        account.affiliation = account.affiliation.replace(')','')
-                        account.affiliation = account.affiliation.replace('*','')
-                        account.affiliation = account.affiliation.strip()
+                        account.institution = groups[3]
+                        account.institution = account.institution.replace('(','')
+                        account.institution = account.institution.replace(')','')
+                        account.institution = account.institution.replace('*','')
+                        account.institution = account.institution.strip()
                         account.username = account.email
                         account.password = ''
                         account.is_active = 0
@@ -132,7 +132,7 @@ class Command(BaseCommand):
                         print(f"{k} already exists")
                     else:
                         v.save()
-                        print(f"{k} created, {v.first_name}, {v.last_name}, {v.affiliation}")
+                        print(f"{k} created, {v.first_name}, {v.last_name}, {v.institution}")
 
                 cache.clear()                                        
 
