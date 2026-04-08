@@ -72,5 +72,6 @@ django-simple-captcha
 lingua-language-detector  # dependency on numpy not picked up by pip3?
 numpy
 xlsxwriter
+openpyxl
 django-altcha
 django-extensions
