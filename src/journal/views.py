@@ -1530,6 +1530,14 @@ def issue_galley(request, issue_id, delete=False):
     return redirect(reverse('manage_issues_id', kwargs={'issue_id': issue.pk}))
 
 
+# TUW quick fix
+# section ordering might be garbled if one adds sections to an issue after having
+# previously alreay changed the order of the existing sections
+# rely on get_sorted_articles (via issue.all_sections) which seems to return the correct even with journal_sectionordering
+# missing entries for one or more sections defined for the journal
+#
+# need to delete all entries to make sure
+
 @editor_user_required
 def sort_issue_sections(request, issue_id):
     issue = get_object_or_404(models.Issue, pk=issue_id, journal=request.journal)
@@ -1538,24 +1546,17 @@ def sort_issue_sections(request, issue_id):
     if request.POST:
         if 'up' in request.POST:
             section_id = request.POST.get('up')
-            section_to_move_up = get_object_or_404(submission_models.Section, pk=section_id, journal=request.journal)
+            section_to_move_up = get_object_or_404(submission_models.Section, pk=section_id, journal=request.journal,)
 
             if section_to_move_up != issue.first_section:
-                section_to_move_up_index = sections.index(section_to_move_up)
-                section_to_move_down = sections[section_to_move_up_index - 1]
-
-                section_to_move_up_ordering, c = models.SectionOrdering.objects.get_or_create(
-                    issue=issue,
-                    section=section_to_move_up)
-                section_to_move_down_ordering, c = models.SectionOrdering.objects.get_or_create(
-                    issue=issue,
-                    section=section_to_move_down)
-
-                section_to_move_up_ordering.order = section_to_move_up_index - 1
-                section_to_move_down_ordering.order = section_to_move_up_index
-
-                section_to_move_up_ordering.save()
-                section_to_move_down_ordering.save()
+                i = sections.index(section_to_move_up)
+                sections[i-1], sections[i] = sections[i], sections[i-1]
+                models.SectionOrdering.objects.filter(issue=issue).delete()
+                for i,section in enumerate(sections):
+                    models.SectionOrdering.objects.create(
+                        issue=issue,
+                        section=section,
+                        order=i,)
             else:
                 messages.add_message(
                     request,
@@ -1565,29 +1566,17 @@ def sort_issue_sections(request, issue_id):
 
         elif 'down' in request.POST:
             section_id = request.POST.get('down')
-            section_to_move_down = get_object_or_404(
-                submission_models.Section,
-                pk=section_id,
-                journal=request.journal,
-            )
-
+            section_to_move_down = get_object_or_404(submission_models.Section,pk=section_id,journal=request.journal,)
             if section_to_move_down != issue.last_section:
-                section_to_move_down_index = sections.index(section_to_move_down)
-                section_to_move_up = sections[section_to_move_down_index + 1]
-
-                section_to_move_up_ordering, c = models.SectionOrdering.objects.get_or_create(
-                    issue=issue,
-                    section=section_to_move_up)
-                section_to_move_down_ordering, c = models.SectionOrdering.objects.get_or_create(
-                    issue=issue,
-                    section=section_to_move_down)
-
-                section_to_move_up_ordering.order = section_to_move_down_index
-                section_to_move_down_ordering.order = section_to_move_down_index + 1
-
-                section_to_move_up_ordering.save()
-                section_to_move_down_ordering.save()
-
+                i = sections.index(section_to_move_down)
+                sections[i],sections[i+1] = sections[i+1],sections[i]
+                models.SectionOrdering.objects.filter(issue=issue).delete()
+                for i,section in enumerate(sections):
+                    section.order = i
+                    models.SectionOrdering.objects.create(
+                        issue=issue,
+                        section=section,
+                        order=i,)
             else:
                 messages.add_message(
                     request,
