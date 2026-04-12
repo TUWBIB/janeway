@@ -68,6 +68,7 @@ freezegun==1.2.0
 # git+ssh://git@gitlab.tuwien.ac.at:822/e040-01-3-bibit/laapy.git@0.6
 gunicorn
 mysqlclient==2.2.0
+mariadb
 django-simple-captcha
 lingua-language-detector  # dependency on numpy not picked up by pip3?
 numpy
