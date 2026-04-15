@@ -74,5 +74,8 @@ lingua-language-detector  # dependency on numpy not picked up by pip3?
 numpy
 xlsxwriter
 openpyxl
+# need to pin altcha, version 2.0.0 got released 20260407
+# sadly incompatible with latest django-altcha 0.10.0
+altcha==1.0.0 
 django-altcha
 django-extensions
