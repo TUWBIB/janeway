@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField('Page', 'display_name', 'display_name_tmp'),
-        migrations.RenameField('Page', 'content', 'content_tmp'),
+#        migrations.RenameField('Page', 'display_name', 'display_name_tmp'),
+#        migrations.RenameField('Page', 'content', 'content_tmp'),
     ]

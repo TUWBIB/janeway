@@ -29,5 +29,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(translate,reverse_code=untranslate)        
+#        migrations.RunPython(translate,reverse_code=untranslate)        
     ]

@@ -6,43 +6,42 @@ from django.db import migrations, models
 from django.utils.translation import gettext_lazy as _
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('submission', '9005_tuw_clean_double_keywords'),
     ]
 
     operations = [
-        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `title_de` `title_de_tuw` VARCHAR(300) NULL",
-            state_operations=[
-                migrations.AlterField(
-                    'article',
-                    'title_de_tuw',
-                    models.CharField(max_length=300, blank=True, null=True,
-                        help_text=_('Parallel title of the article'),
-                        db_column='title_de_tuw')
-                ),
-            ]
-        ),
-        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `subtitle_de` `subtitle_de_tuw` VARCHAR(300) NULL",
-            state_operations=[
-                migrations.AlterField(
-                    'article',
-                    'subtitle_de_tuw',
-                    models.CharField(max_length=300, blank=True, null=True,
-                        help_text=_('Subtitle of the parallel title of the article'),
-                        db_column='subtitle_de_tuw')
-                ),
-            ]
-        ),
-        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `abstract_de` `abstract_de_tuw` LONGTEXT NULL",
-            state_operations=[
-                migrations.AlterField(
-                    'article',
-                    'abstract_de_tuw',
-                    models.CharField(blank=True, null=True,
-                        help_text=_('Abstract (German)'),
-                        db_column='abstract_de_tuw')
-                ),
-            ]
-        ),
+#        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `title_de` `title_de_tuw` VARCHAR(300) NULL",
+#            state_operations=[
+#                migrations.AlterField(
+#                    'article',
+#                    'title_de_tuw',
+#                    models.CharField(max_length=300, blank=True, null=True,
+#                        help_text=_('Parallel title of the article'),
+#                        db_column='title_de_tuw')
+#                ),
+#            ]
+#        ),
+#        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `subtitle_de` `subtitle_de_tuw` VARCHAR(300) NULL",
+#            state_operations=[
+#                migrations.AlterField(
+#                    'article',
+#                    'subtitle_de_tuw',
+#                    models.CharField(max_length=300, blank=True, null=True,
+#                        help_text=_('Subtitle of the parallel title of the article'),
+#                        db_column='subtitle_de_tuw')
+#                ),
+#            ]
+#        ),
+#        migrations.RunSQL("ALTER TABLE `submission_article` CHANGE COLUMN `abstract_de` `abstract_de_tuw` LONGTEXT NULL",
+#            state_operations=[
+#                migrations.AlterField(
+#                    'article',
+#                    'abstract_de_tuw',
+#                    models.CharField(blank=True, null=True,
+#                        help_text=_('Abstract (German)'),
+#                        db_column='abstract_de_tuw')
+#                ),
+#            ]
+#        ),
     ]

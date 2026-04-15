@@ -33,5 +33,5 @@ class Migration(migrations.Migration):
                 ('issue', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='journal.issue')),
             ],
         ),
-        migrations.RunSQL('INSERT INTO tuw_sync_datacite (status,ts,article_id,issue_id) SELECT status,ts,article_id,issue_id FROM sync_datacite;'),
+#        migrations.RunSQL('INSERT INTO tuw_sync_datacite (status,ts,article_id,issue_id) SELECT status,ts,article_id,issue_id FROM sync_datacite;'),
     ]
