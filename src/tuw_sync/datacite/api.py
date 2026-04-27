@@ -5,6 +5,7 @@ import re
 import traceback
 import json
 import base64
+import html
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectTimeout,ReadTimeout
 from pathlib import Path
@@ -121,6 +122,7 @@ class API():
             d = json.loads(response.text)
             content = d['data']['attributes']['xml']
             content = base64.b64decode(content).decode()
+            content = html.unescape(content)
 
 
         except ConnectTimeout as e:
