@@ -53,7 +53,7 @@
                         {% for article in articles %}
                             <tr>
                                 <td>{{ article.id }}</td>
-                                <td>{{ article.title }}</td>
+                                <td>{{ article.title | safe }}</td>
                                 <td>{{ article.date_submitted }}</td>
                                 <td>{{ article.correspondence_author.full_name }}</td>
                                 <td>{{ article.section.name }}</td>
