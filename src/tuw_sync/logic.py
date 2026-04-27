@@ -81,7 +81,7 @@ def checkArticleMandatoryFields(article):
 
     if len(article.frozen_authors())==0:
         errors.append("no authors for article")
-    
+
     return errors
 
 def normalizeValues(article):
@@ -627,6 +627,8 @@ def checkArticleMarcMandatoryFields(article):
 
     if article.get_doi() is None:
         errors.append("doi not set")
+    if not article.page_numbers:
+        errors.append("page numbers not set")
     
     return errors
 
@@ -675,6 +677,8 @@ def checkArticleMarcDuplicates(article) -> List[str]:
 #
 
 
+# don't escape field values when adding to a datafield
+# this is taken care of in MarcRecord.toXml()
 def articleToMarc(article):
     def getControlField008():
         value = setting_handler.get_setting('tuw-alma','marc_008_29',article.journal).value
@@ -793,7 +797,7 @@ def articleToMarc(article):
                 datafield = DataField.createDataField("245","1","0")
             else:
                 datafield = DataField.createDataField("245","0","0")
-            datafield.addSubField(SubField.createSubField("a",escape(title_raw)))
+            datafield.addSubField(SubField.createSubField("a",title_raw))
             sf_b = ''
             if subtitle_raw:
                 sf_b += subtitle_raw
@@ -813,7 +817,7 @@ def articleToMarc(article):
                     sf_b += ' : '+ subtitle_de
            
             if sf_b:
-                datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
+                datafield.addSubField(SubField.createSubField("b",sf_b))
 
 
             auth = []
@@ -826,16 +830,16 @@ def articleToMarc(article):
             if source_parallel_title == 'de':
                 if title_de:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(title_de)))
+                    datafield.addSubField(SubField.createSubField("a",title_de))
                     if subtitle_de:
-                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_de)))
+                        datafield.addSubField(SubField.createSubField("b",subtitle_de))
                     mr.addDataField(datafield)
             elif source_parallel_title == 'en':
                 if title_en:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(title_en)))
+                    datafield.addSubField(SubField.createSubField("a",title_en))
                     if subtitle_en:
-                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_en)))
+                        datafield.addSubField(SubField.createSubField("b",subtitle_en))
                     mr.addDataField(datafield)
 
             # 251 __ coar
@@ -1026,11 +1030,9 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             xml = mr.toXML()
-
             x = etree.fromstring(xml)
             xml = etree.tostring(x, pretty_print=True).decode("utf-8")
             xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
-
         except Exception as e:
             print (traceback.format_exc())
             errors.append(''.join(['error creating xml: ',str(e)]))
