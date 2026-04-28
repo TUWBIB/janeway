@@ -84,6 +84,9 @@ def checkArticleMandatoryFields(article):
 
     return errors
 
+# normalize values:
+# + null > ''
+# + unescape values, bleached fields may contain "&amp;""
 def normalizeValues(article):
     title_raw = article.getTitleRAW
     title_en = article.getTitleEN
@@ -103,15 +106,15 @@ def normalizeValues(article):
     if abstract_raw is None: abstract_raw = ''
     if abstract_en is None: abstract_en = ''
     if abstract_de is None: abstract_de = ''
-    title_raw = title_raw.strip()
-    title_en = title_en.strip()
-    title_de = title_de.strip()
-    subtitle_raw = subtitle_raw.strip()
-    subtitle_en = subtitle_en.strip()
-    subtitle_de = subtitle_de.strip()
-    abstract_raw = abstract_raw.strip()
-    abstract_en = abstract_en.strip()
-    abstract_de = abstract_de.strip()
+    title_raw = unescape(title_raw.strip())
+    title_en = unescape(title_en.strip())
+    title_de = unescape(title_de.strip())
+    subtitle_raw = unescape(subtitle_raw.strip())
+    subtitle_en = unescape(subtitle_en.strip())
+    subtitle_de = unescape(subtitle_de.strip())
+    abstract_raw = unescape(abstract_raw.strip())
+    abstract_en = unescape(abstract_en.strip())
+    abstract_de = unescape(abstract_de.strip())
 
     return (
         title_raw,title_en,title_de,
@@ -902,27 +905,26 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 520, abstracts
-            if article.language == 'eng':
+            if not article.language or article.language == 'eng':
                 if abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+abstract_en))
                     mr.addDataField(datafield)
 
                 if abstract_de and abstract_de != abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+abstract_de))
                     mr.addDataField(datafield)
             elif article.language == 'deu':
                 if abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+abstract_de))
                     mr.addDataField(datafield)
 
                 if abstract_en and abstract_en != abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+abstract_en))
                     mr.addDataField(datafield)
-
 
             # 540, Lizenz
             if article.license is not None and article.license.short_name != 'Copyright':
