@@ -386,13 +386,13 @@ def almaCreateUpdateConfirm(article):
     
     if mmsid:
         result = api.getBibRecord(mmsid)
-        xml = result.data
+        xml_current = result.data
         errors = result.errs
         if errors:
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml_current)
         if match:
             mmsid_nz = match[1]
             errors.append("can't update record; already in NZ: " + mmsid_nz)
