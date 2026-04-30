@@ -88,6 +88,22 @@ def checkArticleMandatoryFields(article):
 # + null > ''
 # + unescape values, bleached fields may contain "&amp;""
 def normalizeValues(article):
+
+    def clean_html(text):
+        # 1. Replace structural/block tags with a single space.
+        # This includes opening and closing tags for div, br, p, li, etc.
+        struct_tags = r'/?(div|br|p|li|h[1-6]|tr|td|blockquote|section|article|ul|ol)'
+        text = re.sub(f'<{struct_tags}[^>]*>', ' ', text, flags=re.IGNORECASE)
+        
+        # 2. Strip all other tags (inline tags like <b>, <i>, <span>) 
+        # without adding spaces, as these usually don't separate words.
+        text = re.sub(r'<[^>]+>', '', text)
+        
+        # 3. Clean up whitespace (convert tabs/newlines/multiple spaces to one space)
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        return text
+
     title_raw = article.getTitleRAW
     title_en = article.getTitleEN
     title_de = article.getTitleDE
@@ -112,9 +128,9 @@ def normalizeValues(article):
     subtitle_raw = unescape(subtitle_raw.strip())
     subtitle_en = unescape(subtitle_en.strip())
     subtitle_de = unescape(subtitle_de.strip())
-    abstract_raw = unescape(abstract_raw.strip())
-    abstract_en = unescape(abstract_en.strip())
-    abstract_de = unescape(abstract_de.strip())
+    abstract_raw = clean_html(unescape(abstract_raw.strip()))
+    abstract_en = clean_html(unescape(abstract_en.strip()))
+    abstract_de = clean_html(unescape(abstract_de.strip()))
 
     return (
         title_raw,title_en,title_de,
