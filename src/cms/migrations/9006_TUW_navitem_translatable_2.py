@@ -14,39 +14,39 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='NavigationItemTranslation',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('link_name', models.CharField(max_length=100)),
-                ('language_code', models.CharField(db_index=True, max_length=15)),
-            ],
-            options={
-                'db_table': 'cms_navigationitem_translation',
-                'db_tablespace': '',
-                'abstract': False,
-                'managed': True,
-                'default_permissions': (),
-            },
-        ),
-        migrations.AlterModelOptions(
-            name='navigationitem',
-            options={'base_manager_name': '_plain_manager'},
-        ),
-        migrations.AlterModelManagers(
-            name='navigationitem',
-            managers=[
-                ('objects', django.db.models.manager.Manager()),
-                ('_plain_manager', django.db.models.manager.Manager()),
-            ],
-        ),
-        migrations.AddField(
-            model_name='navigationitemtranslation',
-            name='master',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='translations', to='cms.NavigationItem'),
-        ),
-        migrations.AlterUniqueTogether(
-            name='navigationitemtranslation',
-            unique_together=set([('language_code', 'master')]),
-        ),
+#        migrations.CreateModel(
+#            name='NavigationItemTranslation',
+#            fields=[
+#                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+#                ('link_name', models.CharField(max_length=100)),
+#                ('language_code', models.CharField(db_index=True, max_length=15)),
+#            ],
+#            options={
+#                'db_table': 'cms_navigationitem_translation',
+#                'db_tablespace': '',
+#                'abstract': False,
+#                'managed': True,
+#                'default_permissions': (),
+#            },
+#        ),
+#        migrations.AlterModelOptions(
+#            name='navigationitem',
+#            options={'base_manager_name': '_plain_manager'},
+#        ),
+#        migrations.AlterModelManagers(
+#            name='navigationitem',
+#            managers=[
+#                ('objects', django.db.models.manager.Manager()),
+#                ('_plain_manager', django.db.models.manager.Manager()),
+#            ],
+#        ),
+#        migrations.AddField(
+#            model_name='navigationitemtranslation',
+#            name='master',
+#            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='translations', to='cms.NavigationItem'),
+#        ),
+#        migrations.AlterUniqueTogether(
+#            name='navigationitemtranslation',
+#            unique_together=set([('language_code', 'master')]),
+#        ),
     ]

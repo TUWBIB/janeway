@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='article',
-            name='abstract_de_tuw',
-            field=core.model_utils.JanewayBleachField(blank=True, help_text='Abstract (German)', null=True),
-        ),
+#        migrations.AlterField(
+#            model_name='article',
+#            name='abstract_de_tuw',
+#            field=core.model_utils.JanewayBleachField(blank=True, help_text='Abstract (German)', null=True),
+#        ),
         migrations.AlterField(
             model_name='article',
             name='datacite_state',
@@ -26,16 +26,16 @@ class Migration(migrations.Migration):
             name='subtitle',
             field=core.model_utils.JanewayBleachCharField(blank=True, help_text='Subtitle for the article.', max_length=999, null=True),
         ),
-        migrations.AlterField(
-            model_name='article',
-            name='subtitle_de_tuw',
-            field=core.model_utils.JanewayBleachCharField(blank=True, help_text='Subtitle of the parallel title of the article', max_length=300, null=True),
-        ),
-        migrations.AlterField(
-            model_name='article',
-            name='title_de_tuw',
-            field=core.model_utils.JanewayBleachCharField(blank=True, db_column='title_de_tuw', help_text='Parallel title of the article', max_length=300, null=True),
-        ),
+#        migrations.AlterField(
+#            model_name='article',
+#            name='subtitle_de_tuw',
+#            field=core.model_utils.JanewayBleachCharField(blank=True, help_text='Subtitle of the parallel title of the article', max_length=300, null=True),
+#        ),
+#        migrations.AlterField(
+#            model_name='article',
+#            name='title_de_tuw',
+#            field=core.model_utils.JanewayBleachCharField(blank=True, db_column='title_de_tuw', help_text='Parallel title of the article', max_length=300, null=True),
+#        ),
         migrations.AlterField(
             model_name='keyword',
             name='language',

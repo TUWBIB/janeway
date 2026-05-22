@@ -12,5 +12,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField('NavigationItem', 'link_name', 'link_name_tmp'),
+#        migrations.RenameField('NavigationItem', 'link_name', 'link_name_tmp'),
     ]        

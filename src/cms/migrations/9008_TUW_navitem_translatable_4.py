@@ -12,8 +12,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='navigationitem',
-            name='link_name_tmp',
-        ),
+#        migrations.RemoveField(
+#            model_name='navigationitem',
+#            name='link_name_tmp',
+#        ),
     ]

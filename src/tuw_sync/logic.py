@@ -81,10 +81,29 @@ def checkArticleMandatoryFields(article):
 
     if len(article.frozen_authors())==0:
         errors.append("no authors for article")
-    
+
     return errors
 
+# normalize values:
+# + null > ''
+# + unescape values, bleached fields may contain "&amp;""
 def normalizeValues(article):
+
+    def clean_html(text):
+        # 1. Replace structural/block tags with a single space.
+        # This includes opening and closing tags for div, br, p, li, etc.
+        struct_tags = r'/?(div|br|p|li|h[1-6]|tr|td|blockquote|section|article|ul|ol)'
+        text = re.sub(f'<{struct_tags}[^>]*>', ' ', text, flags=re.IGNORECASE)
+        
+        # 2. Strip all other tags (inline tags like <b>, <i>, <span>) 
+        # without adding spaces, as these usually don't separate words.
+        text = re.sub(r'<[^>]+>', '', text)
+        
+        # 3. Clean up whitespace (convert tabs/newlines/multiple spaces to one space)
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        return text
+
     title_raw = article.getTitleRAW
     title_en = article.getTitleEN
     title_de = article.getTitleDE
@@ -103,15 +122,15 @@ def normalizeValues(article):
     if abstract_raw is None: abstract_raw = ''
     if abstract_en is None: abstract_en = ''
     if abstract_de is None: abstract_de = ''
-    title_raw = title_raw.strip()
-    title_en = title_en.strip()
-    title_de = title_de.strip()
-    subtitle_raw = subtitle_raw.strip()
-    subtitle_en = subtitle_en.strip()
-    subtitle_de = subtitle_de.strip()
-    abstract_raw = abstract_raw.strip()
-    abstract_en = abstract_en.strip()
-    abstract_de = abstract_de.strip()
+    title_raw = unescape(title_raw.strip())
+    title_en = unescape(title_en.strip())
+    title_de = unescape(title_de.strip())
+    subtitle_raw = unescape(subtitle_raw.strip())
+    subtitle_en = unescape(subtitle_en.strip())
+    subtitle_de = unescape(subtitle_de.strip())
+    abstract_raw = clean_html(unescape(abstract_raw.strip()))
+    abstract_en = clean_html(unescape(abstract_en.strip()))
+    abstract_de = clean_html(unescape(abstract_de.strip()))
 
     return (
         title_raw,title_en,title_de,
@@ -627,6 +646,8 @@ def checkArticleMarcMandatoryFields(article):
 
     if article.get_doi() is None:
         errors.append("doi not set")
+    if not article.page_numbers:
+        errors.append("page numbers not set")
     
     return errors
 
@@ -675,6 +696,8 @@ def checkArticleMarcDuplicates(article) -> List[str]:
 #
 
 
+# don't escape field values when adding to a datafield
+# this is taken care of in MarcRecord.toXml()
 def articleToMarc(article):
     def getControlField008():
         value = setting_handler.get_setting('tuw-alma','marc_008_29',article.journal).value
@@ -793,7 +816,7 @@ def articleToMarc(article):
                 datafield = DataField.createDataField("245","1","0")
             else:
                 datafield = DataField.createDataField("245","0","0")
-            datafield.addSubField(SubField.createSubField("a",escape(title_raw)))
+            datafield.addSubField(SubField.createSubField("a",title_raw))
             sf_b = ''
             if subtitle_raw:
                 sf_b += subtitle_raw
@@ -813,7 +836,7 @@ def articleToMarc(article):
                     sf_b += ' : '+ subtitle_de
            
             if sf_b:
-                datafield.addSubField(SubField.createSubField("b",escape(sf_b)))
+                datafield.addSubField(SubField.createSubField("b",sf_b))
 
 
             auth = []
@@ -826,16 +849,16 @@ def articleToMarc(article):
             if source_parallel_title == 'de':
                 if title_de:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(title_de)))
+                    datafield.addSubField(SubField.createSubField("a",title_de))
                     if subtitle_de:
-                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_de)))
+                        datafield.addSubField(SubField.createSubField("b",subtitle_de))
                     mr.addDataField(datafield)
             elif source_parallel_title == 'en':
                 if title_en:
                     datafield = DataField.createDataField("246","1","1")
-                    datafield.addSubField(SubField.createSubField("a",escape(title_en)))
+                    datafield.addSubField(SubField.createSubField("a",title_en))
                     if subtitle_en:
-                        datafield.addSubField(SubField.createSubField("b",escape(subtitle_en)))
+                        datafield.addSubField(SubField.createSubField("b",subtitle_en))
                     mr.addDataField(datafield)
 
             # 251 __ coar
@@ -898,27 +921,26 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             # 520, abstracts
-            if article.language == 'eng':
+            if not article.language or article.language == 'eng':
                 if abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+abstract_en))
                     mr.addDataField(datafield)
 
                 if abstract_de and abstract_de != abstract_en:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+abstract_de))
                     mr.addDataField(datafield)
             elif article.language == 'deu':
                 if abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+escape(abstract_de)))
+                    datafield.addSubField(SubField.createSubField("a","ger:"+" "+abstract_de))
                     mr.addDataField(datafield)
 
                 if abstract_en and abstract_en != abstract_de:
                     datafield = DataField.createDataField("520"," "," ")
-                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+escape(abstract_en)))
+                    datafield.addSubField(SubField.createSubField("a","eng:"+" "+abstract_en))
                     mr.addDataField(datafield)
-
 
             # 540, Lizenz
             if article.license is not None and article.license.short_name != 'Copyright':
@@ -1026,11 +1048,9 @@ def articleToMarc(article):
             mr.addDataField(datafield)
 
             xml = mr.toXML()
-
             x = etree.fromstring(xml)
             xml = etree.tostring(x, pretty_print=True).decode("utf-8")
             xml = '<?xml version="1.0" encoding="UTF-8"?>\n'+xml
-
         except Exception as e:
             print (traceback.format_exc())
             errors.append(''.join(['error creating xml: ',str(e)]))

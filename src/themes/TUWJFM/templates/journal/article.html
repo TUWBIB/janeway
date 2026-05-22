@@ -98,13 +98,13 @@
                     {% if article.title %}
                         <tr>
                         <th>{% trans "Title" %}</th>
-                        <td>{{ article.title }}</td>
+                        <td>{{ article.title | safe }}</td>
                         </tr>
                     {% endif %}
                     {% if article.subtitle %}
                         <tr>
                         <th></th>
-                        <td>{{ article.subtitle }}</td>
+                        <td>{{ article.subtitle | safe }}</td>
                         </tr>
                     {% endif %}
                     {% if article.frozen_authors %}
@@ -204,9 +204,9 @@
                         <th>{% if forloop.first %} {% trans "Download" %} {% endif %}</th>
                         <td>
                             {% if forloop.first %}
-                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title }} [{% file_size galley.file article %}]</a>
+                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title | safe }} [{% file_size galley.file article %}]</a>
                             {% else %}
-                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title }} ({{ galley.label }}) [{% file_size galley.file article %}]</a>
+                            <a href="{% url 'article_download_galley' article.id galley.id %}">{{ article.title | safe }} ({{ galley.label }}) [{% file_size galley.file article %}]</a>
                             {% endif %}
                         </td>
                     </tr>

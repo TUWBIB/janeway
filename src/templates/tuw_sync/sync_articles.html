@@ -53,7 +53,7 @@
             {% for article in articles %}
                 <tr>
                     <td><a href="{% url 'edit_metadata' article.pk %}">{{ article.id }}</a></td>
-                    <td>{{ article.title }}</td>
+                    <td>{{ article.title | safe }}</td>
                     {% if article.primary_issue %}
                     <td>{{ article.primary_issue.tuw_issue_count }}</td>    
                     {% else %}

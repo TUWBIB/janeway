@@ -9,14 +9,6 @@ from submission import models as submission_models
 
 class Migration(migrations.Migration):
 
-    def set_state(apps, schema_editor):
-        articles = submission_models.Article.objects.all()
-        for article in articles:
-            if article.get_doi() is not None:
-                article.datacite_state=submission_models.DATACITE_STATE_FINDABLE
-                article.datacite_ts=datetime(2020,1,1)
-                article.save()
-
     dependencies = [
         ('submission', '9001_tuw_add_trans_dedicated_fields'),
     ]
@@ -32,5 +24,4 @@ class Migration(migrations.Migration):
             name='datacite_ts',
             field=models.DateTimeField(blank=True, null=True),
         ),
-        migrations.RunPython(set_state),
     ]

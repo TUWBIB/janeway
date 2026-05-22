@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='page',
-            name='content_tmp',
-        ),
-        migrations.RemoveField(
-            model_name='page',
-            name='display_name_tmp',
-        ),
+#        migrations.RemoveField(
+#            model_name='page',
+#            name='content_tmp',
+#        ),
+#        migrations.RemoveField(
+#            model_name='page',
+#            name='display_name_tmp',
+#        ),
     ]
