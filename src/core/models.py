@@ -2840,6 +2840,10 @@ def validate_ror_id(ror_id):
         raise ValidationError(f"{ror_id} is not a valid ROR identifier")
 
 
+# TUW
+# filtered constraints are not supported by mariadb
+# changes marked mit TUW_ror_id_virtual
+
 class Organization(models.Model):
     class RORStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
@@ -2854,6 +2858,7 @@ class Organization(models.Model):
         verbose_name="ROR ID",
         help_text="Non-URI form of Research Organization Registry identifier",
     )
+
     ror_status = models.CharField(
         blank=True,
         max_length=10,
@@ -2878,13 +2883,16 @@ class Organization(models.Model):
 
     class Meta:
         ordering = ("ror_display__value", "custom_label__value")
-        constraints = [
-            models.UniqueConstraint(
-                fields=["ror_id"],
-                condition=~models.Q(ror_id__exact=""),
-                name="filled_unique",
-            )
-        ]
+
+        # TUW_ror_id_virtual
+#        constraints = [
+#            models.UniqueConstraint(
+#                fields=["ror_id"],
+#                condition=~models.Q(ror_id__exact=""),
+#                name="filled_unique",
+#            )
+#        ]
+        # --- TUW_ror_id_virtual
 
     @property
     def name_location(self):
