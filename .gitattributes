@@ -4,3 +4,5 @@ src/themes/OLH/assets/jquery/* linguist-vendored
 src/themes/OLH/assets/motion-ui/* linguist-vendored
 src/themes/OLH/assets/foundation-sites/* linguist-vendored
 src/themes/default/css/*
+*.pot merge=pofile
+*.po merge=pofile
