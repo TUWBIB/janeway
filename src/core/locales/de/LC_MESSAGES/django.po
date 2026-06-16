@@ -972,25 +972,31 @@ msgstr "Geben Sie hier das Abstract Ihres Artikels ein"
 
 #: src/repository/models.py:140
 msgid "Used for outputs including DC and Citation metadata"
-msgstr ""
+msgstr "Verwendet, um DublinCore und Zitationsdaten auszugeben"
 
 #: src/repository/models.py:146
 msgid ""
 "The contents of this field are output into the JS areaat the foot of every "
 "Repository page."
 msgstr ""
+"Die Inhalte dieses Feldes werden im JS-Bereich am unteren Ende jeder "
+"Repositoriumsseite ausgegeben."
 
 #: src/repository/models.py:154
 msgid ""
 "If set to True, this will require all file uploads fromauthors to be PDF "
 "files."
 msgstr ""
+"Wenn \"Wahr\" ausgewählt wird, müssen alle hochgeladenen Dateien von "
+"Autor:innen PDF-Dateien sein."
 
 #: src/repository/models.py:382
 msgid ""
 "If this field is to be output as a dc metadata field you can addthe type "
 "here."
 msgstr ""
+"Wenn dieses Feld als DublinCore-Metadatenfeld ausgegeben werden soll, können "
+"Sie hier den Typ hinzufügen."
 
 #: src/repository/models.py:431 src/repository/models.py:1049
 #: src/repository/models.py:1199 src/submission/models.py:1033
@@ -1002,15 +1008,15 @@ msgstr "Titel Ihres Artikels"
 #: src/templates/admin/elements/current_authors_inner.html:106
 #: src/templates/admin/submission/edit/author.html:150
 msgid "ORCID"
-msgstr ""
+msgstr "ORCID"
 
 #: src/repository/models.py:1261
 msgid "Approved"
-msgstr ""
+msgstr "Bestätigt"
 
 #: src/repository/models.py:1263
 msgid "Under Review"
-msgstr "Unter Peer Review"
+msgstr "In Begutachtung"
 
 #: src/repository/models.py:1265 src/templates/admin/review/view_review.html:64
 msgid "Declined"
@@ -1018,50 +1024,50 @@ msgstr "Abgelehnt"
 
 #: src/repository/views.py:1121
 msgid "Author information saved"
-msgstr "Informationen zum Autor / zur Autorin gespeichert"
+msgstr "Autor:innen-Informationen gespeichert"
 
 #: src/review/forms.py:249
 msgid "Are you sure you want to request revisions?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie Korrekturen beantragen wollen?"
 
 #: src/review/forms.py:298
 msgid "Are you sure you want to complete the revision request?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie den Korrekturauftrag abschließen wollen?"
 
 #: src/review/forms.py:435
 msgid "Author can access this review"
-msgstr ""
+msgstr "Autor:in kann auf das Gutachten zugreifen"
 
 #: src/review/forms.py:436
 msgid "Author can access review file"
-msgstr ""
+msgstr "Autor:in kann auf Gutachtendatei zugreifen"
 
 #: src/review/forms.py:455
 #, python-format
 msgid "Author can see ‘%(name)s’"
-msgstr ""
+msgstr "Autor:in kann ‘%(name)s’ sehen"
 
 #: src/review/models.py:249
 msgid "Anonymity"
-msgstr ""
+msgstr "Anonymität"
 
 #: src/review/models.py:419
 msgid "available for the author to access"
-msgstr ""
+msgstr "Autor kann darauf zugreifen"
 
 #: src/review/models.py:420
 msgid "not available for the author to access"
-msgstr ""
+msgstr "Autor kann darauf nicht zugreifen"
 
 #: src/review/views.py:1788
 msgid "This article has already been accepted or declined."
-msgstr "Dieser Artikel ist bereits akzeptiert oder abgelehnt."
+msgstr "Dieser Artikel wurde schon akzeptiert oder abgelehnt"
 
 #: src/security/templatetags/securitytags.py:107
 #: src/templates/admin/elements/author_summary_table.html:93
 #: src/templates/admin/elements/author_summary_table.html:101
 msgid "[Anonymised data]"
-msgstr ""
+msgstr "[Anonymisierte Daten]"
 
 #: src/submission/decorators.py:22
 msgid "This page can only be accessed on Journals."
@@ -1069,7 +1075,7 @@ msgstr "Diese Seite ist nur über Zeitschriften zugänglich."
 
 #: src/submission/decorators.py:33
 msgid "Submission is disabled for this journal."
-msgstr "Abgabe ist für diese Zeitschrift deaktiviert. "
+msgstr "Einreichungen sind für diese Zeitschrift deaktiviert. "
 
 #: src/submission/forms.py:103
 #: src/templates/admin/submission/submit_review.html:48
@@ -1080,6 +1086,7 @@ msgstr "Untertitel"
 #: src/submission/logic.py:117
 msgid "You must upload a file that is either a Doc, Docx, RTF or ODT."
 msgstr ""
+"Sie müssen eine Datei in den Formaten Doc, Docx, RTF oder ODT hochladen."
 
 #: src/submission/logic.py:365
 #, python-format
