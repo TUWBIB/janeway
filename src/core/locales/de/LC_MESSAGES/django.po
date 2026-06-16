@@ -129,8 +129,8 @@ msgid ""
 "The account belonging to %(email)s has not yet been activated, so the "
 "recipient of this assignment may not be able to log in and view it."
 msgstr ""
-"Das Konto von %(email)s wurde noch nicht aktiviert, daher kann eine Anmeldung "
-"nicht erfolgen und der Auftrag nicht angesehen werden."
+"Das Konto von %(email)s wurde noch nicht aktiviert, daher kann eine "
+"Anmeldung nicht erfolgen und der Auftrag nicht angesehen werden."
 
 #: src/core/homepage_elements/about/hooks.py:25
 msgid "About this Journal"
@@ -503,7 +503,6 @@ msgstr "Das alte Passwort ist nicht korrekt."
 msgid "Successfully subscribed to article notifications."
 msgstr "Erfolgreich für Artikelbenachrichtigungen angemeldet."
 
-
 #: src/core/views.py:656
 msgid "Successfully unsubscribed from article notifications."
 msgstr "Erfolgreich von den Artikelbenachrichtigungen abgemeldet."
@@ -670,7 +669,6 @@ msgstr ""
 "Das Bild in Logogröße am oberen Rand aller Seiten, das normalerweise für "
 "Journalogos verwendet wird."
 
-
 #: src/journal/models.py:180
 msgid ""
 "The tiny round or square image appearing in browser tabs before the webpage "
@@ -734,7 +732,8 @@ msgstr ""
 
 #: src/journal/models.py:868
 msgid "Image representing the cover of a printed issue or volume"
-msgstr "Bild, das das Cover einer gedruckten Ausgabe oder eines Bandes darstellt"
+msgstr ""
+"Bild, das das Cover einer gedruckten Ausgabe oder eines Bandes darstellt"
 
 #: src/journal/models.py:876
 msgid "landscape hero image used in the carousel and issue page"
@@ -3538,7 +3537,6 @@ msgid ""
 "              "
 msgstr ""
 
-
 #: src/templates/admin/submission/edit/author_metadata.html:61
 #: src/templates/admin/submission/submit_authors.html:78
 #, fuzzy
@@ -5690,7 +5688,6 @@ msgstr ""
 msgid "Peer Review"
 msgstr "Peer Review"
 
-
 #: src/themes/OLH/templates/journal/article_list.html:27
 #: src/themes/TUW_ARW/templates/journal/article_list.html:27
 #: src/themes/clean/templates/journal/article_list.html:19
@@ -6903,11 +6900,8 @@ msgstr "akzeptiert"
 msgid "declined"
 msgstr "abgelehnt"
 
-
 #: src/cms/models.py:161
 msgid ""
 "Language for which this nav item is displayed, leave empty if item is to be "
 "shown regardless of language"
 msgstr ""
-
-
