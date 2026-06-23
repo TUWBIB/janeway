@@ -1026,16 +1026,29 @@ class Issue(AbstractLastModifiedModel):
 
         return section_article_dict
 
+    # TUW quick fix
+    # section ordering might be garbled if one adds sections to an issue after having
+    # previously alreay changed the order of the existing sections
+    # rely on get_sorted_articles which seems to return the correct even with journal_sectionordering
+    # missing entries for one or more sections defined for the journal
     @property
     def all_sections(self):
-        ordered_sections = [order.section for order in SectionOrdering.objects.filter(issue=self)]
-        articles = self.articles.all().order_by('section')
-
+        ordered_sections = []
+        articles = self.get_sorted_articles(published_only=False)
         for article in articles:
             if not article.section in ordered_sections:
                 ordered_sections.append(article.section)
-
+      
         return ordered_sections
+
+#        ordered_sections = [order.section for order in SectionOrdering.objects.filter(issue=self)]
+#        articles = self.articles.all().order_by('section')
+#
+#        for article in articles:
+#            if not article.section in ordered_sections:
+#                ordered_sections.append(article.section)
+#
+#        return ordered_sections
 
     @property
     def first_section(self):
