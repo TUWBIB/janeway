@@ -395,7 +395,12 @@ def dataciteMetadata(article_id=None,issue_id=None):
                 l.append('</identifier>')
 
                 value = setting_handler.get_setting('tuw-datacite','issuelevel__editors',issue.journal).value
-                l_values = json.loads(value)
+                if not value:
+                    raise Exception("setting tuw-datacite / issuelevel__editors not set")
+                try:
+                    l_values = json.loads(value)
+                except Exception as e:
+                    raise Exception("setting tuw-datacite / issuelevel__editors invalid")
                 if l_values:
                     l.append('<creators>')
                     for d in l_values:

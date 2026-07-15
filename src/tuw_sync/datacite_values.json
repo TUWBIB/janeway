@@ -147,7 +147,7 @@
             "ARW": [ { "orcid" : "0000-0002-6965-7794", "full_name": "Kubinger, Wilfried", "given_name": "Wilfried", "family_name": "Kubinger" }, { "orcid" : "0000-0002-5907-4624", "full_name": "Kranzer, Simon", "given_name": "Simon", "family_name": "Kranzer" }, { "orcid" : "0000-0002-2799-491X", "full_name": "Vincze, Markus", "given_name": "Markus", "family_name": "Vincze" } ],
             "IOTW": [ { "orcid": "0000-0001-6901-7714", "full_name": "Frangoudis, Pantelis", "given_name": "Pantelis", "family_name": "Fragoudis" }, { "orcid": "0000-0001-5933-3246", "full_name": "Kimovski, Dragi", "given_name": "Dragi", "family_name": "Kimovski" } ],
             "EF": "",
-            "AIROV": "",
+            "AIROV": [ { "orcid": "0000-0001-8351-5066", "full_name": "Kleber, Florian", "given_name": "Florian", "family_name": "Kleber" }, { "orcid": "0000-0002-9767-0611", "full_name": "Nessler, Bernhard", "given_name": "Bernhard", "family_name": "Nessler" }, { "orcid": "0000-0001-9566-1298", "full_name": "Roth, Peter M.", "given_name": "Peter M.", "family_name": "Roth" }, { "orcid": "0000-0003-1221-8253", "full_name": "Rückert, Elmar", "given_name": "Elmar", "family_name": "Rückert" } ],
             "ISVCS": ""
         },
         "editable_by": [
@@ -173,7 +173,7 @@
             "ARW": "Gesellschaft für Messtechnik, Automatisierung und Robotik - GMAR und Automatisierungs- und Regelungstechnik Institut der TU Wien",
             "IOTW": "Institute of Information Systems Engineering, TU Wien",
             "EF": "",
-            "AIROV": "",
+            "AIROV": "Institute of Visual Computing &amp; Human-Centered Technology, Computer Vision Lab, TU Wien",
             "ISVCS": ""
         },
         "editable_by": [
