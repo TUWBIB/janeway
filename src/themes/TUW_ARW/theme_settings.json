@@ -109,5 +109,29 @@
         "editable_by": [
             "journal-manager"
         ]
+    },
+    {
+        "group": {
+            "name": "styling"
+        },
+        "setting": {
+            "description": "Determines if the cover image is shown in the issue_sidebar, 'yes' or 'no'",
+            "is_translatable": false,
+            "name": "tuw_show_cover_image_in_issue_sidebar",
+            "pretty_name": "Cover image in sidebar",
+            "type": "rich-text"
+        },
+        "value": {
+            "default": "yes",
+            "JFM": "",
+            "OES": "",
+            "ARW": "yes",
+            "IOTW": "yes",
+            "EF": "yes",
+            "AIROV": "yes"
+        },
+        "editable_by": [
+            "journal-manager"
+        ]
     }
 ]
