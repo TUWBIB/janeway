@@ -49,7 +49,7 @@ def svg(filename):
 
 
 @register.simple_tag
-def svg_or_image(image_field, css_class="", alt_text="", inline=False):
+def svg_or_image(image_field, css_class="", alt_text="", inline=False, width="100%"):
     """Renders the given image or SVG from a Field as DOM object
     :param image_field: An instance of core.model_utils.SVGImageField
     :param css_class: String to be added as the class attribute in the dom
@@ -65,10 +65,11 @@ def svg_or_image(image_field, css_class="", alt_text="", inline=False):
 
     if not inline or not mimetype or mimetype[0] != "image/svg+xml":
         return mark_safe(
-            '<img src="{url}" class="{css_class}" alt="{alt_text}">'.format(
+            '<img src="{url}" class="{css_class}" alt="{alt_text}" width="{width}">'.format(
                 url=image_field.url,
                 css_class=css_class,
                 alt_text=alt_text,
+                width=width,
             )
         )
 
