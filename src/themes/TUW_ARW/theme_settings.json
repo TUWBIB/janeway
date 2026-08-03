@@ -16,7 +16,8 @@
             "OES": "",
             "ARW": "header",
             "IOTW": "header",
-            "EF": "header"
+            "EF": "header",
+            "AIROV": "none"
         },
         "editable_by": [
             "journal-manager"
@@ -39,7 +40,8 @@
             "OES": null,
             "ARW": null,
             "IOTW": null,
-            "EF": null
+            "EF": null,
+            "AIROV": null
         },
         "editable_by": [
             "journal-manager"
@@ -62,7 +64,8 @@
             "OES": "",
             "ARW": "no",
             "IOTW": "no",
-            "EF": "no"
+            "EF": "no",
+            "AIROV": "no"
         },
         "editable_by": [
             "journal-manager"
@@ -95,6 +98,10 @@
                 "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
             },
             "EF": {
+                "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
+                "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
+            },
+            "AIROV": {
                 "en": "Infrastructure provided by TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>",
                 "de": "Infrastruktur zur Verfügung gestellt von TU Wien Bibliothek; powered by <a data-open=\"janeway-info-modal\">Janeway</a>"
             }
