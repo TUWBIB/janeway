@@ -424,6 +424,11 @@ def get_settings_to_edit(display_group, journal, user):
                     "general", "hide_editors_from_authors", journal
                 ),
             },
+        ]
+        setting_group = "general"
+
+    elif display_group == "metadata":
+        group_of_settings = [
             {
                 "name": "author_job_title",
                 "object": setting_handler.get_setting(
@@ -443,7 +448,7 @@ def get_settings_to_edit(display_group, journal, user):
                 ),
             },
         ]
-        setting_group = "general"
+        setting_group = "metadata"
 
     elif display_group == "review":
         group_of_settings = [
