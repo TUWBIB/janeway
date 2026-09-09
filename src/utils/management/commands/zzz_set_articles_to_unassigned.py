@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
             print("deleted %d from %s", (res := feautured_models.FeaturedArticle.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := core_models.WorkflowLog.objects.filter(article=article)).delete()[0], res.model.__name__)
-#            print("deleted %d from %s", (res := core_models.Galley.objects.filter(article=article)).delete()[0], res.model.__name__)
+            print("deleted %d from %s", (res := core_models.Galley.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := cron_models.CronTask.objects.filter(article=article)).delete()[0], res.model.__name__)
 
             print("deleted %d from %s", (res := discussion_models.Thread.objects.filter(article=article)).delete()[0], res.model.__name__)
@@ -102,23 +102,3 @@ class Command(BaseCommand):
             print("deleted %d from %s", (res := journal_models.FixedPubCheckItems.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := journal_models.PrePublicationChecklistItem.objects.filter(article=article)).delete()[0], res.model.__name__)
 
-
-
-#Table: identifiers_identifier | Model: Identifier (via field: article
-#Table: identifiers_brokendoi | Model: BrokenDOI (via field: article
-#Table: journal_issue | Model: Issue (via field: articles
-#Table: journal_articleordering | Model: ArticleOrdering (via field: article
-#Table: submission_articlefunding | Model: ArticleFunding (via field: article
-#Table: submission_citedreference | Model: CitedReference (via field: article
-#Table: submission_articlestagelog | Model: ArticleStageLog (via field: article
-#Table: submission_keywordarticle | Model: KeywordArticle (via field: article
-#Table: submission_article | Model: Article (via field: preprint_journal_article
-#Table: submission_frozenauthor | Model: FrozenAuthor (via field: article
-#Table: submission_note | Model: Note (via field: article
-#Table: submission_fieldanswer | Model: FieldAnswer (via field: article
-#Table: submission_articleauthororder | Model: ArticleAuthorOrder (via field: article
-#Table: tuw_sync_datacite | Model: DataCite (via field: article
-#Table: tuw_sync_alma | Model: Alma (via field: article
-
-
-    
