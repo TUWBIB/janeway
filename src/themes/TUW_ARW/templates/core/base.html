@@ -70,8 +70,13 @@
 <div class="wrapper">
     <header class="main-header" role="banner">
         <div class="main top-bar">
-            <div class="top-bar-left border-right">
+            <div class="top-bar-left header-image-bar border-right">
                 {% if request.journal %}
+                    {% if request.journal.header_image %}
+                    <a title="{% trans 'Home' %}" href="{{ request.journal.site_url }}">
+                        {% svg_or_image request.journal.header_image css_class='header-image top-bar-image' %}
+                    </a>
+                    {% endif %}
                 {% elif request.repository %}
                     {% if request.repository.logo %}
                         {% svg_or_image request.repository.logo %}
