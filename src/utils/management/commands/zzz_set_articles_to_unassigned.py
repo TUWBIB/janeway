@@ -60,7 +60,11 @@ class Command(BaseCommand):
             # article.date_submitted = None
             article.date_published = None
             article.date_updated = None
+            article.primary_issue = None
+            article.projected_issue = None
             article.save() 
+
+            print("deleted %d from %s", (res := submission_models.ArticleStageLog.objects.filter(article=article)).delete()[0], res.model.__name__)
 
             print("deleted %d from %s", (res := review_models.EditorAssignment.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := review_models.ReviewRound.objects.filter(article=article)).delete()[0], res.model.__name__)
@@ -98,6 +102,7 @@ class Command(BaseCommand):
 #            print("deleted %d from %s", (res := press_models.Press.objects.filter(article=article)).delete()[0], res.model.__name__)
 
 
+            print("deleted %d from %s", (res := journal_models.ArticleOrdering.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := journal_models.PinnedArticle.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := journal_models.FixedPubCheckItems.objects.filter(article=article)).delete()[0], res.model.__name__)
             print("deleted %d from %s", (res := journal_models.PrePublicationChecklistItem.objects.filter(article=article)).delete()[0], res.model.__name__)
