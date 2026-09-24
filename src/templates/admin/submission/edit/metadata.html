@@ -11,7 +11,7 @@
 {% endblock breadcrumbs %}
 {% block head %}
     {{ block.super }}
-    {{ info_form.media }}
+    {{ info_form.media.css }}
 {% endblock %}
 
 {% block body %}
@@ -91,6 +91,21 @@
                             {{ info_form.primary_issue|foundation }}
                         </div>
                     </div>
+                    <div class="row expanded">
+                        <div class="large-9 columns">
+                          {{ info_form.keywords }}
+                          <p class="help-text">Hit Enter to add a new keyword.</p>
+                        </div>
+                      <div class="large-3 columns end">
+                              {{ info_form.jats_article_type_override|foundation }}
+                      </div>
+                    </div>
+                    <div class="row expanded">
+                       <div class="large-9 columns">
+                          {{ info_form.keywords_de }}
+                          <p class="help-text">Hit Enter to add a new keyword.</p>
+                      </div>
+                    </div>
                     {% if request.journal.submissionconfiguration.competing_interests %}
                         <div class="large-10 columns">
                             {{ info_form.competing_interests|foundation }}
@@ -101,19 +116,6 @@
                     </div>
                     <div class="large-10 columns">
                         {{ info_form.rights|foundation }}
-                    </div>
-                    <div class="large-12 columns">
-                        <label for="id_keywords">Keywords</label>
-                        <input type="text" id="id_keywords" name="keywords" value="
-                                {% if form.cleaned_data.keywords %}{{ form.cleaned_data.keywords }}{% else %}{% for keyword in article.keywords_lang_en %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                        {% trans "Hit Enter to add a new keyword." %}
-                    </div>
-
-                    <div class="large-12 columns">
-                        <label for="id_keywords_de">{% trans "Keywords (German)" %}</label>
-                        <input type="text" id="id_keywords_de" name="keywords_de" value="
-                                {% if form.cleaned_data.keywords_de %}{{ form.cleaned_data.keywords_de }}{% else %}{% for keyword in article.keywords_lang_de.all %}{{ keyword.word }}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}"/>
-                        {% trans "Hit Enter to add a new keyword." %}
                     </div>
 
                     {% include "admin/elements/submission/additional_fields.html" with form=info_form additional_fields=additional_fields %}
@@ -289,20 +291,7 @@
 
 
 {% block js %}
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
-    <script type="text/javascript" src="{% static "common/js/jq-ui.min.js" %}"></script>
-    <script src="{% static "common/js/tagit.js" %}"></script>
-
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#id_keywords").tagit(
-                {allowSpaces: true});
-            $("#id_keywords_de").tagit(
-                {allowSpaces: true});
-        });
-    </script>
-
-
+    {{ info_form.media.js }}
     <script src="{% static "admin/js/csrf.js" %}"></script>
     <script>
         function onFunderTextEnterPress(event) {
