@@ -124,66 +124,6 @@
             </div>
 
             {% include "admin/elements/submission/additional_fields.html" with form=article_form additional_fields=additional_fields %}    
-
-            <div class="title-area">
-                <h2>{% trans "Article Authors" %}</h2>
-            </div>
-            <div class="content" data-equalizer data-equalize-on="medium">
-                <div class="large-7 columns" data-equalizer-watch>
-                    <p>{% trans "You can add an author by clicking the button below. This will open a popup modal for you to complete their details." %}</p>
-                    <p>{% trans "If you know of an existing author, complete only the email field and they will be added as an author." %}</p>
-                    <a href="#" id="add_author_dialog" data-open="author" class="small success button">{% trans "Add New Author" %}</a>
-                    <hr/>
-                    <p>{% trans "Search for a user using email address or ORCiD. If a user is matched, they will be automatically added as an author. This search only returns exact matches." %}</p>
-                    <input form="other" id="add_author_searchvalue" class="form-control" name="author_search_text" style="width: 100%;" value=""
-                    placeholder="{% trans "Search by email address or ORCiD" %}.">
-                    <p></p>
-                    <a href="#" id="add_author" class="small success button">{% trans "Add New Author" %}</a>
-                </div>
-                <div class="large-5 columns" data-equalizer-watch>
-                    <h4>{% trans "Current Authors" %}</h4>
-                    <div class="row">
-                        <div class="large-12 columns">
-                            <table id="author_table">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>{% trans "Name" %}</th>
-                                    <th>{% trans "Email" %}</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody id="sortable">
-                                {% for order in article.articleauthororder_set.all %}
-                                <tr id="authors-{{ order.author.pk }}">
-                                    <td><i class="fa fa-sort"></i></td>
-                                    <td>{{ order.author.full_name }}</td>
-                                    <td>{{ order.author.email }}</td>
-                                    <td><a href="{% url 'backcontent_delete_author' article.pk order.author.pk %}"><i
-                                            class="fa fa-trash">
-                                        &nbsp;</i></a></td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3">{% trans "No authors yet, add one!" %}</td>
-                                </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            <hr/>
-                            <p>{% trans "You may select a main author, this author will receive the communications regarding your articles process through our systems. This does not have to be you." %}</p>
-                            <label for="main-author">{% trans "Select main author" %}:</label>
-                            <select class="form-control" id="main-author" name="main-author">
-                                <option value="">---------</option>
-                                {% for author in article.authors.all %}
-                                    <option value="{{ author.pk }}"
-                                            {% if article.correspondence_author.pk == author.pk %}selected{% endif %}>{{ author.full_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>      
                 
             <div class="title-area">
                 <h2>{% trans "Galleys" %}</h2>
@@ -334,10 +274,94 @@
                 </div>
             </div>
         </form>
+
+        <div class="title-area">
+            <h2>{% trans "Article Authors" %}</h2>
+        </div>
+        {% include "admin/elements/current_authors.html" %}
+        <div class="columns">
+            <div class="box">
+            <div class="row expanded">
+                <div class="columns title-area">
+                <h2>{% trans "Add more authors" %}</h2>
+                </div>
+            </div>
+            <div class="row expanded">
+                <div class="large-12 columns max-w-40">
+                <div class="callout">
+                    <p>
+                    {% blocktrans with journal=request.journal.name press=request.press.name %}
+                        Some authors may already be registered in <i>{{ journal }}</i>,
+                        {{ press }}, or <a href="https://orcid.org/"
+                        target="_blank">the ORCID registry<span
+                        class="show-for-sr">(opens in new tab)</span></a>.
+                        You can check by searching for
+                        their email or ORCID. If a match is found, they will be added to
+                        the author list.
+                    {% endblocktrans %}
+                    </p>
+                    <form method="POST" action="{% url 'backcontent_add_author' article.pk %}?next={{ request.get_full_path|urlencode }}">
+                    {% csrf_token %}
+                    <label for="author_search_text">
+                        <strong>{% trans "Search" %}</strong>
+                    </label>
+                    <input
+                        id="author_search_text"
+                        name="author_search_text"
+                        placeholder="e.g. 0000-0001-2345-6789"
+                        type="search">
+                    <div class="button-group">
+                        <button type="submit" class="button" name="search_authors">
+                        <span class="fa fa-search"></span>
+                        {% trans "Add author from search" %}
+                        </button>
+                    </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+            <div class="row expanded">
+                <div class="large-12 columns max-w-56 float-left">
+                <div class="callout">
+                    <p>{% blocktrans %}
+                    If you cannot find the author in the search,
+                    you can add them manually.
+                    {% endblocktrans %}</p>
+                    <form method="POST" action="{% url 'backcontent_add_author' article.pk %}?next={{ request.get_full_path|urlencode }}">
+                    {% csrf_token %}
+                    <div class="flex direction-column row-gap-0">
+                        <div class="grid auto row-gap-0">
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.first_name %}
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.middle_name %}
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.last_name %}
+                        </div>
+                        <div class="grid auto row-gap-0">
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.name_prefix %}
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.name_suffix %}
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.is_corporate %}
+                        </div>
+                        <div class="grid auto row-gap-0">
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.frozen_email %}
+                        {% include "admin/elements/forms/field.html" with field=new_author_form.display_email %}
+                        </div>
+                        <div class="flex wrap gap-1 items-end">
+                        <div class="button-group">
+                            <button
+                            name="add_author"
+                            class="button">
+                            <span class="fa fa-user-plus"></span>
+                            {% trans "Add author manually" %}
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-    {% include "tuw_backcontent/submission_author.html" %}
 {% endblock %}
 
 {% block js %}
@@ -352,99 +376,11 @@
             // hides the article-jump elements which gets inherited from base.html
             $("#article-jump").hide();
 
-            $("#sortable").sortable({
-            update: function (event, ui) {
-                var data = $(this).sortable('serialize');
-
-                // POST to server using $.post or $.ajax
-                $.ajax({
-                    data: data,
-                    type: 'POST',
-                    url: '{% url "backcontent_order_authors" article.pk %}'
-                });
-            }
-            });
-            $("#sortable").disableSelection();
-
             $("#id_keywords").tagit(
                 {allowSpaces: true});
 
             $("#id_keywords_de").tagit(
                 {allowSpaces: true});
-
-            $("#author_table").on("click", "a", function(e){
-                e.preventDefault()
-                
-                var id = this.href.split("/")[9]
-                $.get(this.href, function(data, textStatus, xhr) {
-                    if(xhr.status == 200) {
-                        removeAuthor(id)
-                    }
-                })
-            })
-
-            $("#add_author").on("click", function(e) {
-                e.preventDefault()
-
-                var csrf_token = $("#uploadbox input[name='csrfmiddlewaretoken']").val()
-                var str=$("#add_author_searchvalue").val()
-
-                var formData = new FormData()
-                formData.append('csrfmiddlewaretoken', csrf_token)
-                formData.append('search', str)
-
-
-                $.ajax({              
-                    url: 'add_author/', 
-                    type: 'post',
-                    data: formData,
-                    contentType: false, 
-                    processData: false,                     
-                    success: function(response)
-                    {
-                        var message=response.message;
-                        var status=response.status;
-
-                        if (status == "success")
-                        {
-                            context = JSON.parse(response.context);
-                            if(context.aao != undefined) 
-                            {
-
-                                aao=JSON.parse(context.aao)[0]
-                                author=JSON.parse(context.author)[0]
-
-                                aao_pk=aao.pk;
-                                aao_order=aao.fields.order
-                                author_pk=author.pk
-                                author_last_name=author.fields.last_name
-                                author_first_name=author.fields.first_name
-                                author_email=author.fields.email
-
-                                onAddAuthor(aao_pk,aao_order,author_pk,author_last_name,author_first_name,author_email,context.url)
-                            }
-                                                   
-                            toastr.success(message)
-                        }
-                        else if (status == "warning")
-                        {
-                            toastr.warning(message);
-                        }
-                        else if (status == "error")
-                        {
-                            toastr.error(message);
-                        }
-
-                    },
-                    error: function(response){
-                        toastr.error("request failed");                        
-                    },
-                });
-            })
-
-
-
-
 
             $("#upload-table").on("click", "a", function(e) {
                 if(!confirm("This action will cause loss of all unsaved progress! Are you sure you want to continue?")) {
@@ -452,12 +388,10 @@
                 }
             })
 
-
             $("#uploadbox").on("click", "button", function(e) {
                 e.preventDefault();
 
                 $("#uploadbox button").prop("disabled",true);
-
 
                 var csrf_token = $("#uploadbox input[name='csrfmiddlewaretoken']").val();
                 var label = $("#uploadbox input[name='label']").val();
@@ -536,45 +470,7 @@
                 }
             })
         });
-
-        function onAddAuthor(aao_id, aao_order, author_id, author_last_name,author_first_name,author_email,link) 
-        {
-            var authors = $("#author_table > tbody > tr")
-            var emptyAuthor = authors.children().length === 1;
-            if(emptyAuthor) {
-                authors.children()[0].remove();
-            }
-            $("#author_table").append($("<tr id='authors-"+author_id+"'><td><i class='fa fa-sort'></i></td><td>" + author_first_name + " " + author_last_name + "</td><td>" + author_email + "</td><td><a href='" + link + "'><i class='fa fa-trash'>&nbsp;</i></a></td></tr>"))
-            $("#main-author").append('<option value="' + author_id + '">' + author_first_name + " " + author_last_name + '</option>')
-        }
-
-        function removeAuthor(id) {
-            var found = false
-            $("#author_table > tbody > tr").each(function(i) {
-                $(this).find("a").each(function(j) {
-                  if($(this).attr("href").indexOf(id) > -1) {
-                      found = true
-                  }
-                })
-                if(found) {
-                    $(this).remove()
-                    return false
-                }
-            })
-
-            $('#main-author > option[value="' + id + '"]').remove()
-
-            var authors = $("#author_table > tbody > tr")
-            var emptyAuthor = authors.children().length === 0;
-
-            if(emptyAuthor) {
-                $("#author_table").append($('<tr><td colspan="3">No authors yet, add one!</td></tr>'))
-            }
-        }
     </script>
-    {% if modal %}
-        {% include "elements/open_modal.html" with target=modal %}
-    {% endif %}
     {% include "elements/datepicker.html" with target=".datepicker" %}
 {% endblock %}
 
