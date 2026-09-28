@@ -295,12 +295,17 @@ class Repository(model_utils.AbstractSiteModel):
             repository=self,
         )
 
+    # TUW
+    # f/bf: keep port in development environment
     def site_url(self, path="", query=''):
         if self.domain and not settings.URL_CONFIG == 'path':
+            request = logic.get_current_request()
+            port = logic.get_port_from_request(request)
+
             return logic.build_url(
                     netloc=self.domain,
                     scheme=self._get_scheme(),
-                    port=None,
+                    port=port,
                     path=path,
                     query=query,
             )

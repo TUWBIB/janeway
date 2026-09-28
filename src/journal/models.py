@@ -386,8 +386,13 @@ class Journal(AbstractSiteModel):
                 pass
         return obj, path
 
+    # TUW
+    # f/bf: keep port in development environment
     def site_url(self, path="", query=''):
         if self.domain and not settings.URL_CONFIG == 'path':
+            # Get port from request if it's non-standard and matches Host header
+            request = logic.get_current_request()
+            port = logic.get_port_from_request(request)
 
             # Handle domain journal being browsed in path mode
             site_path = f'/{self.code}'
@@ -396,7 +401,7 @@ class Journal(AbstractSiteModel):
             return logic.build_url(
                     netloc=self.domain,
                     scheme=self._get_scheme(),
-                    port=None,
+                    port=port,
                     path=path,
                     query=query,
             )

@@ -207,14 +207,13 @@ class Press(AbstractSiteModel):
         """ Returns a Repo's path mode url relative to its press """
         return self.site_path_url(repository, path)
 
+    # TUW
+    # f/bf: keep port in development environment
     def site_path_url(self, child_site, path=None, query=''):
         """Returns the path mode URL of a site relative to its press"""
         _path = "/" + child_site.code
         request = logic.get_current_request()
-        if settings.DEBUG and request:
-            port = request.get_port()
-        else:
-            port = None
+        port = logic.get_port_from_request(request)
         if path is not None:
             # Ignore duplicate site code if provided in code
             if path.startswith(_path):

@@ -147,7 +147,7 @@ def replace_netloc_port(netloc, new_port):
 def build_url(netloc, port=None, scheme=None, path="", query=None, fragment=""):
     """ Builds a url given all its parts
     :netloc: string
-    :port: int
+    :port: int - if None, any port already present in netloc is preserved
     :scheme: string
     :path: string
     :query: A dict or QueryDict with any GET parameters, or a query string with
@@ -169,6 +169,15 @@ def build_url(netloc, port=None, scheme=None, path="", query=None, fragment=""):
 
     if port is not None:
         netloc = replace_netloc_port(netloc, port)
+    else:
+        # Preserve any port already present in netloc (e.g., from request.get_host())
+        # Only strip the port if it's the default for the scheme (80 for http, 443 for https)
+        if scheme and ':' in netloc:
+            host, existing_port = netloc.rsplit(':', 1)
+            if scheme == 'https' and existing_port == '443':
+                netloc = host
+            elif scheme == 'http' and existing_port == '80':
+                netloc = host
 
     return SplitResult(
         scheme=scheme,
@@ -184,6 +193,46 @@ def get_current_request():
         return GlobalRequestMiddleware.get_current_request()
     except (KeyError, AttributeError):
         return None
+
+# TUW
+# f/bf: keep port in development environment
+def get_port_from_request(request):
+    """Gets the port from a request only if it's non-standard and matches the Host header.
+
+    This prevents leaking internal (gunicorn) ports when running behind a reverse proxy.
+    - Returns None for standard ports (80/443)
+    - Returns the port only if it's in the HTTP_HOST header (client actually used it)
+
+    :param request: Django HttpRequest object
+    :return: Port int or None
+    """
+    if not request:
+        return None
+
+    port = request.get_port()
+    if not port:
+        return None
+
+    # Standard ports are not included in URLs
+    scheme = request.scheme
+    if (scheme == 'https' and port == 443) or (scheme == 'http' and port == 80):
+        return None
+
+    # Extract port from HTTP_HOST header (the port the client actually used)
+    http_host = request.META.get('HTTP_HOST', '')
+    if ':' in http_host:
+        host_port = http_host.rsplit(':', 1)[1]
+        try:
+            if port == int(host_port):
+                return port
+        except ValueError:
+            pass
+    else:
+        # HTTP_HOST has no port - client used a standard port
+        # Don't include the internal gunicorn port
+        return None
+
+    return None
 
 
 def get_janeway_version():
