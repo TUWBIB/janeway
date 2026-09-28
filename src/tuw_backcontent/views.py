@@ -79,11 +79,10 @@ def backcontent_article(request, article_id):
             article.license = default_configuration.default_license
 
         article_form = submission_forms.ArticleInfo(instance=article,journal=request.journal,additional_fields=additional_fields,submission_summary=submission_summary,pop_disabled_fields=False)
-        author_form = bc_forms.BackContentAuthorForm()
+        author_form = submission_forms.EditFrozenAuthor()
         pub_form = bc_forms.PublicationInfo(instance=article)
         remote_form = bc_forms.RemoteArticle(instance=article)
         galley_form = production_forms.GalleyForm()
-        new_author_form = submission_forms.EditFrozenAuthor()
 
         if request.POST:
             if 'file' in request.FILES:
@@ -118,14 +117,13 @@ def backcontent_article(request, article_id):
     context = {
         'article': article,
         'article_form': article_form,
-        'form': author_form,
         'pub_form': pub_form,
         'galleys': prod_logic.get_all_galleys(article),
         'remote_form': remote_form,
         'additional_fields': additional_fields,
         'galley_form': galley_form,
+        'author_form': author_form,
         'authors': submission_logic.get_current_authors(article, request),
-        "new_author_form": new_author_form,
     }
 
     return render(request, template, context)
