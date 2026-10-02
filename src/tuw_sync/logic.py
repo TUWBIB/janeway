@@ -780,7 +780,7 @@ def articleToMarc(article):
 
             # 040 __ kat inst
             datafield = DataField.createDataField("040"," "," ")
-            datafield.addSubField(SubField.createSubField("a","TUW"))
+            datafield.addSubField(SubField.createSubField("a","AT-UBTUW"))
             datafield.addSubField(SubField.createSubField("b","ger"))
             datafield.addSubField(SubField.createSubField("c","JW"))
             datafield.addSubField(SubField.createSubField("d","AT-UBTUW"))
