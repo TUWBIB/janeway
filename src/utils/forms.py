@@ -67,9 +67,15 @@ class FakeModelForm(ModelForm):
 class KeywordModelForm(ModelForm):
     """ A ModelForm for models implementing a Keyword M2M relationship """
     keywords = CharField(
-            required=False, help_text=_("Hit Enter to add a new keyword."))
+            required=False,
+            help_text=_("Hit Enter to add a new keyword."),
+            label="Keywords",
+    )
     keywords_de = CharField(
-            required=False, help_text=_("Hit Enter to add a new keyword."))
+            required=False,
+            help_text=_("Hit Enter to add a new keyword."),
+            label="Keywords (German)",
+    )
 
     def __init__(self, *args, **kwargs):
         from core.forms.widgets import TagitWidget

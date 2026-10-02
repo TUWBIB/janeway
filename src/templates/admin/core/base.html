@@ -59,7 +59,11 @@
               </ul>
             </nav>
             {% if article.pk %}
-                {% include "admin/elements/article_jump.html" %}
+                {# TUW #}
+                {# c - disable timeline for backcontent #}
+                {% if not 'backcontent' in request.path %}
+                    {% include "admin/elements/article_jump.html" %}
+                {% endif %}
             {% endif %}
         </div>
     </div>

@@ -93,8 +93,7 @@
                     </div>
                     <div class="row expanded">
                         <div class="large-9 columns">
-                          {{ info_form.keywords }}
-                          <p class="help-text">Hit Enter to add a new keyword.</p>
+                          {{ info_form.keywords|foundation }}
                         </div>
                       <div class="large-3 columns end">
                               {{ info_form.jats_article_type_override|foundation }}
@@ -102,8 +101,7 @@
                     </div>
                     <div class="row expanded">
                        <div class="large-9 columns">
-                          {{ info_form.keywords_de }}
-                          <p class="help-text">Hit Enter to add a new keyword.</p>
+                          {{ info_form.keywords_de|foundation }}
                       </div>
                     </div>
                     {% if request.journal.submissionconfiguration.competing_interests %}
