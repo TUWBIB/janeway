@@ -1101,7 +1101,7 @@ class API:
         url = self.API_JOBS + jobnumber + '?op=run'
         return self.sendAPIRequest(url,type='POST',xml=xml)
 
-    def runLinkJob(self,setid,prefix='(AT-OBV)') -> APIResult:
+    def runLinkJob(self,setid,prefix='(AT-OBV)',name='Link a set of records to the Network Zone') -> APIResult:
         url='https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/jobs/M85?op=run'
         xml="""
         <job>
@@ -1136,13 +1136,14 @@ class API:
                 </parameter>
                 <parameter>
                     <name>job_name</name>
-                    <value>Link a set of records to the Network Zone</value>
+                    <value>***NAME***</value>
                 </parameter>
             </parameters>
         </job>
         """
         xml = xml.replace('***SETID***',setid)
         xml = xml.replace('***PREFIX***',prefix)
+        xml = xml.replace('***NAME***',name)
         return self.sendAPIRequest(url,type='POST',xml=xml)
 
     def runDeleteBibJob(self,setid) -> APIResult:

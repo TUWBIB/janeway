@@ -6,11 +6,13 @@ import re
 import datetime
 import pytz
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from utils.logger import get_logger
 
 from rest_framework import viewsets, generics
 from rest_framework.decorators import api_view, permission_classes
@@ -21,6 +23,8 @@ from core import models as core_models
 from submission import models as submission_models
 from journal import models as journal_models
 from repository import models as repository_models
+
+logger = get_logger(__name__)
 
 
 @api_view(["GET"])
@@ -569,3 +573,40 @@ def redoc(request):
     context = {"schema_url": "openapi-schema"}
 
     return render(request, template, context)
+
+
+@csrf_exempt
+@require_POST
+def callback_link_nz_job(request):
+    """
+    Skeleton endpoint called by Alma when a "Link to Network Zone" job has
+    finished running.
+
+    The endpoint is invoked via HTTP POST and is registered as the
+    ``callback_url`` parameter of the Alma job (the ``job_name`` of the job
+    carries the JSON payload). The following parameters may be supplied as
+    POST data:
+
+    - ``setid``:       the Alma set id that was created for the linking job.
+    - ``mmsids``:      a comma separated list of the Alma mmsids that were part
+                       of the set.
+    - ``callback_url``: the URL of this endpoint itself.
+
+    :param request: An instance of django.http.HttpRequest
+    :return: A JsonResponse acknowledging receipt of the callback.
+    """
+    setid = request.POST.get("setid")
+    mmsids = request.POST.get("mmsids")
+    callback_url = request.POST.get("callback_url")
+
+    # TODO: process the callback for the linking job (e.g. verify each mmsid
+    # now has an NZ linked_record_id, update Janeway records and clean up the
+    # Alma set).
+    logger.info(
+        "Received link_nz_job callback: setid=%s, mmsids=%s, callback_url=%s",
+        setid,
+        mmsids,
+        callback_url,
+    )
+
+    return JsonResponse({"status": "ok", "setid": setid})

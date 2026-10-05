@@ -526,8 +526,20 @@ def almaPushNZConfirm(article):
         errors.insert(0,'error adding record to set')
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
+
+    site_url = article.journal.site_url()
+    if not site_url[-1] == '/':
+        site_url += '/'
+    callback_url = site_url + 'api/tuw/callback_link_nz_job/'
    
-    result = api.runLinkJob(setid)
+    data = {
+        'setid': setid,
+        'mmsids': [
+            mmsid,
+        ],
+        callback_url: callback_url
+    }
+    result = api.runLinkJob(setid,name=json.dumps(data))
     errors = result.errs
     if errors:
         msg = ','.join(errors)    

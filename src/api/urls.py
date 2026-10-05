@@ -22,6 +22,7 @@ urlpatterns = [
     re_path(r'^', include(router.urls)),
     # keep TUW impl
     re_path(r'^oai/$', views.oai_tuw, name='OAI_list_records'),
+    re_path(r'^tuw/callback_link_nz_job/$', views.callback_link_nz_job, name='callback_link_nz_job'),
     # Janeway master
 #    re_path(r'^oai/$', oai_views.oai_view_factory, name='OAI_list_records'),
     re_path(r'^kbart/$', views.kbart, name='kbart'),
