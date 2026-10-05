@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+
+use Digest::SHA qw(hmac_sha256_base64);
+use File::Slurp;
+use Getopt::Std;
+use XML::Twig;
+
+require $ENV{ETC} . "/config.pl";
+
+sub fix {
+	local(*str) = @_;
+
+	$str =~ s/[äÄ]/AE/g;
+	$str =~ s/[öÖ]/OE/g;
+	$str =~ s/[üÜ]/UE/g;
+	$str =~ s/[ß]/SS/g;
+	$str =~ tr/a-z/A-Z/;
+	$str =~ tr/A-Z0-9/_/cs;
+	$str =~ s/[_]+/_/g;
+	$str =~ s/_$//;
+	$str =~ s/^_//;
+	}
+
+%options = ();
+getopts("h",\%options);
+if (defined($options{h})) {
+	print STDERR "usage: $0 [-h]\n";
+	print STDERR "\t-h this help\n";
+	print STDERR "\tMessage on STDIN\n";
+	print STDERR "\tInfo will be written to STDOUT\n";
+	exit(3);
+	}
+
+$message = read_file("/dev/stdin", {err_mode => 'quiet'});
+
+$xml = XML::Twig->new(twig_handlers => {
+	'notification/id' => sub { $id = $_->text },
+	'notification/action' => sub { $action = $_->text },
+	'job_instance/status' => sub { $status = $_->text },
+	'job_instance/name' => sub { $data = $_->text },
+	'letter_name' => sub { $name = $_->text },
+	'letter_type' => sub { $category = $_->text },
+	'job_info/name' => sub { $name = $_->text },
+	'job_info/category' => sub { $category = $_->text } });
+
+exit (2) if (!$xml->safe_parse($message));
+$category = OTHER if ($category eq "");
+exit(1) if ($id eq "" || $action eq "");
+$name = NO_NAME if ($name eq "");
+$status = COMPLETED_SUCCESS if ($status eq "");
+foreach $idx (keys %WEBHOOK_NAME) {
+	$name = $idx if ($name eq $WEBHOOK_NAME{$idx});
+	}
+fix(*name);
+fix(*action);
+fix(*category);
+fix(*status);
+fix(*data);
+
+printf "STX:%s:%s:%s:%s:%s:ETX\n",$id,$name,$action,$category,$status,$data;
+exit(0);

@@ -1,0 +1,92 @@
+#!/bin/bash
+
+. /usr/local/include/CGI.sh
+. /data/alma/etc/config.sh
+
+IDENT="WebHook.${PROFILE}[${PID}]"
+
+function logit() {
+	logger -p ${LOG_FACILITY}.$1 -t "${IDENT}" "<WH> $2"
+	}
+
+if [ -n "${CGI_challenge}" ]
+then
+	printf "Content-Type: text/plain\n\n"
+	printf "{challenge: \"%s\"}" "${CGI_challenge}"
+	logit debug "WebHook activated"
+	exit
+fi
+
+if [ -z "${HTTP_X_EXL_SIGNATURE}" ]
+then
+	printf "Status: 400 Bad Request\n"
+	printf "Content-Type: text/plain\n\n"
+	printf "Error: Signature missing\n"
+	logit error "Signature missing"
+	exit
+fi
+
+if [ -z "${STDIN_STRING}" ]
+then
+	printf "Status: 400 Bad Request\n"
+	printf "Content-Type: text/plain\n\n"
+	printf "Error: Body missing\n"
+	logit error "Body missing"
+	exit
+fi
+
+printf "%s" "${STDIN_STRING}" >${TMP}/webhook_${PROFILE}_body.${PID}
+#printf "%s" "${HTTP_X_EXL_SIGNATURE}" >${TMP}/webhook_${PROFILE}_sig.${PID}
+${WHLIB}/verify_signature -P ${PROFILE} "${HTTP_X_EXL_SIGNATURE}" \
+	<${TMP}/webhook_${PROFILE}_body.${PID} >/dev/null 2>&1
+if [ $? -ne 0 ]
+then
+	printf "Status: 401 Unauthorized\n"
+	printf "Content-Type: text/plain\n\n"
+	printf "Error: Wrong signature\n"
+	logit error "Wrong signature"
+	exit
+fi
+
+WEBHOOK=$(${WHLIB}/check_webhook <${TMP}/webhook_${PROFILE}_body.${PID} 2>/dev/null)
+if [ $? -ne 0 ]
+then
+	printf "Status: 401 Unauthorized\n"
+	printf "Content-Type: text/plain\n\n"
+	printf "Error: Invalid webHook\n"
+	logit error "Invalid webHook"
+	exit
+fi
+
+PARA=(${WEBHOOK//:/ })
+export COMMAND="${PARA[4]}/${PARA[2]}"
+export ACTION=${PARA[3]}
+export ID=${PARA[1]}
+export STATUS=${PARA[5]}
+export DATA=${PARA[6]}
+
+logit debug "${COMMAND}[${ACTION}] (ID ${ID}) ${STATUS}"
+
+if [[ "$DATA" == Janeway* ]] 
+then
+	"${WHLIB}/process_janeway_link_job" "${DATA}"
+elif [ -x ${HOOK}/${COMMAND} ]
+then
+	if [ "xxx${STATUS}" == "xxxCOMPLETED_SUCCESS" ]
+	then
+		logit debug "Hook for ${ID} found and executed"
+		${HOOK}/${COMMAND} ${PROFILE} "${IDENT}" >/dev/null 2>&1 &
+	elif [ "xxx${STATUS}" == "xxxCOMPLETED_FAILED" -a \
+		-x ${HOOK}/${COMMAND}_FAILED ]
+	then
+		logit debug "Hook for ${ID} found and executed even though failed"
+		${HOOK}/${COMMAND}_FAILED ${PROFILE} "${IDENT}" >/dev/null 2>&1 &
+	else
+		${HOOK}/FAILURE ${PROFILE} "${IDENT}" >/dev/null 2>&1 &
+	fi
+else
+	${HOOK}/FALLBACK ${PROFILE} "${IDENT}" >/dev/null 2>&1 &
+fi
+
+printf "Content-Type: text/plain\n\nOK\n"
+exit

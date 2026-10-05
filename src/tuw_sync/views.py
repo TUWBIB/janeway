@@ -537,9 +537,10 @@ def almaPushNZConfirm(article):
         'mmsids': [
             mmsid,
         ],
-        callback_url: callback_url
+        'callback_url': callback_url
     }
-    result = api.runLinkJob(setid,name=json.dumps(data))
+    name = 'Janeway ' + json.dumps(data)
+    result = api.runLinkJob(setid,name=name)
     errors = result.errs
     if errors:
         msg = ','.join(errors)    

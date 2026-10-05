@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Posts the Alma "Link to Network Zone" callback payload to the callback URL it
+# contains.
+#
+# The job_name parameter is prefixed with "Janeway " and Alma appends a
+# timestamp to it, so the value handed to us looks like this:
+#
+#   Janeway {"setid": "13401871750003336", "mmsids": ["998200933603336"], "callback_url": "http://..."} - 05.10.2026 13:44:25 CEST
+#
+# This script strips the "Janeway " prefix, extracts just the JSON object
+# (ignoring the trailing timestamp), reads its fields, and sends them back to
+# callback_url as a standard application/x-www-form-urlencoded POST (the format
+# expected by the Django callback endpoint).
+
+payload="${1:-}"
+if [[ -z "$payload" ]]; then
+  if [[ ! -t 0 ]]; then
+    # No argument given but stdin is piped, so read from stdin.
+    payload="$(cat)"
+  else
+    echo "Usage: $0 '<payload>'" >&2
+    exit 1
+  fi
+fi
+
+# Strip the optional "Janeway " prefix that Alma prepends to the job_name value.
+# The parameter expansion is a no-op if the prefix is not present.
+payload="${payload#Janeway }"
+
+# Extract only the JSON object by anchoring on the braces. Everything before the
+# first "{" and after the last "}" (i.e. the trailing " - <timestamp>") is
+# discarded, so the timestamp can never reach jq and trigger an
+# "Invalid numeric literal" error.
+json="$(printf '%s\n' "$payload" | sed -n 's/^.*\({.*}\).*/\1/p')"
+if [[ -z "$json" ]]; then
+  echo "Error: could not find a JSON object in the payload." >&2
+  exit 1
+fi
+
+# Validate and pull each field. jq is only ever fed the clean JSON object.
+if ! jq -e . >/dev/null 2>&1 <<<"$json"; then
+  echo "Error: invalid JSON payload." >&2
+  exit 1
+fi
+
+setid="$(jq -r '.setid // empty' <<<"$json")"
+if [[ -z "$setid" ]]; then
+  echo "Error: 'setid' missing from payload." >&2
+  exit 1
+fi
+
+# The callback endpoint expects mmsids as a comma separated list, so join the
+# JSON array (a single value stays as itself).
+mmsids="$(jq -r '.mmsids | join(",")' <<<"$json")"
+
+callback_url="$(jq -r '.callback_url // empty' <<<"$json")"
+if [[ -z "$callback_url" ]]; then
+  echo "Error: 'callback_url' missing from payload." >&2
+  exit 1
+fi
+
+echo "Posting to: $callback_url"
+echo "  setid:        $setid"
+echo "  mmsids:       $mmsids"
+echo "  callback_url: $callback_url"
+
+# Send the fields as form data and print the endpoint's JSON response.
+curl -sS -X POST "$callback_url" \
+  --data-urlencode "setid=$setid" \
+  --data-urlencode "mmsids=$mmsids" \
+  --data-urlencode "callback_url=$callback_url"
+
+echo
+
