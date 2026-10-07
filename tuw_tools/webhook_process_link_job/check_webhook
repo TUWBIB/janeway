@@ -37,7 +37,6 @@ $xml = XML::Twig->new(twig_handlers => {
 	'notification/id' => sub { $id = $_->text },
 	'notification/action' => sub { $action = $_->text },
 	'job_instance/status' => sub { $status = $_->text },
-	'job_instance/name' => sub { $data = $_->text },
 	'letter_name' => sub { $name = $_->text },
 	'letter_type' => sub { $category = $_->text },
 	'job_info/name' => sub { $name = $_->text },
@@ -55,7 +54,6 @@ fix(*name);
 fix(*action);
 fix(*category);
 fix(*status);
-fix(*data);
 
-printf "STX:%s:%s:%s:%s:%s:ETX\n",$id,$name,$action,$category,$status,$data;
+printf "STX:%s:%s:%s:%s:%s:ETX\n",$id,$name,$action,$category,$status;
 exit(0);

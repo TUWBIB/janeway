@@ -63,9 +63,10 @@ export COMMAND="${PARA[4]}/${PARA[2]}"
 export ACTION=${PARA[3]}
 export ID=${PARA[1]}
 export STATUS=${PARA[5]}
-export DATA=${PARA[6]}
 
 logit debug "${COMMAND}[${ACTION}] (ID ${ID}) ${STATUS}"
+
+DATA=$(xmlstarlet sel -t -v "//notification//job_instance//name[starts-with(text(),'Janeway')]" <${TMP}/webhook_${PROFILE}_body.${PID}) 
 
 if [[ "$DATA" == Janeway* ]] 
 then
