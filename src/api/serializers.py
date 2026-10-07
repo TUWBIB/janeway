@@ -1,9 +1,13 @@
+import logging
+
 from rest_framework import serializers
 
 from core import models as core_models
 from journal import models as journal_models
 from submission import models as submission_models
 from repository import models as repository_models
+
+logger = logging.getLogger(__name__)
 
 
 class LicenceSerializer(serializers.HyperlinkedModelSerializer):
@@ -127,6 +131,8 @@ class IssueSerializer(serializers.HyperlinkedModelSerializer):
     )
 
 
+# TUW
+# bf - fix api using the requests host, which doesn't work at all in domain mode
 class JournalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = journal_models.Journal
@@ -143,12 +149,41 @@ class JournalSerializer(serializers.HyperlinkedModelSerializer):
             "issues",
         )
 
-    issues = serializers.HyperlinkedRelatedField(
-        many=True,
-        source="issue_set",
-        read_only=True,
-        view_name="issue-detail",
-    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Store the request from context to build per-journal URLs
+        self._request = self.context.get("request") if self.context else None
+
+    def get_issue_url(self, obj):
+        """Build issue URLs using the journal's own domain, not the request host."""
+        if not self._request or not obj or not obj.pk:
+            return None
+        from utils import logic
+        # Use the journal's site_url to get the correct domain
+        return obj.journal.site_url("/journal/{}/issue/{}/".format(obj.journal.code, obj.pk))
+
+    issues = serializers.SerializerMethodField()
+
+    def get_issues(self, obj):
+        """Return list of issue detail URLs using each issue's journal domain."""
+        request = self.context.get("request") if self.context else None
+        if not request:
+            return []
+        issues = obj.issue_set.all()
+        return [
+            issue.journal.site_url("/journal/{}/issue/{}/".format(issue.journal.code, issue.pk))
+            for issue in issues
+        ]
+
+    def get_current_issue(self, obj):
+        """Return the current issue URL using the journal's own domain."""
+        request = self.context.get("request") if self.context else None
+        if not request:
+            return None
+        current_issue = obj.current_issue
+        if not current_issue:
+            return None
+        return obj.site_url("/journal/{}/issue/{}/".format(obj.code, current_issue.pk))
 
 
 class RoleSerializer(serializers.HyperlinkedModelSerializer):
