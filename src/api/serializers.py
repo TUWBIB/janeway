@@ -154,13 +154,18 @@ class JournalSerializer(serializers.HyperlinkedModelSerializer):
         # Store the request from context to build per-journal URLs
         self._request = self.context.get("request") if self.context else None
 
-    def get_issue_url(self, obj):
-        """Build issue URLs using the journal's own domain, not the request host."""
-        if not self._request or not obj or not obj.pk:
-            return None
+    def _build_api_url_with_journal_domain(self, journal, api_path):
+        """Build an API URL with the journal's own domain as netloc.
+        
+        e.g., https://test.journal.ifm.tuwien.ac.at/api/issues/80/
+        """
         from utils import logic
-        # Use the journal's site_url to get the correct domain
-        return obj.journal.site_url("/journal/{}/issue/{}/".format(obj.journal.code, obj.pk))
+        # Use the journal's scheme but replace the netloc with the journal's domain
+        return logic.build_url(
+            netloc=journal.domain,
+            scheme=self._request.scheme if self._request else "http",
+            path=api_path,
+        )
 
     issues = serializers.SerializerMethodField()
 
@@ -170,8 +175,9 @@ class JournalSerializer(serializers.HyperlinkedModelSerializer):
         if not request:
             return []
         issues = obj.issue_set.all()
+        api_base = "/api/issues/"
         return [
-            issue.journal.site_url("/journal/{}/issue/{}/".format(issue.journal.code, issue.pk))
+            self._build_api_url_with_journal_domain(issue.journal, api_base + str(issue.pk) + "/")
             for issue in issues
         ]
 
@@ -183,7 +189,9 @@ class JournalSerializer(serializers.HyperlinkedModelSerializer):
         current_issue = obj.current_issue
         if not current_issue:
             return None
-        return obj.site_url("/journal/{}/issue/{}/".format(obj.code, current_issue.pk))
+        return self._build_api_url_with_journal_domain(
+            obj, "/api/issues/" + str(current_issue.pk) + "/"
+        )
 
 
 class RoleSerializer(serializers.HyperlinkedModelSerializer):
