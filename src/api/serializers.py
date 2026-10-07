@@ -181,6 +181,8 @@ class JournalSerializer(serializers.HyperlinkedModelSerializer):
             for issue in issues
         ]
 
+    current_issue = serializers.SerializerMethodField()
+
     def get_current_issue(self, obj):
         """Return the current issue URL using the journal's own domain."""
         request = self.context.get("request") if self.context else None
