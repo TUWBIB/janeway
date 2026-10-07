@@ -81,6 +81,10 @@ class AccountRoleViewSet(viewsets.ModelViewSet):
 class JournalViewSet(viewsets.ModelViewSet):
     """
     API Endpoint for journals.
+    
+    When accessed via a journal domain (e.g., test.journal.example.com),
+    returns only that journal. When accessed via the press domain, returns
+    all journals for that press.
     """
 
     from journal import models as journal_models
@@ -88,6 +92,14 @@ class JournalViewSet(viewsets.ModelViewSet):
     queryset = journal_models.Journal.objects.filter(hide_from_press=False)
     serializer_class = serializers.JournalSerializer
     http_method_names = ["get"]
+
+    def get_queryset(self):
+        if self.request.journal:
+            # Accessing via a journal domain — return only that journal
+            return journal_models.Journal.objects.filter(
+                pk=self.request.journal.pk, hide_from_press=False
+            )
+        return journal_models.Journal.objects.filter(hide_from_press=False)
 
 
 class IssueViewSet(viewsets.ModelViewSet):
