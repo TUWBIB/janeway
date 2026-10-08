@@ -652,7 +652,8 @@ def checkArticleMarcMandatoryFields(article):
     alma_ignore_doi_not_set = hasattr(settings,'ALMA_IGNORE_DOI_NOT_SET') and settings.ALMA_IGNORE_DOI_NOT_SET
     if not alma_ignore_doi_not_set and article.get_doi() is None:
         errors.append("doi not set")
-    if not article.page_numbers:
+    alma_ignore_page_numbers_not_set = hasattr(settings,'ALMA_IGNORE_PAGE_NUMBERS_NOT_SET') and settings.ALMA_IGNORE_PAGE_NUMBERS_NOT_SET
+    if not alma_ignore_page_numbers_not_set and not article.page_numbers:
         errors.append("page numbers not set")
     
     return errors

@@ -25,9 +25,48 @@
 {# article tab #}
 <div class="tabs-panel" id="tab-articles">
 <div class="content">
+        {# Bulk action toolbar - always visible #}
+        <div class="row" id="bulk-toolbar" style="margin-bottom: 10px;">
+            <div class="small-12 columns">
+                <button class="button small primary" id="btn-select-all">Select All</button>
+                <button class="button small secondary" id="btn-deselect-all">Deselect All</button>
+                <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px; display: inline-block;">
+                    <li>
+                        <a href="#" id="btn-bulk-actions" disabled>Bulk Actions</a>
+                        <ul class="vertical menu nested">
+                            {% if settings.alma_article_sync %}
+                            <li>
+                                <a href="#">Alma</a>
+                                <ul class="vertical menu nested">
+                                    <li>
+                                        <a href="#" class="button hollow btn-bulk-create-update" id="btn-bulk-create-update">Create / Update Marc Records</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="button hollow btn-bulk-push-nz" id="btn-bulk-push-nz">Push Selected To Network Zone</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% endif %}
+                            {% if settings.datacite_article_sync %}
+                            <li>
+                                <a href="#">Datacite</a>
+                                <ul class="vertical menu nested">
+                                    <li>
+                                        <a href="#" class="button hollow btn-bulk-register-doi" id="btn-bulk-register-doi">Register DOIs</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                </ul>
+                <span id="selected-count" style="margin-left: 10px;">0</span> articles selected
+            </div>
+        </div>
         <table class="table table-bordered" id="datatable-articles" >
             <thead>
             <tr>
+                <th rowspan="2"></th>
                 <th rowspan="2">{% trans "Id" %}</th>
                 <th rowspan="2">{% trans "Title" %}</th>
                 <th rowspan="2">
@@ -51,7 +90,8 @@
             </thead>
             <tbody>
             {% for article in articles %}
-                <tr>
+                <tr data-article-id="{{ article.pk }}">
+                    <td style="vertical-align: middle; text-align: center;"><input type="checkbox" class="article-checkbox" data-article-id="{{ article.pk }}"></td>
                     <td><a href="{% url 'edit_metadata' article.pk %}">{{ article.id }}</a></td>
                     <td>{{ article.title | safe }}</td>
                     {% if article.primary_issue %}
@@ -260,9 +300,101 @@
     <script type="text/javascript">
         $(document).foundation();   
 
-        $(document).ready(function () 
+        $(document).ready(function ()
         {
-            $(".btn_alma_create_update").on("click", function(e) 
+            // Bulk select functionality
+            var selectedArticleIds = [];
+            var allArticleIds = []; // Store all article IDs from the table
+            var table_articles_instance = null;
+
+            // Function to sync checkboxes with selectedArticleIds
+            function syncCheckboxes() {
+                $('.article-checkbox').each(function() {
+                    var id = $(this).data('article-id');
+                    var isChecked = selectedArticleIds.indexOf(id) !== -1;
+                    $(this).prop('checked', isChecked);
+                });
+            }
+
+            // Collect all article IDs from table rows when page loads
+            $('tbody tr[data-article-id]').each(function() {
+                var articleId = $(this).data('article-id');
+                if (articleId) {
+                    allArticleIds.push(articleId);
+                }
+            });
+
+            // Select All button - selects ALL articles across all pages
+            $('#btn-select-all').on('click', function() {
+                selectedArticleIds = allArticleIds.slice(); // Copy all article IDs
+                // Check boxes on current page for all articles
+                $('.article-checkbox').each(function() {
+                    var id = $(this).data('article-id');
+                    if (selectedArticleIds.indexOf(id) !== -1) {
+                        $(this).prop('checked', true);
+                    }
+                });
+                updateSelectedIds();
+            });
+
+            // Deselect All button - deselects ALL articles across all pages
+            $('#btn-deselect-all').on('click', function() {
+                selectedArticleIds = [];
+                updateSelectedIds();
+                // Force sync checkboxes immediately
+                syncCheckboxes();
+            });
+
+            // Individual checkbox change (for checkboxes visible on current page)
+            $('body').on('change', '.article-checkbox', function() {
+                var articleId = $(this).data('article-id');
+                if ($(this).prop('checked')) {
+                    if (selectedArticleIds.indexOf(articleId) === -1) {
+                        selectedArticleIds.push(articleId);
+                    }
+                } else {
+                    var idx = selectedArticleIds.indexOf(articleId);
+                    if (idx > -1) {
+                        selectedArticleIds.splice(idx, 1);
+                    }
+                }
+                updateSelectedIds();
+            });
+
+
+            // Update the selected article IDs array and toolbar
+            function updateSelectedIds() {
+                var count = selectedArticleIds.length;
+                $('#selected-count').text(count);
+                
+                if (count > 0) {
+                    $('#btn-bulk-actions').prop('disabled', false);
+                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi').prop('disabled', false);
+                } else {
+                    $('#btn-bulk-actions').prop('disabled', true);
+                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi').prop('disabled', true);
+                }
+            }
+
+            // Bulk push to NZ button
+            $('.btn-bulk-push-nz').on('click', function(e) {
+                e.preventDefault();
+                if (selectedArticleIds.length === 0) {
+                    return;
+                }
+                bulkPushNZConfirm(selectedArticleIds);
+            });
+
+            // Bulk Create / Update Marc Records button
+            $('.btn-bulk-create-update').on('click', function(e) {
+                e.preventDefault();
+                if (selectedArticleIds.length === 0) {
+                    return;
+                }
+                bulkAlmaCreateUpdateConfirm(selectedArticleIds);
+            });
+
+            $(".btn_alma_create_update").on("click", function(e)
             {
                 e.preventDefault();
 
@@ -937,11 +1069,23 @@
 
             })
 
-            var table_articles = $('#datatable-articles').DataTable();
-            table_articles.order( [[ 0, 'desc' ]] ).draw(); 
+            table_articles_instance = $('#datatable-articles').DataTable({
+                columnDefs: [
+                    { orderable: false, targets: 0 }
+                ],
+                drawCallback: function() {
+                    // Sync checkboxes with selectedArticleIds after each draw
+                    $('.article-checkbox').each(function() {
+                        var id = $(this).data('article-id');
+                        var isChecked = selectedArticleIds.indexOf(id) !== -1;
+                        $(this).prop('checked', isChecked);
+                    });
+                }
+            });
+            table_articles_instance.order( [[ 1, 'desc' ]] ).draw();
 
             var table_issues = $('#datatable-issues').DataTable();
-            table_issues.order( [[ 0, 'desc' ]] ).draw(); 
+            table_issues.order( [[ 0, 'desc' ]] ).draw();
         })
         
         function dataciteMetadataConfirm(article_id,issue_id)
@@ -1158,6 +1302,312 @@
             })
         }
 
+        // Bulk push to NZ functions
+        function bulkPushNZ(article_ids, callback) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'alma_push_nz',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    callback(response);
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkPushNZConfirm(article_ids) {
+            // First, validate which articles are ready for NZ push
+            bulkPushNZ(article_ids, function(validationResponse) {
+                var valid_count = validationResponse.valid_count || 0;
+                var invalid_count = validationResponse.invalid_count || 0;
+                var errors = validationResponse.errors;
+                var warnings = validationResponse.warnings;
+
+                if (validationResponse.bulk && invalid_count > 0) {
+                    // Some articles failed validation
+                    var errorMessages = [];
+                    if (errors && typeof errors === 'object') {
+                        for (var articleId in errors) {
+                            if (errors.hasOwnProperty(articleId)) {
+                                var msgs = errors[articleId];
+                                for (var i = 0; i < msgs.length; i++) {
+                                    errorMessages.push(msgs[i]);
+                                }
+                            }
+                        }
+                    }
+                    if (errorMessages.length > 0) {
+                        toastr.error(arrayToStringWithBr(errorMessages));
+                    }
+                    if (valid_count > 0) {
+                        toastr.warning(valid_count + " article(s) are valid and ready for push. " + invalid_count + " article(s) failed validation.");
+                    }
+                    return;
+                }
+
+                if (errors && errors.length > 0) {
+                    toastr.error(arrayToStringWithBr(errors));
+                    return;
+                }
+
+                if (valid_count === 0) {
+                    toastr.warning("No articles are ready for push to Network Zone.");
+                    return;
+                }
+
+                // Show confirmation modal
+                var content = '<div class="reveal small" id="modal-bulk-push-nz" data-close-on-click="false" data-close-on-esc="false"'+
+                    '<h2>Push ' + valid_count + ' Articles To Network Zone</h2>'+
+                    '<p>Are you sure you want to push the selected ' + valid_count + ' article(s) to the Network Zone?</p>'+
+                    '<p class="lead"><em>Further updates to these records won\'t be possible after pushing.</em></p>'+
+                    '<button class="button success ok float-center" id="btn-confirm-bulk-push">Push To Network Zone</button>'+
+                    '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                    '</div>';
+
+                $('body').append(content);
+
+                var modal = new Foundation.Reveal($('#modal-bulk-push-nz'));
+                modal.open();
+
+                $('#btn-confirm-bulk-push').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-push-nz').remove();
+                    $('.reveal-overlay').remove();
+                    
+                    // Perform the actual bulk push
+                    doBulkPushNZ(article_ids);
+                });
+                
+                $('.cancel').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-push-nz').remove();
+                    $('.reveal-overlay').remove();
+                });
+            });
+        }
+
+        function doBulkPushNZ(article_ids) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'alma_push_nz_confirm',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    var errors = response.errors;
+                    var warnings = response.warnings;
+                    var success_count = response.success_count || 0;
+                    var failed_count = response.failed_count || 0;
+
+                    if (errors && errors.length > 0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        var msg = success_count + " article(s) successfully pushed to Network Zone.";
+                        if (failed_count > 0) {
+                            msg += " " + failed_count + " article(s) failed.";
+                            if (warnings && warnings.length > 0) {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+                        }
+                        toastr.success(msg);
+                        toastr.info("Give it a while, then use Fetch AC to retrieve the acquisition details.");
+                        
+                        // Refresh the page to update the table
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkAlmaCreateUpdate(article_ids, callback) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'alma_create_update',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    callback(response);
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkAlmaCreateUpdateConfirm(article_ids) {
+            // First, validate which articles can be created/updated
+            bulkAlmaCreateUpdate(article_ids, function(validationResponse) {
+                var valid_count = validationResponse.valid_count || 0;
+                var invalid_count = validationResponse.invalid_count || 0;
+                var errors = validationResponse.errors;
+                var warnings = validationResponse.warnings;
+
+                if (validationResponse.bulk && invalid_count > 0) {
+                    // Some articles failed validation
+                    var errorMessages = [];
+                    if (errors && typeof errors === 'object') {
+                        for (var articleId in errors) {
+                            if (errors.hasOwnProperty(articleId)) {
+                                var msgs = errors[articleId];
+                                for (var i = 0; i < msgs.length; i++) {
+                                    errorMessages.push(msgs[i]);
+                                }
+                            }
+                        }
+                    }
+                    if (errorMessages.length > 0) {
+                        toastr.error(arrayToStringWithBr(errorMessages));
+                    }
+                    if (valid_count > 0) {
+                        toastr.warning(valid_count + " article(s) are valid and ready for processing. " + invalid_count + " article(s) failed validation.");
+                    }
+                    return;
+                }
+
+                if (errors && errors.length > 0) {
+                    toastr.error(arrayToStringWithBr(errors));
+                    return;
+                }
+
+                if (valid_count === 0) {
+                    toastr.warning("No articles are ready for Create / Update operation.");
+                    return;
+                }
+
+                // Show confirmation modal
+                var content = '<div class="reveal small" id="modal-bulk-create-update" data-close-on-click="false" data-close-on-esc="false"'+
+                    '<h2>Create / Update ' + valid_count + ' Marc Records</h2>'+
+                    '<p>Are you sure you want to process the selected ' + valid_count + ' article(s)?</p>'+
+                    '<button class="button success ok float-center" id="btn-confirm-bulk-create-update">Create / Update</button>'+
+                    '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                    '</div>';
+
+                $('body').append(content);
+
+                var modal = new Foundation.Reveal($('#modal-bulk-create-update'));
+                modal.open();
+
+                $('#btn-confirm-bulk-create-update').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-create-update').remove();
+                    $('.reveal-overlay').remove();
+                    
+                    // Perform the actual bulk create/update
+                    doBulkAlmaCreateUpdate(article_ids);
+                });
+                
+                $('.cancel').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-create-update').remove();
+                    $('.reveal-overlay').remove();
+                });
+            });
+        }
+
+        function doBulkAlmaCreateUpdate(article_ids) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'alma_create_update_confirm',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    var errors = response.errors;
+                    var warnings = response.warnings;
+                    var success_count = response.success_count || 0;
+                    var failed_count = response.failed_count || 0;
+                    var updated_mmsids = response.updated_mmsids || {};
+
+                    if (errors && errors.length > 0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        var msg = success_count + " article(s) successfully processed.";
+                        if (failed_count > 0) {
+                            msg += " " + failed_count + " article(s) failed.";
+                            if (warnings && warnings.length > 0) {
+                                toastr.warning(arrayToStringWithBr(warnings));
+                            }
+                        }
+                        toastr.success(msg);
+
+                        // Update the table with new mmsids without refreshing
+                        for (var articleId in updated_mmsids) {
+                            if (updated_mmsids.hasOwnProperty(articleId)) {
+                                var mmsid = updated_mmsids[articleId];
+                                var mmsidAcCell = $("#alma_mmsid_ac_" + articleId);
+                                if (mmsidAcCell.length > 0) {
+                                    mmsidAcCell.html(mmsid);
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
 
         function ajaxError()
         {
@@ -1196,6 +1646,15 @@
     .btn-group > a {
         margin-left: 6px;
         margin-right: 6px;
+    }
+    #datatable-articles tbody tr td:first-child {
+        vertical-align: middle;
+        text-align: center;
+        width: 50px;
+    }
+    #datatable-articles .article-checkbox {
+        margin: 0;
+        vertical-align: middle;
     }
 </style>
 {% endblock %}
