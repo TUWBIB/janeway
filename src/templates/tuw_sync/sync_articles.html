@@ -66,27 +66,23 @@
         <table class="table table-bordered" id="datatable-articles" >
             <thead>
             <tr>
-                <th rowspan="2"></th>
-                <th rowspan="2">{% trans "Id" %}</th>
-                <th rowspan="2">{% trans "Title" %}</th>
-                <th rowspan="2">
-                {% if request.journal.code == "JFM" %} 
+                <th class="th-resizable"></th>
+                <th class="th-resizable">{% trans "Id" %}</th>
+                <th class="th-resizable">{% trans "Title" %}</th>
+                <th class="th-resizable">
+                {% if request.journal.code == "JFM" %}
                     {% trans "Issue" %}
                 {% elif request.journal.code == "OES" %}
                     {% trans "Issue" context "oes" %}
                 {% else %}
                     {% trans "Issue" %}
                 {% endif %}
-                <th colspan="2">Datacite</th>
-                <th colspan="2">Alma</th>
-                <th rowspan="2">Actions</th>
+                <th class="th-resizable">DOI</th>
+                <th class="th-resizable">State</th>
+                <th class="th-resizable">MMS Id / AC</th>
+                <th class="th-resizable">Sync</th>
+                <th class="th-resizable">Actions</th>
                 </tr>
-            <tr>
-                <th>DOI</th>
-                <th>State</th>
-                <th>MMS Id / AC</th>
-                <th>Sync</th>
-            </tr>
             </thead>
             <tbody>
             {% for article in articles %}
@@ -99,21 +95,21 @@
                     {% else %}
                     <td></td>
                     {% endif %}
-                    {% if article.get_doi %}                                
-                    <td id="datacite_doi_{{ article.pk }}">{{ article.get_doi }}</td>
+                    {% if article.get_doi %}
+                    <td class="col-datacite-doi" id="datacite_doi_{{ article.pk }}">{{ article.get_doi }}</td>
                     {% else %}
-                    <td id="datacite_doi_{{ article.pk }}"></td>
-                    {% endif %}                      
-                    {% if article.datacite_state %}                                
-                    <td id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
+                    <td class="col-datacite-doi" id="datacite_doi_{{ article.pk }}"></td>
+                    {% endif %}
+                    {% if article.datacite_state %}
+                    <td class="col-datacite-state" id="datacite_state_{{ article.pk }}">{{ article.datacite_state }}</td>
                     {% else %}
-                    <td id="datacite_state_{{ article.pk }}"></td>
-                    {% endif %}                      
-                    <td id="alma_mmsid_ac_{{ article.pk }}">
+                    <td class="col-datacite-state" id="datacite_state_{{ article.pk }}"></td>
+                    {% endif %}
+                    <td class="col-alma-mmsid" id="alma_mmsid_ac_{{ article.pk }}">
                     {% if article.get_mmsid %} {{ article.get_mmsid }} {% endif %}
                     {% if article.get_ac %} {% if article.get_mmsid %} <br> {% endif %} {{ article.get_ac }} {% endif %}
                     </td>
-                    <td></td>
+                    <td class="col-alma-sync"></td>
                     <td>
                         <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
                             {% if settings.datacite_article_sync %}
@@ -181,18 +177,14 @@
     <table class="table table-bordered" id="datatable-issues">
         <thead>
         <tr>
-            <th rowspan="2">{% trans "Id" %}</th>
-            <th rowspan="2">{% trans "Title" %}</th>
-            <th colspan="2">Datacite</th>
-            <th colspan="2">Alma</th>
-            <th rowspan="2">Actions</th>
+            <th class="th-resizable">{% trans "Id" %}</th>
+            <th class="th-resizable">{% trans "Title" %}</th>
+            <th class="th-resizable">DOI</th>
+            <th class="th-resizable">State</th>
+            <th class="th-resizable">MMS Id / AC</th>
+            <th class="th-resizable">Sync</th>
+            <th class="th-resizable">Actions</th>
             </tr>
-        <tr>
-            <th>DOI</th>
-            <th>State</th>
-            <th>MMS Id / AC</th>
-            <th>Sync</th>
-        </tr>
         </thead>
         <tbody>
         {% for issue in issues %}
@@ -200,21 +192,21 @@
                 <td><a href="{% url 'manage_issues_id' issue.pk %}">{{ issue.pk }}</a></td>
                 <td>{{ issue.issue_title }}</td>
 
-                {% if issue.doi %}                                
-                <td id="datacite_issue_doi_{{ issue.pk }}">{{ issue.doi }}</td>
+                {% if issue.doi %}
+                <td class="col-datacite-doi" id="datacite_issue_doi_{{ issue.pk }}">{{ issue.doi }}</td>
                 {% else %}
-                <td id="datacite_issue_doi_{{ issue.pk }}"></td>
-                {% endif %}                      
-                {% if issue.datacite and issue.datacite.state %}                                
-                <td id="datacite_issue_state_{{ issue.pk }}">{{ issue.datacite.state }}</td>
+                <td class="col-datacite-doi" id="datacite_issue_doi_{{ issue.pk }}"></td>
+                {% endif %}
+                {% if issue.datacite and issue.datacite.state %}
+                <td class="col-datacite-state" id="datacite_issue_state_{{ issue.pk }}">{{ issue.datacite.state }}</td>
                 {% else %}
-                <td id="datacite_issue_state_{{ issue.pk }}"></td>
-                {% endif %}                      
-                <td id="alma_issue_mmsid_ac_{{ article.pk }}">
+                <td class="col-datacite-state" id="datacite_issue_state_{{ issue.pk }}"></td>
+                {% endif %}
+                <td class="col-alma-mmsid" id="alma_issue_mmsid_ac_{{ issue.pk }}">
                 {% if issue.get_mmsid %} {{ issue.get_mmsid }} {% endif %}
                 {% if issue.get_ac %} {% if issue.get_mmsid %} <br> {% endif %} {{ issue.get_ac }} {% endif %}
                 </td>
-                <td></td>
+                <td class="col-alma-sync"></td>
                 <td>
                     <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px;">
                         {% if settings.datacite_issue_sync %}
@@ -1069,6 +1061,48 @@
 
             })
 
+            // Column resize functionality
+            // Articles table columns: 0=checkbox, 1=Id, 2=Title, 3=Issue, 4=DOI, 5=State, 6=MMS/AC, 7=Sync, 8=Actions
+            // Issues table columns: 0=Id, 1=Title, 2=DOI, 3=State, 4=MMS/AC, 5=Sync, 6=Actions
+            function initColumnResize(tableId, handleClass) {
+                var $table = $(tableId);
+                var $headers = $table.find('th.' + handleClass);
+                var startX, startW, $resizingHeader;
+
+                $headers.each(function() {
+                    var $th = $(this);
+                    // Add resize handle to the right edge of each header cell
+                    $('<span class="col-resize-handle"></span>')
+                        .appendTo($th)
+                        .on('mousedown', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            startX = e.pageX;
+                            startW = $th.outerWidth();
+                            $resizingHeader = $th;
+                            $(document).on('mousemove.columnResize', onMouseMove);
+                            $(document).on('mouseup.columnResize', onMouseUp);
+                            $('body').addClass('resizing');
+                        });
+                });
+
+                function onMouseMove(e) {
+                    e.preventDefault();
+                    if (!$resizingHeader) return;
+                    var diff = e.pageX - startX;
+                    var newW = Math.max(40, startW + diff);
+                    $resizingHeader.outerWidth(newW);
+                }
+
+                function onMouseUp(e) {
+                    e.preventDefault();
+                    $(document).off('mousemove.columnResize');
+                    $(document).off('mouseup.columnResize');
+                    $resizingHeader = null;
+                    $('body').removeClass('resizing');
+                }
+            }
+
             table_articles_instance = $('#datatable-articles').DataTable({
                 columnDefs: [
                     { orderable: false, targets: 0 }
@@ -1080,12 +1114,18 @@
                         var isChecked = selectedArticleIds.indexOf(id) !== -1;
                         $(this).prop('checked', isChecked);
                     });
+                    // Re-attach resize handles after draw (DataTable rebuilds headers)
+                    initColumnResize('#datatable-articles', 'th-resizable');
                 }
             });
             table_articles_instance.order( [[ 1, 'desc' ]] ).draw();
 
             var table_issues = $('#datatable-issues').DataTable();
             table_issues.order( [[ 0, 'desc' ]] ).draw();
+
+            // Initialize resize handles for both tables
+            initColumnResize('#datatable-articles', 'th-resizable');
+            initColumnResize('#datatable-issues', 'th-resizable');
         })
         
         function dataciteMetadataConfirm(article_id,issue_id)
@@ -1655,6 +1695,39 @@
     #datatable-articles .article-checkbox {
         margin: 0;
         vertical-align: middle;
+    }
+    .col-resize-handle {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        cursor: col-resize;
+        background: transparent;
+        z-index: 10;
+    }
+    .col-resize-handle:hover {
+        background: rgba(0, 123, 255, 0.3);
+    }
+    .col-resize-handle::after {
+        content: "";
+        position: absolute;
+        top: 25%;
+        bottom: 25%;
+        left: 2px;
+        right: 2px;
+        border-right: 2px solid rgba(0, 0, 0, 0.2);
+    }
+    .th-resizable {
+        position: relative;
+    }
+    .resizing {
+        cursor: col-resize !important;
+        user-select: none;
+    }
+    .resizing * {
+        cursor: col-resize !important;
+        user-select: none;
     }
 </style>
 {% endblock %}
