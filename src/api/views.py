@@ -6,6 +6,7 @@ import re
 import datetime
 import pytz
 
+from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -23,9 +24,11 @@ from core import models as core_models
 from submission import models as submission_models
 from journal import models as journal_models
 from repository import models as repository_models
+from identifiers import models as identifier_models
+
+from laapy import API,MarcRecord,stripXmlDeclaration
 
 logger = get_logger(__name__)
-
 
 @api_view(["GET"])
 @permission_classes((permissions.AllowAny,))
@@ -396,13 +399,6 @@ def match_date(date_str,round):
 
     return date
 
-
-
-
-
-
-
-
 def kbart_csv(request):
     return kbart(request, tsv=False)
 
@@ -607,13 +603,14 @@ def callback_link_nz_job(request):
     :param request: An instance of django.http.HttpRequest
     :return: A JsonResponse acknowledging receipt of the callback.
     """
+
+    alma_settings = settings.ALMA
+    alma_api = API(json_str=json.dumps(settings.LAAPY))
+
     setid = request.POST.get("setid")
     mmsids = request.POST.get("mmsids")
     callback_url = request.POST.get("callback_url")
 
-    # TODO: process the callback for the linking job (e.g. verify each mmsid
-    # now has an NZ linked_record_id, update Janeway records and clean up the
-    # Alma set).
     logger.info(
         "Received link_nz_job callback: setid=%s, mmsids=%s, callback_url=%s",
         setid,
@@ -621,4 +618,48 @@ def callback_link_nz_job(request):
         callback_url,
     )
 
-    return JsonResponse({"status": "ok", "setid": setid})
+    (xml,errors) = alma_api.deleteSet(setid)
+    if errors:
+        errors.insert(0,)
+        logger.exception('error deleting set')
+        return JsonResponse({"status": "error"})
+
+    for mmsid in mmsids:
+        ac = None
+        result = alma_api.getBibRecord(mmsid)
+        xml = result.data
+        errors = result.errs
+        if errors:
+            logger.exception('error getting bib record %s',mmsid)
+            return JsonResponse({"status": "error"})
+
+        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+        if not match:
+            logger.exception('error bib record not linked to nz %s',mmsid)
+            return JsonResponse({"status": "error"})
+
+        try:
+            xml = stripXmlDeclaration(xml)
+            mr = MarcRecord()
+            mr.parse(xml)
+            ac = mr.getAC()
+        except Exception as e:
+            logger.exception('error getting ac from bib record %s',mmsid)
+            return JsonResponse({"status": "error"})
+        
+        article = submission_models.Article.objects.filter(
+            identifier__id_type='mmsid',
+            identifier__identifier=mmsid
+        ).first()
+
+        if article and ac:
+            try:
+                identifier_models.Identifier.objects.filter(article=article,id_type='ac').delete()
+                identifier_models.Identifier.objects.create(article=article,id_type='ac',identifier=ac)
+            except Exception as e:
+                logger.exception('error updating getting ac for bib record %s',mmsid)
+                return JsonResponse({"status": "error"})
+
+            logger.info("ac updated for bib record %s : %s",mmsid,ac)
+
+    return JsonResponse({"status": "ok"})
