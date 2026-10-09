@@ -12,15 +12,15 @@ from django.db.models import Max
 from django.utils.timezone import get_current_timezone
 from django.utils.translation import activate
 
-
 from submission import models as submission_models
 from journal import models as journal_models
 from tuw_sync import models as sync_models
 from identifiers import models as identifier_models
 from utils import setting_handler
 from utils.logger import get_logger
-from tuw_sync.datacite import api as datacite_api
 from laapy import API,MarcRecord,ControlField,DataField,SubField,stripXmlDeclaration
+from . import datacite_api,datacite_settings
+from . import alma_api,alma_settings
 
 logger = get_logger(__name__)
 
@@ -29,7 +29,7 @@ def createDOI(article:submission_models.Article = None, issue: journal_models.Is
 
     if article:
         journal_code = article.journal.code
-        journal_settings = settings.DATACITE['journals'][journal_code]
+        journal_settings = datacite_settings['journals'][journal_code]
         if "pattern_article" in journal_settings: 
             doi = journal_settings["pattern_article"]
             if "***publication_year***" in doi:
@@ -44,7 +44,7 @@ def createDOI(article:submission_models.Article = None, issue: journal_models.Is
                 doi = doi.replace("***article_id_plus_offset***",str(val))
     elif issue:
         journal_code = issue.journal.code
-        journal_settings = settings.DATACITE['journals'][journal_code]
+        journal_settings = datacite_settings['journals'][journal_code]
         if "pattern_issue" in journal_settings: 
             doi = journal_settings["pattern_issue"]
             if "***publication_year***" in doi:
@@ -55,7 +55,7 @@ def createDOI(article:submission_models.Article = None, issue: journal_models.Is
 def checkDOI(doi:str,article: submission_models.Article = None,issue: journal_models.Issue = None) -> bool:
     if article:
         journal_code = article.journal.code
-        journal_settings = settings.DATACITE['journals'][journal_code]
+        journal_settings = datacite_settings['journals'][journal_code]
         pattern = journal_settings.get('pattern_article_regex','')
         if match := re.search(pattern,doi):
             return True
@@ -63,7 +63,7 @@ def checkDOI(doi:str,article: submission_models.Article = None,issue: journal_mo
             return False
     elif issue:
         journal_code = issue.journal.code
-        journal_settings = settings.DATACITE['journals'][journal_code]
+        journal_settings = datacite_settings['journals'][journal_code]
         pattern = journal_settings.get('pattern_issue_regex','')
         if match := re.search(pattern,doi):
             return True
@@ -149,7 +149,6 @@ def dataciteMetadata(article_id=None,issue_id=None):
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
         (title_raw,title_en,title_de,subtitle_raw,subtitle_en,subtitle_de,abstract_raw,abstract_en,abstract_de,) = normalizeValues(article)
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         errors = checkArticleMandatoryFields(article)
 
         l = []
@@ -378,7 +377,6 @@ def dataciteMetadata(article_id=None,issue_id=None):
 
     elif issue_id:
         issue: journal_models.Issue = journal_models.Issue.objects.get(pk=issue_id)
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
 
         l = []
 
@@ -465,7 +463,6 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
 
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         doi = article.get_doi()
         if not doi:
             errors.append("No DOI registered")
@@ -482,7 +479,6 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
     elif issue_id:
         issue = journal_models.Issue.objects.get(pk=issue_id)
         doi = issue.doi
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         if not doi:
             errors.append("No DOI registered")
         else:
@@ -490,7 +486,7 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if not errors:
-            status,content = api.getMetadata(doi)
+            status,content = datacite_api.getMetadata(doi)
             if status != 'success':
                 errors.append(content)
             else:
@@ -505,7 +501,6 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
 
     if article_id:
         article = submission_models.Article.objects.get(pk=article_id)
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         doi = article.get_doi()
         if not doi:
             errors.append("No DOI registered")
@@ -521,7 +516,6 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
                 url=content
     elif issue_id:
         issue = journal_models.Issue.objects.get(pk=issue_id)
-        api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
         doi = issue.doi
         if not doi:
             errors.append("No DOI registered")
@@ -529,7 +523,7 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
             if not checkDOI(doi,issue=issue):
                 errors.append("existing DOI doesn't conform to current configuration")
         if not errors:
-            status,content=api.getURL(doi)
+            status,content = datacite_api.getURL(doi)
             if status != 'success':
                 errors.append(content)
             else:
@@ -649,10 +643,10 @@ def doiDeleted(doi,article=None,issue=None):
 def checkArticleMarcMandatoryFields(article):
     errors = []
 
-    alma_ignore_doi_not_set = hasattr(settings,'ALMA_IGNORE_DOI_NOT_SET') and settings.ALMA_IGNORE_DOI_NOT_SET
+    alma_ignore_doi_not_set = alma_settings.get('ignore_doi_not_set',False)
     if not alma_ignore_doi_not_set and article.get_doi() is None:
         errors.append("doi not set")
-    alma_ignore_page_numbers_not_set = hasattr(settings,'ALMA_IGNORE_PAGE_NUMBERS_NOT_SET') and settings.ALMA_IGNORE_PAGE_NUMBERS_NOT_SET
+    alma_ignore_page_numbers_not_set = alma_settings.get('ignore_page_numbers_not_set',False)
     if not alma_ignore_page_numbers_not_set and not article.page_numbers:
         errors.append("page numbers not set")
     
@@ -664,11 +658,10 @@ def checkArticleMarcDuplicates(article) -> List[str]:
         return []
 
     l_ac = []
-    if not hasattr(settings,'ALMA_DISABLE_DOI_DUPLICATE_CHECK') or not settings.ALMA_DISABLE_DOI_DUPLICATE_CHECK:
+    if not alma_settings.get('disable_doi_duplicate_check',False):
         try:
-            api = API(json_str=json.dumps(settings.LAAPY))
             params = { "alma.digital_object_identifier" : article.get_doi(), }
-            result = api.sendSRURequest(**params)
+            result = alma_api.sendSRURequest(**params)
             if result and result.errs:
                 raise Exception(*result.errs)
             l_record = MarcRecord.parseMultiple(stripXmlDeclaration(result.data))

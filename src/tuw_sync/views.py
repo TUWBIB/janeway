@@ -33,13 +33,13 @@ from security.decorators import has_journal, editor_user_required
 from submission import models as submission_models
 from journal import models as journal_models
 from utils.logger import get_logger
-from tuw_sync import models as sync_models
-from tuw_sync import logic
-from tuw_sync.datacite import api as datacite_api
-from laapy import API,MarcRecord,stripXmlDeclaration
+from laapy import MarcRecord,stripXmlDeclaration
+from . import datacite_api,datacite_settings
+from . import alma_api,alma_settings
+from . import models as sync_models
+from . import logic
 
 logger = get_logger(__name__)
-
 
 def debug(request):
     html = f"<h1>Debug Info</h1>"
@@ -48,7 +48,6 @@ def debug(request):
     html += f"<p>request.get_host(): {request.get_host()}</p>"
     html += f"<p>META headers: {request.META}</p>"
     return HttpResponse(html)
-
 
 ## sync
 
@@ -62,11 +61,11 @@ def sync(request):
     articles = submission_models.Article.objects.filter(journal=request.journal)
     issues = journal_models.Issue.objects.filter(journal=request.journal)
     view_settings = {}
-    view_settings['alma_article_sync'] = True if request.journal.code in settings.ALMA['article_sync'] else False
-    view_settings['alma_issue_sync'] = True if request.journal.code in settings.ALMA['issue_sync'] else False
-    sync_settings = settings.DATACITE['journals'][request.journal.code]
-    view_settings['datacite_article_sync'] = True if 'pattern_article' in sync_settings else False
-    view_settings['datacite_issue_sync'] = True if 'pattern_issue' in sync_settings else False
+    view_settings['alma_article_sync'] = request.journal.code in alma_settings.get('article_sync',False)
+    view_settings['alma_issue_sync'] = request.journal.code in alma_settings.get('issue_sync',False)
+    sync_settings = datacite_settings['journals'][request.journal.code]
+    view_settings['datacite_article_sync'] = 'pattern_article' in sync_settings
+    view_settings['datacite_issue_sync'] = 'pattern_issue' in sync_settings
 
     if request.method  == "POST":
         data = json.loads(request.body)
@@ -196,7 +195,6 @@ def dataciteMetadataConfirm(article_id=None,issue_id=None):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
     
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     match = re.search(r'<identifier\sidentifierType="DOI">(.+)</identifier>',xml)
     if match is None:
         errors = ['cant extract DOI from xml']
@@ -204,7 +202,7 @@ def dataciteMetadataConfirm(article_id=None,issue_id=None):
             'datacite' : { 'xml' : xml, 'doi' : None, 'url' : None, 'state' : None }})
     else:
         doi = match.group(1)
-        (status,content)=api.updateMetadata(doi,xml)
+        (status,content) = datacite_api.updateMetadata(doi,xml)
         if status == "success":
             status,errors,state = logic.metadataUpdated(doi,article_id=article_id,issue_id=issue_id)
             return JsonResponse({ 'errors': errors, 'warnings': None,
@@ -221,8 +219,7 @@ def dataciteURL(host,article=None,issue:journal_models.Issue=None):
     url is set to article or issue page    
     '''
     errors = []
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-    url = api.options['protocol']
+    url = datacite_api.options['protocol']
     url += host
     if article:
         url += reverse('article_view',args=['id',article.pk])
@@ -248,8 +245,7 @@ def dataciteURL(host,article=None,issue:journal_models.Issue=None):
 
 def dataciteURLConfirm(host,article=None,issue=None):
     errors = []
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
-    url = api.options['protocol']
+    url = datacite_api.options['protocol']
     url += host
     if article:
         url += reverse('article_view',args=['id',article.pk])
@@ -275,7 +271,7 @@ def dataciteURLConfirm(host,article=None,issue=None):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'datacite' : { 'xml' : None, 'doi' : None, 'url' : url, 'state' : None }})
 
-    (status,content) = api.registerURL(doi,url)
+    (status,content) = datacite_api.registerURL(doi,url)
     if status == "success":
         status,errors = logic.urlSet(doi,article=article,issue=issue)
         return JsonResponse({ 'errors': errors, 'warnings': None,
@@ -290,7 +286,6 @@ def deleteDOI(article: submission_models.Article = None,
               issue: journal_models.Issue = None):
 
     errors: List[str] = []
-    api = datacite_api.API(json_str=json.dumps(settings.DATACITE))
     if article:
         doi = article.get_doi()
         state = article.datacite_state
@@ -342,15 +337,7 @@ def almaViewCurrent(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
         
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append('error getting Alma API instance')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-
-    result = api.getBibRecord(mmsid)
+    result = alma_api.getBibRecord(mmsid)
     xml = result.data
     errors = result.errs
     if errors:
@@ -380,17 +367,10 @@ def almaCreateUpdateConfirm(article):
     ac = article.get_ac()
     doi = article.get_doi()
 
-    collectionid = settings.ALMA_PORTFOLIOS.get('collection_id',None)
-    serviceid = settings.ALMA_PORTFOLIOS.get('service_id',None)
-    create_portfolio = True if not mmsid and bool(settings.ALMA_PORTFOLIOS.get('create_portfolios',False)) else False
-
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append('error getting Alma API instance')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+    portfolio_settings = alma_settings.get('portfolios',{})
+    collectionid = portfolio_settings.get('collection_id',None)
+    serviceid = portfolio_settings.get('service_id',None)
+    create_portfolio = True if not mmsid and bool(portfolio_settings.get('create_portfolios',False)) else False
 
     (xml,errors,warnings) = logic.articleToMarc(article)
     if errors:
@@ -398,7 +378,7 @@ def almaCreateUpdateConfirm(article):
             'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
     
     if mmsid:
-        result = api.getBibRecord(mmsid)
+        result = alma_api.getBibRecord(mmsid)
         xml_current = result.data
         errors = result.errs
         if errors:
@@ -412,9 +392,9 @@ def almaCreateUpdateConfirm(article):
             return JsonResponse({ 'errors': errors, 'warnings': warnings,
                 'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
-        result = api.updateBibRecord(xml,mmsid)
+        result = alma_api.updateBibRecord(xml,mmsid)
     else:
-        result = api.createBibRecord(xml)
+        result = alma_api.createBibRecord(xml)
     
     xml = result.data
     errors = result.errs
@@ -439,7 +419,7 @@ def almaCreateUpdateConfirm(article):
             'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
 
     if create_portfolio and collectionid and serviceid:
-        result = api.createPortfolio(collectionid,serviceid,mmsid,f"https://doi.org/{doi}")
+        result = alma_api.createPortfolio(collectionid,serviceid,mmsid,f"https://doi.org/{doi}")
 
     errors = result.errs
 
@@ -458,15 +438,7 @@ def almaPushNZ(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append('error getting Alma API instance')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-
-    result = api.getBibRecord(mmsid)
+    result = alma_api.getBibRecord(mmsid)
     xml = result.data
     errors = result.errs
     if errors:
@@ -484,8 +456,6 @@ def almaPushNZ(article):
         'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
 
-
-
 def almaPushNZConfirm(article):
     errors = []
 
@@ -497,15 +467,7 @@ def almaPushNZConfirm(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append('error getting Alma API instance')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-
-    result = api.getBibRecord(mmsid)
+    result = alma_api.getBibRecord(mmsid)
     xml = result.data
     errors = result.errs
     if errors:
@@ -526,14 +488,14 @@ def almaPushNZConfirm(article):
     # 3. call job
     # 4. delete set XXX not possible until job has run
 
-    setid, result = api.createItemizedBibRecordSet(setname='JW set - '+mmsid)
+    setid, result = alma_api.createItemizedBibRecordSet(setname='JW set - '+mmsid)
     errors = result.errs
     if errors:
         errors.insert(0,'error creating set')
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
 
-    result = api.addIdToSet(setid,mmsid)
+    result = alma_api.addIdToSet(setid,mmsid)
     errors = result.errs
     if errors:
         errors.insert(0,'error adding record to set')
@@ -553,16 +515,15 @@ def almaPushNZConfirm(article):
         'callback_url': callback_url
     }
     name = 'Janeway ' + json.dumps(data)
-    result = api.runLinkJob(setid,name=name)
+    result = alma_api.runLinkJob(setid,name=name)
     errors = result.errs
     if errors:
         msg = ','.join(errors)    
-        print (msg)        
         errors.insert(0,'error running linking job')
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'None' : mmsid, 'ac' : ac }})
 
-#    (xml,errors) = api.deleteSet(setid)
+#    (xml,errors) = alma_api.deleteSet(setid)
 #    if errors:
 #        errors.insert(0,'error deleting set')
 #        return JsonResponse({ 'errors': errors, 'warnings': None,
@@ -582,15 +543,7 @@ def almaFetchAC(article):
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
     
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append('error getting Alma API instance')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-
-    result = api.getBibRecord(mmsid)
+    result = alma_api.getBibRecord(mmsid)
     xml = result.data
     errors = result.errs
     if errors:
@@ -642,15 +595,7 @@ def almaPushNZBulk(journal, article_ids):
             invalid_count += 1
             continue
 
-        try:
-            api = API(json_str=json.dumps(settings.LAAPY))
-        except Exception as e:
-            article_errors.append(f"Article {article.pk}: error getting Alma API instance - {str(e)}")
-            errors_by_id[article.pk] = article_errors
-            invalid_count += 1
-            continue
-
-        result = api.getBibRecord(mmsid)
+        result = alma_api.getBibRecord(mmsid)
         xml = result.data
         article_errors = result.errs
 
@@ -709,14 +654,7 @@ def almaPushNZConfirmBulk(journal, article_ids):
             failed_articles.append(f"Article {article.pk}: no (local) mmsid")
             continue
 
-        try:
-            api = API(json_str=json.dumps(settings.LAAPY))
-        except Exception as e:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: error getting Alma API instance - {str(e)}")
-            continue
-
-        result = api.getBibRecord(mmsid)
+        result = alma_api.getBibRecord(mmsid)
         xml = result.data
         article_errors = result.errs
 
@@ -760,20 +698,8 @@ def almaPushNZConfirmBulk(journal, article_ids):
         site_url += '/'
     callback_url = site_url + 'api/tuw/callback_link_nz_job/'
 
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        errors.append(f"error getting Alma API instance - {str(e)}")
-        return JsonResponse({
-            'errors': errors,
-            'warnings': None,
-            'success_count': success_count,
-            'failed_count': failed_count,
-            'bulk': True
-        })
-
     # Create a single set for all valid mmsids
-    setid, result = api.createItemizedBibRecordSet(setname='JW set - bulk ' + ','.join(valid_mmsids[:3]))
+    setid, result = alma_api.createItemizedBibRecordSet(setname='JW set - bulk ' + ','.join(valid_mmsids[:3]))
     set_errors = result.errs
 
     if set_errors:
@@ -788,7 +714,7 @@ def almaPushNZConfirmBulk(journal, article_ids):
 
     # Add all valid mmsids to the set
     for mmsid in valid_mmsids:
-        result = api.addIdToSet(setid, mmsid)
+        result = alma_api.addIdToSet(setid, mmsid)
         if result.errs:
             failed_count += 1
             failed_articles.append(f"Article {mmsid}: error adding to set")
@@ -816,13 +742,12 @@ def almaPushNZConfirmBulk(journal, article_ids):
         'mmsids': added_mmsids,
         'callback_url': callback_url
     }
-    name = 'Janeway bulk ' + json.dumps(data)
-    result = api.runLinkJob(setid, name=name)
+    name = 'Janeway ' + json.dumps(data)
+    result = alma_api.runLinkJob(setid, name=name)
     link_errors = result.errs
 
     if link_errors:
         msg = ','.join(link_errors)
-        print(msg)
         link_errors.insert(0, 'error running linking job')
         return JsonResponse({
             'errors': link_errors,
@@ -853,30 +778,13 @@ def almaCreateUpdateBulk(journal, article_ids):
 
     articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
 
-    # Initialize API object once and reuse for all articles
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        # If API initialization fails, report error for all articles
-        for article in articles:
-            article_errors = [f"Article {article.pk}: error getting Alma API instance - {str(e)}"]
-            errors_by_id[article.pk] = article_errors
-            invalid_count += 1
-        return JsonResponse({
-            'errors': errors_by_id,
-            'warnings': None,
-            'valid_count': 0,
-            'invalid_count': invalid_count,
-            'bulk': True
-        })
-
     for article in articles:
         mmsid = article.get_mmsid()
         article_errors = []
 
         if mmsid:
             # Check if already in NZ
-            result = api.getBibRecord(mmsid)
+            result = alma_api.getBibRecord(mmsid)
             xml = result.data
             article_errors = result.errs
 
@@ -925,30 +833,15 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
 
     articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
 
-    # Initialize API object once
-    try:
-        api = API(json_str=json.dumps(settings.LAAPY))
-    except Exception as e:
-        for article in articles:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: error getting Alma API instance - {str(e)}")
-        return JsonResponse({
-            'errors': failed_articles,
-            'warnings': None,
-            'success_count': 0,
-            'failed_count': failed_count,
-            'updated_mmsids': {},
-            'bulk': True
-        })
-
     for article in articles:
         mmsid = article.get_mmsid()
         ac = article.get_ac()
         doi = article.get_doi()
 
-        collectionid = settings.ALMA_PORTFOLIOS.get('collection_id', None)
-        serviceid = settings.ALMA_PORTFOLIOS.get('service_id', None)
-        create_portfolio = True if not mmsid and bool(settings.ALMA_PORTFOLIOS.get('create_portfolios', False)) else False
+        portfolio_settings = alma_settings.get('portfolios',{})
+        collectionid = portfolio_settings.get('collection_id',None)
+        serviceid = portfolio_settings.get('service_id',None)
+        create_portfolio = True if not mmsid and bool(portfolio_settings.get('create_portfolios',False)) else False
 
         (xml, article_errors, warnings) = logic.articleToMarc(article)
         if article_errors:
@@ -958,7 +851,7 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
 
         if mmsid:
             # Check if already in NZ
-            result = api.getBibRecord(mmsid)
+            result = alma_api.getBibRecord(mmsid)
             xml_current = result.data
             check_errors = result.errs
             if check_errors:
@@ -973,9 +866,9 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
                 failed_articles.append(f"Article {article.pk}: can't update record; already in NZ: {mmsid_nz}")
                 continue
 
-            result = api.updateBibRecord(xml, mmsid)
+            result = alma_api.updateBibRecord(xml, mmsid)
         else:
-            result = api.createBibRecord(xml)
+            result = alma_api.createBibRecord(xml)
 
         xml = result.data
         article_errors = result.errs
@@ -1001,7 +894,7 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
             continue
 
         if create_portfolio and collectionid and serviceid:
-            result = api.createPortfolio(collectionid, serviceid, mmsid, f"https://doi.org/{doi}")
+            result = alma_api.createPortfolio(collectionid, serviceid, mmsid, f"https://doi.org/{doi}")
 
         article_errors = result.errs
         if article_errors:
