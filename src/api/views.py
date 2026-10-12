@@ -604,12 +604,18 @@ def callback_link_nz_job(request):
     :return: A JsonResponse acknowledging receipt of the callback.
     """
 
-    alma_settings = settings.ALMA
-    alma_api = API(json_str=json.dumps(settings.LAAPY))
-
     setid = request.POST.get("setid")
     mmsids = request.POST.get("mmsids")
     callback_url = request.POST.get("callback_url")
+
+    # Validate required parameters
+    if not setid:
+        logger.warning("Received link_nz_job callback without setid")
+        return JsonResponse({"status": "error", "message": "Missing required parameter: setid"}, status=400)
+
+    if not mmsids:
+        logger.warning("Received link_nz_job callback without mmsids")
+        return JsonResponse({"status": "error", "message": "Missing required parameter: mmsids"}, status=400)
 
     logger.info(
         "Received link_nz_job callback: setid=%s, mmsids=%s, callback_url=%s",
@@ -618,48 +624,68 @@ def callback_link_nz_job(request):
         callback_url,
     )
 
-    (xml,errors) = alma_api.deleteSet(setid)
-    if errors:
-        errors.insert(0,)
-        logger.exception('error deleting set')
-        return JsonResponse({"status": "error"})
+    try:
+        alma_settings = settings.ALMA
+        alma_api = API(json_str=json.dumps(settings.LAAPY))
 
-    for mmsid in mmsids:
-        ac = None
-        result = alma_api.getBibRecord(mmsid)
-        xml = result.data
-        errors = result.errs
+        (xml,errors) = alma_api.deleteSet(setid)
         if errors:
-            logger.exception('error getting bib record %s',mmsid)
-            return JsonResponse({"status": "error"})
+            logger.exception('error deleting set %s',setid)
+        else:
+            logger.info('set %s deleted',setid)
 
-        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
-        if not match:
-            logger.exception('error bib record not linked to nz %s',mmsid)
-            return JsonResponse({"status": "error"})
+        for mmsid in mmsids.split(', '):
+            logger.info('processing bib record %s',mmsid)            
+            ac = None
+            article = None
+            result = alma_api.getBibRecord(mmsid)
+            xml = result.data
+            errors = result.errs
+            if errors:
+                logger.exception('error getting bib record %s',mmsid)
+                continue
 
-        try:
+            match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
+            if not match:
+                logger.exception('error bib record not linked to nz %s',mmsid)
+                continue
+
             xml = stripXmlDeclaration(xml)
             mr = MarcRecord()
             mr.parse(xml)
             ac = mr.getAC()
-        except Exception as e:
-            logger.exception('error getting ac from bib record %s',mmsid)
-            return JsonResponse({"status": "error"})
-        
-        article = submission_models.Article.objects.filter(
-            identifier__id_type='mmsid',
-            identifier__identifier=mmsid
-        ).first()
 
-        if article and ac:
+            if ac is None:
+                logger.exception('no ac for %s',mmsid)
+                continue
+        
+            try:
+                article = submission_models.Article.objects.filter(
+                    identifier__id_type='mmsid',
+                    identifier__identifier=mmsid
+                ).first()
+            except Exception:
+                logger.exception('error getting article for bib record %s',mmsid)
+                continue
+
+            if article is None:
+                logger.exception('no article for %s',mmsid)
+                continue
+
             try:
                 identifier_models.Identifier.objects.filter(article=article,id_type='ac').delete()
                 identifier_models.Identifier.objects.create(article=article,id_type='ac',identifier=ac)
-            except Exception as e:
-                logger.exception('error updating getting ac for bib record %s',mmsid)
-                return JsonResponse({"status": "error"})
-
+            except Exception:
+                logger.exception('error updating ac for bib record %s',mmsid)
+                continue
+            
             logger.info("ac updated for bib record %s : %s",mmsid,ac)
 
-    return JsonResponse({"status": "ok"})
+    except Exception:
+        logger.exception('error processing link_nz_callback')
+        return JsonResponse({"status": "error", "message": "Error processing Link-NZ-Callback"}, status=400)
+
+    return JsonResponse({"status": "ok", "message": "Successfully processed Link-NZ-Callback"}, status=200)
+
+
+
