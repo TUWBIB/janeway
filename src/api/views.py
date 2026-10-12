@@ -628,19 +628,19 @@ def callback_link_nz_job(request):
         alma_settings = settings.ALMA
         alma_api = API(json_str=json.dumps(settings.LAAPY))
 
-        (xml,errors) = alma_api.deleteSet(setid)
+        result = alma_api.deleteSet(setid)
+        xml, errors = result.data, result.errs
         if errors:
             logger.exception('error deleting set %s',setid)
         else:
             logger.info('set %s deleted',setid)
 
-        for mmsid in mmsids.split(', '):
+        for mmsid in mmsids.split(','):
             logger.info('processing bib record %s',mmsid)            
             ac = None
             article = None
             result = alma_api.getBibRecord(mmsid)
-            xml = result.data
-            errors = result.errs
+            xml, errors = result.data, result.errs
             if errors:
                 logger.exception('error getting bib record %s',mmsid)
                 continue
