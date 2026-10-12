@@ -516,6 +516,9 @@ def almaPushNZConfirm(article):
     }
     name = 'Janeway ' + json.dumps(data)
     result = alma_api.runLinkJob(setid,name=name)
+    xml = result.data
+    print(xml)
+
     errors = result.errs
     if errors:
         msg = ','.join(errors)    
@@ -744,6 +747,8 @@ def almaPushNZConfirmBulk(journal, article_ids):
     }
     name = 'Janeway ' + json.dumps(data)
     result = alma_api.runLinkJob(setid, name=name)
+
+    xml = result.data
     link_errors = result.errs
 
     if link_errors:
@@ -757,12 +762,29 @@ def almaPushNZConfirmBulk(journal, article_ids):
             'bulk': True
         })
 
+    # Extract job execution ID from Alma response XML
+    job_id_match = re.search(r'instances/(\d+)', xml)
+    job_id = job_id_match.group(1) if job_id_match else None
+
+    # Create BulkJob record to track the link job
+    try:
+        bulk_job = sync_models.BulkJob.objects.create(
+            jobid=job_id,
+            name=name,
+            data=json.dumps(data),
+            status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
+        )
+        logger.info('Created BulkJob %s (Alma job_id=%s) for setid %s', bulk_job.pk, job_id, setid)
+    except Exception:
+        logger.exception('error creating BulkJob for setid %s', setid)
+
     return JsonResponse({
         'errors': None,
         'warnings': failed_articles if failed_articles else None,
         'success_count': success_count,
         'failed_count': failed_count,
-        'bulk': True
+        'bulk': True,
+        'bulk_job_id': bulk_job.pk if job_id else None,
     })
 
 

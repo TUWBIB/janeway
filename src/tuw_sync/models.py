@@ -52,3 +52,45 @@ class Alma(models.Model):
     ac = models.CharField(max_length=50, blank=True, null=True,)
 
 
+class BulkJob(models.Model):
+
+    BULKJOB_STATUS_NONE =''
+    BULKJOB_STATUS_STARTED = 'started'
+    BULKJOB_STATUS_SUCCESS = 'success'
+    BULKJOB_STATUS_ERROR = 'error'
+
+    BULKJOB_STATUS_CHOICES = [
+        (BULKJOB_STATUS_NONE, BULKJOB_STATUS_NONE),
+        (BULKJOB_STATUS_STARTED, BULKJOB_STATUS_STARTED),
+        (BULKJOB_STATUS_SUCCESS, BULKJOB_STATUS_SUCCESS),
+        (BULKJOB_STATUS_ERROR, BULKJOB_STATUS_ERROR),
+    ]
+
+    jobid = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+
+    name = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+
+    data = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    status = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        choices=BULKJOB_STATUS_CHOICES,
+    )
+
+    data = models.TextField(
+        blank=True,
+        null=True,
+    )
