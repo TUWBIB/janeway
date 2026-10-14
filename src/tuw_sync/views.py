@@ -751,7 +751,7 @@ def almaPushNZConfirmBulk(journal, article_ids):
     # running (started) for this journal.
     if sync_models.BulkJob.objects.filter(
         journal=journal,
-        name=name,
+        name=sync_models.BulkJob.BULKJOB_NAME_LINK_NZ,
         status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
     ).exists():
         logger.warning(
@@ -787,19 +787,28 @@ def almaPushNZConfirmBulk(journal, article_ids):
     job_id_match = re.search(r'instances/(\d+)', xml)
     job_id = job_id_match.group(1) if job_id_match else None
 
-    # Create BulkJob record to track the link job
+    # Create BulkJob record to track the link job. The name is fixed to the
+    # link_nz job type; the job payload (plain JSON, without the "Janeway "
+    # prefix that Alma expects in the job name) is stored in data.
     bulk_job = None
     try:
         bulk_job = sync_models.BulkJob.objects.create(
             journal=journal,
             jobid=job_id,
-            name=name,
+            name=sync_models.BulkJob.BULKJOB_NAME_LINK_NZ,
             data=json.dumps(data),
             status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
         )
         logger.info('Created BulkJob %s (Alma job_id=%s) for setid %s', bulk_job.pk, job_id, setid)
     except Exception:
         logger.exception('error creating BulkJob for setid %s', setid)
+        return JsonResponse({
+            'errors': ['error creating BulkJob record for setid %s' % setid],
+            'warnings': None,
+            'success_count': success_count,
+            'failed_count': failed_count,
+            'bulk': True,
+        })
 
     return JsonResponse({
         'errors': None,

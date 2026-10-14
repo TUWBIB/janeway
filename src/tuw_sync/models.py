@@ -54,6 +54,11 @@ class Alma(models.Model):
 
 class BulkJob(models.Model):
 
+    BULKJOB_NAME_LINK_NZ = 'link_nz'
+    BULKJOB_NAMES_CHOICES = [
+        (BULKJOB_NAME_LINK_NZ, BULKJOB_NAME_LINK_NZ),
+    ]
+
     BULKJOB_STATUS_NONE = ''
     BULKJOB_STATUS_STARTED = 'started'
     BULKJOB_STATUS_SUCCESS = 'success'
@@ -82,6 +87,7 @@ class BulkJob(models.Model):
         max_length=50,
         blank=True,
         null=True,
+        choices=BULKJOB_NAMES_CHOICES,
     )
 
     data = models.TextField(
@@ -94,9 +100,4 @@ class BulkJob(models.Model):
         blank=True,
         null=True,
         choices=BULKJOB_STATUS_CHOICES,
-    )
-
-    data = models.TextField(
-        blank=True,
-        null=True,
     )
