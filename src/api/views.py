@@ -1,5 +1,6 @@
 import collections
 import csv
+import hmac
 import io
 import json
 import re
@@ -25,6 +26,7 @@ from submission import models as submission_models
 from journal import models as journal_models
 from repository import models as repository_models
 from identifiers import models as identifier_models
+from tuw_sync import models as sync_models
 
 from laapy import API,MarcRecord,stripXmlDeclaration
 
@@ -595,20 +597,40 @@ def callback_link_nz_job(request):
     carries the JSON payload). The following parameters may be supplied as
     POST data:
 
+    - ``jobid``:       the Alma job instance id of the finished job (identifies
+                       the ``BulkJob`` record created for the job).
     - ``setid``:       the Alma set id that was created for the linking job.
     - ``mmsids``:      a comma separated list of the Alma mmsids that were part
                        of the set.
     - ``callback_url``: the URL of this endpoint itself.
 
+    The request must additionally carry an ``Authorization`` header of the
+    form ``Bearer <key>`` where ``<key>`` matches ``TUW_API_KEY``
+    from the settings. Requests without a valid key are rejected with a
+    401 response before any further processing.
+
     :param request: An instance of django.http.HttpRequest
     :return: A JsonResponse acknowledging receipt of the callback.
     """
 
+    # Simple API key check: expect "Authorization: Bearer <TUW_API_KEY>".
+    expected_key = settings.TUW_API_KEY
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    provided_key = auth_header.split(" ", 1)[1] if auth_header.startswith("Bearer ") else None
+    if not expected_key or not provided_key or not hmac.compare_digest(provided_key, expected_key):
+        logger.warning("Rejected link_nz_job callback with missing or invalid API key")
+        return JsonResponse({"status": "error", "message": "Invalid or missing API key"}, status=401)
+
+    jobid = request.POST.get("jobid")
     setid = request.POST.get("setid")
     mmsids = request.POST.get("mmsids")
     callback_url = request.POST.get("callback_url")
 
     # Validate required parameters
+    if not jobid:
+        logger.warning("Received link_nz_job callback without jobid")
+        return JsonResponse({"status": "error", "message": "Missing required parameter: jobid"}, status=400)
+
     if not setid:
         logger.warning("Received link_nz_job callback without setid")
         return JsonResponse({"status": "error", "message": "Missing required parameter: setid"}, status=400)
@@ -618,11 +640,50 @@ def callback_link_nz_job(request):
         return JsonResponse({"status": "error", "message": "Missing required parameter: mmsids"}, status=400)
 
     logger.info(
-        "Received link_nz_job callback: setid=%s, mmsids=%s, callback_url=%s",
+        "Received link_nz_job callback: jobid=%s, setid=%s, mmsids=%s, callback_url=%s",
+        jobid,
         setid,
         mmsids,
         callback_url,
     )
+
+    # Identify the BulkJob instance created for this job by its Alma job
+    # instance id (unique). The jobid must correspond to a BulkJob that is
+    # still in "started" status, otherwise the callback is rejected.
+    bulk_job = sync_models.BulkJob.objects.filter(
+        jobid=jobid,
+        status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
+    ).first()
+    if bulk_job is None:
+        logger.error(
+            "rejecting link_nz_job callback: jobid %s does not correspond to a started BulkJob",
+            jobid,
+        )
+        return JsonResponse(
+            {"status": "error", "message": "No started bulk job found for jobid"},
+            status=400,
+        )
+
+    if sync_models.BulkJob.objects.filter(
+        journal=bulk_job.journal,
+        name=bulk_job.name,
+        status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
+    ).exclude(pk=bulk_job.pk).exists():
+        # Another bulk job with the same name is still running for this
+        # journal, so this callback is not processed.
+        logger.error(
+            "aborting link_nz_job callback for jobid %s: another bulk job with the same name is running for journal %s",
+            jobid,
+            bulk_job.journal.pk if bulk_job.journal else None,
+        )
+        bulk_job.status = sync_models.BulkJob.BULKJOB_STATUS_ERROR
+        bulk_job.save(update_fields=['status'])
+        return JsonResponse(
+            {"status": "error", "message": "Another bulk job with the same name is already running for this journal"},
+            status=409,
+        )
+
+    job_error = False
 
     try:
         alma_settings = settings.ALMA
@@ -632,6 +693,7 @@ def callback_link_nz_job(request):
         xml, errors = result.data, result.errs
         if errors:
             logger.exception('error deleting set %s',setid)
+            job_error = True
         else:
             logger.info('set %s deleted',setid)
 
@@ -643,11 +705,13 @@ def callback_link_nz_job(request):
             xml, errors = result.data, result.errs
             if errors:
                 logger.exception('error getting bib record %s',mmsid)
+                job_error = True
                 continue
 
             match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
             if not match:
                 logger.exception('error bib record not linked to nz %s',mmsid)
+                job_error = True
                 continue
 
             xml = stripXmlDeclaration(xml)
@@ -657,6 +721,7 @@ def callback_link_nz_job(request):
 
             if ac is None:
                 logger.exception('no ac for %s',mmsid)
+                job_error = True
                 continue
         
             try:
@@ -666,10 +731,12 @@ def callback_link_nz_job(request):
                 ).first()
             except Exception:
                 logger.exception('error getting article for bib record %s',mmsid)
+                job_error = True
                 continue
 
             if article is None:
                 logger.exception('no article for %s',mmsid)
+                job_error = True
                 continue
 
             try:
@@ -677,13 +744,24 @@ def callback_link_nz_job(request):
                 identifier_models.Identifier.objects.create(article=article,id_type='ac',identifier=ac)
             except Exception:
                 logger.exception('error updating ac for bib record %s',mmsid)
+                job_error = True
                 continue
             
             logger.info("ac updated for bib record %s : %s",mmsid,ac)
 
     except Exception:
         logger.exception('error processing link_nz_callback')
+        bulk_job.status = sync_models.BulkJob.BULKJOB_STATUS_ERROR
+        bulk_job.save(update_fields=['status'])
         return JsonResponse({"status": "error", "message": "Error processing Link-NZ-Callback"}, status=400)
+
+    bulk_job.status = (
+        sync_models.BulkJob.BULKJOB_STATUS_SUCCESS
+        if not job_error
+        else sync_models.BulkJob.BULKJOB_STATUS_ERROR
+    )
+    bulk_job.save(update_fields=['status'])
+    logger.info('BulkJob %s set to status %s', bulk_job.pk, bulk_job.status)
 
     return JsonResponse({"status": "ok", "message": "Successfully processed Link-NZ-Callback"}, status=200)
 

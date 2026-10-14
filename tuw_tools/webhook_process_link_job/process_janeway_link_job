@@ -4,23 +4,36 @@ set -euo pipefail
 # Posts the Alma "Link to Network Zone" callback payload to the callback URL it
 # contains.
 #
-# The job_name parameter is prefixed with "Janeway " and Alma appends a
-# timestamp to it, so the value handed to us looks like this:
+# The first argument is the Alma job instance id ("jobid") of the finished
+# job, extracted from the webhook XML by the caller. The callback endpoint
+# uses it to identify the BulkJob record that was created for the job.
+#
+# The second argument is the data JSON, i.e. the job_name parameter of the
+# Alma job. It is prefixed with "Janeway " and Alma appends a timestamp to it,
+# so the value handed to us looks like this:
 #
 #   Janeway {"setid": "13401871750003336", "mmsids": ["998200933603336"], "callback_url": "http://..."} - 05.10.2026 13:44:25 CEST
 #
-# This script strips the "Janeway " prefix, extracts just the JSON object
+# The script strips the "Janeway " prefix, extracts just the JSON object
 # (ignoring the trailing timestamp), reads its fields, and sends them back to
-# callback_url as a standard application/x-www-form-urlencoded POST (the format
-# expected by the Django callback endpoint).
+# callback_url as a standard application/x-www-form-urlencoded POST (the
+# format expected by the Django callback endpoint).
 
-payload="${1:-}"
+# Alma job instance id of the finished job. The callback endpoint uses it to
+# look up the BulkJob record that tracks this job.
+jobid="${1:-}"
+if [[ -z "$jobid" ]]; then
+  echo "Error: 'jobid' (first argument) missing." >&2
+  exit 1
+fi
+
+payload="${2:-}"
 if [[ -z "$payload" ]]; then
   if [[ ! -t 0 ]]; then
     # No argument given but stdin is piped, so read from stdin.
     payload="$(cat)"
   else
-    echo "Usage: $0 '<payload>'" >&2
+    echo "Usage: $0 '<jobid>' '<payload>'" >&2
     exit 1
   fi
 fi
@@ -61,13 +74,23 @@ if [[ -z "$callback_url" ]]; then
   exit 1
 fi
 
+# The endpoint authenticates requests via an Authorization header.
+api_key="${JANEWAY_API_KEY:-}"
+if [[ -z "$api_key" ]]; then
+  echo "Error: JANEWAY_API_KEY environment variable is not set." >&2
+  exit 1
+fi
+
 echo "Posting to: $callback_url"
+echo "  jobid:        $jobid"
 echo "  setid:        $setid"
 echo "  mmsids:       $mmsids"
 echo "  callback_url: $callback_url"
 
 # Send the fields as form data and print the endpoint's JSON response.
 curl -sS -X POST "$callback_url" \
+  -H "Authorization: Bearer $api_key" \
+  --data-urlencode "jobid=$jobid" \
   --data-urlencode "setid=$setid" \
   --data-urlencode "mmsids=$mmsids" \
   --data-urlencode "callback_url=$callback_url"

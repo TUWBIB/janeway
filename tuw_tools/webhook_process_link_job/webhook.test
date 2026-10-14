@@ -68,9 +68,9 @@ logit debug "${COMMAND}[${ACTION}] (ID ${ID}) ${STATUS}"
 
 DATA=$(xmlstarlet sel -t -v "//notification//job_instance//name[starts-with(text(),'Janeway')]" <${TMP}/webhook_${PROFILE}_body.${PID}) 
 
-if [[ "$DATA" == Janeway* ]] 
+if [[ "$DATA" == Janeway* ]]
 then
-	"${WHLIB}/process_janeway_link_job" "${DATA}"
+	"${WHLIB}/process_janeway_link_job" "${ID}" "${DATA}"
 elif [ -x ${HOOK}/${COMMAND} ]
 then
 	if [ "xxx${STATUS}" == "xxxCOMPLETED_SUCCESS" ]

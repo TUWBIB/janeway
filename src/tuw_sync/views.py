@@ -746,6 +746,27 @@ def almaPushNZConfirmBulk(journal, article_ids):
         'callback_url': callback_url
     }
     name = 'Janeway ' + json.dumps(data)
+
+    # Do not start the job if a bulk job with the same name is already
+    # running (started) for this journal.
+    if sync_models.BulkJob.objects.filter(
+        journal=journal,
+        name=name,
+        status=sync_models.BulkJob.BULKJOB_STATUS_STARTED,
+    ).exists():
+        logger.warning(
+            'not starting link job for setid %s: a bulk job with the same name is already running for journal %s',
+            setid,
+            journal.pk,
+        )
+        return JsonResponse({
+            'errors': ['A bulk job with the same name is already running for this journal. Job not started.'],
+            'warnings': None,
+            'success_count': 0,
+            'failed_count': 0,
+            'bulk': True
+        })
+
     result = alma_api.runLinkJob(setid, name=name)
 
     xml = result.data
@@ -767,8 +788,10 @@ def almaPushNZConfirmBulk(journal, article_ids):
     job_id = job_id_match.group(1) if job_id_match else None
 
     # Create BulkJob record to track the link job
+    bulk_job = None
     try:
         bulk_job = sync_models.BulkJob.objects.create(
+            journal=journal,
             jobid=job_id,
             name=name,
             data=json.dumps(data),
@@ -784,7 +807,7 @@ def almaPushNZConfirmBulk(journal, article_ids):
         'success_count': success_count,
         'failed_count': failed_count,
         'bulk': True,
-        'bulk_job_id': bulk_job.pk if job_id else None,
+        'bulk_job_id': bulk_job.pk if bulk_job else None,
     })
 
 

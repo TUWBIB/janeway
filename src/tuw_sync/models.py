@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+from journal import models as journal_models
 
 class DataCite(models.Model):
 
@@ -54,7 +54,7 @@ class Alma(models.Model):
 
 class BulkJob(models.Model):
 
-    BULKJOB_STATUS_NONE =''
+    BULKJOB_STATUS_NONE = ''
     BULKJOB_STATUS_STARTED = 'started'
     BULKJOB_STATUS_SUCCESS = 'success'
     BULKJOB_STATUS_ERROR = 'error'
@@ -65,6 +65,12 @@ class BulkJob(models.Model):
         (BULKJOB_STATUS_SUCCESS, BULKJOB_STATUS_SUCCESS),
         (BULKJOB_STATUS_ERROR, BULKJOB_STATUS_ERROR),
     ]
+    journal = models.ForeignKey(
+        "journal.Journal",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     jobid = models.CharField(
         max_length=50,
