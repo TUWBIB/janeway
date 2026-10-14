@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('journal', '9002_alter_issue_tuw_year'),
+        ('journal', '9001_tuw_add_under_construction_image'),
         ('tuw_sync', '0001_initial'),
     ]
 
