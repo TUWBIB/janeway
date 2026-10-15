@@ -315,7 +315,7 @@ def deleteDOI(article: submission_models.Article = None,
             return JsonResponse({ 'errors': errors, 'warnings': None,
                 'datacite' : { 'xml' : None, 'doi' : None, 'url' : None, 'state' : None }})
     
-    (status,content)=api.deleteDOI(doi)
+    (status,content) = datacite_api.deleteDOI(doi)
     if status == "success":
         status,errors = logic.doiDeleted(doi,article=article,issue=issue)
         if article:
