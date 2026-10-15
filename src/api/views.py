@@ -1,9 +1,9 @@
 import collections
 import csv
 import hmac
-import io
 import json
 import re
+import warnings
 import datetime
 import pytz
 
@@ -12,19 +12,25 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Q
+from django.db.models.functions import Lower
+from django.contrib.auth import logout
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from utils.logger import get_logger
 
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
+from rest_framework.response import Response
 
 from api import serializers, permissions as api_permissions
 from core import models as core_models
 from submission import models as submission_models
 from journal import models as journal_models
 from repository import models as repository_models
+from identifiers import models as identifier_models
 from identifiers import models as identifier_models
 from tuw_sync import models as sync_models
 
@@ -70,6 +76,11 @@ class AccountViewSet(viewsets.ModelViewSet):
                 | Q(first_name__iregex=search_regex)
                 | Q(last_name__iregex=search_regex)
             )
+        orcid = self.request.query_params.get("orcid")
+        if orcid:
+            queryset = queryset.filter(
+                orcid=orcid,
+            )
         return queryset
 
 
@@ -92,42 +103,45 @@ class JournalViewSet(viewsets.ModelViewSet):
     all journals for that press.
     """
 
-    from journal import models as journal_models
-
-    queryset = journal_models.Journal.objects.filter(hide_from_press=False)
     serializer_class = serializers.JournalSerializer
     http_method_names = ["get"]
 
     def get_queryset(self):
         if self.request.journal:
-            # Accessing via a journal domain — return only that journal
-            return journal_models.Journal.objects.filter(
-                pk=self.request.journal.pk, hide_from_press=False
+            queryset = journal_models.Journal.objects.filter(
+                pk=self.request.journal.pk,
+                hide_from_press=False,
             )
-        return journal_models.Journal.objects.filter(hide_from_press=False)
+        else:
+            queryset = journal_models.Journal.objects.filter(
+                hide_from_press=False,
+            )
+        return queryset
 
 
 class IssueViewSet(viewsets.ModelViewSet):
     """
-    API Endpoint for journals.
+    API endpoint for issues.
     """
 
     serializer_class = serializers.IssueSerializer
     http_method_names = ["get"]
 
     def get_queryset(self):
-        from journal import models as journal_models
-
         if self.request.journal:
-            queryset = journal_models.Issue.objects.filter(journal=self.request.journal)
+            queryset = journal_models.Issue.objects.filter(
+                journal=self.request.journal,
+            )
         else:
-            queryset = journal_models.Issue.objects.all()
+            queryset = journal_models.Issue.objects.filter(
+                journal__hide_from_press=False,
+            )
 
         return queryset
 
 class LicenceViewSet(viewsets.ModelViewSet):
     """
-    API Endpoint for journals.
+    API Endpoint for licenses.
     """
 
     serializer_class = serializers.LicenceSerializer
@@ -140,7 +154,7 @@ class LicenceViewSet(viewsets.ModelViewSet):
             )
         else:
             queryset = submission_models.Licence.objects.filter(
-                journal=self.request.press
+                press=self.request.press
             )
 
         return queryset
@@ -153,7 +167,7 @@ class KeywordsViewSet(viewsets.ModelViewSet):
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """
-    API Endpoint for journals.
+    API endpoint for articles.
     """
 
     serializer_class = serializers.ArticleSerializer
@@ -170,6 +184,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
             queryset = submission_models.Article.objects.filter(
                 stage=submission_models.STAGE_PUBLISHED,
                 date_published__lte=timezone.now(),
+                journal__hide_from_press=False,
             )
 
         return queryset
@@ -181,16 +196,384 @@ class PreprintViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = serializers.PreprintSerializer
+    http_method_names = ["get", "post", "delete", "put"]
+    permission_classes = [api_permissions.IsRepositoryManager]
+
+    def get_serializer_class(self):
+        if self.request.method in "GET":
+            return serializers.PreprintSerializer
+        elif self.request.method in ["POST", "PUT"]:
+            return serializers.PreprintCreateSerializer
+        return serializers.PreprintSerializer
+
+    def get_queryset(self):
+        preprints = repository_models.Preprint.objects.filter(
+            repository=self.request.repository,
+        )
+
+        search_term = self.request.query_params.get("search")
+        stage = self.request.query_params.get("stage")
+        subjects = self.request.query_params.getlist("subject")
+
+        if search_term:
+            terms = [term.lower() for term in search_term.split()]
+
+            # Title, abstract and keywords.
+            matches = (
+                Q(title__icontains=search_term)
+                | Q(abstract__icontains=search_term)
+                | Q(keywords__word=search_term)
+            )
+
+            # Author names and affiliations, on published preprints.
+            from_author = (
+                submission_models.FrozenAuthor.objects.filter(
+                    preprint__repository=self.request.repository,
+                    preprint__date_published__lte=timezone.now(),
+                )
+                .annotate(
+                    lower_first_name=Lower("first_name"),
+                    lower_middle_name=Lower("middle_name"),
+                    lower_last_name=Lower("last_name"),
+                )
+                .filter(
+                    Q(lower_first_name__in=terms)
+                    | Q(lower_middle_name__in=terms)
+                    | Q(lower_last_name__in=terms)
+                    | Q(
+                        controlledaffiliation__organization__labels__value__icontains=search_term
+                    )
+                    | Q(
+                        controlledaffiliation__organization__custom_label__value__icontains=search_term
+                    )
+                )
+                .values("preprint_id")
+            )
+            matches |= Q(pk__in=from_author)
+
+            # Filter the repository's queryset in the database, never widening
+            # it beyond the site this request is for.
+            preprints = preprints.filter(
+                pk__in=repository_models.Preprint.objects.filter(matches).values("pk")
+            )
+
+        if stage:
+            preprints = preprints.filter(
+                stage=stage,
+            )
+
+        if subjects:
+            preprints = preprints.filter(
+                subject__name__in=subjects,
+            )
+
+        return preprints
+
+
+class PublishedPreprintViewSet(PreprintViewSet):
+    http_method_names = ["get"]
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def get_queryset(self):
+        preprints = super().get_queryset()
+
+        subjects = self.request.query_params.getlist("subject")
+
+        filters = {
+            "date_published__isnull": False,
+            "stage": repository_models.STAGE_PREPRINT_PUBLISHED,
+            "repository": self.request.repository,
+        }
+
+        if subjects:
+            filters["subject__name__in"] = subjects
+
+        return preprints.filter(
+            **filters,
+        ).order_by(
+            "-date_published",
+            "title",
+        )
+
+
+class UserPreprintsViewSet(PreprintViewSet):
+    serializer_class = serializers.PreprintSerializer
+    http_method_names = ["get", "post", "put"]
+    permission_classes = [permissions.IsAuthenticated, api_permissions.CanEditPreprint]
+
+    def get_serializer_class(self):
+        if self.request.method in "GET":
+            return serializers.PreprintSerializer
+        elif self.request.method in ["POST", "PUT"]:
+            return serializers.UserPreprintSerializer
+        return serializers.PreprintSerializer
+
+    def get_queryset(self):
+        preprints = repository_models.Preprint.objects.filter(
+            owner=self.request.user,
+            repository=self.request.repository,
+        )
+        stage_filter = self.request.GET.get("stage")
+        if stage_filter:
+            preprints = preprints.filter(stage=stage_filter)
+        return preprints
+
+
+class PreprintLicenses(viewsets.ModelViewSet):
+    serializer_class = serializers.LicenceSerializer
+    http_method_names = ["get", "post", "delete"]
+    permission_classes = [
+        api_permissions.IsRepositoryManager | api_permissions.IsEditor,
+    ]
+
+    def get_queryset(self):
+        if self.request.repository:
+            return self.request.repository.active_licenses.all()
+        else:
+            raise NotImplementedError(
+                "This view only works with Repositories.",
+            )
+
+
+class RepositoryFields(viewsets.ModelViewSet):
+    serializer_class = serializers.RepositoryFieldSerializer
+    http_method_names = ["get"]
+    permission_classes = [
+        api_permissions.IsRepositoryManager,
+    ]
+
+    def get_queryset(self):
+        if self.request.repository:
+            return repository_models.RepositoryField.objects.filter(
+                repository=self.request.repository,
+            )
+        else:
+            raise NotImplementedError(
+                "This view only works with Repositories.",
+            )
+
+
+class PreprintFiles(viewsets.ModelViewSet):
+    serializer_class = serializers.PreprintFileSerializer
+    http_method_names = ["get", "post", "delete"]
+    permission_classes = [permissions.IsAuthenticated, api_permissions.CanEditPreprint]
+
+    def get_serializer_class(self):
+        if self.request.method in ["POST"]:
+            return serializers.PreprintFileCreateSerializer
+        return serializers.PreprintFileSerializer
+
+    def get_queryset(self):
+        if self.request.repository:
+            return repository_models.PreprintFile.objects.filter(
+                preprint__repository=self.request.repository,
+                preprint__owner=self.request.user,
+            )
+        else:
+            raise NotImplementedError(
+                "This view only works with Repositories.",
+            )
+
+
+class RepositorySubjects(viewsets.ModelViewSet):
+    serializer_class = serializers.PreprintSubjectGroupSerializer
     http_method_names = ["get"]
 
     def get_queryset(self):
-        return repository_models.Preprint.objects.filter(
+        return repository_models.Subject.objects.filter(
             repository=self.request.repository,
             date_published__lte=timezone.now(),
             stage=repository_models.STAGE_PREPRINT_PUBLISHED,
         )
 
+
+class RepositoryVersionQueue(viewsets.ModelViewSet):
+    serializer_class = serializers.VersionQueueSerializer
+    http_method_names = ["get", "post"]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_serializer_class(self):
+        if self.request.method in "GET":
+            return serializers.VersionQueueSerializer
+        elif self.request.method in ["POST"]:
+            return serializers.VersionQueueCreateSerializer
+        return serializers.VersionQueueSerializer
+
+    def get_queryset(self):
+        version_queues = (
+            repository_models.VersionQueue.objects.filter(
+                preprint__repository=self.request.repository,
+                preprint__owner=self.request.user,
+                is_draft=False,
+            )
+            .select_related("preprint", "file")
+            .prefetch_related(
+                "frozenauthor_set__author",
+                "repositoryfieldanswer_set__field",
+            )
+        )
+        preprint_filter = self.request.GET.get("preprint", "")
+        if preprint_filter.isdigit():
+            version_queues = version_queues.filter(preprint=preprint_filter)
+        return version_queues
+
+
+class SubmissionAccountSearch(viewsets.ModelViewSet):
+    """
+    Limited search feature for authenticated users. Can search by
+    exact email or exact ORCID. Returns 0 results if no exact match.
+
+    The availability of this view is controlled by the Django setting:
+    API_ENABLE_ACCOUNT_ENDPOINTS which is False by default.
+    """
+
+    serializer_class = serializers.SubmissionAccountSearch
+    http_method_names = ["get"]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_queryset(self):
+        search = self.request.GET.get("search")
+        if not search:
+            return core_models.Account.objects.none()
+        return core_models.Account.objects.filter(
+            Q(email=search) | Q(orcid=search),
+        )[:1]
+
+
+class UserInfo(AccountViewSet):
+    """
+    Account viewset limited to a single payload based on the current user.
+    """
+
+    http_method_names = ["get"]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_queryset(self):
+        accounts = super().get_queryset()
+        accounts = accounts.filter(
+            pk=self.request.user.pk,
+        )
+        return accounts
+
+
+class Logout(viewsets.ViewSet):
+    """
+    A ViewSet for logging out the current user.
+    """
+
+    http_method_names = ["post"]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    @staticmethod
+    def create(request):
+        logout(request)
+        return Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class RegisterAccount(viewsets.ModelViewSet):
+    serializer_class = serializers.RegisterAccountSerializer
+    http_method_names = ["post"]
+
+
+class UpdateAccountView(APIView):
+    serializer_class = serializers.RegisterAccountSerializer
+    http_method_names = ["put"]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def put(self, request, *args, **kwargs):
+        account = get_object_or_404(
+            core_models.Account,
+            email=request.user.email,
+        )
+        data = request.data.copy()
+        data.pop("email", None)
+        serializer = self.serializer_class(
+            account,
+            data=data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class ActivateAccount(viewsets.ModelViewSet):
+    serializer_class = serializers.ActivateAccountSerializer
+    http_method_names = ["put"]
+
+    def get_queryset(self):
+        accounts = core_models.Account.objects.filter(
+            confirmation_code=self.request.data.get("confirmation_code"),
+            is_active=False,
+        )
+        return accounts
+
+
+class Identifiers(viewsets.ModelViewSet):
+    serializer_class = serializers.IdentifierSerializer
+    http_method_names = ["get"]
+
+    def get_queryset(self):
+        preprint_id = self.request.GET.get("preprint_id")
+        preprint_version_id = self.request.GET.get("preprint_version_id")
+        article_id = self.request.GET.get("article_id")
+
+        if self.request.repository:
+            return self._get_repository_identifiers(
+                preprint_id,
+                preprint_version_id,
+            )
+        elif self.request.journal:
+            return self._get_journal_identifiers(article_id)
+        return identifier_models.Identifier.objects.none()
+
+    def _get_repository_identifiers(self, preprint_id, preprint_version_id):
+        queryset = identifier_models.Identifier.objects.filter(
+            preprint_version__preprint__repository=self.request.repository,
+            preprint_version__preprint__date_published__lte=timezone.now(),
+            enabled=True,
+        )
+        if preprint_id:
+            queryset = queryset.filter(
+                preprint_version__preprint__pk=preprint_id,
+            )
+        elif preprint_version_id:
+            queryset = queryset.filter(
+                preprint_version__pk=preprint_version_id,
+            )
+        return queryset
+
+    def _get_journal_identifiers(self, article_id):
+        queryset = identifier_models.Identifier.objects.filter(
+            article__journal=self.request.journal,
+            article__date_published__lte=timezone.now(),
+            enabled=True,
+        )
+        if article_id:
+            queryset = queryset.filter(article__pk=article_id)
+        return queryset
+
+
 def oai(request):
+    warnings.warn("This view is deprecated. OAI views are in api/oai/views.py")
     articles = submission_models.Article.objects.filter(
         stage=submission_models.STAGE_PUBLISHED
     )
@@ -433,9 +816,15 @@ def kbart(request, tsv=True):
     has_header = False
     writer = None
 
-    for journal in journal_models.Journal.objects.filter(
-        is_remote=False, hide_from_press=False
-    ):
+    journals = journal_models.Journal.objects.filter(
+        is_remote=False,
+    )
+
+    if request.journal:
+        journals = journals.filter(pk=request.journal.pk)
+    else:
+        journals = journals.filter(hide_from_press=False)
+    for journal in journals:
         kbart_embargo = journal.get_setting("kbart", "embargo_period")
         # Note that we here use an OrderedDict. This is important as the
         # field headers are generated below at the late init of the TSV or
@@ -477,9 +866,12 @@ def kbart(request, tsv=True):
 
             # The date that the last issue that we have was published,
             # this is should only be populated if the article has ceased
-            # publication OR if the article  publishes content after a
+            # publication OR if the article publishes content after a
             # period of embargo
-            if journal.is_archived or kbart_embargo:
+            if (
+                journal.status == journal_models.Journal.PublishingStatus.ARCHIVED
+                or kbart_embargo
+            ):
                 journal_line["date_last_issue_online"] = "{:%Y-%m-%d}".format(
                     last_issue.date
                 )

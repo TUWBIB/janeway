@@ -379,64 +379,33 @@ class TestEditAuthor(TestSubmitViewsBase):
         )
 
 
-class TestSubmitInfoKeywords(TestSubmitViewsBase):
+class TestSubmitReviewFieldAnswers(TestSubmitViewsBase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.licence = helpers.create_licence(
+        cls.review_article = helpers.create_article(
             cls.journal_one,
-            name="Creative Commons 4",
-            short_name="CC4",
+            owner=cls.kathleen,
+            current_step=4,
         )
+        cls.deleted_field = helpers.create_submission_field(
+            cls.journal_one,
+            name="Ethics Statement",
+        )
+        models.FieldAnswer.objects.create(
+            field=cls.deleted_field,
+            article=cls.review_article,
+            answer="Approved by the ethics board.",
+        )
+        cls.deleted_field.delete()
 
     @override_settings(URL_CONFIG="domain")
-    def test_submit_info_post_saves_tagit_keywords(self):
+    def test_submit_review_shows_name_of_deleted_field(self):
         self.client.force_login(self.kathleen)
-        response = self.client.post(
-            reverse("submit_info", kwargs={"article_id": self.article.pk}),
-            {
-                "title": "A keyword round-trip test",
-                "section": self.article.section.pk,
-                "license": self.licence.pk,
-                "language": "eng",
-                "keywords": "bioinformatics,machine learning applications",
-            },
-            SERVER_NAME=self.journal_one.domain,
-        )
-        self.assertEqual(
-            response.status_code,
-            302,
-            response.context["form"].errors if response.context else None,
-        )
-        self.assertEqual(
-            response.url,
-            reverse("submit_authors", kwargs={"article_id": self.article.pk}),
-        )
-        self.assertEqual(
-            list(self.article.keywords.values_list("word", flat=True)),
-            ["bioinformatics", "machine learning applications"],
-        )
-
-    @override_settings(URL_CONFIG="domain")
-    def test_submit_info_post_keeps_keywords_when_one_is_too_long(self):
-        self.client.force_login(self.kathleen)
-        posted_keywords = "first keyword,{},second keyword".format("k" * 201)
-        response = self.client.post(
-            reverse("submit_info", kwargs={"article_id": self.article.pk}),
-            {
-                "title": "A keyword bounce test",
-                "section": self.article.section.pk,
-                "license": self.licence.pk,
-                "language": "eng",
-                "keywords": posted_keywords,
-            },
+        response = self.client.get(
+            reverse("submit_review", kwargs={"article_id": self.review_article.pk}),
             SERVER_NAME=self.journal_one.domain,
         )
         self.assertEqual(response.status_code, 200)
-        form = response.context["form"]
-        self.assertIn("cannot exceed 200", form.errors["keywords"][0])
-        # The bounced form must redisplay every posted keyword, including
-        # the rejected one, so the submitter does not lose their input.
-        self.assertEqual(form["keywords"].value(), posted_keywords)
-        self.assertContains(response, posted_keywords)
-        self.assertFalse(self.article.keywords.exists())
+        self.assertContains(response, "Ethics Statement")
+        self.assertContains(response, "Approved by the ethics board.")

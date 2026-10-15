@@ -5,6 +5,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 import json
 import os
+import os
 import re
 import warnings
 from importlib import import_module
@@ -1516,7 +1517,10 @@ def manage_issues(request, issue_id=None, event=None):
                 save_issue.journal = request.journal
                 save_issue.save()
                 if request.FILES and save_issue.large_image:
-                    resize_and_crop(save_issue.large_image.path, [750, 324])
+                    resize_and_crop(
+                        save_issue.large_image.path,
+                        field_name="Large image",
+                    )
                 if issue:
                     return redirect(
                         reverse("manage_issues_id", kwargs={"issue_id": issue.pk})
@@ -1533,7 +1537,12 @@ def manage_issues(request, issue_id=None, event=None):
         "form": form,
         "modal": modal,
         "galley_form": galley_form,
-        "articles": issue.get_sorted_articles(published_only=False) if issue else None,
+        "article_groups": logic.group_issue_articles(
+            issue.get_sorted_articles(published_only=False),
+            request.journal.issue_article_grouping,
+        )
+        if issue
+        else None,
         "sort_form": sort_form,
     }
 
@@ -2057,8 +2066,8 @@ def publication_schedule(request):
 
     return render(request, template, context)
 
-@login_required
-@decorators.frontend_enabled
+
+@has_journal
 def become_reviewer(request):
     """
     If a user is signed in and not a reviewer, lets them become one, otherwsie asks them to login/tells them they
@@ -2070,7 +2079,9 @@ def become_reviewer(request):
     # The user needs to login before we can do anything else
     code = "not-logged-in"
     message = _(
-        "You must login before you can become a reviewer. Click the button below to login."
+        "You must be logged in to become a reviewer. If you do not have an "
+        "account you can register, then add your reviewing interests and "
+        "other details from your Profile page."
     )
 
     if (
@@ -2091,9 +2102,14 @@ def become_reviewer(request):
     ):
         # The user is logged in, and is already a reviewer
         code = "already-reviewer"
-        message = _("You are already a reviewer.")
+        message = _(
+            "You are already a reviewer. You can add your reviewing "
+            "interests and other details from your Profile page."
+        )
 
     if request.POST.get("action", None) == "go":
+        if not request.user.is_authenticated:
+            return redirect(reverse("core_login"))
         request.user.add_account_role("reviewer", request.journal)
         messages.add_message(
             request,
@@ -2102,7 +2118,10 @@ def become_reviewer(request):
         )
         return redirect(reverse("core_dashboard"))
 
-    template = "journal/become_reviewer.html"
+    if request.journal.disable_front_end:
+        template = "admin/journal/become_reviewer.html"
+    else:
+        template = "journal/become_reviewer.html"
     context = {
         "code": code,
         "message": message,
@@ -2111,21 +2130,17 @@ def become_reviewer(request):
     return render(request, template, context)
 
 
-def contact(request):
+def contact(request, contact_person_id=None):
     """
     Displays a form that allows a user to contact admins or editors.
     :param request: HttpRequest object
+    :param contact_person_id: pk for the ContactPerson that should be pre-selected
     :return: HttpResponse or HttpRedirect if POST
     """
-    subject = request.GET.get("subject", "")
-    contacts = core_models.Contacts.objects.filter(
-        content_type=request.model_content_type, object_id=request.site_type.pk
-    )
 
-    contact_form = forms.ContactForm(subject=subject, contacts=contacts)
-
-    if request.POST:
-        contact_form = forms.ContactForm(request.POST, contacts=contacts)
+    # Backwards compatibility
+    if not request.journal:
+        return redirect(reverse("press_contact"))
 
         if contact_form.is_valid():
             new_contact = contact_form.save(commit=False)
@@ -2164,17 +2179,118 @@ def contact(request):
             )
             return redirect(reverse("contact"))
 
-    if request.journal and request.journal.disable_front_end:
+    if request.journal.disable_front_end:
         template = "admin/journal/contact.html"
-    elif request.journal:
-        template = "journal/contact.html"
     else:
-        template = "press/journal/contact.html"
+        template = "journal/contact.html"
     context = {
         "contact_form": contact_form,
-        "contacts": contacts,
+        "contacts": contact_people,
     }
 
+    return render(request, template, context)
+
+
+@decorators.frontend_enabled
+def accessibility(request):
+    """
+    Displays the accessibility information page.
+    :param request: HttpRequest object
+    :return: HttpResponse object
+    """
+    if request.journal and request.journal.disable_front_end:
+        template = "admin/core/a11y.html"
+    elif request.journal:
+        template = "core/a11y.html"
+    elif request.repository:
+        template = "repository/a11y.html"
+    else:
+        template = "press/a11y.html"
+
+    # Load a11y conformance data
+    try:
+        json_path = os.path.join(settings.BASE_DIR, "a11y", "conformance_data.json")
+        with open(json_path, "r") as f:
+            raw_data = json.load(f)
+
+        # Parse markdown links: [text](url) -> {text: ..., url: ...}
+        def parse_audit_link(audit_str):
+            if not audit_str:
+                return {"text": "", "url": ""}
+            match = re.match(r"\[([^\]]+)\]\(([^)]+)\)", audit_str)
+            if match:
+                return {"text": match.group(1), "url": match.group(2)}
+            return {"text": audit_str, "url": ""}
+
+        # Process data for each theme
+        vpat_data = {}
+        for theme_key, theme_info in raw_data.get("area", {}).items():
+            vpat_data[theme_key] = {
+                "name": theme_info.get("name"),
+                "audit_results": [
+                    {
+                        "criterion_id": crit_id,
+                        "criterion_name": raw_data["criteria"]
+                        .get(crit_id, {})
+                        .get("criterion_name"),
+                        "level": raw_data["criteria"].get(crit_id, {}).get("level"),
+                        "conformance": result.get("conformance"),
+                        "remarks": result.get("remarks"),
+                        "audit": parse_audit_link(result.get("audit")),
+                    }
+                    for crit_id, result in theme_info.get("audit_results", {}).items()
+                ],
+            }
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        vpat_data = {}
+
+    # For press a11y page, identify themes in use by journals and repositories
+    journal_themes = {}
+    repository_themes = {}
+    if not request.journal and not request.repository:  # This is the press-level page
+        from core.models import SettingValue, Setting
+        from repository.models import Repository
+
+        press = request.press
+        all_journals = press.journals()
+
+        # Check all themes used by journals (including defaults)
+        try:
+            journal_theme_settings = (
+                SettingValue.objects.filter(
+                    journal__in=all_journals,
+                    setting__name="journal_theme",
+                    setting__group__name="general",
+                )
+                .values_list("value", flat=True)
+                .distinct()
+            )
+            themes_in_use = set(journal_theme_settings)
+        except (SettingValue.DoesNotExist, Setting.DoesNotExist):
+            themes_in_use = set()
+
+        # make lower case and include all journal themes
+        for theme in themes_in_use:
+            theme_lower = theme.lower()
+            journal_themes[theme_lower] = {"has_vpat": theme_lower in vpat_data}
+
+        # Check all themes used by live repositories belonging to this press
+        repository_themes_in_use = set(
+            Repository.objects.filter(press=press, live=True).values_list(
+                "theme", flat=True
+            )
+        )
+        for theme in repository_themes_in_use:
+            theme_lower = theme.lower()
+            repository_themes[theme_lower] = {"has_vpat": theme_lower in vpat_data}
+
+    context = {
+        "vpat_data": vpat_data,
+        "journal_themes": journal_themes,
+        "repository_themes": repository_themes,
+        "other_themes_in_use": set(journal_themes) | set(repository_themes),
+    }
     return render(request, template, context)
 
 
@@ -2231,10 +2347,16 @@ def sitemap(request, issue_id=None):
     """
     Renders an XML sitemap based on articles and pages available to the journal.
     :param request: HttpRequest object
-    :param issue_id: Int, primary key of an Issue object
+    :param issue_id: Int primary key of an Issue object, or the sentinel
+        string "none" to serve the 'not in any issue' sub-sitemap.
     :return: HttpResponse object
     """
-    if issue_id:
+    if issue_id == "none":
+        path_parts = [
+            request.journal.code,
+            "no_issue_sitemap.xml",
+        ]
+    elif issue_id:
         issue = models.Issue.objects.get(
             pk=issue_id,
             journal=request.journal,
@@ -2248,6 +2370,34 @@ def sitemap(request, issue_id=None):
             request.journal.code,
             "sitemap.xml",
         ]
+    return core_views.sitemap(
+        request,
+        path_parts,
+    )
+
+
+def news_sitemap(request):
+    """
+    Serves the news sub-sitemap for the current journal.
+    """
+    path_parts = [
+        request.journal.code,
+        "news_sitemap.xml",
+    ]
+    return core_views.sitemap(
+        request,
+        path_parts,
+    )
+
+
+def pages_sitemap(request):
+    """
+    Serves the pages sub-sitemap for the current journal.
+    """
+    path_parts = [
+        request.journal.code,
+        "pages_sitemap.xml",
+    ]
     return core_views.sitemap(
         request,
         path_parts,
@@ -2287,6 +2437,7 @@ def full_text_search(request):
     search_term, keyword, sort, form, redir = logic.handle_search_controls(
         request,
     )
+
     if search_term:
         form.is_valid()
         articles = submission_models.Article.objects.search(
@@ -2296,10 +2447,25 @@ def full_text_search(request):
             site=request.site_object,
         )
 
+    paginate_by = request.GET.get("paginate_by", 25)
+    if paginate_by == "all":
+        paginate_by = articles.count() if articles else 25
+
+    paginator = Paginator(articles, paginate_by)
+    page_number = request.GET.get("page")
+
+    try:
+        page_obj = paginator.get_page(page_number)
+    except (EmptyPage, PageNotAnInteger):
+        page_obj = paginator.get_page(1)
+
     template = "journal/full-text-search.html"
     context = {
-        "articles": articles,
-        "article_search": search_term,
+        "articles": page_obj,
+        "page_obj": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
+        "paginate_by": paginate_by,
+        "search_term": search_term,
         "keyword": keyword,
         "form": form,
     }
@@ -2324,7 +2490,6 @@ def old_search(request):
 
     if redir:
         return redir
-    from itertools import chain
 
     if search_term:
         escaped = re.escape(search_term)
@@ -2639,19 +2804,6 @@ def download_supp_file(request, article_id, supp_file_id):
     )
 
     return files.serve_file(request, supp_file.file, article, public=True)
-
-
-@staff_member_required
-def texture_edit(request, file_id):
-    file = get_object_or_404(core_models.File, pk=file_id)
-
-    template = "admin/journal/texture.html"
-    context = {
-        "file": file,
-        "content": files.get_file(file, file.article).replace("\n", ""),
-    }
-
-    return render(request, template, context)
 
 
 @editor_user_required_and_can_see_pii
@@ -3088,7 +3240,8 @@ class FacetedArticlesListView(core_views.GenericFacetedListView):
 class PublishedArticlesListView(FacetedArticlesListView):
     """
     A list of published articles that can be searched,
-    sorted, and filtered
+    sorted, and filtered.
+    Not for use at the press level.
     """
 
     template_name = "journal/article_list.html"
@@ -3118,6 +3271,18 @@ class PublishedArticlesListView(FacetedArticlesListView):
             },
         }
         return self.filter_facets_if_journal(facets)
+
+    def get_facet_queryset(self):
+        queryset = super().get_facet_queryset()
+        return queryset.filter(
+            date_published__lte=timezone.now(),
+            stage=submission_models.STAGE_PUBLISHED,
+        )
+
+    def get_order_by(self):
+        order_by = self.request.GET.get("order_by", "-date_published")
+        order_by_choices = self.get_order_by_choices()
+        return order_by if order_by in dict(order_by_choices) else ""
 
     def get_order_by_choices(self):
         return [
