@@ -471,7 +471,7 @@ def getCurrentDataCiteXML(article_id=None,issue_id=None):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if not errors:
-            status,content=api.getMetadata(doi)
+            status,content = datacite_api.getMetadata(doi)
             if status != 'success':
                 errors.append(content)
             else:
@@ -509,7 +509,7 @@ def getCurrentDataCiteURL(article_id=None,issue_id=None):
                 errors.append("existing DOI doesn't conform to current configuration")
 
         if not errors:
-            status,content=api.getURL(doi)
+            status,content = datacite_api.getURL(doi)
             if status != 'success':
                 errors.append(content)
             else:

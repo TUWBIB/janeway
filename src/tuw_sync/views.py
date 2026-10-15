@@ -80,7 +80,8 @@ def sync(request):
 
         # Handle bulk operations
         article_ids = data.get('article_ids', [])
-        if article_ids and operation in ('alma_push_nz', 'alma_push_nz_confirm', 'alma_create_update', 'alma_create_update_confirm'):
+        if article_ids and operation in ('alma_push_nz', 'alma_push_nz_confirm', 'alma_create_update', 'alma_create_update_confirm',
+                                         'datacite_register_doi', 'datacite_register_doi_confirm'):
             if operation == 'alma_push_nz':
                 response = almaPushNZBulk(request.journal, article_ids)
             elif operation == 'alma_push_nz_confirm':
@@ -89,6 +90,10 @@ def sync(request):
                 response = almaCreateUpdateBulk(request.journal, article_ids)
             elif operation == 'alma_create_update_confirm':
                 response = almaCreateUpdateConfirmBulk(request.journal, article_ids)
+            elif operation == 'datacite_register_doi':
+                response = dataciteRegisterDOIBulk(request.journal, article_ids)
+            elif operation == 'datacite_register_doi_confirm':
+                response = dataciteRegisterDOIConfirmBulk(request.journal, article_ids)
             return response
 
         if article:
@@ -353,18 +358,42 @@ def almaViewCurrent(article):
         'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
 
 
-def almaCreateUpdate(article):
-    (xml,errors,warnings) = logic.articleToMarc(article)
-
-    return JsonResponse({ 'errors': errors, 'warnings': warnings,
-        'alma' : { 'xml' : xml, 'mmsid' : None, 'ac' : None }})
+NZ_LINKED_RECORD_RE = re.compile(r'<linked_record_id type="NZ">(\d+)</linked_record_id>')
 
 
-def almaCreateUpdateConfirm(article):
-    errors = []
+def almaCheckRecord(article, action='push'):
+    """
+    Check an article's Alma record for push / update readiness.
 
+    Returns (ready, mmsid, errors); ready is True when the record can be
+    pushed to the NZ / updated, otherwise errors holds the reasons.
+    """
     mmsid = article.get_mmsid()
-    ac = article.get_ac()
+
+    if not mmsid:
+        return False, mmsid, ["record has no (local) mmsid, can't push to NZ"]
+
+    result = alma_api.getBibRecord(mmsid)
+    errors = result.errs
+    if errors:
+        return False, mmsid, errors
+
+    match = NZ_LINKED_RECORD_RE.search(result.data)
+    if match:
+        if action == 'update':
+            return False, mmsid, ["can't update record; already in NZ: " + match.group(1)]
+        return False, mmsid, ["can't push record to NZ; already in NZ: " + match.group(1)]
+
+    return True, mmsid, []
+
+
+def almaCreateUpdateRecord(article):
+    """
+    Create / Update the Alma record for a single article.
+
+    Returns (success, mmsid, errors); the new mmsid is persisted on success.
+    """
+    mmsid = article.get_mmsid()
     doi = article.get_doi()
 
     portfolio_settings = alma_settings.get('portfolios',{})
@@ -374,33 +403,21 @@ def almaCreateUpdateConfirm(article):
 
     (xml,errors,warnings) = logic.articleToMarc(article)
     if errors:
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : ac }})
-    
-    if mmsid:
-        result = alma_api.getBibRecord(mmsid)
-        xml_current = result.data
-        errors = result.errs
-        if errors:
-            return JsonResponse({ 'errors': errors, 'warnings': warnings,
-                'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+        return False, mmsid, errors
 
-        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml_current)
-        if match:
-            mmsid_nz = match[1]
-            errors.append("can't update record; already in NZ: " + mmsid_nz)
-            return JsonResponse({ 'errors': errors, 'warnings': warnings,
-                'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+    if mmsid:
+        ready, _, check_errors = almaCheckRecord(article, action='update')
+        if not ready:
+            return False, mmsid, check_errors
 
         result = alma_api.updateBibRecord(xml,mmsid)
     else:
         result = alma_api.createBibRecord(xml)
-    
+
     xml = result.data
     errors = result.errs
     if errors:
-        return JsonResponse({ 'errors': errors, 'warnings': warnings,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+        return False, mmsid, errors
 
     try:
         xml = stripXmlDeclaration(xml)
@@ -408,76 +425,59 @@ def almaCreateUpdateConfirm(article):
         mr.parse(xml)
         mmsid = mr.getMMSId()
     except Exception as e:
-        errors.append('error parsing API response')
-        errors.append(str(e))
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
+        errors = ['error parsing API response', str(e)]
+        return False, mmsid, errors
 
     errors = logic.setMMSId(article,mmsid)
     if errors:
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
+        return False, mmsid, errors
 
     if create_portfolio and collectionid and serviceid:
         result = alma_api.createPortfolio(collectionid,serviceid,mmsid,f"https://doi.org/{doi}")
+        errors = result.errs
+        if errors:
+            return False, mmsid, errors
 
-    errors = result.errs
-
-    return JsonResponse({ 'errors': errors, 'warnings': None,
-        'alma' : { 'xml' : xml, 'mmsid' : mmsid, 'ac' : None }})
+    return True, mmsid, []
 
 
-def almaPushNZ(article):
-    errors = []
 
-    mmsid = article.get_mmsid()
+def almaCreateUpdate(article):
+    (xml,errors,warnings) = logic.articleToMarc(article)
+
+    return JsonResponse({ 'errors': errors, 'warnings': warnings,
+        'alma' : { 'xml' : xml, 'mmsid' : None, 'ac' : None }})
+
+
+def almaCreateUpdateConfirm(article):
+    success, mmsid, errors = almaCreateUpdateRecord(article)
+    if not success:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
     ac = article.get_ac()
 
-    if not mmsid:
-        errors.append("record has no (local) mmsid, can't push to NZ")
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-    
-    result = alma_api.getBibRecord(mmsid)
-    xml = result.data
-    errors = result.errs
-    if errors:
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
-
-    match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
-    if match:
-        mmsid_nz=match[1]
-        errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
-    
     return JsonResponse({ 'errors': None, 'warnings': None,
         'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
 
 
-def almaPushNZConfirm(article):
-    errors = []
 
-    mmsid = article.get_mmsid()
+def almaPushNZ(article):
+    ready, mmsid, errors = almaCheckRecord(article)
+    if not ready:
+        return JsonResponse({ 'errors': errors, 'warnings': None,
+            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+    return JsonResponse({ 'errors': None, 'warnings': None,
+        'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : None }})
+
+
+
+def almaPushNZConfirm(article):
     ac = article.get_ac()
 
-    if not mmsid:
-        errors.append("record has no (local) mmsid, can't push to NZ")
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-    
-    result = alma_api.getBibRecord(mmsid)
-    xml = result.data
-    errors = result.errs
-    if errors:
-        return JsonResponse({ 'errors': errors, 'warnings': None,
-            'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
-
-    match=re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>',xml)
-    if match:
-        mmsid_nz=match[1]
-        errors.append("can't push record to NZ; already in NZ: "+mmsid_nz)
+    ready, mmsid, errors = almaCheckRecord(article)
+    if not ready:
         return JsonResponse({ 'errors': errors, 'warnings': None,
             'alma' : { 'xml' : None, 'mmsid' : mmsid, 'ac' : ac }})
 
@@ -517,7 +517,6 @@ def almaPushNZConfirm(article):
     name = 'Janeway ' + json.dumps(data)
     result = alma_api.runLinkJob(setid,name=name)
     xml = result.data
-    print(xml)
 
     errors = result.errs
     if errors:
@@ -589,29 +588,11 @@ def almaPushNZBulk(journal, article_ids):
     articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
 
     for article in articles:
-        mmsid = article.get_mmsid()
-        article_errors = []
-
-        if not mmsid:
-            article_errors.append(f"Article {article.pk}: record has no (local) mmsid, can't push to NZ")
-            errors_by_id[article.pk] = article_errors
-            invalid_count += 1
-            continue
-
-        result = alma_api.getBibRecord(mmsid)
-        xml = result.data
-        article_errors = result.errs
-
-        if article_errors:
-            errors_by_id[article.pk] = article_errors
-            invalid_count += 1
-            continue
-
-        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>', xml)
-        if match:
-            mmsid_nz = match[1]
-            article_errors.append(f"Article {article.pk}: can't push record to NZ; already in NZ: {mmsid_nz}")
-            errors_by_id[article.pk] = article_errors
+        ready, mmsid, errors = almaCheckRecord(article)
+        if not ready:
+            errors_by_id[article.pk] = [
+                f"Article {article.pk}: {message}" for message in errors
+            ]
             invalid_count += 1
             continue
 
@@ -650,27 +631,10 @@ def almaPushNZConfirmBulk(journal, article_ids):
     valid_mmsids = []
 
     for article in articles:
-        mmsid = article.get_mmsid()
-
-        if not mmsid:
+        ready, mmsid, errors = almaCheckRecord(article)
+        if not ready:
             failed_count += 1
-            failed_articles.append(f"Article {article.pk}: no (local) mmsid")
-            continue
-
-        result = alma_api.getBibRecord(mmsid)
-        xml = result.data
-        article_errors = result.errs
-
-        if article_errors:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: {', '.join(article_errors)}")
-            continue
-
-        match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>', xml)
-        if match:
-            mmsid_nz = match[1]
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: already in NZ: {mmsid_nz}")
+            failed_articles.append(f"Article {article.pk}: {', '.join(errors)}")
             continue
 
         valid_mmsids.append(mmsid)
@@ -833,27 +797,13 @@ def almaCreateUpdateBulk(journal, article_ids):
     articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
 
     for article in articles:
-        mmsid = article.get_mmsid()
-        article_errors = []
-
-        if mmsid:
-            # Check if already in NZ
-            result = alma_api.getBibRecord(mmsid)
-            xml = result.data
-            article_errors = result.errs
-
-            if article_errors:
-                errors_by_id[article.pk] = article_errors
-                invalid_count += 1
-                continue
-
-            match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>', xml)
-            if match:
-                mmsid_nz = match[1]
-                article_errors.append(f"Article {article.pk}: can't update record; already in NZ: {mmsid_nz}")
-                errors_by_id[article.pk] = article_errors
-                invalid_count += 1
-                continue
+        ready, mmsid, errors = almaCheckRecord(article, action='update')
+        if not ready:
+            errors_by_id[article.pk] = [
+                f"Article {article.pk}: {message}" for message in errors
+            ]
+            invalid_count += 1
+            continue
 
         valid_count += 1
 
@@ -888,72 +838,10 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
     articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
 
     for article in articles:
-        mmsid = article.get_mmsid()
-        ac = article.get_ac()
-        doi = article.get_doi()
-
-        portfolio_settings = alma_settings.get('portfolios',{})
-        collectionid = portfolio_settings.get('collection_id',None)
-        serviceid = portfolio_settings.get('service_id',None)
-        create_portfolio = True if not mmsid and bool(portfolio_settings.get('create_portfolios',False)) else False
-
-        (xml, article_errors, warnings) = logic.articleToMarc(article)
-        if article_errors:
+        success, mmsid, errors = almaCreateUpdateRecord(article)
+        if not success:
             failed_count += 1
-            failed_articles.append(f"Article {article.pk}: {', '.join(article_errors)}")
-            continue
-
-        if mmsid:
-            # Check if already in NZ
-            result = alma_api.getBibRecord(mmsid)
-            xml_current = result.data
-            check_errors = result.errs
-            if check_errors:
-                failed_count += 1
-                failed_articles.append(f"Article {article.pk}: {', '.join(check_errors)}")
-                continue
-
-            match = re.search(r'<linked_record_id type="NZ">(\d+)</linked_record_id>', xml_current)
-            if match:
-                mmsid_nz = match[1]
-                failed_count += 1
-                failed_articles.append(f"Article {article.pk}: can't update record; already in NZ: {mmsid_nz}")
-                continue
-
-            result = alma_api.updateBibRecord(xml, mmsid)
-        else:
-            result = alma_api.createBibRecord(xml)
-
-        xml = result.data
-        article_errors = result.errs
-        if article_errors:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: {', '.join(article_errors)}")
-            continue
-
-        try:
-            xml = stripXmlDeclaration(xml)
-            mr = MarcRecord()
-            mr.parse(xml)
-            mmsid = mr.getMMSId()
-        except Exception as e:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: error parsing API response - {str(e)}")
-            continue
-
-        errors_set_mmsid = logic.setMMSId(article, mmsid)
-        if errors_set_mmsid:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: {', '.join(errors_set_mmsid)}")
-            continue
-
-        if create_portfolio and collectionid and serviceid:
-            result = alma_api.createPortfolio(collectionid, serviceid, mmsid, f"https://doi.org/{doi}")
-
-        article_errors = result.errs
-        if article_errors:
-            failed_count += 1
-            failed_articles.append(f"Article {article.pk}: {', '.join(article_errors)}")
+            failed_articles.append(f"Article {article.pk}: {', '.join(errors)}")
             continue
 
         success_count += 1
@@ -965,5 +853,106 @@ def almaCreateUpdateConfirmBulk(journal, article_ids):
         'success_count': success_count,
         'failed_count': failed_count,
         'updated_mmsids': updated_mmsids,
+        'bulk': True
+    })
+
+
+def dataciteRegisterDOIRecord(article):
+    """
+    Register / Update the DataCite DOI for a single article.
+
+    Mirrors the single-article flow of dataciteMetadataConfirm():
+    generate metadata, extract the DOI, push it to DataCite and persist
+    the DOI + state locally.
+
+    Returns (success, doi, state, errors).
+    """
+    (xml, errors, _) = logic.dataciteMetadata(article_id=article.pk)
+    if errors:
+        return False, None, None, errors
+
+    match = re.search(r'<identifier\sidentifierType="DOI">(.+)</identifier>', xml)
+    if match is None:
+        return False, None, None, ["can't extract DOI from xml"]
+
+    doi = match.group(1)
+    (status, content) = datacite_api.updateMetadata(doi, xml)
+    if status != "success":
+        return False, doi, None, [content]
+
+    status, errors, state = logic.metadataUpdated(doi, article_id=article.pk)
+    if status != "success":
+        return False, doi, None, errors
+
+    return True, doi, state, []
+
+
+def dataciteRegisterDOIBulk(journal, article_ids):
+    """
+    Check selected articles for DataCite DOI registration readiness.
+    Returns validation results for each article.
+    """
+    errors_by_id = {}
+    valid_count = 0
+    invalid_count = 0
+
+    articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
+
+    for article in articles:
+        (xml, errors, _) = logic.dataciteMetadata(article_id=article.pk)
+        if errors:
+            errors_by_id[article.pk] = [
+                f"Article {article.pk}: {message}" for message in errors
+            ]
+            invalid_count += 1
+            continue
+
+        valid_count += 1
+
+    if invalid_count > 0:
+        return JsonResponse({
+            'errors': errors_by_id,
+            'warnings': None,
+            'valid_count': valid_count,
+            'invalid_count': invalid_count,
+            'bulk': True
+        })
+
+    return JsonResponse({
+        'errors': None,
+        'warnings': None,
+        'valid_count': valid_count,
+        'invalid_count': 0,
+        'bulk': True
+    })
+
+
+def dataciteRegisterDOIConfirmBulk(journal, article_ids):
+    """
+    Register / Update DataCite DOIs for selected articles in bulk.
+    """
+    success_count = 0
+    failed_count = 0
+    failed_articles = []
+    updated_dois = {}  # Track doi + state for successfully processed articles
+
+    articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
+
+    for article in articles:
+        success, doi, state, errors = dataciteRegisterDOIRecord(article)
+        if not success:
+            failed_count += 1
+            failed_articles.append(f"Article {article.pk}: {', '.join(errors)}")
+            continue
+
+        success_count += 1
+        updated_dois[article.pk] = { 'doi': doi, 'state': state }
+
+    return JsonResponse({
+        'errors': failed_articles if failed_articles else None,
+        'warnings': None,
+        'success_count': success_count,
+        'failed_count': failed_count,
+        'updated_dois': updated_dois,
         'bulk': True
     })

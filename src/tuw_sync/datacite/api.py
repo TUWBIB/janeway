@@ -61,6 +61,9 @@ class API():
         if not 'endpoint' in data['login'].keys():
             raise Exception("DataciteApi config file: 'login.endpoint' expected")
 
+        if not 'rest-endpoint' in data['login'].keys():
+            raise Exception("DataciteApi config file: 'login.rest-endpoint' expected")
+
         if not 'user' in data['login'].keys():
             raise Exception("DataciteApi config file: 'login.user' expected")
 
@@ -117,13 +120,10 @@ class API():
                 status = "error"
             content=response.text
 
-            print(content)
-
             d = json.loads(response.text)
             content = d['data']['attributes']['xml']
             content = base64.b64decode(content).decode()
             content = html.unescape(content)
-
 
         except ConnectTimeout as e:
             status = "error"
@@ -136,8 +136,6 @@ class API():
             content = (''.join(['general exception: ',str(e)]))
 
         return (status,content)
-
-
 
     def updateMetadata(self,doi,xml):
         url = self.login['endpoint']
@@ -204,7 +202,6 @@ class API():
             content = (''.join(['general exception: ',str(e)]))
 
         return (status,content)
-
 
     def getURL(self,doi):
         url = self.login['endpoint']

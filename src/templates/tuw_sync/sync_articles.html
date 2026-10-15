@@ -423,6 +423,15 @@
                 bulkAlmaCreateUpdateConfirm(selectedArticleIds);
             });
 
+            // Bulk Register DOIs button (DataCite)
+            $('.btn-bulk-register-doi').on('click', function(e) {
+                e.preventDefault();
+                if (selectedArticleIds.length === 0) {
+                    return;
+                }
+                bulkRegisterDOIConfirm(selectedArticleIds);
+            });
+
             $(".btn_alma_create_update").on("click", function(e)
             {
                 e.preventDefault();
@@ -1673,6 +1682,161 @@
                                 var mmsidAcCell = $("#alma_mmsid_ac_" + articleId);
                                 if (mmsidAcCell.length > 0) {
                                     mmsidAcCell.html(mmsid);
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkRegisterDOI(article_ids, callback) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'datacite_register_doi',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    callback(response);
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkRegisterDOIConfirm(article_ids) {
+            // First, validate which articles are ready for DOI registration
+            bulkRegisterDOI(article_ids, function(validationResponse) {
+                var valid_count = validationResponse.valid_count || 0;
+                var invalid_count = validationResponse.invalid_count || 0;
+                var errors = validationResponse.errors;
+                var warnings = validationResponse.warnings;
+
+                if (validationResponse.bulk && invalid_count > 0) {
+                    // Some articles failed validation
+                    var errorMessages = [];
+                    if (errors && typeof errors === 'object') {
+                        for (var articleId in errors) {
+                            if (errors.hasOwnProperty(articleId)) {
+                                var msgs = errors[articleId];
+                                for (var i = 0; i < msgs.length; i++) {
+                                    errorMessages.push(msgs[i]);
+                                }
+                            }
+                        }
+                    }
+                    if (errorMessages.length > 0) {
+                        toastr.error(arrayToStringWithBr(errorMessages));
+                    }
+                    if (valid_count > 0) {
+                        toastr.warning(valid_count + " article(s) are valid and ready for registration. " + invalid_count + " article(s) failed validation.");
+                    }
+                    return;
+                }
+
+                if (errors && errors.length > 0) {
+                    toastr.error(arrayToStringWithBr(errors));
+                    return;
+                }
+
+                if (valid_count === 0) {
+                    toastr.warning("No articles are ready for DOI registration.");
+                    return;
+                }
+
+                // Show confirmation modal
+                var content = '<div class="reveal small" id="modal-bulk-register-doi" data-close-on-click="false" data-close-on-esc="false"'+
+                    '<h2>Register DOIs for ' + valid_count + ' Articles</h2>'+
+                    '<p>Are you sure you want to register the DOI / update the metadata for the selected ' + valid_count + ' article(s) at DataCite?</p>'+
+                    '<button class="button success ok float-center" id="btn-confirm-bulk-register-doi">Register DOIs</button>'+
+                    '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                    '</div>';
+
+                $('body').append(content);
+
+                var modal = new Foundation.Reveal($('#modal-bulk-register-doi'));
+                modal.open();
+
+                $('#btn-confirm-bulk-register-doi').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-register-doi').remove();
+                    $('.reveal-overlay').remove();
+
+                    // Perform the actual bulk registration
+                    doBulkRegisterDOI(article_ids);
+                });
+
+                $('.cancel').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-register-doi').remove();
+                    $('.reveal-overlay').remove();
+                });
+            });
+        }
+
+        function doBulkRegisterDOI(article_ids) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'datacite_register_doi_confirm',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    var errors = response.errors;
+                    var warnings = response.warnings;
+                    var success_count = response.success_count || 0;
+                    var failed_count = response.failed_count || 0;
+                    var updated_dois = response.updated_dois || {};
+
+                    if (errors && errors.length > 0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        var msg = success_count + " article(s) successfully registered at DataCite.";
+                        if (failed_count > 0) {
+                            msg += " " + failed_count + " article(s) failed.";
+                        }
+                        toastr.success(msg);
+
+                        // Update the table with new dois + states without refreshing
+                        for (var articleId in updated_dois) {
+                            if (updated_dois.hasOwnProperty(articleId)) {
+                                var doi = updated_dois[articleId].doi;
+                                var state = updated_dois[articleId].state;
+                                if (state) {
+                                    $("#datacite_state_" + articleId).html(state);
+                                }
+                                if (doi) {
+                                    $("#datacite_doi_" + articleId).html(doi);
                                 }
                             }
                         }
