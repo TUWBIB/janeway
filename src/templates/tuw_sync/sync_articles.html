@@ -26,41 +26,52 @@
 <div class="tabs-panel" id="tab-articles">
 <div class="content">
         {# Bulk action toolbar - always visible #}
-        <div class="row" id="bulk-toolbar" style="margin-bottom: 10px;">
-            <div class="small-12 columns">
+        <div class="row expanded" id="bulk-toolbar" style="margin-bottom: 10px;">
+            <div class="small-3 columns">
                 <button class="button small primary" id="btn-select-all">Select All</button>
                 <button class="button small secondary" id="btn-deselect-all">Deselect All</button>
-                <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px; display: inline-block;">
-                    <li>
-                        <a href="#" id="btn-bulk-actions" disabled>Bulk Actions</a>
-                        <ul class="vertical menu nested">
-                            {% if settings.alma_article_sync %}
-                            <li>
-                                <a href="#">Alma</a>
-                                <ul class="vertical menu nested">
-                                    <li>
-                                        <a href="#" class="button hollow btn-bulk-create-update" id="btn-bulk-create-update">Create / Update Marc Records</a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="button hollow btn-bulk-push-nz" id="btn-bulk-push-nz">Push Selected To Network Zone</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            {% endif %}
-                            {% if settings.datacite_article_sync %}
-                            <li>
-                                <a href="#">Datacite</a>
-                                <ul class="vertical menu nested">
-                                    <li>
-                                        <a href="#" class="button hollow btn-bulk-register-doi" id="btn-bulk-register-doi">Register DOIs</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
+                <div class="selection-mode-row">
+                    <span class="selection-mode-label">Select rows on:</span>
+                    <label class="selection-mode-option"><input type="radio" name="selection-mode" value="current-page" checked> current page only</label>
+                    <label class="selection-mode-option"><input type="radio" name="selection-mode" value="all-pages"> all pages</label>
+                </div>
+                <div class="selected-count-row">
+                    <span id="selected-count">0</span> articles selected
+                </div>
+            </div>
+            <div class="small-3 columns">
+                <ul class="vertical dropdown menu" data-dropdown-menu style="max-width: 250px; display: inline-block; vertical-align: middle; margin-left: 15px;">
+                <li>
+                    <a href="#" id="btn-bulk-actions" disabled>Bulk Actions</a>
+                    <ul class="vertical menu nested">
+                        {% if settings.alma_article_sync %}
+                        <li>
+                            <a href="#">Alma</a>
+                            <ul class="vertical menu nested">
+                                <li>
+                                    <a href="#" class="button hollow btn-bulk-create-update" id="btn-bulk-create-update">Create / Update Marc Records</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="button hollow btn-bulk-push-nz" id="btn-bulk-push-nz">Push Selected To Network Zone</a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if settings.datacite_article_sync %}
+                        <li>
+                            <a href="#">Datacite</a>
+                            <ul class="vertical menu nested">
+                                <li>
+                                    <a href="#" class="button hollow btn-bulk-register-doi" id="btn-bulk-register-doi">Register DOIs</a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </li>
                 </ul>
-                <span id="selected-count" style="margin-left: 10px;">0</span> articles selected
+            </div>
+            <div class="small-6 columns">
             </div>
         </div>
         <table class="table table-bordered" id="datatable-articles" >
@@ -298,6 +309,7 @@
             var selectedArticleIds = [];
             var allArticleIds = []; // Store all article IDs from the table
             var table_articles_instance = null;
+            var selectionMode = 'current-page'; // 'current-page' or 'all-pages'
 
             // Function to sync checkboxes with selectedArticleIds
             function syncCheckboxes() {
@@ -308,6 +320,24 @@
                 });
             }
 
+            // Get article IDs for the rows currently displayed on the active page
+            function getCurrentPageArticleIds() {
+                var ids = [];
+                if (!table_articles_instance) {
+                    return ids;
+                }
+                table_articles_instance.rows({ page: 'current' }).every(function () {
+                    var node = this.node();
+                    if (node) {
+                        var id = $(node).data('article-id');
+                        if (id) {
+                            ids.push(id);
+                        }
+                    }
+                });
+                return ids;
+            }
+
             // Collect all article IDs from table rows when page loads
             $('tbody tr[data-article-id]').each(function() {
                 var articleId = $(this).data('article-id');
@@ -316,16 +346,23 @@
                 }
             });
 
-            // Select All button - selects ALL articles across all pages
+            // Selection mode change - clear all selections when the mode is switched
+            $('input[name="selection-mode"]').on('change', function() {
+                selectionMode = $(this).val();
+                selectedArticleIds = [];
+                updateSelectedIds();
+                syncCheckboxes();
+            });
+
+            // Select All button - scope depends on the active row-selection mode
             $('#btn-select-all').on('click', function() {
-                selectedArticleIds = allArticleIds.slice(); // Copy all article IDs
-                // Check boxes on current page for all articles
-                $('.article-checkbox').each(function() {
-                    var id = $(this).data('article-id');
-                    if (selectedArticleIds.indexOf(id) !== -1) {
-                        $(this).prop('checked', true);
-                    }
-                });
+                if (selectionMode === 'all-pages') {
+                    selectedArticleIds = allArticleIds.slice(); // all articles across all pages
+                } else {
+                    selectedArticleIds = getCurrentPageArticleIds(); // only rows on the current page
+                }
+                // Reflect the new selection in the visible checkboxes
+                syncCheckboxes();
                 updateSelectedIds();
             });
 
@@ -1694,6 +1731,31 @@
     }
     #datatable-articles .article-checkbox {
         margin: 0;
+        vertical-align: middle;
+    }
+    /* Flush the toolbar with the table below: the expanded row spans the full
+       width, so remove the Foundation gutter padding of the inner column */
+    #bulk-toolbar .small-12.columns {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .selection-mode-row {
+        display: block;
+        margin-top: 8px;
+    }
+    .selected-count-row {
+        display: block;
+        margin-top: 8px;
+    }
+    .selection-mode-label {
+        margin-right: 6px;
+    }
+    .selection-mode-option {
+        margin-right: 12px;
+        cursor: pointer;
+    }
+    .selection-mode-option input[type="radio"] {
+        margin-right: 3px;
         vertical-align: middle;
     }
     .col-resize-handle {
