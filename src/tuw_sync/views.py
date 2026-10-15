@@ -81,7 +81,8 @@ def sync(request):
         # Handle bulk operations
         article_ids = data.get('article_ids', [])
         if article_ids and operation in ('alma_push_nz', 'alma_push_nz_confirm', 'alma_create_update', 'alma_create_update_confirm',
-                                         'datacite_register_doi', 'datacite_register_doi_confirm'):
+                                         'datacite_register_doi', 'datacite_register_doi_confirm',
+                                         'datacite_url', 'datacite_url_confirm'):
             if operation == 'alma_push_nz':
                 response = almaPushNZBulk(request.journal, article_ids)
             elif operation == 'alma_push_nz_confirm':
@@ -94,6 +95,10 @@ def sync(request):
                 response = dataciteRegisterDOIBulk(request.journal, article_ids)
             elif operation == 'datacite_register_doi_confirm':
                 response = dataciteRegisterDOIConfirmBulk(request.journal, article_ids)
+            elif operation == 'datacite_url':
+                response = dataciteURLBulk(request.journal, article_ids)
+            elif operation == 'datacite_url_confirm':
+                response = dataciteURLConfirmBulk(request.META['HTTP_HOST'], request.journal, article_ids)
             return response
 
         if article:
@@ -954,5 +959,125 @@ def dataciteRegisterDOIConfirmBulk(journal, article_ids):
         'success_count': success_count,
         'failed_count': failed_count,
         'updated_dois': updated_dois,
+        'bulk': True
+    })
+
+
+def dataciteURLRecord(host, article):
+    """
+    Register the DataCite URL for a single article.
+
+    Mirrors the single-article flow of dataciteURLConfirm():
+    validate, register the article page URL at DataCite and mark the
+    article as findable.
+
+    Returns (success, url, state, errors).
+    """
+    errors = []
+    url = datacite_api.options['protocol']
+    url += host
+    url += reverse('article_view', args=['id', article.pk])
+
+    doi = article.get_doi()
+    if doi is None:
+        errors.append("no doi registered yet")
+    else:
+        if not logic.checkDOI(doi, article):
+            errors.append("existing DOI doesn't conform to current configuration")
+
+    if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
+        errors.append("URL already registered")
+
+    if errors:
+        return False, url, None, errors
+
+    (status, content) = datacite_api.registerURL(doi, url)
+    if status != "success":
+        return False, url, None, [content]
+
+    status, errors = logic.urlSet(doi, article=article)
+    if status != "success":
+        return False, url, None, errors
+
+    return True, url, submission_models.DATACITE_STATE_FINDABLE, []
+
+
+def dataciteURLBulk(journal, article_ids):
+    """
+    Check selected articles for DataCite URL registration readiness.
+    Returns validation results for each article.
+    """
+    errors_by_id = {}
+    valid_count = 0
+    invalid_count = 0
+
+    articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
+
+    for article in articles:
+        errors = []
+        doi = article.get_doi()
+        if doi is None:
+            errors.append("no doi registered yet")
+        else:
+            if not logic.checkDOI(doi, article):
+                errors.append("existing DOI doesn't conform to current configuration")
+
+        if article.datacite_state == submission_models.DATACITE_STATE_FINDABLE:
+            errors.append("URL already registered")
+
+        if errors:
+            errors_by_id[article.pk] = [
+                f"Article {article.pk}: {message}" for message in errors
+            ]
+            invalid_count += 1
+            continue
+
+        valid_count += 1
+
+    if invalid_count > 0:
+        return JsonResponse({
+            'errors': errors_by_id,
+            'warnings': None,
+            'valid_count': valid_count,
+            'invalid_count': invalid_count,
+            'bulk': True
+        })
+
+    return JsonResponse({
+        'errors': None,
+        'warnings': None,
+        'valid_count': valid_count,
+        'invalid_count': 0,
+        'bulk': True
+    })
+
+
+def dataciteURLConfirmBulk(host, journal, article_ids):
+    """
+    Register DataCite URLs for selected articles in bulk.
+    """
+    success_count = 0
+    failed_count = 0
+    failed_articles = []
+    updated_urls = {}  # Track url + state for successfully processed articles
+
+    articles = submission_models.Article.objects.filter(journal=journal, pk__in=article_ids)
+
+    for article in articles:
+        success, url, state, errors = dataciteURLRecord(host, article)
+        if not success:
+            failed_count += 1
+            failed_articles.append(f"Article {article.pk}: {', '.join(errors)}")
+            continue
+
+        success_count += 1
+        updated_urls[article.pk] = { 'url': url, 'state': state }
+
+    return JsonResponse({
+        'errors': failed_articles if failed_articles else None,
+        'warnings': None,
+        'success_count': success_count,
+        'failed_count': failed_count,
+        'updated_urls': updated_urls,
         'bulk': True
     })

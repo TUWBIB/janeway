@@ -64,6 +64,9 @@
                                 <li>
                                     <a href="#" class="button hollow btn-bulk-register-doi" id="btn-bulk-register-doi">Register DOIs</a>
                                 </li>
+                                <li>
+                                    <a href="#" class="button hollow btn-bulk-register-url" id="btn-bulk-register-url">Register URLs</a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
@@ -398,10 +401,10 @@
                 
                 if (count > 0) {
                     $('#btn-bulk-actions').prop('disabled', false);
-                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi').prop('disabled', false);
+                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi, .btn-bulk-register-url').prop('disabled', false);
                 } else {
                     $('#btn-bulk-actions').prop('disabled', true);
-                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi').prop('disabled', true);
+                    $('.btn-bulk-create-update, .btn-bulk-push-nz, .btn-bulk-register-doi, .btn-bulk-register-url').prop('disabled', true);
                 }
             }
 
@@ -430,6 +433,15 @@
                     return;
                 }
                 bulkRegisterDOIConfirm(selectedArticleIds);
+            });
+
+            // Bulk Register URLs button (DataCite)
+            $('.btn-bulk-register-url').on('click', function(e) {
+                e.preventDefault();
+                if (selectedArticleIds.length === 0) {
+                    return;
+                }
+                bulkRegisterURLConfirm(selectedArticleIds);
             });
 
             $(".btn_alma_create_update").on("click", function(e)
@@ -1837,6 +1849,157 @@
                                 }
                                 if (doi) {
                                     $("#datacite_doi_" + articleId).html(doi);
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkRegisterURL(article_ids, callback) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'datacite_url',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    callback(response);
+                },
+                error: function(response)
+                {
+                    ajaxError()
+                }
+            })
+        }
+
+        function bulkRegisterURLConfirm(article_ids) {
+            // First, validate which articles are ready for URL registration
+            bulkRegisterURL(article_ids, function(validationResponse) {
+                var valid_count = validationResponse.valid_count || 0;
+                var invalid_count = validationResponse.invalid_count || 0;
+                var errors = validationResponse.errors;
+                var warnings = validationResponse.warnings;
+
+                if (validationResponse.bulk && invalid_count > 0) {
+                    // Some articles failed validation
+                    var errorMessages = [];
+                    if (errors && typeof errors === 'object') {
+                        for (var articleId in errors) {
+                            if (errors.hasOwnProperty(articleId)) {
+                                var msgs = errors[articleId];
+                                for (var i = 0; i < msgs.length; i++) {
+                                    errorMessages.push(msgs[i]);
+                                }
+                            }
+                        }
+                    }
+                    if (errorMessages.length > 0) {
+                        toastr.error(arrayToStringWithBr(errorMessages));
+                    }
+                    if (valid_count > 0) {
+                        toastr.warning(valid_count + " article(s) are valid and ready for URL registration. " + invalid_count + " article(s) failed validation.");
+                    }
+                    return;
+                }
+
+                if (errors && errors.length > 0) {
+                    toastr.error(arrayToStringWithBr(errors));
+                    return;
+                }
+
+                if (valid_count === 0) {
+                    toastr.warning("No articles are ready for URL registration.");
+                    return;
+                }
+
+                // Show confirmation modal
+                var content = '<div class="reveal small" id="modal-bulk-register-url" data-close-on-click="false" data-close-on-esc="false"'+
+                    '<h2>Register URLs for ' + valid_count + ' Articles</h2>'+
+                    '<p>Are you sure you want to register the URL (article page) for the selected ' + valid_count + ' article(s) at DataCite?</p>'+
+                    '<button class="button success ok float-center" id="btn-confirm-bulk-register-url">Register URLs</button>'+
+                    '<button class="button alert cancel float-center" data-close>Cancel</button>'+
+                    '</div>';
+
+                $('body').append(content);
+
+                var modal = new Foundation.Reveal($('#modal-bulk-register-url'));
+                modal.open();
+
+                $('#btn-confirm-bulk-register-url').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-register-url').remove();
+                    $('.reveal-overlay').remove();
+
+                    // Perform the actual bulk URL registration
+                    doBulkRegisterURL(article_ids);
+                });
+
+                $('.cancel').on('click', function() {
+                    modal.close();
+                    $('#modal-bulk-register-url').remove();
+                    $('.reveal-overlay').remove();
+                });
+            });
+        }
+
+        function doBulkRegisterURL(article_ids) {
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }} ',
+                'article_ids': article_ids,
+                'article_id': null,
+                'issue_id': null,
+                'operation': 'datacite_url_confirm',
+            };
+
+            $.ajax({
+                url: '{{ request.path }}',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(response)
+                {
+                    var errors = response.errors;
+                    var warnings = response.warnings;
+                    var success_count = response.success_count || 0;
+                    var failed_count = response.failed_count || 0;
+                    var updated_urls = response.updated_urls || {};
+
+                    if (errors && errors.length > 0)
+                    {
+                        toastr.error(arrayToStringWithBr(errors));
+                    }
+                    else
+                    {
+                        var msg = success_count + " URL(s) successfully registered at DataCite.";
+                        if (failed_count > 0) {
+                            msg += " " + failed_count + " article(s) failed.";
+                        }
+                        toastr.success(msg);
+
+                        // Update the table with new states without refreshing
+                        for (var articleId in updated_urls) {
+                            if (updated_urls.hasOwnProperty(articleId)) {
+                                var state = updated_urls[articleId].state;
+                                if (state) {
+                                    $("#datacite_state_" + articleId).html(state);
                                 }
                             }
                         }
