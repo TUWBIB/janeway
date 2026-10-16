@@ -1,4 +1,7 @@
 import json
+import re
+
+import requests
 
 from django.shortcuts import render
 from django.conf import settings
@@ -29,6 +32,7 @@ from utils import setting_handler
 from utils import shared
 from utils.logger import get_logger
 from utils.decorators import GET_language_override
+from utils.forms import clean_orcid_id
 from production import logic as prod_logic
 
 from tuw_backcontent import forms as bc_forms
@@ -161,6 +165,335 @@ def backcontent_add_author(request,article_id):
     return redirect(
         reverse("backcontent_article", kwargs={"article_id": article_id})
     )
+
+
+@editor_user_required
+def backcontent_add_author_from_dropdown(request, article_id):
+    """
+    Adds an author directly from a GND/ORCID dropdown suggestion.
+
+    The record data is passed in by the client (see the autocomplete in
+    tuw_backcontent/submission.html), so no external lookup services are
+    queried. A FrozenAuthor is created locally from the forename,
+    surname, orcid and first affiliation of the selected record.
+    """
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
+
+    if request.method != "POST":
+        raise Http404
+
+    first_name = request.POST.get('first_name', '').strip()
+    surname = request.POST.get('surname', '').strip()
+    orcid = request.POST.get('orcid', '').strip()
+    affiliations = [a.strip() for a in request.POST.getlist('affiliations') if a.strip()]
+
+    if orcid:
+        try:
+            orcid = clean_orcid_id(orcid)
+        except ValueError:
+            orcid = ''
+
+    if not orcid and not first_name and not surname:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            _("Incomplete author record, nothing was added."),
+        )
+        return redirect(reverse('backcontent_article', kwargs={'article_id': article_id}))
+
+    author, created = None, False
+    if orcid:
+        # Reuse an existing author with this ORCID, if there is one.
+        author, created = submission_models.FrozenAuthor.get_or_snapshot_if_orcid_found(
+            orcid,
+            article,
+        )
+
+    if not author and (first_name or surname):
+        # No ORCID (GND-only record) or no existing match: avoid
+        # duplicate entries with the same name on the article.
+        name_qs = submission_models.FrozenAuthor.objects.filter(article=article)
+        if surname:
+            name_qs = name_qs.filter(last_name__iexact=surname)
+        if first_name:
+            name_qs = name_qs.filter(first_name__iexact=first_name)
+        if name_qs.exists():
+            author = name_qs.first()
+
+    if not author:
+        author = submission_models.FrozenAuthor(
+            article=article,
+            first_name=first_name,
+            last_name=surname,
+            order=article.next_frozen_author_order(),
+        )
+        if orcid:
+            author.frozen_orcid = orcid
+        author.save()
+        created = True
+
+        # Store the first affiliation as unstructured institution text.
+        if affiliations:
+            core_models.ControlledAffiliation.get_or_create_without_ror(
+                institution=affiliations[0],
+                frozen_author=author,
+            )
+
+    if created:
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            _("%(author_name)s is now an author.") % {
+                "author_name": author.full_name(),
+            },
+        )
+    else:
+        messages.add_message(
+            request,
+            messages.INFO,
+            _("%(author_name)s is already an author.") % {
+                "author_name": author.full_name(),
+            },
+        )
+
+    return redirect(
+        reverse("backcontent_article", kwargs={"article_id": article_id})
+    )
+
+
+GND_SEARCH_URL = 'https://www2.ub.tuwien.ac.at/gnd/'
+ORCID_SEARCH_URL = 'https://www2.ub.tuwien.ac.at/orcid/'
+MAX_AUTHOR_SEARCH_RESULTS = 10
+# Matches a full ORCID iD like 0000-0001-6872-1494 (16 chars incl. dashes).
+ORCID_ID_PATTERN = re.compile(r'\d{4}-\d{4}-\d{4}-\d{3}[\dX]')
+
+
+def _first_value(value):
+    """Normalize GND list-valued name fields to a single string."""
+    if isinstance(value, (list, tuple)):
+        return ' '.join(str(v) for v in value if v).strip()
+    return str(value).strip() if value else ''
+
+
+def _parse_gnd_search_results(data):
+    """
+    Parse the LOBID GND search response (JSON-LD).
+
+    Only person records are considered. For each person the ORCID iD is
+    extracted from the ``sameAs`` list (if present).
+    """
+    records = []
+    for member in data.get('member', []):
+        types = member.get('type', [])
+        if 'Person' not in types and 'DifferentiatedPerson' not in types:
+            continue
+
+        described_by = member.get('describedBy', {})
+        orcid = ''
+        for same in member.get('sameAs', []):
+            same_id = same.get('id', '')
+            if 'orcid.org/' in same_id:
+                candidate = same_id.rsplit('/', 1)[-1]
+                # Placeholder ORCID iDs are not real identifiers; ignoring
+                # them also prevents them from collapsing distinct records
+                # during orcid-based deduplication.
+                if candidate.startswith('0000-0000-0000'):
+                    break
+                orcid = candidate
+                break
+
+        forename = _first_value(described_by.get('forename'))
+        surname = _first_value(described_by.get('surname'))
+        if not forename and not surname:
+            # Some GND records only have a single personalName / preferredName.
+            surname = _first_value(described_by.get('personalName')) or \
+                _first_value(member.get('preferredName'))
+        if not forename and not surname:
+            continue
+
+        records.append({
+            'source': 'gnd',
+            'identifier': member.get('gndIdentifier', ''),
+            'orcid': orcid,
+            'forename': forename,
+            'surname': surname,
+            'affiliations': [
+                aff.get('label') for aff in member.get('affiliation', [])
+                if aff.get('label')
+            ],
+        })
+    return records
+
+
+def _parse_orcid_search_results(data):
+    """
+    Parse the ORCID Elasticsearch search response.
+    """
+    records = []
+    for hit in data.get('hits', {}).get('hits', []):
+        source = hit.get('_source', {})
+        name_entity = source.get('preferredNameEntityForThePerson', {})
+        affiliation = source.get('affiliation', {}) or {}
+
+        affiliations = []
+        for key in ('emp', 'edu'):
+            for value in affiliation.get(key, []) or []:
+                if value not in affiliations:
+                    affiliations.append(value)
+
+        records.append({
+            'source': 'orcid',
+            'identifier': source.get('id') or hit.get('_id', ''),
+            'orcid': source.get('id') or hit.get('_id', ''),
+            'forename': _first_value(name_entity.get('forename')),
+            'surname': _first_value(name_entity.get('surname')),
+            'affiliations': affiliations[:3],
+        })
+    return records
+
+
+def _fetch_search_json(url, params=None):
+    """
+    GET a lookup endpoint and return the parsed JSON body,
+    or ``None`` on any error so that a failing lookup service does not
+    break the autocomplete.
+    """
+    try:
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        logger.warning(
+            "backcontent_author_search: lookup at %s failed: %s", url, e,
+        )
+        return None
+
+    try:
+        return resp.json()
+    except ValueError:
+        logger.warning(
+            "backcontent_author_search: non-JSON response from %s", url,
+        )
+        return None
+
+
+def _fetch_author_search_results(url, search_term):
+    """
+    Fetch and parse one author search endpoint (``?q=<term>``).
+
+    Returns a list of records, or an empty list on any error.
+    """
+    data = _fetch_search_json(url, {'q': search_term})
+    if data is None:
+        return []
+
+    if url == GND_SEARCH_URL:
+        return _parse_gnd_search_results(data)
+    if url == ORCID_SEARCH_URL:
+        return _parse_orcid_search_results(data)
+    return []
+
+
+def _fetch_gnd_by_orcid(orcid_id):
+    """
+    Fetch the GND records linked to an ORCID iD via
+    ``?orcid=<iD>`` (returns the usual LOBID search shape).
+    """
+    data = _fetch_search_json(GND_SEARCH_URL, {'orcid': orcid_id})
+    if data is None:
+        return []
+    return _parse_gnd_search_results(data)
+
+
+def _fetch_orcid_direct(orcid_id):
+    """
+    Fetch a single ORCID record by iD (``/orcid/<iD>``) and parse it
+    with the search-result parser.
+    """
+    data = _fetch_search_json(ORCID_SEARCH_URL + orcid_id)
+    if data is None:
+        return []
+
+    # The direct endpoint returns a single record with the same shape
+    # as the search hits' `_source`; wrap it so the search parser can
+    # handle it unchanged.
+    return _parse_orcid_search_results(
+        {'hits': {'hits': [{'_source': data}]}}
+    )
+
+
+@editor_user_required
+def backcontent_author_search(request):
+    """
+    Endpoint for the author search autocomplete.
+
+    Queries the TUW library GND and ORCID lookup services (GND first)
+    for the given search term, extracts orcid, surname, forename and
+    affiliations per person, deduplicates based on orcid and returns
+    at most ``MAX_AUTHOR_SEARCH_RESULTS`` records.
+
+    When the search term is a full ORCID iD, direct lookups are used
+    instead of the text search:
+    * GND:   ``/gnd/?orcid=<iD>``
+    * ORCID: ``/orcid/<iD>``
+    """
+    search_term = request.GET.get('q', '').strip()
+
+    if not search_term:
+        return JsonResponse({
+            'results': [],
+            'search_term': search_term,
+        })
+
+    # The client can enable/disable the individual sources via the
+    # checkboxes in the dropdown search form; both are enabled by default.
+    search_gnd = request.GET.get('gnd', '1') not in ('0', 'false', '')
+    search_orcid = request.GET.get('orcid', '1') not in ('0', 'false', '')
+
+    # A search term that is already a full ORCID iD is looked up directly
+    # at /orcid/<iD>, which returns exactly that person's record.
+    orcid_match = ORCID_ID_PATTERN.match(search_term)
+
+    all_records = []
+    if search_gnd:
+        if orcid_match:
+            all_records += _fetch_gnd_by_orcid(orcid_match.group(0))
+        else:
+            all_records += _fetch_author_search_results(GND_SEARCH_URL, search_term)
+    if search_orcid:
+        if orcid_match:
+            all_records += _fetch_orcid_direct(orcid_match.group(0))
+        else:
+            all_records += _fetch_author_search_results(ORCID_SEARCH_URL, search_term)
+
+    seen_orcids = set()
+    seen_names = set()
+    results = []
+    for record in all_records:
+        orcid = (record.get('orcid') or '').strip().lower()
+        name_key = (
+            record.get('surname', '').lower(),
+            record.get('forename', '').lower(),
+        )
+        if orcid:
+            if orcid in seen_orcids:
+                continue
+            seen_orcids.add(orcid)
+        elif name_key in seen_names:
+            continue
+        else:
+            seen_names.add(name_key)
+        results.append(record)
+        if len(results) >= MAX_AUTHOR_SEARCH_RESULTS:
+            break
+
+    return JsonResponse({
+        'results': results,
+        'search_term': search_term,
+    })
 
 
 @editor_user_required

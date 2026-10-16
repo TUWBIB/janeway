@@ -19,5 +19,17 @@ urlpatterns = [
         r"^manage/articles/backcontent/article/(?P<article_id>\d+)/add_author/$",
         views.backcontent_add_author,
         name="backcontent_add_author",
-    ),        
+    ),
+
+    re_path(
+        r"^manage/articles/backcontent/article/(?P<article_id>\d+)/add_author_from_dropdown/$",
+        views.backcontent_add_author_from_dropdown,
+        name="backcontent_add_author_from_dropdown",
+    ),
+
+    re_path(
+        r"^manage/articles/backcontent/author_search/$",
+        views.backcontent_author_search,
+        name="backcontent_author_search",
+    ),
 ]

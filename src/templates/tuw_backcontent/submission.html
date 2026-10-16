@@ -309,7 +309,7 @@
                     <form method="POST" action="{% url 'backcontent_add_author' article.pk %}?next={{ request.get_full_path|urlencode }}">
                     {% csrf_token %}
                     <label for="author_search_text">
-                        <strong>{% trans "Search" %}</strong>
+                        <strong>{% trans "Search by email or ORCID iD" %}</strong>
                     </label>
                     <input
                         id="author_search_text"
@@ -322,6 +322,47 @@
                         {% trans "Add author from search" %}
                         </button>
                     </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+            <div class="row expanded">
+                <div class="large-12 columns max-w-40">
+                <div class="callout">
+                    <p>
+                    {% blocktrans with journal=request.journal.name press=request.press.name %}
+                        Search authors in the local gnd / orcid clone. Just start typing and pick a suggestion from the drop down.
+                    {% endblocktrans %}
+                    </p>
+                    <form
+                        id="author_dropdown_search_form"
+                        method="POST"
+                        action="{% url 'backcontent_add_author_from_dropdown' article.pk %}">
+                    {% csrf_token %}
+                    <div class="flex wrap gap-3 items-center">
+                        <label class="flex align-center column-gap-1">
+                            <input type="checkbox"
+                                id="author_search_use_gnd"
+                                name="search_gnd"
+                                checked>
+                            GND
+                        </label>
+                        <label class="flex align-center column-gap-1">
+                            <input type="checkbox"
+                                id="author_search_use_orcid"
+                                name="search_orcid"
+                                checked>
+                            ORCID
+                        </label>
+                    </div>
+                    <label for="author_dropdown_search_text">
+                        <strong>{% trans "Search" %}</strong>
+                    </label>
+                    <input
+                        id="author_dropdown_search_text"
+                        name="author_dropdown_search_text"
+                        placeholder="{% trans 'e.g. Hermann Haken' %}"
+                        type="search">
                     </form>
                 </div>
                 </div>
@@ -381,6 +422,136 @@
             // workaround
             // hides the article-jump elements which gets inherited from base.html
             $("#article-jump").hide();
+
+            // Author dropdown search (GND/ORCID autocomplete):
+            // A separate form + field from the classic "add author from
+            // search" form below. Typing into it triggers AJAX calls
+            // against the backcontent_author_search endpoint (see
+            // tuw_backcontent/views.py), which queries the TUW library
+            // GND and ORCID lookup services.
+            //
+            // Response shape:
+            // {"results": [
+            //     {"source": "gnd"|"orcid", "identifier": "...", "orcid": "...",
+            //      "forename": "...", "surname": "...",
+            //      "affiliations": ["...", ...]},
+            //     ...
+            // ]}
+            // Selecting a suggestion submits the dropdown search form with
+            // the full record, so the author is added directly.
+            // A plain form submission (e.g. pressing Enter without picking
+            // a suggestion) has no record data, so it is prevented.
+            $("#author_dropdown_search_form").on("submit", function(e) {
+                e.preventDefault();
+            });
+            $("#author_dropdown_search_text").autocomplete({
+                source: function(request, response) {
+                    // Only query the sources enabled in the checkboxes.
+                    $.getJSON(
+                        "{% url 'backcontent_author_search' %}",
+                        {
+                            q: request.term,
+                            gnd: $('#author_search_use_gnd').is(':checked') ? '1' : '0',
+                            orcid: $('#author_search_use_orcid').is(':checked') ? '1' : '0'
+                        },
+                        function(data) {
+                            var gndIcon = '<img src="{% static "common/img/icons/gnd.svg" %}" alt="gnd" width="14" height="14" style="vertical-align:-2px; margin-right:2px;">';
+                            var orcidIcon = '<img src="{% static "common/img/icons/orcid.png" %}" alt="orcid" width="14" height="14" style="vertical-align:-2px; margin-right:2px;">';
+                            var suggestions = (data.results || []).map(function(r) {
+                                // Prepend the source icon (gnd / orcid).
+                                var label = (r.source === 'gnd' ? gndIcon : orcidIcon);
+                                var name = [r.forename, r.surname].filter(Boolean).join(' ');
+                                if (name) { label += name; }
+                                if (r.affiliations && r.affiliations.length) {
+                                    if (name) { label += ' '; }
+                                    label += '(' + r.affiliations.join(', ') + ')';
+                                }
+                                // Prefix every identifier that exists,
+                                // even when only one of the two ids is
+                                // available. (For ORCID-source records the
+                                // identifier field holds the ORCID iD, not
+                                // a GND id.)
+                                var ids = [];
+                                if (r.source === 'gnd') {
+                                    if (r.identifier) {
+                                        ids.push('gnd: ' + r.identifier);
+                                    }
+                                    if (r.orcid) {
+                                        ids.push('orcid: ' + r.orcid);
+                                    }
+                                } else {
+                                    if (r.orcid) {
+                                        ids.push('orcid: ' + r.orcid);
+                                    } else if (r.identifier) {
+                                        ids.push('orcid: ' + r.identifier);
+                                    }
+                                }
+                                if (ids.length) {
+                                    label += ' ' + ids.join(' ');
+                                }
+                                return {
+                                    label: label,
+                                    value: r.orcid || r.identifier,
+                                    // Full record, used by the select
+                                    // handler to add the author directly.
+                                    record: r
+                                };
+                            });
+                            response(suggestions);
+                        }
+                    );
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    event.preventDefault();
+                    $(this).val(ui.item.value);
+
+                    // Submit the separate dropdown search form via AJAX
+                    // to backcontent_add_author_from_dropdown. The full
+                    // record (name, orcid, affiliations) is passed in, so
+                    // the view creates the FrozenAuthor locally without
+                    // querying orcid.org. The view consumes the status
+                    // message and redirects; the subsequent page reload
+                    // shows the callout message and the updated author
+                    // list.
+                    var $form = $('#author_dropdown_search_form');
+                    if ($form.data('adding-author')) {
+                        return;
+                    }
+                    $form.data('adding-author', true);
+                    var r = ui.item.record || {};
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'post',
+                        data: {
+                            'csrfmiddlewaretoken': $form.find('input[name="csrfmiddlewaretoken"]').val(),
+                            'first_name': r.forename || '',
+                            'surname': r.surname || '',
+                            'orcid': r.orcid || '',
+                            'affiliations': r.affiliations || []
+                        },
+                        complete: function() {
+                            window.location.reload();
+                        }
+                    });
+                }
+            }).each(function() {
+                // Render the menu items as HTML so the source icons are shown.
+                // NOTE: in jQuery UI 1.12.1 _renderMenu -> _renderItemData ->
+                // _renderItem all live on the autocomplete widget itself, so
+                // the override must be applied there (not on widget.menu).
+                // The base _renderItemData still wraps the returned <li> with
+                // .data("ui-autocomplete-item", item), which the menuselect
+                // handler reads, so selection keeps working.
+                var widget = $(this).data('ui-autocomplete');
+                if (widget) {
+                    widget._renderItem = function(ul, item) {
+                        return $("<li>").data("item.autocomplete", item)
+                            .append($("<a>").html(item.label))
+                            .appendTo(ul);
+                    };
+                }
+            });
 
             $("#upload-table").on("click", "a", function(e) {
                 if(!confirm("This action will cause loss of all unsaved progress! Are you sure you want to continue?")) {
