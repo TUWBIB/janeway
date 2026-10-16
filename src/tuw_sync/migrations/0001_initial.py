@@ -3,7 +3,6 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
-
 class Migration(migrations.Migration):
 
     initial = True
@@ -21,17 +20,6 @@ class Migration(migrations.Migration):
                 ('ts', models.DateTimeField(blank=True, null=True)),
                 ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='submission.article')),
                 ('issue', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='journal.issue')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='BulkJob',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('jobid', models.CharField(blank=True, max_length=50, null=True)),
-                ('name', models.CharField(blank=True, choices=[('link_nz', 'link_nz')], max_length=50, null=True)),
-                ('data', models.TextField(blank=True, null=True)),
-                ('status', models.CharField(blank=True, choices=[('', ''), ('started', 'started'), ('success', 'success'), ('error', 'error')], max_length=50, null=True)),
-                ('journal', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='journal.journal')),
             ],
         ),
         migrations.CreateModel(
