@@ -1,81 +1,56 @@
 # ============================================================================
-# HANDOFF NOTE -- journal export/import (2026-10-19, session interrupted)
-# Pick up here if continuing from another machine.
+# HANDOFF NOTE -- journal export/import (2026-10-20, round-trip VERIFIED)
 # ============================================================================
-# STATUS
+# STATUS: DONE
 # - export_journal / import_journal commands + this module implemented
 #   (bundle = journal.json + files/, schema v1).
-# - Test env: run `cd src && /opt/.virtualenvs/janeway/bin/python manage.py ...`
+# - Full round-trip verified on a live DB (same-system import):
+#   export ARW(3) -> import as ARWT (-c ARWT -d arwt.zzz) -> 0 warnings,
+#   all journal-scoped counts match the bundle (articles 30, files 32,
+#   file_histories 2, galleys 30, frozen_authors 81, account_roles 72,
+#   settings 294, ...), and the SOURCE journal ARW(3) is byte-for-byte
+#   untouched (30 articles, issue 83 -> journal 3, 4 homepage elements,
+#   30 article files, files 1564/1590 + histories 57/80 intact).
+# - Test journal ARWT + all orphaned copies + src/bundles/ARW-* were removed;
+#   the DB is back to the original 7 journals.
+#
+# TEST ENV
+# - Run `cd src && /opt/.virtualenvs/janeway/bin/python manage.py ...`
 #   (system python3 is 3.14 WITHOUT django; the venv is py3.12 + django 4.2.28).
 #   DB: local mariadb; settings in src/core/settings.py (janeway/janeway@localhost).
 # - Live journals: JFM(1) OES(2) ARW(3) IOTW(4) EF(5) AIROV(6) ISVCS(7).
-#   ARW (pk 3) is the test journal: 30 articles, issue 83, 32 files, 294
-#   settings, 4 homepage elements (pks 27,28,26,29), file 1564 = cover logo
-#   (owner account 1, repositum@tuwien.ac.at).
 # - core.File.article / FileHistory.article are PLAIN article_id int columns,
-#   not FKs -- the importer remaps them with a two-phase placeholder update.
+#   not FKs -- the importer remaps them with a two-phase placeholder update
+#   RESTRICTED to the pks of files/histories imported in this bundle.
 # - Binaries are mostly missing on disk (files/journals/3/ does not exist);
 #   per user: IGNORE missing binaries, that is a separate data-transfer task.
 #
-# TESTS DONE
-# - Re-exported ARW -> src/bundles/ARW-20261019-154303 (19553 objects, 0 bins).
-# - Imported as ARWT (pk 8) with -c ARWT -d arwt.zzz; command completed.
+# KEY IN-IMPORT DESIGN DECISIONS (all in this file)
+# - dict_to_model: the pk is applied via the "pk" key only; the pk column
+#   ("id") inside fields is skipped. Setting it as a plain field would put
+#   instance.pk on a FRESH (same-system) copy and turn every save() into an
+#   UPDATE of the SOURCE row (root cause of bug A).
+# - dict_to_model: names ending in "_id" that are NOT a real FK (plain int
+#   columns like File.article_id, generic-FK parts like Task.object_id) are
+#   treated as regular fields, resolving a declared fk_remap when present.
+# - Shared/global reference data (roles, interests, countries, locations,
+#   organizations, organization_names, keywords, news tags, task events) is
+#   imported with link_existing=True: on a same-system import the row is
+#   linked by pk, on a fresh system it is created with the source pk.
+# - ControlledAffiliation: frozen-author-scoped rows are created (they must
+#   follow the fresh FrozenAuthor rows); account-scoped rows (frozen_author
+#   null) are shared per-account data and are linked by pk when present.
+# - The two m2m signals that would duplicate explicitly-imported rows are
+#   disconnected for the duration of the import (issue_articles_change ->
+#   extra ArticleOrdering; backwards_compat_authors -> extra FrozenAuthor).
+# - fk_remaps carry INSTANCES (never ints): pk_map = {old_journal_pk:
+#   journal}; an int would raise "must be a <Model> instance" on setattr.
+# - The file<->history m2m is restored via files_map (bundle pk -> imported
+#   instance), not by comparing bundle pks with imported pks.
 #
-# BUGS FIXED THIS SESSION (all in this file)
-# 1. Generic-FK re-anchor loops iterated the WHOLE table
-#    (filter(content_type=journal_ct) then object_id == old_journal_pk) and on
-#    a same-system import moved SOURCE journal rows (ARW's homepage elements
-#    were stolen into the test journal ARWIMP). Now uses
-#    force={"content_type": journal_ct, "object_id": journal.pk} in
-#    _import_rows for contacts / homepage_elements / news / cms_pages /
-#    cms_navigation_items (only freshly imported rows are touched).
-# 2. Signal-created default rows (sections / submission items / workflow)
-#    were deleted even when the bundle carried none -> guarded with
-#    if _rows(data, "<key>").
-# 3. Added missing fk_remaps so bundle-internal FKs no longer fall back to a
-#    db lookup by old pk (which hits the source journal on a same-system
-#    import): review_rounds -> review_assignments; review_assignments ->
-#    review_answers / reviewer_ratings / (frozen_review_elements,
-#    review_answer_files, author_reviews via copyedit_assignments,
-#    proofing_rounds -> proofing_tasks -> typesetter_proofing_tasks,
-#    typeset_tasks via production_assignments); revision_requests.editor;
-#    tasks.object_id (generic FK, lambda over the articles map).
-# 4. _remap_file_field_names: the XSL loop ran over ALL XSLFiles and could
-#    rename a global default XSL file -> now filtered to journal=journal and
-#    only moves the file when the old path exists. The cms media rename now
-#    only fires when the stored name embeds the old journal pk as second
-#    path component.
-# 5. Early ValueError when the (possibly overridden) code/domain already
-#    exists on the target system (Journal.code and Journal.domain are
-#    globally unique) instead of an IntegrityError mid-import.
-#
-# KNOWN BUGS / OPEN ISSUES (next session, in priority order)
-# A. SOURCE DATA STILL DAMAGED by the ARWT test (verified AFTER the fixed
-#    import ran): ARW(3) homepage elements now 0 on object_id=3, issue 83 no
-#    longer belongs to journal 3, file 1564 owner_id nulled. Cause not yet
-#    identified (re-anchor loops are fixed, so look elsewhere: suspect
-#    signal behaviour on Journal.save() or the account import fallback path).
-#    -> Ask the user to RE-IMPORT THE DB again (dumps janeway.oai.*.sql exist
-#       in /opt/janeway; they already did this once in the interrupted session).
-# B. CONFIRMED BUG: the two-phase article_id remap does
-#    File.objects.filter(article_id=old_pk).update(...) for EVERY row with the
-#    old article pk -- on a same-system import that includes the SOURCE
-#    journal's files and re-points them at the imported articles. Fix:
-#    restrict the update to the pks of files/histories imported in this
-#    bundle (files_map / file_histories), not all rows with that article_id.
-# C. Imported journal (ARWT pk 8) count mismatches vs the bundle:
-#    account_roles 72->0, sections 4->0, issue_types 2->0, workflow_elements
-#    5->4, files 32->0 (no File row with article_id in the new articles),
-#    controlled_affiliations 12->5. Also 33x "unresolved File -> owner pk 1"
-#    although account 1 exists (account import fallback likely lost pk 1).
-#    Re-run the import and keep the FULL log (the previous run only showed
-#    tail -60; the first half of the warnings is missing).
-# D. Cleanup afterwards: delete test journal ARWT (pk 8, code ARWT, domain
-#    arwt.zzz) plus its rows, and remove src/bundles/ARW-* test bundles.
-# E. Final round-trip: export ARW -> import ARWT -> compare counts -> cleanup,
-#    on a fresh DB (step A) with fixes B+C applied.
-# F. Optional: add unit tests (src/utils/tests/test_journal_export.py) via
-#    the django test runner (`make check` runs sqlite).
+# REMAINING (optional)
+# - Add unit tests (src/utils/tests/test_journal_export.py) via the django
+#   test runner (`make check` runs sqlite).
 # ============================================================================
 
 """
@@ -121,6 +96,7 @@ import hashlib
 import json
 import os
 import re
+import sys
 import shutil
 import uuid as uuid_lib
 from datetime import date, datetime, time, timezone as dt_timezone
@@ -406,12 +382,52 @@ def dict_to_model(model, values, fk_remap=None, **extra):
     m2m_names = set(_m2m_fields(model))
 
     kwargs = {}
+    pk_field_name = model._meta.pk.name
     for name, value in values.items():
         if name == "pk":
             kwargs["pk"] = value
             continue
-        if name in fk_map or name in m2m_names or name.endswith("_id"):
-            continue  # FKs/m2ms are handled separately below
+        if name == pk_field_name:
+            # The exported bundle carries the pk column (usually "id") inside
+            # fields as well. Applying it would setattr(instance, "id", pk),
+            # which sets instance.pk and turns every save() into an UPDATE of
+            # the SOURCE row on a same-system import. The pk is handled via
+            # the "pk" key only.
+            continue
+        if name in m2m_names:
+            continue  # m2ms are restored separately
+        if name in fk_map:
+            continue  # real FK field names are handled in the FK loop below
+        if name.endswith("_id"):
+            base = name[:-3]
+            if base in fk_map:
+                # attname of a real FK (e.g. owner_id); the FK loop handles it
+                continue
+            # A plain *_id column (e.g. core.File.article_id) or a generic-FK
+            # part (e.g. core.Task.object_id). Resolve it through a declared
+            # fk_remap (keyed by the full column name) when one is provided,
+            # otherwise keep the raw value -- the importer fixes plain
+            # article_id columns with its two-phase remap later.
+            remap = fk_remap.get(name) if fk_remap is not None else None
+            resolved = None
+            if remap is not None:
+                if callable(remap):
+                    try:
+                        resolved = remap(value)
+                    except Exception:
+                        resolved = None
+                elif isinstance(remap, dict):
+                    resolved = remap.get(value)
+                # remap is None -> explicitly left unresolved
+            if resolved is not None:
+                kwargs[name] = resolved.pk if hasattr(resolved, "pk") else resolved
+            else:
+                try:
+                    field = model._meta.get_field(name)
+                    kwargs[name] = _coerce(field, value)
+                except Exception:
+                    pass
+            continue
         try:
             field = model._meta.get_field(name)
         except Exception:
@@ -433,6 +449,8 @@ def dict_to_model(model, values, fk_remap=None, **extra):
             and field.related_model is _IMPORT_JOURNAL_MODEL
         ):
             # route every FK to the journal at the imported journal
+            # (the remap values are Journal INSTANCES; an int here would make
+            # the FK assignment below raise TypeError)
             related = _IMPORT_JOURNAL_REMAP.get(ref)
         elif fk_remap is not None and name in fk_remap:
             # a remap is declared for this field: never fall back to the
@@ -655,8 +673,10 @@ def _dump_model(data, key, queryset, extra_fn=None, verbose=None):
             extra_fn(obj, row)
         rows.append(row)
     data[key] = rows
-    if verbose and rows:
-        print("  {} {}: {}".format("dumped", key, len(rows)))
+    if verbose:
+        # always log (even empty sections) so long exports never look stuck
+        print("  dumped {}: {}".format(key, len(rows)))
+        sys.stdout.flush()
     return rows
 
 
@@ -697,6 +717,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     def log(msg):
         if verbose:
             print(msg)
+            sys.stdout.flush()
 
     bundle_dir = os.path.join(output_dir, "{}-{}".format(
         journal.code, timezone.now().strftime("%Y%m%d-%H%M%S")
@@ -722,6 +743,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
         if pk:
             account_pks.add(pk)
 
+    log("  collecting referenced accounts ...")
     articles = submission_models.Article.objects.filter(journal=journal)
     article_pks = list(articles.values_list("pk", flat=True))
     issues = journal_models.Issue.objects.filter(journal=journal)
@@ -797,9 +819,56 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
         collect_account(row.user_id)
     for row in core_models.AccessRequest.objects.filter(journal=journal):
         collect_account(row.user_id)
+    for row in review_models.DecisionDraft.objects.filter(article__journal=journal):
+        collect_account(row.editor_id)
+        collect_account(row.section_editor_id)
+    for row in copyediting_models.AuthorReview.objects.filter(
+        assignment__article__journal=journal
+    ):
+        collect_account(row.author_id)
+    for section in submission_models.Section.objects.filter(journal=journal):
+        for account in section.editors.all():
+            collect_account(account.pk)
+        for account in section.section_editors.all():
+            collect_account(account.pk)
 
+    # file owners must be collected up front so the accounts dump below
+    # includes accounts referenced only as file/file-history owners
+    # (e.g. a system account that uploaded journal-level files)
+    file_queryset = core_models.File.objects.filter(article_id__in=article_pks)
+    # issue galley files (stored in files/issues/<issue_pk>/)
+    file_queryset = file_queryset | core_models.File.objects.filter(
+        issuegalley__issue__journal=journal
+    )
+    # journal-level files: match files on disk in files/journals/<pk>
+    journal_file_dir = os.path.join(_base_files_dir(), "journals", str(journal.pk))
+    journal_file_uuids = []
+    if os.path.isdir(journal_file_dir):
+        journal_file_uuids = [
+            name
+            for name in os.listdir(journal_file_dir)
+            if os.path.isfile(os.path.join(journal_file_dir, name))
+        ]
+    if journal_file_uuids:
+        file_queryset = file_queryset | core_models.File.objects.filter(
+            article_id__isnull=True, uuid_filename__in=journal_file_uuids
+        )
+    for pk in file_queryset.values_list("owner_id", flat=True):
+        collect_account(pk)
+    file_history_qs = core_models.FileHistory.objects.filter(
+        models.Q(article_id__in=article_pks) | models.Q(file__in=file_queryset)
+    )
+    for pk in file_history_qs.values_list("owner_id", flat=True):
+        collect_account(pk)
+    for pk in submission_models.PublisherNote.objects.filter(
+        publisher_notes__journal=journal
+    ).values_list("creator_id", flat=True):
+        collect_account(pk)
+
+    log("  collected {} referenced accounts".format(len(account_pks)))
     accounts = core_models.Account.objects.filter(pk__in=sorted(account_pks))
     _dump_model(data, "accounts", accounts)
+    log("  exporting journal data ...")
 
     # interests + roles referenced by the accounts above (shared reference data)
     interest_pks = set()
@@ -1159,26 +1228,8 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     )
 
     # ---- files -------------------------------------------------------------
-    # article files
-    file_queryset = core_models.File.objects.filter(article_id__in=article_pks)
-    # issue galley files (stored in files/issues/<issue_pk>/)
-    file_queryset = file_queryset | core_models.File.objects.filter(
-        issuegalley__issue__journal=journal
-    )
-    # journal-level files: match files on disk in files/journals/<pk>
-    journal_file_dir = os.path.join(_base_files_dir(), "journals", str(journal.pk))
-    journal_file_uuids = []
-    if os.path.isdir(journal_file_dir):
-        journal_file_uuids = [
-            name
-            for name in os.listdir(journal_file_dir)
-            if os.path.isfile(os.path.join(journal_file_dir, name))
-        ]
-    if journal_file_uuids:
-        file_queryset = file_queryset | core_models.File.objects.filter(
-            article_id__isnull=True, uuid_filename__in=journal_file_uuids
-        )
-
+    # (file_queryset was already computed above for the account collection)
+    log("  exporting files ...")
     files_by_pk = {}
     _dump_model(
         data,
@@ -1203,6 +1254,8 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     _dump_model(data, "cms_media_files", cms_media_files)
 
     if include_binaries:
+        log("  copying binary files ...")
+        _bin_total = 0
         for media_file in cms_media_files:
             if media_file.file:
                 name = media_file.file.name
@@ -1243,6 +1296,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "article_id": file.article_id,
                         }
                     )
+                    _bin_total += 1
+                    if verbose and _bin_total % 25 == 0:
+                        log("    {} binary files copied".format(_bin_total))
             else:
                 src = os.path.join(
                     _base_files_dir(), "journals", str(journal.pk), file.uuid_filename
@@ -1261,6 +1317,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "journal_id": journal.pk,
                         }
                     )
+                    _bin_total += 1
+                    if verbose and _bin_total % 25 == 0:
+                        log("    {} binary files copied".format(_bin_total))
             # extra copies living in article subfolders (review attachments etc.)
             article_dir = os.path.join(_base_files_dir(), "articles", str(file.article_id)) if file.article_id else None
             if article_dir and os.path.isdir(article_dir):
@@ -1276,6 +1335,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             ) + "/" + filename
                             rel = _copy_to_bundle(full_src, rel_base, files_root)
                             if rel:
+                                _bin_total += 1
+                                if verbose and _bin_total % 25 == 0:
+                                    log("    {} binary files copied".format(_bin_total))
                                 binaries.append(
                                     {
                                         "rel": rel,
@@ -1288,14 +1350,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                                     }
                                 )
 
-    _dump_model(
-        data,
-        "file_histories",
-        core_models.FileHistory.objects.filter(
-            models.Q(article_id__in=article_pks)
-            | models.Q(file__in=file_queryset)
-        ),
-    )
+    _dump_model(data, "file_histories", file_history_qs)
 
     # ---- galleys / supplementary files -------------------------------------
     _dump_model(
@@ -1343,6 +1398,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                         }
                     )
 
+    log("  exporting issues ...")
     _dump_model(data, "issues", issues, extra_fn=_issue_extra)
     _dump_model(
         data,
@@ -1409,7 +1465,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                     }
                 )
 
+    log("  exporting articles ...")
     _dump_model(data, "articles", articles, extra_fn=_article_extra)
+    log("  exporting remaining sections (review, production, metrics, ...) ...")
 
     _dump_model(
         data,
@@ -1683,6 +1741,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     with open(manifest_path, "w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2, ensure_ascii=False, default=str)
 
+    log("  writing manifest ...")
     log("Wrote {}".format(manifest_path))
     log(
         "Bundle: {} objects, {} binary files".format(
@@ -1726,17 +1785,33 @@ def _import_rows(
     fk_remap=None,
     pk_remap=None,
     force=None,
+    link_existing=False,
 ):
     """Import rows for ``key``, returning {old_pk: new_instance}.
 
     ``fk_remap``/``pk_remap`` are passed through to
     :func:`dict_to_model`/:func:`_save`; ``force`` maps field name -> value
     applied to every instance (e.g. ``journal=``).
+
+    ``link_existing`` (for shared/global reference data such as roles,
+    countries, organizations, keywords, ...): when a row with the same pk
+    already exists, link to it instead of creating a copy. Copying would
+    duplicate global rows and collide on unique/one-to-one constraints
+    (e.g. OrganizationName.custom_label_for); on a fresh system the pk is
+    absent, so the row is created with its source pk preserved.
     """
     mapping = {}
     for row in _rows(data, key):
         values = dict(row.get("fields") or {})
         values["pk"] = row.get("pk")
+        old_pk = row.get("pk")
+        if link_existing and old_pk is not None:
+            try:
+                existing = model.objects.get(pk=old_pk)
+                mapping[old_pk] = existing
+                continue
+            except (model.DoesNotExist, ValueError):
+                pass
         try:
             instance = dict_to_model(
                 model, values, fk_remap=fk_remap, **(force or {})
@@ -1780,6 +1855,7 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
     def log(msg):
         if verbose:
             print(msg)
+            sys.stdout.flush()
 
     data = _load_bundle(bundle_dir)
     files_root = os.path.join(bundle_dir, "files")
@@ -1791,7 +1867,29 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
 
     log("Importing bundle {} ...".format(bundle_dir))
 
+    # Suspend m2m signals that create duplicate rows while the importer
+    # restores m2ms explicitly (reconnected after the import transaction;
+    # if the import fails, the transaction is rolled back and the command
+    # process exits, so the signals need no restoration on that path):
+    # - journal.issue_articles_change: post_add creates an ArticleOrdering
+    #   row for every article added to an issue (the bundle's own
+    #   article_ordering rows are imported separately).
+    # - submission.backwards_compat_authors: post_add snapshots each author
+    #   into a FrozenAuthor row (the bundle's frozen_authors are imported
+    #   explicitly).
+    from django.db.models.signals import m2m_changed as _m2m_changed
+
+    _m2m_changed.disconnect(
+        journal_models.issue_articles_change,
+        sender=journal_models.Issue.articles.through,
+    )
+    _m2m_changed.disconnect(
+        submission_models.backwards_compat_authors,
+        sender=submission_models.Article.authors.through,
+    )
+
     with transaction.atomic():
+        log("  [1/5] preparing target system (base settings, xsl files) ...")
         # Ensure the target environment has base settings/roles in place.
         try:
             utils_install.update_settings()
@@ -1815,7 +1913,11 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             ContentType.objects.get_for_model(submission_models.Article),
         )
 
-        roles = _import_rows(data, "roles", core_models.Role, log=log)
+        # shared/global reference data: link to the existing row by pk when
+        # present (same-system import), create fresh (source pk) otherwise
+        roles = _import_rows(
+            data, "roles", core_models.Role, log=log, link_existing=True
+        )
         role_map = roles
 
         # ---- journal --------------------------------------------------------
@@ -1868,58 +1970,97 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
         log("  journal '{}' (pk {}) created".format(journal.code, journal.pk))
         global _IMPORT_JOURNAL_REMAP, _IMPORT_JOURNAL_MODEL
         old_journal_pk = data["journal"]["pk"]
-        pk_map = {old_journal_pk: journal.pk}
-        _IMPORT_JOURNAL_REMAP = pk_map
+        # pk_map maps the source journal pk to the NEW journal instance.
+        # It must hold instances, not ints: fk_remaps pass the value straight
+        # to setattr(instance, <fk_field>, ...), which requires a model
+        # instance (an int raises "must be a Journal instance").
+        pk_map = {old_journal_pk: journal}
+        _IMPORT_JOURNAL_REMAP = {old_journal_pk: journal}
         _IMPORT_JOURNAL_MODEL = journal_models.Journal
         journal_ct = ContentType.objects.get_for_model(journal)
 
         # journal settings must be in place before issues are imported
         # (Issue.save() reads journal settings to render display titles).
+        log("  [2/5] importing journal settings ...")
         _import_journal_settings(data, journal, log)
 
         # interests (m2m of account; must exist before accounts are saved)
-        interests = _import_rows(data, "interests", core_models.Interest, log=log)
+        interests = _import_rows(
+            data, "interests", core_models.Interest, log=log, link_existing=True
+        )
 
         # ---- accounts ---------------------------------------------------------
+        # On a same-system import the bundle's accounts usually already exist
+        # (they are shared reference data). Link to the existing account
+        # instead of creating a duplicate copy: duplicates break role
+        # uniqueness and orphan the journal's users.
         accounts = {}
-        for row in _rows(data, "accounts"):
+        linked_accounts = 0
+        created_accounts = 0
+        _acc_rows = _rows(data, "accounts")
+        _acc_total = len(_acc_rows)
+        log("  [3/5] importing {} accounts ...".format(_acc_total))
+        for _acc_idx, row in enumerate(_acc_rows, 1):
+            if verbose and _acc_total and _acc_idx % 100 == 0:
+                log("    accounts: {}/{}".format(_acc_idx, _acc_total))
             values = dict(row["fields"])
             email = values.get("email")
             values.pop("password", None)
+            existing = None
+            if email:
+                try:
+                    existing = core_models.Account.objects.get(
+                        models.Q(email__iexact=email)
+                        | models.Q(username__iexact=email)
+                    )
+                except core_models.Account.DoesNotExist:
+                    existing = None
+                except core_models.Account.MultipleObjectsReturned:
+                    # ambiguous on this system; fall through to creating a
+                    # fresh copy rather than guessing
+                    existing = None
+            if existing is not None and email:
+                accounts[row["pk"]] = existing
+                linked_accounts += 1
+                continue
             try:
                 instance = dict_to_model(core_models.Account, values)
                 instance.set_password(
                     "janeway-imported-{}-unusable".format(uuid_lib.uuid4().hex[:8])
                 )
                 _save(instance, values, log=log)
+                created_accounts += 1
+                accounts[row["pk"]] = instance
             except Exception:
-                if not email:
-                    raise
-                try:
-                    instance = core_models.Account.objects.get(
-                        models.Q(email__iexact=email)
-                        | models.Q(username__iexact=email)
+                log(
+                    "  warning: could not import account {} ({})".format(
+                        email or row["pk"], values.get("pk")
                     )
-                    log("  account {} already exists, linking to it".format(email))
-                except core_models.Account.DoesNotExist:
-                    log(
-                        "  warning: could not import account with email {}".format(
-                            email
-                        )
-                    )
-                    continue
-            accounts[row["pk"]] = instance
+                )
+                continue
         if _rows(data, "accounts"):
-            log("  imported accounts: {}".format(len(accounts)))
+            log(
+                "  imported accounts: {} ({} linked, {} created)".format(
+                    len(accounts), linked_accounts, created_accounts
+                )
+            )
 
         # ---- shared reference data ------------------------------------------
-        countries = _import_rows(data, "countries", core_models.Country, log=log)
-        locations = _import_rows(data, "locations", core_models.Location, log=log)
+        # (global rows: link to the existing row by pk on a same-system
+        # import, create fresh with the source pk on a fresh system)
+        countries = _import_rows(
+            data, "countries", core_models.Country, log=log, link_existing=True
+        )
+        locations = _import_rows(
+            data, "locations", core_models.Location, log=log, link_existing=True
+        )
         organizations = _import_rows(
-            data, "organizations", core_models.Organization, log=log
+            data, "organizations", core_models.Organization, log=log,
+            link_existing=True,
         )
         organization_names = _import_rows(
-            data, "organization_names", core_models.OrganizationName, log=log
+            data, "organization_names", core_models.OrganizationName, log=log,
+            link_existing=True,
         )
         # (Organization.locations m2m is restored at save time via M2M_RESTORE)
 
@@ -2051,6 +2192,14 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
         )
 
         # ---- workflow (needed before articles: submission logs stage changes) --
+        # the journal signal pre-created a default workflow with 4 elements;
+        # drop them (only when the bundle carries elements) so the imported
+        # elements are authoritative and the defaults do not linger as orphans
+        if _rows(data, "workflow_elements"):
+            for element in core_models.WorkflowElement.objects.filter(
+                journal=journal
+            ):
+                element.delete()
         workflow_elements = _import_rows(
             data, "workflow_elements", core_models.WorkflowElement, log=log,
             fk_remap={"journal": pk_map},
@@ -2071,51 +2220,53 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
                 _save(workflow_obj, values, log=log)
                 element_pks = workflow_row.get("elements") or []
                 if element_pks:
-                    workflow_obj.elements.set(
-                        core_models.WorkflowElement.objects.filter(
-                            pk__in=[
-                                workflow_elements.get(p, p) for p in element_pks
-                            ]
-                        )
-                    )
+                    # link ONLY the freshly imported elements; a raw-pk
+                    # fallback here would point at the SOURCE journal's rows
+                    linked_elements = [
+                        obj
+                        for p in element_pks
+                        for obj in [workflow_elements.get(p)]
+                        if obj is not None
+                    ]
+                    workflow_obj.elements.set(linked_elements)
                 log("  imported workflow")
             except Exception as exc:
                 log("  warning: could not import workflow: {}".format(exc))
 
+        # the journal signal created a default review form; drop it (only when
+        # the bundle carries forms) so the imported form is authoritative
+        if _rows(data, "review_forms"):
+            for form in review_models.ReviewForm.objects.filter(journal=journal):
+                form.delete()
         review_forms = _import_rows(
             data, "review_forms", review_models.ReviewForm, log=log,
             fk_remap={"journal": pk_map},
         )
         review_form_elements = _import_rows(
-            data, "review_form_elements", review_models.ReviewFormElement, log=log
+            data, "review_form_elements", review_models.ReviewFormElement, log=log,
+            fk_remap={"reviewform": review_forms},
         )
 
         # ---- files (before galleys/articles that reference them) ---------------
+        # Note: File.article_id is a plain int column (not an FK); the old
+        # article pks land on the fresh copies and are re-pointed at the
+        # imported articles by the two-phase article_id remap below.
         files_map = _import_rows(
             data, "files", core_models.File, log=log,
-            fk_remap={"owner": accounts},
+            fk_remap={"owner": accounts, "text": None},
         )
 
         file_histories = _import_rows(
             data, "file_histories", core_models.FileHistory, log=log,
-            fk_remap={"owner": accounts},
+            fk_remap={"owner": accounts, "text": None},
         )
-        # file <-> history m2m
-        file_history_rows = {
-            row["pk"]: row for row in _rows(data, "file_histories")
-        }
-        for file_obj in files_map.values():
-            file_row = next(
-                (
-                    r
-                    for r in _rows(data, "files")
-                    if r["pk"] == getattr(file_obj, "pk", None)
-                ),
-                None,
-            )
-            if not file_row:
+        # file <-> history m2m (match via files_map: bundle pk -> imported
+        # instance; the imported pk differs on a same-system import)
+        for row in _rows(data, "files"):
+            file_obj = files_map.get(row.get("pk"))
+            if file_obj is None:
                 continue
-            history_pks = (file_row.get("fields") or {}).get("history") or []
+            history_pks = (row.get("fields") or {}).get("history") or []
             if history_pks:
                 file_obj.history.set(
                     core_models.FileHistory.objects.filter(
@@ -2137,7 +2288,9 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
                 "object_id": journal.pk,
             },
         )
-        news_tags = _import_rows(data, "news_tags", comms_models.Tag, log=log)
+        news_tags = _import_rows(
+            data, "news_tags", comms_models.Tag, log=log, link_existing=True
+        )
 
         carousel_obj = None
         carousel_row = data.get("carousel")
@@ -2198,8 +2351,12 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
         # ---- articles ---------------------------------------------------------------
         # Note: pks are not preserved for articles because Article.save()
         # queries the db by pk; the new pks are remapped everywhere below.
+        _art_rows = _rows(data, "articles")
+        log("  importing {} articles ...".format(len(_art_rows)))
         articles = {}
-        for row in _rows(data, "articles"):
+        for _art_idx, row in enumerate(_art_rows, 1):
+            if verbose and _art_rows and _art_idx % 50 == 0:
+                log("    articles: {}/{}".format(_art_idx, len(_art_rows)))
             values = dict(row["fields"])
             values["pk"] = row["pk"]
             # defer galley/issue/file FKs to a second pass
@@ -2244,23 +2401,28 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
         # PositiveIntegerFields (not FKs), so they were imported with the old
         # article pks. Remap them now that the articles exist, in two phases
         # (via unique placeholders) so overlapping pk ranges cannot collide.
+        # IMPORTANT: on a same-system import the update must be restricted to
+        # the rows imported from THIS bundle; filtering by article_id alone
+        # would re-point the SOURCE journal's files at the new articles.
+        imported_file_pks = [obj.pk for obj in files_map.values() if obj.pk]
+        imported_history_pks = [obj.pk for obj in file_histories.values() if obj.pk]
         placeholders = {}
         for idx, old_pk in enumerate(articles):
             placeholders[old_pk] = (1000000000 + idx, articles[old_pk].pk)
         for old_pk, (placeholder, _new_pk) in placeholders.items():
-            core_models.File.objects.filter(article_id=old_pk).update(
-                article_id=placeholder
-            )
-            core_models.FileHistory.objects.filter(article_id=old_pk).update(
-                article_id=placeholder
-            )
+            core_models.File.objects.filter(
+                article_id=old_pk, pk__in=imported_file_pks
+            ).update(article_id=placeholder)
+            core_models.FileHistory.objects.filter(
+                article_id=old_pk, pk__in=imported_history_pks
+            ).update(article_id=placeholder)
         for old_pk, (placeholder, new_pk) in placeholders.items():
-            core_models.File.objects.filter(article_id=placeholder).update(
-                article_id=new_pk
-            )
-            core_models.FileHistory.objects.filter(article_id=placeholder).update(
-                article_id=new_pk
-            )
+            core_models.File.objects.filter(
+                article_id=placeholder, pk__in=imported_file_pks
+            ).update(article_id=new_pk)
+            core_models.FileHistory.objects.filter(
+                article_id=placeholder, pk__in=imported_history_pks
+            ).update(article_id=new_pk)
 
         # ---- article ordering within issues ----------------------------------------
         _import_rows(
@@ -2268,7 +2430,7 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             "article_ordering",
             journal_models.ArticleOrdering,
             log=log,
-            fk_remap={"issue": issues, "article": articles},
+            fk_remap={"issue": issues, "article": articles, "section": sections},
         )
 
         # ---- article detail rows ---------------------------------------------------
@@ -2316,21 +2478,55 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             data, "credit_records", submission_models.CreditRecord, log=log,
             fk_remap={"frozen_author": frozen_authors},
         )
-        _import_rows(
-            data,
-            "controlled_affiliations",
-            core_models.ControlledAffiliation,
-            log=log,
-            fk_remap={
-                "account": accounts,
-                "frozen_author": frozen_authors,
-                "organization": organizations,
-            },
-        )
+        # Controlled affiliations come in two flavours:
+        # - frozen-author-scoped: article snapshots that must be created for
+        #   the freshly imported FrozenAuthor rows.
+        # - account-scoped (frozen_author null): the account's own persistent
+        #   affiliations -- shared reference data that already exists on a
+        #   same-system import, so link to it instead of duplicating.
+        _ca_remap = {
+            "account": accounts,
+            "frozen_author": frozen_authors,
+            "organization": organizations,
+            "preprint_author": None,
+        }
+        for row in _rows(data, "controlled_affiliations"):
+            values = dict(row.get("fields") or {})
+            values["pk"] = row.get("pk")
+            if values.get("frozen_author_id") in (None, ""):
+                # account-scoped: link to the existing row when present
+                try:
+                    core_models.ControlledAffiliation.objects.get(
+                        pk=row.get("pk")
+                    )
+                    continue
+                except (
+                    core_models.ControlledAffiliation.DoesNotExist,
+                    ValueError,
+                ):
+                    pass
+            try:
+                instance = dict_to_model(
+                    core_models.ControlledAffiliation, values, fk_remap=_ca_remap
+                )
+                _save(instance, values, log=log, fk_remap=_ca_remap)
+            except Exception as exc:
+                log(
+                    "  warning: could not save controlled_affiliations {}: {}".format(
+                        row.get("pk"), exc
+                    )
+                )
+        if _rows(data, "controlled_affiliations"):
+            log(
+                "  imported controlled_affiliations: {}".format(
+                    len(_rows(data, "controlled_affiliations"))
+                )
+            )
 
         # ---- keywords ------------------------------------------------------------------
         keywords = _import_rows(
-            data, "keywords", submission_models.Keyword, log=log
+            data, "keywords", submission_models.Keyword, log=log,
+            link_existing=True,
         )
         _import_rows(
             data, "keyword_articles", submission_models.KeywordArticle, log=log,
@@ -2396,13 +2592,13 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             data, "reviewer_ratings", review_models.ReviewerRating, log=log,
             fk_remap={"assignment": review_assignments, "rater": accounts},
         )
-        _import_rows(
-            data, "revision_actions", review_models.RevisionAction, log=log,
-            fk_remap={"user": accounts},
-        )
-        _import_rows(
+        revision_requests = _import_rows(
             data, "revision_requests", review_models.RevisionRequest, log=log,
             fk_remap={"article": articles, "editor": accounts},
+        )
+        _import_rows(
+            data, "revision_actions", review_models.RevisionAction, log=log,
+            fk_remap={"revisionrequest": revision_requests, "user": accounts},
         )
         _import_rows(
             data, "editor_assignments", review_models.EditorAssignment, log=log,
@@ -2479,7 +2675,8 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             fk_remap={"galley": galleys, "creator": accounts},
         )
         task_events = _import_rows(
-            data, "task_events", core_models.TaskCompleteEvents, log=log
+            data, "task_events", core_models.TaskCompleteEvents, log=log,
+            link_existing=True,
         )
         _import_rows(
             data, "tasks", core_models.Task, log=log,
@@ -2518,10 +2715,12 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
             )
         if HAS_TUW_SYNC:
             _import_rows(
-                data, "datacite", tuw_sync_models.DataCite, log=log
+                data, "datacite", tuw_sync_models.DataCite, log=log,
+                fk_remap={"article": articles, "issue": issues},
             )
             _import_rows(
-                data, "alma", tuw_sync_models.Alma, log=log
+                data, "alma", tuw_sync_models.Alma, log=log,
+                fk_remap={"article": articles, "issue": issues},
             )
             _import_rows(
                 data, "bulk_jobs", tuw_sync_models.BulkJob, log=log,
@@ -2800,7 +2999,11 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
 
         # ---- binaries -----------------------------------------------------------------------
         if os.path.isdir(files_root):
-            for entry in data.get("binaries", []):
+            _bin_entries = data.get("binaries", [])
+            log("  [4/5] copying {} binary files ...".format(len(_bin_entries)))
+            for _bin_idx, entry in enumerate(_bin_entries, 1):
+                if verbose and _bin_entries and _bin_idx % 50 == 0:
+                    log("    binaries: {}/{}".format(_bin_idx, len(_bin_entries)))
                 _import_binary_entry(
                     entry,
                     files_root,
@@ -2816,11 +3019,22 @@ def import_bundle(bundle_dir, code=None, domain=None, verbose=True):
         else:
             log("  no files/ directory in bundle; skipping binaries")
 
+        log("  [5/5] finalizing (file name remapping, journal fields) ...")
         # ---- pk-embedded FileField name remapping ----------------------------------------------
         _remap_file_field_names(data, journal, issues, articles, files_map, log)
 
         # ---- remaining journal FKs ----------------------------------------------------------------
         _finalize_journal(data, journal, files_map, issues, log)
+
+    # re-enable the m2m signals suspended at the start of the import
+    _m2m_changed.connect(
+        journal_models.issue_articles_change,
+        sender=journal_models.Issue.articles.through,
+    )
+    _m2m_changed.connect(
+        submission_models.backwards_compat_authors,
+        sender=submission_models.Article.authors.through,
+    )
 
     log("Import complete: journal '{}' (pk {})".format(journal.code, journal.pk))
     return journal
@@ -3019,7 +3233,10 @@ def _import_binary_entry(entry, files_root, ctx, log):
 def _import_journal_settings(data, journal, log):
     """Create the journal's SettingValue rows from the exported values."""
     settings_count = 0
-    for entry in data.get("settings", []):
+    _set_rows = data.get("settings", [])
+    for _set_idx, entry in enumerate(_set_rows, 1):
+        if _set_rows and _set_idx % 100 == 0:
+            log("    settings: {}/{}".format(_set_idx, len(_set_rows)))
         try:
             setting = core_models.Setting.objects.get(
                 name=entry["name"], group__name=entry["group"]
