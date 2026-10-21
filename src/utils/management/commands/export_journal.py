@@ -38,6 +38,15 @@ class Command(BaseCommand):
             help="Do not copy binary files into the bundle (data only).",
         )
         parser.add_argument(
+            "--no-article-access",
+            action="store_true",
+            help=(
+                "Do not export article access metrics (the per-event "
+                "ArticleAccess log and the HistoricArticleAccess COUNTER "
+                "aggregates), which can make up the bulk of a bundle."
+            ),
+        )
+        parser.add_argument(
             "-q",
             "--quiet",
             action="store_true",
@@ -59,6 +68,7 @@ class Command(BaseCommand):
             options["output"],
             include_binaries=not options["no_binaries"],
             verbose=not options["quiet"],
+            include_article_access=not options["no_article_access"],
         )
         self.stdout.write(
             "Exported journal '{}' to {}".format(

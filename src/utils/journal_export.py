@@ -98,8 +98,9 @@ import os
 import re
 import sys
 import shutil
+import time
 import uuid as uuid_lib
-from datetime import date, datetime, time, timezone as dt_timezone
+from datetime import date, datetime, time as dt_time, timezone as dt_timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -220,7 +221,7 @@ def _jsonable(value):
         return [_jsonable(v) for v in value]
     if isinstance(value, datetime):
         return value.isoformat()
-    if isinstance(value, (date, time)):
+    if isinstance(value, (date, dt_time)):
         return value.isoformat()
     if isinstance(value, Decimal):
         return str(value)
@@ -251,7 +252,7 @@ def parse_date(value):
 def parse_time(value):
     if not value:
         return None
-    return time.fromisoformat(value)
+    return dt_time.fromisoformat(value)
 
 
 def _coerce(field, value):
@@ -664,14 +665,33 @@ def _copy_from_bundle(rel, files_root, dest):
 # ---------------------------------------------------------------------------
 
 
+# Progress verbosity for _dump_model(): set by export_bundle() so every dump
+# section (accounts, files, articles, the "remaining sections" block, ...)
+# reports progress without having to pass verbose through 60+ call sites.
+_EXPORT_VERBOSE = False
+
+
 def _dump_model(data, key, queryset, extra_fn=None, verbose=None):
     """Dump a queryset into ``data[key]`` as a list of {pk, fields}."""
+    if verbose is None:
+        verbose = _EXPORT_VERBOSE
+    try:
+        total = queryset.count()
+    except Exception:
+        total = 0
     rows = []
+    last_beat = 0.0
     for obj in queryset:
         row = {"pk": obj.pk, "fields": model_to_dict(obj)}
         if extra_fn:
             extra_fn(obj, row)
         rows.append(row)
+        if verbose and total and len(rows) % 100 == 0:
+            now = time.monotonic()
+            if now - last_beat >= 2.0:
+                last_beat = now
+                print("    {}: {}/{} ...".format(key, len(rows), total))
+                sys.stdout.flush()
     data[key] = rows
     if verbose:
         # always log (even empty sections) so long exports never look stuck
@@ -708,8 +728,15 @@ def _dump_settings(data, journal):
     return rows
 
 
-def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
+def export_bundle(
+    journal, output_dir, include_binaries=True, verbose=True,
+    include_article_access=True,
+):
     """Export ``journal`` (a journal_models.Journal) into a bundle directory.
+
+    ``include_article_access=False`` skips the (potentially very large)
+    article access metrics: the per-event ``ArticleAccess`` log and the
+    ``HistoricArticleAccess`` COUNTER aggregates.
 
     Returns a summary dict with counts.
     """
@@ -727,6 +754,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
 
     log("Exporting journal '{}' (pk {}) to {}".format(journal.code, journal.pk, bundle_dir))
 
+    global _EXPORT_VERBOSE
+    _EXPORT_VERBOSE = verbose
+
     data = {
         "schema_version": SCHEMA_VERSION,
         "exported_at": timezone.now().isoformat(),
@@ -735,6 +765,9 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     }
 
     binaries = data["binaries"]
+    # One detail line per referenced binary that is missing on disk;
+    # reported in the final warning so the operator can locate each file.
+    bin_missing = []
 
     # ---- accounts (everyone referenced by the journal) -------------------
     account_pks = set()
@@ -938,6 +971,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                     binaries.append(
                         {"rel": rel, "kind": "profile_image", "account_id": account.pk}
                     )
+                elif include_binaries:
+                    bin_missing.append(
+                        "profile image of account {} ({}): {}".format(
+                            account.pk, account.username, src
+                        )
+                    )
 
     # ---- journal-level users/roles ---------------------------------------
     _dump_model(
@@ -1031,6 +1070,10 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "target": "journal.{}".format(field_name),
                         }
                     )
+                elif include_binaries:
+                    bin_missing.append(
+                        "journal.{} ({}): {}".format(field_name, journal.code, src)
+                    )
 
     _dump_settings(data, journal)
 
@@ -1052,6 +1095,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                         "target": "xsl.{}".format(xsl.pk),
                         "name": xsl.file.name,
                     }
+                )
+            elif include_binaries:
+                bin_missing.append(
+                    "xsl file '{}' (XSLFile pk {}): {}".format(
+                        xsl.file.name, xsl.pk, src
+                    )
                 )
 
     # ---- sections / licenses / issue types / submission config ------------
@@ -1272,6 +1321,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "name": name,
                         }
                     )
+                else:
+                    bin_missing.append(
+                        "cms media file '{}' (MediaFile pk {}): {}".format(
+                            name, media_file.pk, src
+                        )
+                    )
         for file in files_by_pk.values():
             if file.is_remote:
                 continue
@@ -1299,6 +1354,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                     _bin_total += 1
                     if verbose and _bin_total % 25 == 0:
                         log("    {} binary files copied".format(_bin_total))
+                else:
+                    bin_missing.append(
+                        "article file {} (File pk {}, article {}): {}".format(
+                            file.uuid_filename, file.pk, file.article_id, src
+                        )
+                    )
             else:
                 src = os.path.join(
                     _base_files_dir(), "journals", str(journal.pk), file.uuid_filename
@@ -1320,6 +1381,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                     _bin_total += 1
                     if verbose and _bin_total % 25 == 0:
                         log("    {} binary files copied".format(_bin_total))
+                else:
+                    bin_missing.append(
+                        "journal file {} (File pk {}): {}".format(
+                            file.uuid_filename, file.pk, src
+                        )
+                    )
             # extra copies living in article subfolders (review attachments etc.)
             article_dir = os.path.join(_base_files_dir(), "articles", str(file.article_id)) if file.article_id else None
             if article_dir and os.path.isdir(article_dir):
@@ -1349,6 +1416,13 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                                         else "",
                                     }
                                 )
+                            else:
+                                bin_missing.append(
+                                    "article file {} in subfolder {} "
+                                    "(File pk {}): {}".format(
+                                        file.uuid_filename, subpath, file.pk, full_src
+                                    )
+                                )
 
     _dump_model(data, "file_histories", file_history_qs)
 
@@ -1368,6 +1442,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
 
     # ---- issues ------------------------------------------------------------
     def _issue_extra(issue, row):
+        nonlocal bin_missing
         if include_binaries:
             if issue.large_image:
                 src = os.path.join(_media_root(), issue.large_image.name)
@@ -1383,6 +1458,10 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "issue_id": issue.pk,
                         }
                     )
+                else:
+                    bin_missing.append(
+                        "issue {} large_image: {}".format(issue.pk, src)
+                    )
             if issue.cover_image:
                 src = os.path.join(_media_root(), issue.cover_image.name)
                 rel = _copy_to_bundle(
@@ -1396,6 +1475,10 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                             "target": "issue.cover_image",
                             "issue_id": issue.pk,
                         }
+                    )
+                else:
+                    bin_missing.append(
+                        "issue {} cover_image: {}".format(issue.pk, src)
                     )
 
     log("  exporting issues ...")
@@ -1422,6 +1505,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
     )
 
     def _issue_galley_extra(galley, row):
+        nonlocal bin_missing
         if include_binaries and galley.file:
             src = os.path.join(
                 _base_files_dir(), "issues", str(galley.issue_id), galley.file.uuid_filename
@@ -1440,6 +1524,12 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                         "file_id": galley.file_id,
                     }
                 )
+            else:
+                bin_missing.append(
+                    "issue galley file (IssueGalley pk {}, issue {}): {}".format(
+                        galley.pk, galley.issue_id, src
+                    )
+                )
 
     _dump_model(
         data,
@@ -1450,6 +1540,7 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
 
     # ---- articles ----------------------------------------------------------
     def _article_extra(article, row):
+        nonlocal bin_missing
         if include_binaries and article.meta_image:
             src = os.path.join(_media_root(), article.meta_image.name)
             rel = _copy_to_bundle(
@@ -1463,6 +1554,10 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
                         "target": "article.meta_image",
                         "article_id": article.pk,
                     }
+                )
+            else:
+                bin_missing.append(
+                    "article {} meta_image: {}".format(article.pk, src)
                 )
 
     log("  exporting articles ...")
@@ -1699,18 +1794,26 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
             "book_links",
             metrics_models.BookLink.objects.filter(article__journal=journal),
         )
-        _dump_model(
-            data,
-            "historic_article_access",
-            metrics_models.HistoricArticleAccess.objects.filter(
-                article__journal=journal
-            ),
-        )
-        _dump_model(
-            data,
-            "article_access",
-            metrics_models.ArticleAccess.objects.filter(article__journal=journal),
-        )
+        if include_article_access:
+            _dump_model(
+                data,
+                "historic_article_access",
+                metrics_models.HistoricArticleAccess.objects.filter(
+                    article__journal=journal
+                ),
+            )
+            _dump_model(
+                data,
+                "article_access",
+                metrics_models.ArticleAccess.objects.filter(
+                    article__journal=journal
+                ),
+            )
+        else:
+            log(
+                "  skipping article access data "
+                "(ArticleAccess, HistoricArticleAccess)"
+            )
 
     # ---- TUW sync models (optional) ------------------------------------------
     if HAS_TUW_SYNC:
@@ -1749,6 +1852,16 @@ def export_bundle(journal, output_dir, include_binaries=True, verbose=True):
             len(binaries),
         )
     )
+    if include_binaries and bin_missing:
+        log(
+            "  WARNING: {} referenced binary file(s) were NOT found on disk "
+            "and are missing from the bundle (e.g. files/articles/<id>/, "
+            "files/journals/<id>/ or MEDIA_ROOT):".format(len(bin_missing))
+        )
+        for detail in bin_missing[:20]:
+            log("    - {}".format(detail))
+        if len(bin_missing) > 20:
+            log("    ... and {} more".format(len(bin_missing) - 20))
     return {
         "bundle_dir": bundle_dir,
         "manifest": manifest_path,
@@ -1801,7 +1914,14 @@ def _import_rows(
     absent, so the row is created with its source pk preserved.
     """
     mapping = {}
-    for row in _rows(data, key):
+    _all_rows = _rows(data, key)
+    last_beat = 0.0
+    for _idx, row in enumerate(_all_rows, 1):
+        if _all_rows and _idx % 100 == 0:
+            now = time.monotonic()
+            if now - last_beat >= 2.0:
+                last_beat = now
+                log("    {}: {}/{} ...".format(key, _idx, len(_all_rows)))
         values = dict(row.get("fields") or {})
         values["pk"] = row.get("pk")
         old_pk = row.get("pk")
