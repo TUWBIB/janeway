@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand
 
-from utils import journal_export
+from utils import tuw_journal_export
 
 
 class Command(BaseCommand):
-    """Imports a journal bundle created by export_journal."""
+    """Imports a journal bundle created by tuw_export_journal."""
 
     help = (
-        "Imports a journal bundle created by export_journal into this "
+        "Imports a journal bundle created by tuw_export_journal into this "
         "installation. The journal is created with the same code unless "
         "--code is given."
     )
@@ -40,7 +40,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        journal = journal_export.import_bundle(
+        journal = tuw_journal_export.import_bundle(
             options["bundle_dir"],
             code=options["code"],
             domain=options["domain"],

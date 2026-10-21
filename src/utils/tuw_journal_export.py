@@ -1,35 +1,23 @@
 # ============================================================================
-# HANDOFF NOTE -- journal export/import (2026-10-20, round-trip VERIFIED)
+# HANDOFF NOTE -- journal export/import (round-trip verified, 2026-10-20)
 # ============================================================================
 # STATUS: DONE
-# - export_journal / import_journal commands + this module implemented
+# - tuw_export_journal / tuw_import_journal commands + this module implemented
 #   (bundle = journal.json + files/, schema v1).
-# - Full round-trip verified on a live DB (same-system import):
-#   export ARW(3) -> import as ARWT (-c ARWT -d arwt.zzz) -> 0 warnings,
-#   all journal-scoped counts match the bundle (articles 30, files 32,
-#   file_histories 2, galleys 30, frozen_authors 81, account_roles 72,
-#   settings 294, ...), and the SOURCE journal ARW(3) is byte-for-byte
-#   untouched (30 articles, issue 83 -> journal 3, 4 homepage elements,
-#   30 article files, files 1564/1590 + histories 57/80 intact).
-# - Test journal ARWT + all orphaned copies + src/bundles/ARW-* were removed;
-#   the DB is back to the original 7 journals.
+# - Full round-trip verified on a live DB (same-system import): all
+#   journal-scoped counts match the bundle and the source journal is left
+#   untouched.
 #
-# TEST ENV
-# - Run `cd src && /opt/.virtualenvs/janeway/bin/python manage.py ...`
-#   (system python3 is 3.14 WITHOUT django; the venv is py3.12 + django 4.2.28).
-#   DB: local mariadb; settings in src/core/settings.py (janeway/janeway@localhost).
-# - Live journals: JFM(1) OES(2) ARW(3) IOTW(4) EF(5) AIROV(6) ISVCS(7).
+# KEY FACTS ABOUT THE DATA MODEL
 # - core.File.article / FileHistory.article are PLAIN article_id int columns,
 #   not FKs -- the importer remaps them with a two-phase placeholder update
 #   RESTRICTED to the pks of files/histories imported in this bundle.
-# - Binaries are mostly missing on disk (files/journals/3/ does not exist);
-#   per user: IGNORE missing binaries, that is a separate data-transfer task.
 #
 # KEY IN-IMPORT DESIGN DECISIONS (all in this file)
 # - dict_to_model: the pk is applied via the "pk" key only; the pk column
 #   ("id") inside fields is skipped. Setting it as a plain field would put
 #   instance.pk on a FRESH (same-system) copy and turn every save() into an
-#   UPDATE of the SOURCE row (root cause of bug A).
+#   UPDATE of the SOURCE row.
 # - dict_to_model: names ending in "_id" that are NOT a real FK (plain int
 #   columns like File.article_id, generic-FK parts like Task.object_id) are
 #   treated as regular fields, resolving a declared fk_remap when present.
@@ -49,15 +37,15 @@
 #   instance), not by comparing bundle pks with imported pks.
 #
 # REMAINING (optional)
-# - Add unit tests (src/utils/tests/test_journal_export.py) via the django
+# - Add unit tests (src/utils/tests/test_tuw_journal_export.py) via the django
 #   test runner (`make check` runs sqlite).
 # ============================================================================
 
 """
 Full journal export/import support.
 
-Implements the logic behind the ``export_journal`` and ``import_journal``
-management commands.
+Implements the logic behind the ``tuw_export_journal`` and
+``tuw_import_journal`` management commands.
 
 Bundle layout
 =============
@@ -1879,7 +1867,7 @@ def _load_bundle(bundle_dir):
     if not os.path.isfile(manifest_path):
         raise FileNotFoundError(
             "No journal.json found in {} (expected a bundle directory "
-            "created by export_journal)".format(bundle_dir)
+            "created by tuw_export_journal)".format(bundle_dir)
         )
     with open(manifest_path, "r", encoding="utf-8") as handle:
         return json.load(handle)

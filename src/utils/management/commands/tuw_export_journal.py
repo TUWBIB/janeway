@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from journal import models
-from utils import journal_export
+from utils import tuw_journal_export
 
 
 class Command(BaseCommand):
@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = (
         "Exports a journal's complete state (records, settings and binary "
         "files) into a bundle directory that can be imported with "
-        "import_journal on another installation."
+        "tuw_import_journal on another installation."
     )
 
     def add_arguments(self, parser):
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             )
             return
 
-        summary = journal_export.export_bundle(
+        summary = tuw_journal_export.export_bundle(
             journal,
             options["output"],
             include_binaries=not options["no_binaries"],
