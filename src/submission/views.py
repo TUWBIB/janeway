@@ -9,7 +9,7 @@ import warnings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 from django.db.models import Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -373,6 +373,23 @@ def edit_current_authors(request, article_id):
 
     authors = logic.get_current_authors(article, request)
 
+    # The per-author "Create account" button is only offered on the
+    # backcontent article page (the backcontent_article view sets
+    # show_create_account_button=True). This fragment is re-rendered via
+    # AJAX after actions such as reordering authors, so restore the flag
+    # when the request originated from that page. full_page_path holds
+    # the path of the full page that triggered the request.
+    try:
+        backcontent_article_path = reverse(
+            "backcontent_article", kwargs={"article_id": article.pk}
+        )
+    except NoReverseMatch:
+        backcontent_article_path = None
+    show_create_account_button = (
+        backcontent_article_path is not None
+        and full_page_path.split("?", 1)[0] == backcontent_article_path
+    )
+
     template = "admin/elements/current_authors_inner.html"
     context = {
         "article": article,
@@ -380,6 +397,7 @@ def edit_current_authors(request, article_id):
         "last_changed_author": last_changed_author,
         "last_changed_credit_author": last_changed_credit_author,
         "full_page_path": full_page_path,
+        "show_create_account_button": show_create_account_button,
     }
 
     return render(request, template, context)
