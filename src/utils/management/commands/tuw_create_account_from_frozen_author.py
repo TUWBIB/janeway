@@ -82,13 +82,39 @@ class Command(BaseCommand):
         fqs = submission_models.FrozenAuthor.objects.filter(
             frozen_email__iexact=frozen_email
         )
+        already_linked = None
         if not fqs.exists():
-            orcid = options["orcid"]
-            if orcid:
-                fqs = submission_models.FrozenAuthor.objects.filter(
-                    frozen_orcid=orcid
+            # A previous run already linked this record: linking clears
+            # frozen_email (see associate_with_account()), so the record
+            # is now only findable via its account's email.
+            already_linked = (
+                submission_models.FrozenAuthor.objects.filter(
+                    author__email__iexact=frozen_email
                 )
+                .order_by("pk")
+                .first()
+            )
+            if not already_linked:
+                orcid = options["orcid"]
+                if orcid:
+                    fqs = submission_models.FrozenAuthor.objects.filter(
+                        frozen_orcid=orcid
+                    )
         if not fqs.exists():
+            if already_linked:
+                self.stdout.write(
+                    self.style.WARNING(
+                        "FrozenAuthor pk=%s (%s) is already linked to "
+                        "account %r (pk=%s); nothing to do."
+                        % (
+                            already_linked.pk,
+                            already_linked.full_name(),
+                            already_linked.author.email,
+                            already_linked.author.pk,
+                        )
+                    )
+                )
+                return
             raise CommandError(
                 "No FrozenAuthor found with frozen_email %r%s."
                 % (
@@ -102,15 +128,18 @@ class Command(BaseCommand):
         frozen_author = fqs.order_by("pk").first()
         more = fqs.count() - 1
         if frozen_author.author:
-            raise CommandError(
-                "FrozenAuthor %s (%s) is already linked to account %r; "
-                "nothing to do."
-                % (
-                    frozen_author.pk,
-                    frozen_author.full_name(),
-                    frozen_author.author.email,
+            self.stdout.write(
+                self.style.WARNING(
+                    "FrozenAuthor %s (%s) is already linked to account %r; "
+                    "nothing to do."
+                    % (
+                        frozen_author.pk,
+                        frozen_author.full_name(),
+                        frozen_author.author.email,
+                    )
                 )
             )
+            return
         if more:
             self.stdout.write(
                 self.style.WARNING(
