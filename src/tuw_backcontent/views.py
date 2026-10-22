@@ -10,6 +10,7 @@ from django.contrib.messages import get_messages
 from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
@@ -128,9 +129,114 @@ def backcontent_article(request, article_id):
         'galley_form': galley_form,
         'author_form': author_form,
         'authors': submission_logic.get_current_authors(article, request),
+        # shows the per-author "Create account" button in the
+        # shared current_authors include
+        'show_create_account_button': True,
     }
 
     return render(request, template, context)
+
+@require_POST
+@editor_user_required
+def backcontent_create_account_for_author(request, article_id, author_id):
+    """Creates an (inactive) core.Account for a detached FrozenAuthor and
+    links the frozen author to the new account.
+
+    Used by the per-author "Create account" button on the backcontent
+    article page, so that backcontent articles added without a previous
+    submission process can still get a corresponding author.
+    """
+    article = get_object_or_404(
+        submission_models.Article,
+        pk=article_id,
+        journal=request.journal,
+    )
+    author = get_object_or_404(
+        submission_models.FrozenAuthor, pk=author_id, article=article
+    )
+
+    if author.author:
+        messages.add_message(
+            request,
+            messages.INFO,
+            _("%(author_name)s is already linked to a user account.")
+            % {"author_name": author.full_name()},
+        )
+    else:
+        # Prefer the author's real email. If there is none (e.g. a
+        # GND-only record), fall back to the placeholder scheme
+        # firstname.lastname@no.valid.email.com (see
+        # FrozenAuthor.account_email / placeholder_email). Such
+        # accounts can still serve as the correspondence-author
+        # anchor; their email simply cannot be used for delivery.
+        email = author.account_email()
+        if not author.real_email:
+            messages.add_message(
+                request,
+                messages.INFO,
+                _("%(author_name)s has no email address, the placeholder email %(email)s will be used.")
+                % {"author_name": author.full_name(), "email": email},
+            )
+
+        account = core_models.Account.objects.filter(
+            email__iexact=email
+        ).first()
+        if account:
+            created = False
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("%(author_name)s is linked to the existing account %(email)s.")
+                % {"author_name": author.full_name(), "email": account.email},
+            )
+        else:
+            first_name = author.first_name or ""
+            last_name = author.last_name or ""
+            if not (first_name or last_name):
+                first_name = first_name or "Author"
+                last_name = last_name or email.split("@")[0]
+            account = core_models.Account.objects.create(
+                email=email,
+                username=email.lower(),
+                first_name=first_name,
+                last_name=last_name,
+                orcid=author.frozen_orcid or None,
+                # intentionally inactive: the person has not
+                # registered, the account is only the anchor for the
+                # correspondence-author role and the article workflow.
+                is_active=False,
+            )
+            created = True
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Created inactive account %(email)s for %(author_name)s.")
+                % {"email": account.email, "author_name": author.full_name()},
+            )
+
+        # grant the author role for the article's journal
+        if article.journal:
+            # NB: do not name the throwaway '_' here; that would
+            # shadow the module-level gettext '_' for the whole
+            # function and break the translated messages above.
+            role, role_created = core_models.Role.objects.get_or_create(
+                slug="author", defaults={"name": "Author"}
+            )
+            core_models.AccountRole.objects.get_or_create(
+                user=account, role=role, journal=article.journal
+            )
+
+        # link the frozen author to the account (mirrors
+        # FrozenAuthor.associate_with_account())
+        author.author = account
+        author.frozen_email = ""  # linked account, don't store this value
+        author.save()
+
+    return redirect(
+        reverse(
+            "backcontent_article", kwargs={"article_id": article.pk}
+        )
+    )
 
 @editor_user_required
 def backcontent_delete_article(request, article_id):

@@ -32,4 +32,10 @@ urlpatterns = [
         views.backcontent_author_search,
         name="backcontent_author_search",
     ),
+
+    re_path(
+        r"^manage/articles/backcontent/article/(?P<article_id>\d+)/author/(?P<author_id>\d+)/create_account/$",
+        views.backcontent_create_account_for_author,
+        name="backcontent_create_account_for_author",
+    ),
 ]

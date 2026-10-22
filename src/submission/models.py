@@ -2875,6 +2875,52 @@ class FrozenAuthor(AbstractLastModifiedModel):
             except core_models.Account.DoesNotExist:
                 pass
 
+    @classmethod
+    def placeholder_email(cls, first_name, last_name):
+        """
+        Generates a placeholder email address in the scheme
+        firstname.lastname@no.valid.email.com for authors without a
+        real email address (e.g. GND-only records). The domain is
+        flagged by Account.hasValidEmail / real_email, so such
+        accounts cannot be used for email delivery, but they can
+        still serve as the correspondence-author anchor.
+
+        A numeric suffix is appended if an Account with the same
+        email (or username) already exists, so that two distinct
+        authors with the same name do not collide.
+        """
+        def slugify_part(name):
+            return (
+                re.sub(r"[^a-z0-9]+", " ", name or "", flags=re.IGNORECASE)
+                .strip()
+                .replace(" ", ".")
+            )
+
+        first = slugify_part(first_name)
+        last = slugify_part(last_name)
+        local = ".".join(part for part in (first, last) if part) or "author"
+        base = "%s@no.valid.email.com" % local
+
+        email = base
+        counter = 1
+        while core_models.Account.objects.filter(
+            models.Q(email__iexact=email) | models.Q(username__iexact=email.lower())
+        ).exists():
+            counter += 1
+            email = "%s.%d@no.valid.email.com" % (local, counter)
+        return email
+
+    def account_email(self):
+        """
+        The email that should be used when creating a core.Account
+        for this frozen author: the author's real email if there is
+        one, otherwise a generated placeholder (see
+        placeholder_email()).
+        """
+        if self.real_email:
+            return self.real_email
+        return self.placeholder_email(self.first_name, self.last_name)
+
     @property
     def institution(self):
         affil = self.primary_affiliation()

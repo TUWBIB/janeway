@@ -74,6 +74,17 @@
                               {% trans "Edit author details" %}
                             </a>
                           {% endif %}
+                          {% if show_create_account_button and not author.author %}
+                            <form
+                              method="POST"
+                              action="{% url 'backcontent_create_account_for_author' article.pk author.pk %}?next={{ request.get_full_path|urlencode }}">
+                              {% csrf_token %}
+                              <button type="submit" class="button hollow secondary no-bottom-margin">
+                                <span class="fa fa-user-plus"></span>
+                                {% trans "Create account" %}
+                              </button>
+                            </form>
+                          {% endif %}
                           {% url_with_return 'submission_delete_frozen_author' article.pk author.pk as remove_url %}
                           {% trans "Remove author" as remove_label %}
                           {% include "elements/a_remove.html" with href=remove_url label=remove_label %}
