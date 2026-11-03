@@ -92,7 +92,7 @@
                 {% if request.journal.nav_home %}
                 <li class="nav-item"><a href="{% url 'website_index' %}" class="nav-link">
                     {% if request.journal.code == "JFM" %}                
-                        Journal for Facility Managment
+                        Journal for Facility Management
                     {% elif request.journal.code == "OES" %}
                         {% if LANGUAGE_CODE == "de" %}                
                             Der Öffentliche Sektor
