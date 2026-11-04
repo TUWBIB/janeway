@@ -27,6 +27,9 @@ logger = get_logger(__name__)
 
 urlpatterns = [
     path("", include(journal_urls)),
+    # TUW writable API must be included before the generic "api/" router,
+    # which matches every prefix under /api/.
+    path("api/tuw/", include("api.tuw.urls")),
     path("api/", include("api.urls")),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("cms/", include("cms.urls")),
