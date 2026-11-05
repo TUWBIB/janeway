@@ -7,8 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     dependencies = [
         (
-            "submission",
-            "9011_tuw_remove_obsolete_fields",
+            "submission","0082_article_abstract_es_article_title_es_section_name_es_and_more",
         ),
     ]
 

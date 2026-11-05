@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0082_article_abstract_es_article_title_es_section_name_es_and_more'),
+        ('submission', '0083_article_jats_article_type_override_and_more'),
     ]
 
     operations = [

@@ -50,6 +50,7 @@ def update_inprogress_article_authors(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("submission", "0087_alter_frozenauthor_options_and_more"),
+        ("submission", "9011_tuw_remove_obsolete_fields"),
     ]
 
     operations = [
