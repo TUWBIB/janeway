@@ -16,6 +16,10 @@ request):
   ``last_name``, ``name_suffix``, ``institution``, ``department``,
   ``country`` (mirrors ``FrozenAuthorSerializer``).
 - ``cover_image`` / ``large_image``: base64 data URI (write-only).
+- ``title`` / ``subtitle`` / ``abstract``: nested objects with the keys
+  ``raw``, ``en`` and ``de`` (see ``TranslatableTextSerializer``).
+- ``keywords``: a nested object mapping a language (``en``/``de``) to a
+  list of keyword strings.
 """
 
 from rest_framework import serializers
@@ -207,29 +211,81 @@ class IssueWriteSerializer(serializers.Serializer):
         return instance
 
 
+class TranslatableTextSerializer(serializers.Serializer):
+    """
+    Input representation of a translatable text field (``title``,
+    ``subtitle`` or ``abstract``), translated via django-modeltranslation.
+
+    Keys:
+    - ``raw``: the article's primary value, mirroring the untranslated
+      field of the readable API. Stored as the default language's
+      (English) translation.
+    - ``en``: an explicit English value; takes precedence over
+      ``raw`` when present.
+    - ``de``: the German value.
+
+    Any key may be omitted (on PUT, the stored translation is left
+    unchanged; on POST, it is empty). ``null`` or an empty string
+    clears the given translation.
+    """
+
+    raw = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Primary value of the field (stored as the English translation).",
+    )
+    en = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="English value. Takes precedence over 'raw' when present.",
+    )
+    de = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="German value.",
+    )
+
+    def __init__(self, *args, max_length=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if max_length is not None:
+            for field in self.fields.values():
+                field.max_length = max_length
+
+
 class SubmissionWriteSerializer(serializers.Serializer):
     """
     Input serializer for creating and updating submissions (articles)
     via POST/PUT on /api/tuw/submissions/. Field names mirror the
     readable ArticleSerializer.
+
+    ``title`` (required), ``subtitle`` and ``abstract`` are nested
+    objects with the keys ``raw``, ``en`` and ``de`` (see
+    ``TranslatableTextSerializer``). ``keywords`` is a nested object
+    mapping a language (``en``/``de``) to a list of keyword strings;
+    only the languages present in the payload are modified, and a
+    present empty list clears that language's keywords.
     """
 
-    title = serializers.CharField(
-        required=True,
-        allow_blank=True,
+    TRANSLATABLE_FIELDS = ("title", "subtitle", "abstract")
+
+    title = TranslatableTextSerializer(
         max_length=999,
-        help_text="Article title, as in the readable API.",
-    )
-    subtitle = serializers.CharField(
         required=False,
-        allow_blank=True,
-        allow_null=True,
+        help_text="Article title, as in the readable API. Required when "
+        "creating a submission; on update, omit it to leave the stored "
+        "title unchanged.",
+    )
+    subtitle = TranslatableTextSerializer(
         max_length=999,
+        required=False,
+        allow_null=True,
         help_text="Article subtitle (deprecated in the readable API, but still stored).",
     )
-    abstract = serializers.CharField(
+    abstract = TranslatableTextSerializer(
         required=False,
-        allow_blank=True,
         allow_null=True,
         help_text="Article abstract, as in the readable API.",
     )
@@ -247,11 +303,12 @@ class SubmissionWriteSerializer(serializers.Serializer):
         max_length=15,
         help_text="Licence short_name for this journal (e.g. 'CC-BY').",
     )
-    keywords = serializers.ListField(
-        child=serializers.CharField(max_length=200),
+    keywords = serializers.DictField(
         required=False,
         allow_empty=True,
-        help_text="List of keyword strings, as in the readable API.",
+        help_text="Object mapping a language ('en' or 'de') to a list of "
+        "keyword strings. Only the languages present are modified; an "
+        "empty list clears that language's keywords.",
     )
     section = serializers.CharField(
         required=False,
@@ -332,6 +389,47 @@ class SubmissionWriteSerializer(serializers.Serializer):
         return section
 
     def validate(self, attrs):
+        if "title" not in attrs:
+            if self.instance is None:
+                # required when creating a submission
+                raise serializers.ValidationError(
+                    {"title": "This field is required."}
+                )
+            # on update, an omitted title is left unchanged
+        elif self.instance is None:
+            if not any(
+                (attrs["title"].get(key) or "").strip()
+                for key in ("raw", "en", "de")
+            ):
+                raise serializers.ValidationError(
+                    {"title": "Provide a value for at least one of 'raw', 'en' or 'de'."}
+                )
+        elif not any(key in attrs["title"] for key in ("raw", "en", "de")):
+            # on update an empty object is a no-op; an explicit empty
+            # value (e.g. "de": null) is a meaningful clear
+            raise serializers.ValidationError(
+                {"title": "Provide at least one of 'raw', 'en' or 'de'."}
+            )
+
+        keywords = attrs.get("keywords")
+        if keywords is not None:
+            errors = {}
+            for language, words in keywords.items():
+                if language not in ("en", "de"):
+                    errors[language] = "Unsupported keyword language (expected 'en' or 'de')."
+                    continue
+                if not isinstance(words, list):
+                    errors[language] = "Keywords must be a list of strings."
+                    continue
+                for word in words:
+                    if not isinstance(word, str) or len(word.strip()) > 200:
+                        errors[language] = (
+                            "Each keyword must be a string of at most 200 characters."
+                        )
+                        break
+            if errors:
+                raise serializers.ValidationError({"keywords": errors})
+
         if attrs.get("authors"):
             for index, author in enumerate(attrs["authors"]):
                 for key in ("first_name", "last_name"):
@@ -387,25 +485,92 @@ class SubmissionWriteSerializer(serializers.Serializer):
                         }
                     )
 
+    def _apply_translations(self, article, translations):
+        """
+        Write a ``{field: {raw, en, de}}`` mapping into the
+        django-modeltranslation columns of ``title``, ``subtitle`` and
+        ``abstract``.
+
+        ``raw`` is stored as the default language's (English)
+        translation; an explicit ``en`` value takes precedence over
+        ``raw`` (including an explicit empty one, which clears the
+        English value).
+
+        Only keys present in the payload are written; omitted keys leave
+        the stored translation untouched (a ``null`` or empty-string
+        value clears the translation). Fields missing from
+        ``translations`` are left untouched.
+        """
+        for field_name in self.TRANSLATABLE_FIELDS:
+            data = (translations or {}).get(field_name)
+            if not isinstance(data, dict):
+                continue
+            if "en" in data:
+                value = (data["en"] or "").strip() or None
+            elif "raw" in data:
+                value = (data["raw"] or "").strip() or None
+            else:
+                value = None  # no English value in the payload
+            if value is not None or ("en" in data or "raw" in data):
+                setattr(article, "{}_en".format(field_name), value)
+            if "de" in data:
+                de_value = (data["de"] or "").strip() or None
+                setattr(article, "{}_de".format(field_name), de_value)
+
     def _apply_keywords(self, article, keywords):
         """
-        Replace the article's keyword set with the given list of words,
-        reusing existing Keyword rows.
+        Replace the article's keyword set for each language present in
+        the payload (``en``/``de``). A present empty list clears that
+        language's keywords; languages absent from the payload are left
+        untouched. Keyword rows are reused by (word, language) and the
+        through-table order follows the payload.
         """
-        article.keywords.clear()
-        for word in keywords:
-            word = word.strip()
-            if not word:
-                continue
-            keyword, _ = submission_models.Keyword.objects.get_or_create(word=word)
-            article.keywords.add(keyword)
+        for language, words in (keywords or {}).items():
+            submission_models.KeywordArticle.objects.filter(
+                article=article, keyword__language=language
+            ).delete()
+            order = 0
+            for word in words:
+                word = (word or "").strip()
+                if not word:
+                    continue
+                order += 1
+                keyword, _ = submission_models.Keyword.objects.get_or_create(
+                    word=word, language=language
+                )
+                submission_models.KeywordArticle.objects.get_or_create(
+                    article=article,
+                    keyword=keyword,
+                    defaults={"order": order},
+                )
+
+    def _save_article(self, article):
+        """
+        Save the article with per-instance modeltranslation localization
+        disabled (``_mt_disable``), so the localized columns written by
+        ``_apply_translations`` are persisted exactly as given.
+
+        Without this flag, saving a translatable field writes the
+        (fallback-resolved) value back into the base column *and* the
+        currently active language's column, which would e.g. copy a
+        German-only title into ``title_en``.
+        """
+        article._mt_disable = True
+        try:
+            article.save()
+        finally:
+            del article._mt_disable
 
     def create(self, validated_data):
         request = self.context["request"]
         journal = request.journal
 
         authors = validated_data.pop("authors", [])
-        keywords = validated_data.pop("keywords", [])
+        keywords = validated_data.pop("keywords", None)
+        translations = {
+            field: validated_data.pop(field, None)
+            for field in self.TRANSLATABLE_FIELDS
+        }
 
         article = submission_models.Article.objects.create(
             journal=journal,
@@ -413,20 +578,30 @@ class SubmissionWriteSerializer(serializers.Serializer):
             **validated_data,
         )
         try:
+            self._apply_translations(article, translations)
+            self._save_article(article)
             self._apply_authors(article, authors)
-            self._apply_keywords(article, keywords)
+            if keywords is not None:
+                self._apply_keywords(article, keywords)
         except serializers.ValidationError:
             article.delete()
             raise
         return article
 
     def update(self, instance, validated_data):
+        # Enforced in the view: instance is already journal-scoped.
         authors = validated_data.pop("authors", None)
         keywords = validated_data.pop("keywords", None)
+        translations = {
+            field: validated_data.pop(field, None)
+            for field in self.TRANSLATABLE_FIELDS
+        }
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        instance.save()
+
+        self._apply_translations(instance, translations)
+        self._save_article(instance)
 
         if authors is not None:
             self._apply_authors(instance, authors)

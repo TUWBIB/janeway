@@ -57,6 +57,8 @@ class ArticleSerializer(serializers.HyperlinkedModelSerializer):
             "language",
             "license",
             "keywords",
+            "keywords_de",
+            "translations",
             "section",
             "is_remote",
             "remote_url",
@@ -69,10 +71,11 @@ class ArticleSerializer(serializers.HyperlinkedModelSerializer):
         )
 
     license = LicenceSerializer()
-    keywords = KeywordsSerializer(
-        many=True,
-        read_only=True,
-    )
+    # English keywords, in order. (German keywords are exposed
+    # separately as "keywords_de".)
+    keywords = serializers.SerializerMethodField()
+    keywords_de = serializers.SerializerMethodField()
+    translations = serializers.SerializerMethodField()
     section = serializers.ReadOnlyField(read_only=True, source="section.name")
     frozenauthors = FrozenAuthorSerializer(
         many=True,
@@ -82,6 +85,38 @@ class ArticleSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
     )
     galleys = GalleySerializer(source="galley_set", many=True)
+
+    def _keyword_words(self, obj, language):
+        return [
+            through_row.keyword.word
+            for through_row in submission_models.KeywordArticle.objects.filter(
+                article=obj, keyword__language=language
+            ).order_by("order")
+        ]
+
+    def get_keywords(self, obj):
+        return self._keyword_words(obj, "en")
+
+    def get_keywords_de(self, obj):
+        return self._keyword_words(obj, "de")
+
+    def get_translations(self, obj):
+        """
+        Per-language values of the translatable text fields
+        (django-modeltranslation). ``en``/``de`` mirror the columns
+        written by the writable TUW API.
+        """
+
+        def field_values(field_name):
+            return {
+                "en": getattr(obj, "{0}_en".format(field_name)) or None,
+                "de": getattr(obj, "{0}_de".format(field_name)) or None,
+            }
+
+        return {
+            field: field_values(field)
+            for field in ("title", "subtitle", "abstract")
+        }
 
 
 class PreprintSubjectSerializer(serializers.HyperlinkedModelSerializer):

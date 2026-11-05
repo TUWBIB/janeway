@@ -337,11 +337,20 @@ class TestTUWAPI(TestCase):
         response = self.api_client.post(
             "/api/tuw/submissions/",
             data={
-                "title": "A brand new article",
-                "abstract": "The abstract of the article.",
+                "title": {
+                    "raw": "A brand new article",
+                    "de": "Ein brandneuer Artikel",
+                },
+                "abstract": {
+                    "raw": "The abstract of the article.",
+                    "de": "Die Zusammenfassung des Artikels.",
+                },
                 "language": "eng",
                 "license": "CC-BY",
-                "keywords": ["open access", "testing"],
+                "keywords": {
+                    "en": ["open access", "testing"],
+                    "de": ["Offener Zugang", "Test"],
+                },
                 "section": "Article",
                 "authors": [
                     {
@@ -365,14 +374,28 @@ class TestTUWAPI(TestCase):
         self.assertEqual(response.status_code, 201, response.content)
         article = submission_models.Article.objects.get(pk=response.data["pk"])
         self.assertEqual(article.journal, self.journal)
-        self.assertEqual(article.title, "A brand new article")
-        self.assertEqual(article.abstract, "The abstract of the article.")
+        self.assertEqual(article.title_en, "A brand new article")
+        self.assertEqual(article.title_de, "Ein brandneuer Artikel")
+        self.assertEqual(article.abstract_en, "The abstract of the article.")
+        self.assertEqual(article.abstract_de, "Die Zusammenfassung des Artikels.")
         self.assertEqual(article.language, "eng")
         self.assertEqual(article.license, self.licence)
         self.assertEqual(article.section, self.section)
         self.assertEqual(
-            sorted(article.keywords.values_list("word", flat=True)),
+            list(
+                article.keywords.filter(language="en").values_list(
+                    "word", flat=True
+                )
+            ),
             ["open access", "testing"],
+        )
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="de").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["Offener Zugang", "Test"],
         )
         self.assertEqual(article.stage, submission_models.STAGE_UNASSIGNED)
         authors = list(article.frozenauthor_set.order_by("order"))
@@ -386,22 +409,47 @@ class TestTUWAPI(TestCase):
         # the readable API shape for the response
         self.assertEqual(response.data["frozenauthors"][0]["first_name"], "Erika")
         self.assertEqual(response.data["section"], "Article")
+        self.assertEqual(response.data["keywords"], ["open access", "testing"])
+        self.assertEqual(response.data["keywords_de"], ["Offener Zugang", "Test"])
         self.assertEqual(
-            [kw["word"] for kw in response.data["keywords"]],
-            ["open access", "testing"],
+            response.data["translations"],
+            {
+                "title": {
+                    "en": "A brand new article",
+                    "de": "Ein brandneuer Artikel",
+                },
+                "subtitle": {"en": None, "de": None},
+                "abstract": {
+                    "en": "The abstract of the article.",
+                    "de": "Die Zusammenfassung des Artikels.",
+                },
+            },
         )
 
     @override_settings(URL_CONFIG="domain")
     def test_submission_create_requires_title(self):
         response = self.api_client.post(
             "/api/tuw/submissions/",
-            data={"abstract": "No title here"},
+            data={"abstract": {"raw": "No title here"}},
             format="json",
             SERVER_NAME=self.journal.domain,
             HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("title", response.data)
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_create_rejects_empty_title(self):
+        response = self.api_client.post(
+            "/api/tuw/submissions/",
+            data={"title": {"raw": "  ", "de": "   "}},
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.data)
+        self.assertFalse(submission_models.Article.objects.exists())
 
     @override_settings(URL_CONFIG="domain")
     def test_submission_create_rejects_unknown_licence(self):
@@ -432,7 +480,7 @@ class TestTUWAPI(TestCase):
     def test_submission_create_rejects_author_without_name(self):
         response = self.api_client.post(
             "/api/tuw/submissions/",
-            data={"title": "X", "authors": [{"first_name": "No"}]},
+            data={"title": {"raw": "X"}, "authors": [{"first_name": "No"}]},
             format="json",
             SERVER_NAME=self.journal.domain,
             HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
@@ -460,10 +508,10 @@ class TestTUWAPI(TestCase):
         response = self.api_client.put(
             "/api/tuw/submissions/{0}/".format(article.pk),
             data={
-                "title": "A revised title",
-                "abstract": "A revised abstract.",
+                "title": {"raw": "A revised title", "de": "Ein überarbeiteter Titel"},
+                "abstract": {"raw": "A revised abstract."},
                 "language": "deu",
-                "keywords": ["only one"],
+                "keywords": {"en": ["only one"]},
                 "authors": [
                     {
                         "first_name": "New",
@@ -478,11 +526,25 @@ class TestTUWAPI(TestCase):
         )
         self.assertEqual(response.status_code, 200, response.content)
         article.refresh_from_db()
-        self.assertEqual(article.title, "A revised title")
-        self.assertEqual(article.abstract, "A revised abstract.")
+        self.assertEqual(article.title_en, "A revised title")
+        self.assertEqual(article.title_de, "Ein überarbeiteter Titel")
+        self.assertEqual(article.abstract_en, "A revised abstract.")
         self.assertEqual(article.language, "deu")
         self.assertEqual(
-            list(article.keywords.values_list("word", flat=True)), ["only one"]
+            list(
+                article.keywords.filter(language="en").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["only one"],
+        )
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="de").values_list(
+                    "word", flat=True
+                )
+            ),
+            [],
         )
         authors = list(article.frozenauthor_set.order_by("order"))
         self.assertEqual(len(authors), 1)
@@ -494,7 +556,7 @@ class TestTUWAPI(TestCase):
         other_article = self._create_submission(journal=self.journal_two)
         response = self.api_client.put(
             "/api/tuw/submissions/{0}/".format(other_article.pk),
-            data={"title": "Hijacked!"},
+            data={"title": {"raw": "Hijacked!"}},
             format="json",
             SERVER_NAME=self.journal.domain,
             HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
@@ -507,9 +569,226 @@ class TestTUWAPI(TestCase):
     def test_submission_update_of_missing_article_returns_404(self):
         response = self.api_client.put(
             "/api/tuw/submissions/99999/",
-            data={"title": "Ghost"},
+            data={"title": {"raw": "Ghost"}},
             format="json",
             SERVER_NAME=self.journal.domain,
             HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
         )
         self.assertEqual(response.status_code, 404)
+
+    # ------------------------------------------------------------------
+    # Submissions: multilingual fields
+    # ------------------------------------------------------------------
+
+    def _put_submission(self, article, data):
+        return self.api_client.put(
+            "/api/tuw/submissions/{0}/".format(article.pk),
+            data=data,
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_creates_german_only_fields_without_english_copies(self):
+        # German-only title/abstract must not be duplicated into the
+        # English translation columns by the save.
+        response = self.api_client.post(
+            "/api/tuw/submissions/",
+            data={
+                "title": {"de": "Nur auf Deutsch"},
+                "abstract": {"de": "Nur Zusammenfassung"},
+                "language": "deu",
+            },
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        article = submission_models.Article.objects.get(pk=response.data["pk"])
+        self.assertEqual(article.title_de, "Nur auf Deutsch")
+        self.assertIn(article.title_en, ("", None))
+        self.assertEqual(article.abstract_de, "Nur Zusammenfassung")
+        self.assertIn(article.abstract_en, ("", None))
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_explicit_en_overrides_raw(self):
+        response = self.api_client.post(
+            "/api/tuw/submissions/",
+            data={
+                "title": {"raw": "Primary title", "en": "English title"},
+            },
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        article = submission_models.Article.objects.get(pk=response.data["pk"])
+        self.assertEqual(article.title_en, "English title")
+        # an explicit empty 'en' clears the English value
+        response = self._put_submission(
+            article, {"title": {"raw": "Primary title", "en": " "}}
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertIn(article.title_en, ("", None))
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_update_partial_translation_preserves_unmentioned(self):
+        article = self._create_submission()
+        article.title_en = "Old English"
+        article.title_de = "Alter Deutsch"
+        article.subtitle_de = "Alter Untertitel"
+        article.save()
+
+        # only the German title is provided; the rest must survive
+        response = self._put_submission(article, {"title": {"de": "Neu Deutsch"}})
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertEqual(article.title_de, "Neu Deutsch")
+        self.assertEqual(article.title_en, "Old English")
+        self.assertEqual(article.subtitle_de, "Alter Untertitel")
+
+        # clearing a translation with null/empty
+        response = self._put_submission(article, {"title": {"de": None}})
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertIn(article.title_de, ("", None))
+        self.assertEqual(article.title_en, "Old English")
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_update_subtitle_roundtrip(self):
+        article = self._create_submission()
+        response = self._put_submission(
+            article,
+            {"subtitle": {"raw": "English sub", "de": "Deutscher Untertitel"}},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertEqual(article.subtitle_en, "English sub")
+        self.assertEqual(article.subtitle_de, "Deutscher Untertitel")
+        self.assertEqual(
+            response.data["translations"]["subtitle"],
+            {"en": "English sub", "de": "Deutscher Untertitel"},
+        )
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_keywords_language_sets_are_independent(self):
+        article = self._create_submission()
+        response = self._put_submission(
+            article,
+            {
+                "keywords": {
+                    "en": ["en one", "en two"],
+                    "de": ["ein", "zwei"],
+                }
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="en").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["en one", "en two"],
+        )
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="de").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["ein", "zwei"],
+        )
+
+        # order follows the payload and is preserved
+        self.assertEqual(
+            [
+                row.keyword.word
+                for row in submission_models.KeywordArticle.objects.filter(
+                    article=article, keyword__language="en"
+                ).order_by("order")
+            ],
+            ["en one", "en two"],
+        )
+
+        # an empty list clears only that language
+        response = self._put_submission(article, {"keywords": {"de": []}})
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="de").values_list(
+                    "word", flat=True
+                )
+            ),
+            [],
+        )
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="en").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["en one", "en two"],
+        )
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_keywords_same_word_in_both_languages(self):
+        article = self._create_submission()
+        response = self._put_submission(
+            article,
+            {"keywords": {"en": ["open access"], "de": ["open access"]}},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        article.refresh_from_db()
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="en").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["open access"],
+        )
+        self.assertEqual(
+            list(
+                article.keywords.filter(language="de").values_list(
+                    "word", flat=True
+                )
+            ),
+            ["open access"],
+        )
+        self.assertEqual(
+            submission_models.Keyword.objects.filter(word="open access").count(), 2
+        )
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_keywords_reject_unknown_language(self):
+        response = self.api_client.post(
+            "/api/tuw/submissions/",
+            data={
+                "title": {"raw": "X"},
+                "keywords": {"fr": ["un mot"]},
+            },
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("keywords", response.data)
+        self.assertFalse(submission_models.Article.objects.exists())
+
+    @override_settings(URL_CONFIG="domain")
+    def test_submission_rejects_non_object_translatable_field(self):
+        response = self.api_client.post(
+            "/api/tuw/submissions/",
+            data={"title": "just a string"},
+            format="json",
+            SERVER_NAME=self.journal.domain,
+            HTTP_AUTHORIZATION="Bearer " + settings.TUW_API_KEY,
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.data)
+        self.assertFalse(submission_models.Article.objects.exists())
