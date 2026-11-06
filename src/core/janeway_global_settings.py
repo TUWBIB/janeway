@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'tinymce',
     'bootstrap4',
     'rest_framework',
+    'drf_spectacular',
     'foundationform',
     'materializecssform',
     'captcha',
@@ -652,6 +653,38 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
+    # drf-spectacular is the OpenAPI schema generator for both the
+    # readable API (/api/schema/) and the writable TUW API
+    # (/api/tuw/schema/).
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# OAS generation (drf-spectacular). Serves the readable API document at
+# /api/schema/ (see api.urls). The writable TUW API document has its own
+# title, version and components and is served by api.tuw.views.
+# TUWSchemaView; the settings below therefore only affect the readable
+# document and the shared schema-view behaviour.
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Janeway API",
+    "DESCRIPTION": "API for Janeway",
+    "VERSION": "0.0.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    "SERVE_AUTHENTICATION": [],
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "TuwBearer": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": (
+                    "Shared machine-to-machine API key for the writable TUW "
+                    "API (/api/tuw/). Sent as "
+                    "'Authorization: Bearer <TUW_API_KEY>'. The key is "
+                    "configured server-side via settings.TUW_API_KEY."
+                ),
+            },
+        },
+    },
 }
 TINYMCE_CLIPBOARD_CLEANER = {
     # Settings required to optionally clean formatting from a paste event

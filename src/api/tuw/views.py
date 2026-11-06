@@ -13,6 +13,8 @@ round-trip the JSON they fetch from the read endpoints.
 
 from django.shortcuts import get_object_or_404
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.views import SpectacularAPIView
 from rest_framework import status
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.generics import (
@@ -107,6 +109,25 @@ class TUWRetrieveUpdateAPIView(TUWAuthMixin, RetrieveUpdateAPIView):
         raise NotImplementedError
 
 
+@extend_schema_view(
+    post=extend_schema(
+        operation_id="tuw_issue_create",
+        tags=["tuw-issues"],
+        summary="Create an issue",
+        description=(
+            "Creates an issue for the journal bound to the request domain. "
+            "The response is the readable API's issue representation, which "
+            "can be sent back to the update endpoint."
+        ),
+        request={"application/json": tuw_serializers.IssueWriteSerializer},
+        responses={
+            201: read_serializers.IssueSerializer,
+            400: tuw_serializers.TUW_VALIDATION_ERROR,
+            401: tuw_serializers.TuwErrorSerializer,
+        },
+        auth=[{"TuwBearer": []}],
+    ),
+)
 class TUWIssueCreateView(TUWCreateAPIView):
     """POST /api/tuw/issues/ — create an issue for the current journal."""
 
@@ -118,6 +139,27 @@ class TUWIssueCreateView(TUWCreateAPIView):
         )
 
 
+@extend_schema_view(
+    put=extend_schema(
+        operation_id="tuw_issue_update",
+        tags=["tuw-issues"],
+        summary="Update an issue",
+        description=(
+            "Updates an issue of the journal bound to the request domain. "
+            "Issues of other journals are not reachable (404). Omitted "
+            "fields are left unchanged, except the image fields where a "
+            "value of null removes the image."
+        ),
+        request={"application/json": tuw_serializers.IssueWriteSerializer},
+        responses={
+            200: read_serializers.IssueSerializer,
+            400: tuw_serializers.TUW_VALIDATION_ERROR,
+            401: tuw_serializers.TuwErrorSerializer,
+            404: tuw_serializers.TuwErrorSerializer,
+        },
+        auth=[{"TuwBearer": []}],
+    ),
+)
 class TUWIssueUpdateView(TUWRetrieveUpdateAPIView):
     """PUT /api/tuw/issues/<pk>/ — update an issue of the current journal."""
 
@@ -132,6 +174,26 @@ class TUWIssueUpdateView(TUWRetrieveUpdateAPIView):
         )
 
 
+@extend_schema_view(
+    post=extend_schema(
+        operation_id="tuw_submission_create",
+        tags=["tuw-submissions"],
+        summary="Create a submission",
+        description=(
+            "Creates a submission (article) for the journal bound to the "
+            "request domain. A title (at least one of 'raw', 'en' or 'de') "
+            "is required. The response is the readable API's article "
+            "representation, which can be sent back to the update endpoint."
+        ),
+        request={"application/json": tuw_serializers.SubmissionWriteSerializer},
+        responses={
+            201: read_serializers.ArticleSerializer,
+            400: tuw_serializers.TUW_VALIDATION_ERROR,
+            401: tuw_serializers.TuwErrorSerializer,
+        },
+        auth=[{"TuwBearer": []}],
+    ),
+)
 class TUWSubmissionCreateView(TUWCreateAPIView):
     """POST /api/tuw/submissions/ — create a submission for the current journal."""
 
@@ -143,6 +205,27 @@ class TUWSubmissionCreateView(TUWCreateAPIView):
         )
 
 
+@extend_schema_view(
+    put=extend_schema(
+        operation_id="tuw_submission_update",
+        tags=["tuw-submissions"],
+        summary="Update a submission",
+        description=(
+            "Updates a submission (article) of the journal bound to the "
+            "request domain. Submissions of other journals are not "
+            "reachable (404). Omitted fields and translation keys are left "
+            "unchanged; a value of null clears a translation."
+        ),
+        request={"application/json": tuw_serializers.SubmissionWriteSerializer},
+        responses={
+            200: read_serializers.ArticleSerializer,
+            400: tuw_serializers.TUW_VALIDATION_ERROR,
+            401: tuw_serializers.TuwErrorSerializer,
+            404: tuw_serializers.TuwErrorSerializer,
+        },
+        auth=[{"TuwBearer": []}],
+    ),
+)
 class TUWSubmissionUpdateView(TUWRetrieveUpdateAPIView):
     """PUT /api/tuw/submissions/<pk>/ — update a submission of the current journal."""
 
@@ -155,3 +238,38 @@ class TUWSubmissionUpdateView(TUWRetrieveUpdateAPIView):
         return read_serializers.ArticleSerializer(
             instance, context={"request": self.request}
         )
+
+
+class TUWSchemaView(SpectacularAPIView):
+    """
+    Public (no-auth) OpenAPI 3 document for the writable TUW API, served
+    at /api/tuw/schema/.
+
+    Only the writable TUW endpoints are documented: the view generates
+    its schema from the ``api.tuw.urls`` urlconf exclusively (see
+    ``urlconf``) and re-prefixes the paths, so the document never drifts
+    from the actual URL routing. The schema endpoint itself is not part
+    of that urlconf.
+    """
+
+    # Generate from this module's urlpatterns (issues + submissions),
+    # not the site-wide urlconf.
+    urlconf = "api.tuw.urls"
+    # The module above defines bare path segments; the actual mount point
+    # is /api/tuw/ (see core.include_urls). Re-add the prefix so the
+    # operation paths match the real URLs.
+    custom_settings = {
+        "TITLE": "Janeway TUW Writable API",
+        "DESCRIPTION": (
+            "Machine-to-machine writable API used by TUW to create and "
+            "update issues and submissions on a Janeway journal. All "
+            "endpoints are scoped to the journal resolved from the "
+            "request domain and require a shared API key sent as "
+            "'Authorization: Bearer <TUW_API_KEY>' (see the 'TuwBearer' "
+            "security scheme). Responses reuse the readable API "
+            "serializers, so clients can round-trip the JSON fetched "
+            "from /api/."
+        ),
+        "VERSION": "1.0.0",
+        "SCHEMA_PATH_PREFIX_INSERT": "/api/tuw",
+    }

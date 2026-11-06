@@ -22,6 +22,7 @@ request):
   list of keyword strings.
 """
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from core import models as core_models
@@ -255,6 +256,104 @@ class TranslatableTextSerializer(serializers.Serializer):
                 field.max_length = max_length
 
 
+# ---------------------------------------------------------------------------
+# OpenAPI documentation for the writable TUW API (drf-spectacular).
+#
+# The write serializers above are plain ``serializers.Serializer``
+# subclasses, so drf-spectacular can derive the request schemas from
+# them. Two fields are deliberately untyped at runtime (``authors`` is
+# a ``ListField`` of ``DictField`` and ``keywords`` is a ``DictField``)
+# because their shape is validated by ``validate()`` / ``_apply_*``
+# instead of by field classes. The doc-only classes and field stand-ins
+# below give those fields their proper OAS types without changing the
+# runtime validation.
+# ---------------------------------------------------------------------------
+
+
+class TuwAuthorSerializer(serializers.Serializer):
+    """
+    Doc-only representation of the author dicts accepted by
+    ``SubmissionWriteSerializer.authors``. At least one of
+    ``first_name``/``last_name`` or ``institution`` must be non-empty.
+    """
+
+    first_name = serializers.CharField(
+        required=False, allow_blank=True, default="", help_text="Given name."
+    )
+    middle_name = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    last_name = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    name_prefix = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Name prefix (e.g. 'Prof.'). 'salutation' is accepted as an alias.",
+    )
+    name_suffix = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    email = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    orcid = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    institution = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    department = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+    country = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
+
+
+class TuwAuthorListField(serializers.ListField):
+    """Doc stand-in for ``SubmissionWriteSerializer.authors``."""
+
+
+extend_schema_field(TuwAuthorSerializer(many=True))(TuwAuthorListField)
+
+
+class TuwKeywordsSerializer(serializers.Serializer):
+    """
+    Doc-only representation of the ``keywords`` object: a mapping of a
+    language (``en``/``de``) to a list of keyword strings.
+    """
+
+    en = serializers.ListField(
+        child=serializers.CharField(max_length=200), required=False
+    )
+    de = serializers.ListField(
+        child=serializers.CharField(max_length=200), required=False
+    )
+
+
+class TuwKeywordsDictField(serializers.DictField):
+    """Doc stand-in for ``SubmissionWriteSerializer.keywords``."""
+
+
+extend_schema_field(TuwKeywordsSerializer())(TuwKeywordsDictField)
+
+
+class TuwErrorSerializer(serializers.Serializer):
+    """Error body used for 401 (bad/missing API key) and 404 responses."""
+
+    detail = serializers.CharField()
+
+
+# DRF validation errors (400) are a mapping of field name to a list of
+# error strings; document that shape directly.
+TUW_VALIDATION_ERROR = {
+    "type": "object",
+    "additionalProperties": {"type": "array", "items": {"type": "string"}},
+}
+
+
 class SubmissionWriteSerializer(serializers.Serializer):
     """
     Input serializer for creating and updating submissions (articles)
@@ -303,7 +402,9 @@ class SubmissionWriteSerializer(serializers.Serializer):
         max_length=15,
         help_text="Licence short_name for this journal (e.g. 'CC-BY').",
     )
-    keywords = serializers.DictField(
+    # Doc stand-in (see TuwKeywordsDictField above); validates identically
+    # to serializers.DictField().
+    keywords = TuwKeywordsDictField(
         required=False,
         allow_empty=True,
         help_text="Object mapping a language ('en' or 'de') to a list of "
@@ -317,7 +418,9 @@ class SubmissionWriteSerializer(serializers.Serializer):
         max_length=200,
         help_text="Section name for this journal, as in the readable API.",
     )
-    authors = serializers.ListField(
+    # Doc stand-in (see TuwAuthorListField above); validates identically
+    # to ListField(child=DictField()).
+    authors = TuwAuthorListField(
         child=serializers.DictField(),
         required=False,
         allow_empty=True,

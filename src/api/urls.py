@@ -1,7 +1,7 @@
 from django.urls import re_path, include
 
+from drf_spectacular.views import SpectacularAPIView
 from rest_framework import routers
-from rest_framework.schemas import get_schema_view
 
 from api import views
 from api.oai import views as oai_views
@@ -27,7 +27,9 @@ urlpatterns = [
 #    re_path(r'^oai/$', oai_views.oai_view_factory, name='OAI_list_records'),
     re_path(r'^kbart/$', views.kbart, name='kbart'),
     re_path(r'^kbart/csv$', views.kbart_csv, name='kbart'),
-    re_path(r'^schema/$', get_schema_view(title="Janeway API", description="API for Janeway", version="0.0.1"), name='openapi-schema'),
+    # Served by drf-spectacular (title/description/version come from
+    # SPECTACULAR_SETTINGS in core.janeway_global_settings).
+    re_path(r'^schema/$', SpectacularAPIView.as_view(), name='openapi-schema'),
     re_path(r'^swagger_ui/$', views.swagger_ui, name='swagger_ui'),
     re_path(r'^redoc/$', views.redoc, name='redoc'),
 ]
