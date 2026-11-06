@@ -13,9 +13,15 @@ round-trip the JSON they fetch from the read endpoints.
 
 from django.shortcuts import get_object_or_404
 
+from drf_spectacular.renderers import (
+    OpenApiJsonRenderer,
+    OpenApiJsonRenderer2,
+    OpenApiYamlRenderer,
+    OpenApiYamlRenderer2,
+)
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from drf_spectacular.views import SpectacularAPIView
-from rest_framework import status
+from rest_framework import renderers, status
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.generics import (
     CreateAPIView,
@@ -240,6 +246,81 @@ class TUWSubmissionUpdateView(TUWRetrieveUpdateAPIView):
         )
 
 
+class TUWOpenApiHtmlRenderer(renderers.BaseRenderer):
+    """
+    Self-contained HTML landing page for the writable TUW API.
+
+    Rendered when a browser (or a client without an explicit OpenAPI
+    media type / ``?format`` override) requests the schema endpoint. The
+    page shows the API title, a short description and links to the raw
+    YAML (``?format=yaml``) and JSON (``?format=json``) documents. It has
+    no external dependencies and works offline.
+    """
+
+    media_type = "text/html"
+    format = "html"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        request = (renderer_context or {}).get("request")
+        base = (
+            request.build_absolute_uri(self._strip_query(request))
+            if request
+            else "/api/tuw/schema/"
+        )
+
+        info = (data or {}).get("info", {})
+        title = info.get("title", "TUW Writable API")
+        description = info.get("description", "")
+        version = info.get("version", "")
+
+        def safe(text):
+            from html import escape
+            return escape(str(text or ""), quote=True)
+
+        yaml_url = base + "?format=yaml"
+        json_url = base + "?format=json"
+
+        html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{safe(title)}</title>
+<style>
+ body {{ font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 2rem auto; max-width: 48rem; color: #222; line-height: 1.5; }}
+ code {{ background: #f2f2f2; padding: .1rem .35rem; border-radius: 3px; }}
+ a {{ color: #0366d6; }}
+ .links {{ display: flex; gap: 1rem; }}
+ .badge {{ font-size: .8rem; color: #555; }}
+</style>
+</head>
+<body>
+<h1>{safe(title)}</h1>
+<p>{safe(description)}</p>
+<p class="badge">Version: {safe(version)}</p>
+<p>
+ This endpoint serves the OpenAPI description of the writable TUW API.
+ The human-readable document below is also available in machine-readable
+ form:
+</p>
+<div class="links">
+ <a href="{safe(yaml_url)}"><code>?format=yaml</code> (YAML)</a>
+ <a href="{safe(json_url)}"><code>?format=json</code> (JSON)</a>
+</div>
+<hr>
+<pre>{safe(description)}</pre>
+</body>
+</html>
+"""
+        return html.encode("utf-8")
+
+    @staticmethod
+    def _strip_query(request):
+        """Return the request path (without the query string)."""
+        return request.get_full_path().split("?", 1)[0]
+
+
 class TUWSchemaView(SpectacularAPIView):
     """
     Public (no-auth) OpenAPI 3 document for the writable TUW API, served
@@ -250,7 +331,25 @@ class TUWSchemaView(SpectacularAPIView):
     ``urlconf``) and re-prefixes the paths, so the document never drifts
     from the actual URL routing. The schema endpoint itself is not part
     of that urlconf.
+
+    Negotiation:
+    - no ``?format`` and no specific OpenAPI Accept header → ``text/html``
+      (the HTML renderer is listed first, so it wins against ``*/*``).
+    - ``?format=yaml`` / ``?format=json`` → the corresponding document,
+      via DRF's built-in ``URL_FORMAT_OVERRIDE``.
+    - explicit ``Accept: application/vnd.oai.openapi(+json)`` → YAML/JSON.
     """
+
+    # HTML first so a browser (or an unprefixed ``?format`` request with a
+    # generic Accept) gets the human-readable page by default; the YAML and
+    # JSON renderers remain available via ``?format`` or explicit Accept.
+    renderer_classes = [
+        TUWOpenApiHtmlRenderer,
+        OpenApiYamlRenderer,
+        OpenApiYamlRenderer2,
+        OpenApiJsonRenderer,
+        OpenApiJsonRenderer2,
+    ]
 
     # Generate from this module's urlpatterns (issues + submissions),
     # not the site-wide urlconf.
