@@ -2922,7 +2922,7 @@ class FrozenAuthor(AbstractLastModifiedModel):
         return self.placeholder_email(self.first_name, self.last_name)
 
     @property
-    def institution(self):
+    def institution(self) -> str:
         affil = self.primary_affiliation()
         return str(affil.organization) if affil else ""
 
@@ -2933,7 +2933,7 @@ class FrozenAuthor(AbstractLastModifiedModel):
         )
 
     @property
-    def department(self):
+    def department(self) -> str:
         affil = self.primary_affiliation()
         return str(affil.department) if affil else ""
 

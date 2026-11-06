@@ -1,5 +1,6 @@
 import logging
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from core import models as core_models
@@ -21,6 +22,17 @@ class KeywordsSerializer(serializers.HyperlinkedModelSerializer):
         model = submission_models.Keyword
         fields = ("word",)
 
+class FrozenAuthorCountryField(serializers.ReadOnlyField):
+    """Country code of the author's primary affiliation."""
+
+
+extend_schema_field(
+    serializers.CharField(
+        help_text="Country code of the author's primary affiliation.",
+    )
+)(FrozenAuthorCountryField)
+
+
 class FrozenAuthorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = submission_models.FrozenAuthor
@@ -34,7 +46,7 @@ class FrozenAuthorSerializer(serializers.HyperlinkedModelSerializer):
             "country",
         )
 
-    country = serializers.ReadOnlyField(
+    country = FrozenAuthorCountryField(
         read_only=True,
         source="country.name",
     )
@@ -94,12 +106,36 @@ class ArticleSerializer(serializers.HyperlinkedModelSerializer):
             ).order_by("order")
         ]
 
+    @extend_schema_field(
+        serializers.ListField(
+            child=serializers.CharField(max_length=200),
+            required=False,
+        )
+    )
     def get_keywords(self, obj):
         return self._keyword_words(obj, "en")
 
+    @extend_schema_field(
+        serializers.ListField(
+            child=serializers.CharField(max_length=200),
+            required=False,
+        )
+    )
     def get_keywords_de(self, obj):
         return self._keyword_words(obj, "de")
 
+    @extend_schema_field(
+        {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "en": {"type": "string", "nullable": True},
+                    "de": {"type": "string", "nullable": True},
+                },
+            },
+        }
+    )
     def get_translations(self, obj):
         """
         Per-language values of the translatable text fields

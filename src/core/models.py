@@ -1773,7 +1773,7 @@ class Galley(AbstractLastModifiedModel):
             )
             return contents
 
-    def path(self):
+    def path(self) -> str:
         url = reverse(
             "article_download_galley",
             kwargs={"article_id": self.article.pk, "galley_id": self.pk},
