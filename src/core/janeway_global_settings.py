@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     # TUW added
     'tuw_backcontent',
     'tuw_sync',
+    'tuw_utils',
     # -- TUW added
     # 3rd Party
     'mozilla_django_oidc',
